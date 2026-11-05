@@ -6,7 +6,8 @@
     13.0,
     17.0,
     21.0,
-    25.0
+    25.0,
+    29.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 29
+    "max_beats": 31
   },
   "import_report": {
     "catalog_id": "tailor-and-the-mouse",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 28,
+    "note_count": 29,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-tailor-and-the-mouse.mid",
     "tempo_changes_ignored": 0,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 29.0,
+  "length_beats": 31.0,
   "notes": [
     {
       "dur": 1.0,
@@ -171,6 +172,11 @@
       "dur": 1.0,
       "pitch": 72,
       "start": 28.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 68,
+      "start": 29.0
     }
   ],
   "pitches": [

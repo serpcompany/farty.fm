@@ -22,7 +22,8 @@ The rules and thresholds are in pdmx.py. The gates, in order:
            as one (#380), and passes only if that reading passes
   render   unlocked with the full Fixture Library, and the renderer's bar on the reference render
            (ADR 0012, evaluate.BAR): in50cFart >= 94% (notes within 50 cents of their fart's
-           own pitch), onTime >= 95%, no re-attacks
+           own pitch), onTime >= 95%, no re-attacks. An excerpt that would take in the held note its
+           phrase ends on (#389) stops on the bar line before it when taking it in locks the Song
 
 catalog/ is written only once every passing Song's entry imports to exactly the melody its gates
 judged. If one doesn't, the run stops with ReimportMismatch and leaves catalog/ as it was.
@@ -242,14 +243,21 @@ def tune_moves(path, melody, start_beat=0.0):
     return [p for _, p in moved], sorted(set(used) | {t for t, _ in moved})
 
 
-def excerpt(midi, tempos, meters, track=None):
-    """The score's melody read from `track` (melody.py's own pick when None), its render options,
-    and the whole track's melody they were chosen from."""
+def excerpt(midi, title, tempos, meters, library, track=None):
+    """The score's melody read from `track` (melody.py's own pick when None): its render options, the
+    excerpt's melody, and the whole track's melody they were chosen from. The excerpt takes in the
+    held note its phrase ends on (pdmx.held_note_end) only when the full Fixture Library has a fart
+    that lasts it, and otherwise stops on the bar line before it, as it did before #389: the render
+    gate would fail the score for that one note."""
     whole = load_midi(midi, track=track)
-    options = pdmx.render_options(tempos, meters, first_onset=whole.notes[0].start)
-    if track is not None:
-        options["track"] = track
-    return whole, options
+    first, notes = whole.notes[0].start, [(n.start, n.dur) for n in whole.notes]
+    track = {} if track is None else {"track": track}
+    options = {**pdmx.render_options(tempos, meters, first, notes), **track}
+    melody = load_midi(midi, title=title, **options)
+    bars = {**pdmx.render_options(tempos, meters, first), **track}
+    if bars != options and not melody_fit(melody, library).unlocked:
+        options, melody = bars, load_midi(midi, title=title, **bars)
+    return whole, options, melody
 
 
 def gate(title, match, row, midi, member_sha256, archive, library):
@@ -287,12 +295,10 @@ def gate(title, match, row, midi, member_sha256, archive, library):
 
     try:
         tempos, meters = score_meta(midi)
-        whole, options = excerpt(midi, tempos, meters)
-        melody = load_midi(midi, title=title.title, **options)
+        whole, options, melody = excerpt(midi, title.title, tempos, meters, library)
         moved, staves = tune_moves(midi, melody, options.get("start_beat", 0))
         if moved:  # the tune moves to other staves: read them and the melody's as one (#380)
-            whole, options = excerpt(midi, tempos, meters, track=staves)
-            melody = load_midi(midi, title=title.title, **options)
+            whole, options, melody = excerpt(midi, title.title, tempos, meters, library, track=staves)
             result["moved_tune"] = moved
         padded = pdmx.padded_pickup_problems(meters, score_notes(midi), whole.notes[0].start)
     except Exception as e:  # a MIDI file the importer can't read fails sanity
@@ -657,6 +663,7 @@ def main():
                   f"no rest of {pdmx.MOVED_TUNE_REST} beats or more while another staff of the score plays the tune "
                   "(then the staves that carry it are read as one); render with excerpt "
                   f"from the first note to the end of the whole bars that fit in {pdmx.EXCERPT_BEATS} beats from its bar, "
+                  f"or of the held note ({pdmx.HELD_NOTE_BEATS} beats or more) on that closing bar line when the full Fixture Library has a fart that lasts it, "
                   f"and the score's tempo within {pdmx.MIN_BPM}-{pdmx.MAX_BPM} bpm"),
         "bar": BAR,
     }

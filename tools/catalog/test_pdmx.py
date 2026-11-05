@@ -217,6 +217,84 @@ class ExcerptAndTempo(unittest.TestCase):
         )
 
 
+# Grand Old Flag's shape (#389): a 1/4 pickup bar, then 4/4. Seven bars after the pickup fit in 32
+# beats, so the excerpt's closing bar line is beat 29, where "brave" starts, held 3 beats.
+PICKUP_BAR = [(0.0, 1, 4), (1.0, 4, 4)]
+CADENCE = [(b, 1.0) for b in range(29)] + [(29.0, 3.0), (32.0, 1.0), (33.0, 1.0)]
+
+
+def held(notes, meters=PICKUP_BAR, first_onset=0.0):
+    """render_options at 120 bpm for a melody of (start, dur)."""
+    return pdmx.render_options([(0.0, 120.0)], meters, first_onset, notes)
+
+
+class HeldNote(unittest.TestCase):
+    """The excerpt takes in the held note its phrase ends on, when it starts on the closing bar line (#389)."""
+
+    def test_a_pickup_bar_and_a_held_note_on_the_closing_bar_line(self):
+        self.assertEqual(held(()), {"bpm": 120, "max_beats": 29, "beats_per_bar": 4})  # the bar lines alone
+        self.assertEqual(held(CADENCE), {"bpm": 120, "max_beats": 32, "beats_per_bar": 4})
+        # A note held 2 beats is enough, one of 1.75 isn't: the next phrase starts on the bar line.
+        two = CADENCE[:29] + [(29.0, 2.0), (31.0, 1.0)]
+        self.assertEqual(held(two)["max_beats"], 31)
+        self.assertEqual(held(CADENCE[:29] + [(29.0, 1.75), (30.75, 1.0)])["max_beats"], 29)
+
+    def test_the_excerpt_stays_within_32_beats_of_its_start(self):
+        # 4/4 from beat 0: the closing bar line is already 32 beats from the start.
+        self.assertEqual(held([(b, 1.0) for b in range(32)] + [(32.0, 2.0)], [(0.0, 4, 4)])["max_beats"], 32)
+        # 3/4: ten bars, then a dotted half to beat 33 doesn't fit, a half to 32 does.
+        bars = [(b, 1.0) for b in range(30)]
+        self.assertEqual(held(bars + [(30.0, 3.0)], [(0.0, 3, 4)])["max_beats"], 30)
+        self.assertEqual(held(bars + [(30.0, 2.0), (32.0, 1.0)], [(0.0, 3, 4)])["max_beats"], 32)
+        # From a first note on beat 3 of a full bar, 32 beats run to 35: the note to 34 fits.
+        late = [(b, 1.0) for b in range(3, 32)] + [(32.0, 2.0), (34.0, 1.0)]
+        self.assertEqual(held(late, [(0.0, 4, 4)], 3.0), {"bpm": 120, "start_beat": 3, "max_beats": 31})
+
+    def test_no_other_note_starts_inside_the_held_note(self):
+        overlapping = CADENCE[:29] + [(29.0, 3.0), (31.0, 1.0), (32.0, 1.0)]
+        self.assertEqual(held(overlapping)["max_beats"], 29)
+
+    def test_a_held_note_that_ends_on_a_third_of_a_beat(self):
+        # max_beats rounds down, so load_midi leaves out the next note, which starts on that end.
+        notes = [(2 / 3 + b, 1.0) for b in range(29)] + [(30.0, 7 / 3), (30 + 7 / 3, 1.0)]
+        opts = held(notes, [(0.0, 3, 4)], 2 / 3)
+        self.assertEqual(opts["max_beats"], 31.666666)
+        self.assertLess(opts["max_beats"], 30 + 7 / 3 - 2 / 3)
+
+    def test_grand_old_flag_ends_on_brave(self):
+        # The tune moves between the score's two staves, so the Song reads both (#380).
+        path = ROOT / "catalog/midi/pdmx-grand-old-flag.mid"
+        whole = load_midi(path, track=[0, 1])
+        opts = pdmx.render_options(*import_pdmx.score_meta(path), whole.notes[0].start,
+                                   [(n.start, n.dur) for n in whole.notes])
+        self.assertEqual(opts, {"bpm": 120, "max_beats": 32, "beats_per_bar": 4})
+        entry = next(e for e in json.loads((ROOT / "catalog/catalog.json").read_text()) if e["id"] == "grand-old-flag")
+        self.assertEqual(entry["render"], {**opts, "track": [0, 1]})
+        notes = load_midi(path, **entry["render"]).notes
+        self.assertEqual((len(notes), notes[-1].pitch, notes[-1].dur), (37, 62, 3.0))  # "brave": D4 for 3 beats
+
+    def test_every_imported_song_ends_on_its_held_note(self):
+        # An imported Song's excerpt ends on its closing bar line, or takes in the held note that
+        # starts there, unless the full Fixture Library has no fart that lasts it (import_pdmx.excerpt).
+        # A hand-entered Song's excerpt is chosen by hand. The closing bar line is the rule's, from the
+        # Song's own start: a Song of the first batches starts on its first bar line, not its first note.
+        from engine import load_library, melody_fit
+        library = load_library()
+        for entry in json.loads((ROOT / "catalog/catalog.json").read_text()):
+            if "import" not in entry:
+                continue
+            r, path = entry["render"], ROOT / "catalog" / entry["file"]
+            whole = load_midi(path, track=r.get("track"))
+            bars = pdmx.render_options(*import_pdmx.score_meta(path), whole.notes[0].start)
+            close, start = bars.get("start_beat", 0) + bars["max_beats"], r.get("start_beat", 0)
+            shorter = pdmx.excerpt_beats(start, close)
+            longer = pdmx.excerpt_beats(start, pdmx.held_note_end([(n.start, n.dur) for n in whole.notes], start, close))
+            with self.subTest(song=entry["id"]):
+                if longer != shorter and not melody_fit(load_midi(path, **{**r, "max_beats": longer}), library).unlocked:
+                    longer = shorter
+                self.assertEqual(r["max_beats"], longer)
+
+
 class Gates(unittest.TestCase):
     def test_sanity_note_count(self):
         self.assertEqual(pdmx.sanity_problems([60] * 8, 0, 0, 8), [])
@@ -601,12 +679,16 @@ class Gate(unittest.TestCase):
 
     title = titles("twinkle | Twinkle, Twinkle, Little Star")[0]
 
-    def gate(self, midi, member_sha256, pdmx_row=None, archive=ARCHIVE, metrics=None):
-        """Run gate() with a stub fit, plan, render and evaluate that report `metrics`.
-        Returns the result, and whether the render gate was reached."""
-        fit = SimpleNamespace(unlocked=True, covered=1, total=1, missing=[], octave_moves=0)
+    def gate(self, midi, member_sha256, pdmx_row=None, archive=ARCHIVE, metrics=None, unlocked=lambda melody: True):
+        """Run gate() with a stub fit that unlocks the melodies `unlocked` says, and a stub plan,
+        render and evaluate that report `metrics`. Returns the result, and whether the render gate
+        rendered."""
+        def fit(melody, library):
+            ok = unlocked(melody)
+            return SimpleNamespace(unlocked=ok, covered=1, total=1, missing=[] if ok else [(62, 1.5)], octave_moves=0)
+
         stubs = {
-            "melody_fit": mock.Mock(return_value=fit),
+            "melody_fit": mock.Mock(side_effect=fit),
             "plan": mock.Mock(return_value=(0, [SimpleNamespace(shift_semitones=0.0)])),
             "render": mock.Mock(return_value=(None, [])),
             "evaluate": mock.Mock(side_effect=lambda *_: {"per_note": [], **metrics}),
@@ -614,7 +696,7 @@ class Gate(unittest.TestCase):
         with mock.patch.multiple(import_pdmx, **stubs):
             r = import_pdmx.gate(self.title, "title", pdmx_row or row("Twinkle Twinkle Little Star"), midi,
                                  member_sha256, archive, library=[])
-        return r, stubs["melody_fit"].called
+        return r, stubs["render"].called
 
     def file(self, data):
         path = temp_dir(self) / "QmA.mid"
@@ -667,6 +749,20 @@ class Gate(unittest.TestCase):
         self.assertEqual(r["sha256"], sha256(data))
 
     on_bar = {"within_50c_of_fart_pct": 100, "onsets_on_time_pct": 100, "notes_with_retrigger": 0}
+
+    def test_a_held_note_no_fart_lasts_is_left_out(self):
+        # Grand Old Flag's excerpt takes in "brave" (#389), unless the library has no fart for it: then
+        # it stops on the bar line before it, where the render gate would fail it for that one note.
+        data = (ROOT / "catalog/midi/pdmx-grand-old-flag.mid").read_bytes()
+        r, _ = self.gate(self.file(data), sha256(data), metrics=self.on_bar)
+        self.assertEqual((r["render"]["max_beats"], len(r["notes"])), (32, 37))
+        r, _ = self.gate(self.file(data), sha256(data), metrics=self.on_bar, unlocked=lambda m: len(m.notes) < 37)
+        self.assertTrue(r["passed"])
+        self.assertEqual((r["render"]["max_beats"], len(r["notes"])), (29, 36))
+        # Without it the Song is still locked: the render gate fails it as before.
+        r, _ = self.gate(self.file(data), sha256(data), metrics=self.on_bar, unlocked=lambda m: False)
+        self.assertEqual(r["render"]["max_beats"], 29)
+        self.assertEqual(r["gates"]["render"], ["locked with the full Fixture Library: 1 of 1 notes covered, needs D4 (1.5 s)"])
 
     def test_a_tune_that_moves_between_staves_is_read_from_both(self):
         path = score(self, ("Piano", 0, RIGHT_HAND), ("Piano", 0, LEFT_HAND))

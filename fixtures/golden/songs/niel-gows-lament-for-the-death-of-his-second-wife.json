@@ -8,7 +8,8 @@
     16.0,
     19.0,
     22.0,
-    25.0
+    25.0,
+    28.0
   ],
   "beats_per_bar": 3,
   "bpm": 85,
@@ -16,14 +17,14 @@
   "id": "niel-gows-lament-for-the-death-of-his-second-wife",
   "import_args": {
     "bpm": 85,
-    "max_beats": 28,
+    "max_beats": 30,
     "start_beat": 2
   },
   "import_report": {
     "catalog_id": "niel-gows-lament-for-the-death-of-his-second-wife",
     "chord_tones_dropped": 12,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 27,
+    "note_count": 28,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-niel-gows-lament-for-the-death-of-his-second-wife.mid",
     "tempo_changes_ignored": 0,
@@ -34,7 +35,7 @@
       2
     ]
   },
-  "length_beats": 28.0,
+  "length_beats": 30.0,
   "notes": [
     {
       "dur": 0.5,
@@ -170,6 +171,11 @@
       "dur": 1.0,
       "pitch": 62,
       "start": 27.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 28.0
     }
   ],
   "pitches": [

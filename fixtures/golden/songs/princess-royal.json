@@ -6,7 +6,8 @@
     14.0,
     18.0,
     22.0,
-    26.0
+    26.0,
+    30.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 32
   },
   "import_report": {
     "catalog_id": "princess-royal",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 40,
+    "note_count": 41,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-princess-royal.mid",
     "tempo_changes_ignored": 1,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 1.5,
@@ -231,6 +232,11 @@
       "dur": 1.0,
       "pitch": 63,
       "start": 29.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 64,
+      "start": 30.0
     }
   ],
   "pitches": [

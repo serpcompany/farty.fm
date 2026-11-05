@@ -6,7 +6,8 @@
     14.0,
     18.0,
     22.0,
-    26.0
+    26.0,
+    30.0
   ],
   "beats_per_bar": 4,
   "bpm": 112,
@@ -15,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 112,
-    "max_beats": 30
+    "max_beats": 32
   },
   "import_report": {
     "catalog_id": "where-the-bee-sucks",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 30,
+    "note_count": 31,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-where-the-bee-sucks.mid",
     "tempo_changes_ignored": 0,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 1.5,
@@ -181,6 +182,11 @@
       "dur": 0.5,
       "pitch": 69,
       "start": 29.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 30.0
     }
   ],
   "pitches": [

@@ -1,6 +1,7 @@
 {
   "bar_lines": [
-    12.0
+    12.0,
+    26.0
   ],
   "beats_per_bar": 14,
   "bpm": 120,
@@ -9,13 +10,13 @@
   "import_args": {
     "beats_per_bar": 14,
     "bpm": 120,
-    "max_beats": 26
+    "max_beats": 28
   },
   "import_report": {
     "catalog_id": "i-will-go-home-to-kintail",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 22,
+    "note_count": 23,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-i-will-go-home-to-kintail.mid",
     "tempo_changes_ignored": 0,
@@ -24,7 +25,7 @@
       0
     ]
   },
-  "length_beats": 26.0,
+  "length_beats": 28.0,
   "notes": [
     {
       "dur": 2.0,
@@ -135,6 +136,11 @@
       "dur": 2.0,
       "pitch": 67,
       "start": 24.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 26.0
     }
   ],
   "pitches": [

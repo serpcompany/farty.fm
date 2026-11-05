@@ -2,7 +2,8 @@
   "bar_lines": [
     0.0,
     9.0,
-    18.0
+    18.0,
+    27.0
   ],
   "beats_per_bar": 9,
   "bpm": 120,
@@ -10,13 +11,13 @@
   "id": "up-with-aily",
   "import_args": {
     "bpm": 120,
-    "max_beats": 27
+    "max_beats": 30
   },
   "import_report": {
     "catalog_id": "up-with-aily",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 20,
+    "note_count": 21,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-up-with-aily.mid",
     "tempo_changes_ignored": 1,
@@ -25,7 +26,7 @@
       0
     ]
   },
-  "length_beats": 27.0,
+  "length_beats": 30.0,
   "notes": [
     {
       "dur": 2.0,
@@ -126,6 +127,11 @@
       "dur": 1.0,
       "pitch": 71,
       "start": 26.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 72,
+      "start": 27.0
     }
   ],
   "pitches": [
@@ -135,6 +141,7 @@
     67,
     69,
     71,
+    72,
     74
   ],
   "sha256": "a5fb68eafdbc15b627bc02167e82c607987bf45e4dbfc188e5ad44d33430ac8b",

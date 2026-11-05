@@ -7,7 +7,8 @@
     16.0,
     20.0,
     24.0,
-    28.0
+    28.0,
+    30.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,13 +16,13 @@
   "id": "doxology",
   "import_args": {
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 32
   },
   "import_report": {
     "catalog_id": "doxology",
     "chord_tones_dropped": 2,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 16,
+    "note_count": 17,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-doxology.mid",
     "tempo_changes_ignored": 0,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 29.0,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 2.0,
@@ -111,6 +112,11 @@
       "dur": 3.0,
       "pitch": 45,
       "start": 26.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 43,
+      "start": 30.0
     }
   ],
   "pitches": [

@@ -6,7 +6,8 @@
     13.0,
     17.0,
     21.0,
-    25.0
+    25.0,
+    29.0
   ],
   "beats_per_bar": 4,
   "bpm": 72,
@@ -14,14 +15,14 @@
   "id": "prelude-no-4",
   "import_args": {
     "bpm": 72,
-    "max_beats": 29,
+    "max_beats": 32,
     "start_beat": 3
   },
   "import_report": {
     "catalog_id": "prelude-no-4",
     "chord_tones_dropped": 6,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 17,
+    "note_count": 18,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-prelude-no-4.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +32,7 @@
       1
     ]
   },
-  "length_beats": 29.0,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 0.75,
@@ -117,6 +118,11 @@
       "dur": 0.25,
       "pitch": 69,
       "start": 28.75
+    },
+    {
+      "dur": 3.0,
+      "pitch": 69,
+      "start": 29.0
     }
   ],
   "pitches": [

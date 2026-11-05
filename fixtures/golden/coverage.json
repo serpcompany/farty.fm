@@ -1296,7 +1296,7 @@
               "target_midi": 44
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 45
             },
             {
@@ -2536,7 +2536,7 @@
               "target_midi": 41
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 43
             },
             {
@@ -4053,7 +4053,7 @@
               "target_midi": 33
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 35
             },
             {
@@ -5082,16 +5082,16 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 38
+              "seconds": 3.0,
+              "target_midi": 41
             },
             {
-              "seconds": 3.0,
-              "target_midi": 39
+              "seconds": 2.0,
+              "target_midi": 42
             },
             {
               "seconds": 1.0,
-              "target_midi": 42
+              "target_midi": 44
             }
           ],
           "octave_moves": 0,
@@ -5099,15 +5099,15 @@
             "covered": 1,
             "total": 4
           },
-          "plan_cost": 1.6525897439776405,
+          "plan_cost": 4.957769231932922,
           "recording_for_pitch": {
-            "70": null,
+            "70": "022",
             "71": null,
-            "72": "022",
+            "72": null,
             "74": null
           },
           "song": "stars-and-stripes",
-          "transpose": -32,
+          "transpose": -30,
           "unlocked": false
         },
         {
@@ -5309,7 +5309,7 @@
               "target_midi": 47
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 48
             },
             {
@@ -7038,7 +7038,7 @@
               "target_midi": 51
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 52
             },
             {
@@ -8274,7 +8274,7 @@
               "target_midi": 52
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 54
             },
             {
@@ -9779,7 +9779,7 @@
               "target_midi": 50
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 52
             },
             {
@@ -10828,7 +10828,7 @@
               "target_midi": 35
             },
             {
-              "seconds": 0.5,
+              "seconds": 2.0,
               "target_midi": 36
             },
             {
@@ -11051,7 +11051,7 @@
               "target_midi": 53
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 54
             },
             {
@@ -12672,7 +12672,7 @@
               "target_midi": 45
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 46
             },
             {
@@ -13840,7 +13840,7 @@
               "target_midi": 48
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 50
             },
             {
@@ -15245,7 +15245,7 @@
               "target_midi": 40
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 43
             },
             {
@@ -16202,16 +16202,16 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 39
+              "seconds": 3.0,
+              "target_midi": 42
             },
             {
-              "seconds": 3.0,
-              "target_midi": 40
+              "seconds": 2.0,
+              "target_midi": 43
             },
             {
               "seconds": 1.0,
-              "target_midi": 43
+              "target_midi": 45
             }
           ],
           "octave_moves": 0,
@@ -16219,15 +16219,15 @@
             "covered": 1,
             "total": 4
           },
-          "plan_cost": 1.3655905541573286,
+          "plan_cost": 4.096771662471985,
           "recording_for_pitch": {
-            "70": null,
+            "70": "095",
             "71": null,
-            "72": "095",
+            "72": null,
             "74": null
           },
           "song": "stars-and-stripes",
-          "transpose": -31,
+          "transpose": -29,
           "unlocked": false
         },
         {
@@ -16417,7 +16417,7 @@
               "target_midi": 50
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 51
             },
             {
@@ -17922,7 +17922,7 @@
               "target_midi": 45
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 48
             },
             {
@@ -19022,7 +19022,7 @@
               "target_midi": 47
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 49
             },
             {
@@ -20340,19 +20340,19 @@
           "missing": [
             {
               "seconds": 0.3,
-              "target_midi": 37
+              "target_midi": 36
             },
             {
               "seconds": 1.5,
-              "target_midi": 41
+              "target_midi": 40
             },
             {
               "seconds": 0.5,
-              "target_midi": 42
+              "target_midi": 41
             },
             {
-              "seconds": 0.8,
-              "target_midi": 46
+              "seconds": 1.5,
+              "target_midi": 43
             }
           ],
           "octave_moves": 1,
@@ -20360,18 +20360,18 @@
             "covered": 3,
             "total": 7
           },
-          "plan_cost": 142.46879740399515,
+          "plan_cost": 273.7095543004037,
           "recording_for_pitch": {
             "55": null,
             "57": "016",
             "59": null,
             "60": null,
-            "62": "069",
-            "64": null,
+            "62": null,
+            "64": "069",
             "67": "094"
           },
           "song": "grand-old-flag",
-          "transpose": -18,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -21241,27 +21241,31 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 58
+              "target_midi": 59
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 60
             },
             {
               "seconds": 1.0,
-              "target_midi": 61
+              "target_midi": 62
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 2,
+            "covered": 1,
             "total": 4
           },
-          "plan_cost": 24.525976202255546,
+          "plan_cost": 0.8339004600111719,
           "recording_for_pitch": {
             "70": "094",
             "71": null,
-            "72": "069",
+            "72": null,
             "74": null
           },
           "song": "stars-and-stripes",
-          "transpose": -13,
+          "transpose": -12,
           "unlocked": false
         },
         {
@@ -21439,7 +21443,7 @@
               "target_midi": 49
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 50
             },
             {
@@ -23028,7 +23032,7 @@
               "target_midi": 60
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 61
             },
             {
@@ -24188,7 +24192,7 @@
               "target_midi": 60
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 62
             },
             {
@@ -25601,7 +25605,7 @@
               "target_midi": 46
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 48
             }
           ],
@@ -26566,16 +26570,16 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 49
+              "seconds": 3.0,
+              "target_midi": 52
             },
             {
-              "seconds": 3.0,
-              "target_midi": 50
+              "seconds": 2.0,
+              "target_midi": 53
             },
             {
               "seconds": 1.0,
-              "target_midi": 53
+              "target_midi": 55
             }
           ],
           "octave_moves": 0,
@@ -26583,15 +26587,15 @@
             "covered": 1,
             "total": 4
           },
-          "plan_cost": 5.4498835002107935,
+          "plan_cost": 16.34965050063238,
           "recording_for_pitch": {
-            "70": null,
+            "70": "032",
             "71": null,
-            "72": "032",
+            "72": null,
             "74": null
           },
           "song": "stars-and-stripes",
-          "transpose": -21,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -26781,7 +26785,7 @@
               "target_midi": 59
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 60
             },
             {
@@ -28506,7 +28510,7 @@
               "target_midi": 53
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 54
             },
             {
@@ -29770,7 +29774,7 @@
               "target_midi": 54
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 56
             },
             {
@@ -31303,7 +31307,7 @@
               "target_midi": 50
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 52
             },
             {
@@ -32364,7 +32368,7 @@
               "target_midi": 35
             },
             {
-              "seconds": 0.5,
+              "seconds": 2.0,
               "target_midi": 36
             },
             {
@@ -32595,7 +32599,7 @@
               "target_midi": 53
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 54
             },
             {
@@ -34252,7 +34256,7 @@
               "target_midi": 56
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 59
             },
             {
@@ -35456,7 +35460,7 @@
               "target_midi": 48
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 50
             },
             {
@@ -36913,7 +36917,7 @@
               "target_midi": 42
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 44
             },
             {
@@ -37898,16 +37902,16 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 56
+              "seconds": 3.0,
+              "target_midi": 59
             },
             {
-              "seconds": 3.0,
-              "target_midi": 57
+              "seconds": 2.0,
+              "target_midi": 60
             },
             {
               "seconds": 1.0,
-              "target_midi": 60
+              "target_midi": 62
             }
           ],
           "octave_moves": 0,
@@ -37915,15 +37919,15 @@
             "covered": 1,
             "total": 4
           },
-          "plan_cost": 0.27796682000372397,
+          "plan_cost": 0.8339004600111719,
           "recording_for_pitch": {
-            "70": null,
+            "70": "094",
             "71": null,
-            "72": "094",
+            "72": null,
             "74": null
           },
           "song": "stars-and-stripes",
-          "transpose": -14,
+          "transpose": -12,
           "unlocked": false
         },
         {
@@ -38121,7 +38125,7 @@
               "target_midi": 60
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 61
             },
             {
@@ -39718,7 +39722,7 @@
               "target_midi": 54
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 55
             },
             {
@@ -40858,7 +40862,7 @@
               "target_midi": 54
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 56
             },
             {
@@ -42243,7 +42247,7 @@
               "target_midi": 41
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 43
             },
             {
@@ -43192,16 +43196,16 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 49
+              "seconds": 3.0,
+              "target_midi": 52
             },
             {
-              "seconds": 3.0,
-              "target_midi": 50
+              "seconds": 2.0,
+              "target_midi": 53
             },
             {
               "seconds": 1.0,
-              "target_midi": 53
+              "target_midi": 55
             }
           ],
           "octave_moves": 0,
@@ -43209,15 +43213,15 @@
             "covered": 1,
             "total": 4
           },
-          "plan_cost": 5.4498835002107935,
+          "plan_cost": 16.34965050063238,
           "recording_for_pitch": {
-            "70": null,
+            "70": "032",
             "71": null,
-            "72": "032",
+            "72": null,
             "74": null
           },
           "song": "stars-and-stripes",
-          "transpose": -21,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -43403,7 +43407,7 @@
               "target_midi": 45
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 46
             },
             {
@@ -45060,7 +45064,7 @@
               "target_midi": 71
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 72
             },
             {
@@ -46312,7 +46316,7 @@
               "target_midi": 68
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 70
             },
             {
@@ -47841,7 +47845,7 @@
               "target_midi": 60
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 62
             },
             {
@@ -48874,16 +48878,16 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 65
+              "seconds": 3.0,
+              "target_midi": 68
             },
             {
-              "seconds": 3.0,
-              "target_midi": 66
+              "seconds": 2.0,
+              "target_midi": 69
             },
             {
               "seconds": 1.0,
-              "target_midi": 69
+              "target_midi": 71
             }
           ],
           "octave_moves": 0,
@@ -48891,15 +48895,15 @@
             "covered": 1,
             "total": 4
           },
-          "plan_cost": 0.7668079704989959,
+          "plan_cost": 2.3004239114969876,
           "recording_for_pitch": {
-            "70": null,
+            "70": "059",
             "71": null,
-            "72": "059",
+            "72": null,
             "74": null
           },
           "song": "stars-and-stripes",
-          "transpose": -5,
+          "transpose": -3,
           "unlocked": false
         },
         {
@@ -49105,7 +49109,7 @@
               "target_midi": 74
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 75
             },
             {
@@ -50626,7 +50630,7 @@
               "target_midi": 45
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 48
             },
             {
@@ -51718,7 +51722,7 @@
               "target_midi": 51
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 53
             },
             {
@@ -53043,7 +53047,7 @@
               "target_midi": 49
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 51
             },
             {
@@ -53957,7 +53961,7 @@
             "covered": 2,
             "total": 4
           },
-          "plan_cost": 131.61497624618335,
+          "plan_cost": 178.0441645483442,
           "recording_for_pitch": {
             "70": "097",
             "71": null,
@@ -54147,7 +54151,7 @@
               "target_midi": 52
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 53
             },
             {
@@ -55620,7 +55624,7 @@
             "covered": 3,
             "total": 8
           },
-          "plan_cost": 18.316138109393137,
+          "plan_cost": 19.781458852321457,
           "recording_for_pitch": {
             "64": null,
             "66": null,
@@ -56663,7 +56667,7 @@
               "target_midi": 48
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 50
             },
             {
@@ -57936,7 +57940,7 @@
               "target_midi": 42
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 44
             }
           ],
@@ -58802,11 +58806,11 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 47
+              "target_midi": 46
             },
             {
               "seconds": 1.0,
-              "target_midi": 50
+              "target_midi": 49
             }
           ],
           "octave_moves": 1,
@@ -58814,15 +58818,15 @@
             "covered": 2,
             "total": 4
           },
-          "plan_cost": 16.6894838949377,
+          "plan_cost": 40.54440546966705,
           "recording_for_pitch": {
-            "70": "002",
+            "70": "097",
             "71": null,
-            "72": "097",
+            "72": "002",
             "74": null
           },
           "song": "stars-and-stripes",
-          "transpose": -24,
+          "transpose": -25,
           "unlocked": false
         },
         {
@@ -59000,7 +59004,7 @@
               "target_midi": 54
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 55
             },
             {
@@ -60452,7 +60456,7 @@
               "target_midi": 49
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 52
             },
             {
@@ -61512,7 +61516,7 @@
               "target_midi": 51
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 53
             },
             {
@@ -62785,7 +62789,7 @@
               "target_midi": 52
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 54
             },
             {
@@ -63659,11 +63663,11 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 60
+              "target_midi": 48
             },
             {
-              "seconds": 1.0,
-              "target_midi": 63
+              "seconds": 2.0,
+              "target_midi": 49
             }
           ],
           "octave_moves": 1,
@@ -63671,15 +63675,15 @@
             "covered": 2,
             "total": 4
           },
-          "plan_cost": 15.149463542325098,
+          "plan_cost": 38.988045828075826,
           "recording_for_pitch": {
             "70": "094",
             "71": null,
-            "72": "032",
-            "74": null
+            "72": null,
+            "74": "032"
           },
           "song": "stars-and-stripes",
-          "transpose": -11,
+          "transpose": -23,
           "unlocked": false
         },
         {
@@ -63846,23 +63850,23 @@
           "missing": [
             {
               "seconds": 0.4,
-              "target_midi": 44
+              "target_midi": 46
             },
             {
               "seconds": 0.8,
-              "target_midi": 47
-            },
-            {
-              "seconds": 0.6,
               "target_midi": 49
             },
             {
-              "seconds": 0.8,
+              "seconds": 0.6,
               "target_midi": 51
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 54
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 56
             }
           ],
           "octave_moves": 0,
@@ -63870,19 +63874,19 @@
             "covered": 3,
             "total": 8
           },
-          "plan_cost": 69.08425060452272,
+          "plan_cost": 98.67284772479462,
           "recording_for_pitch": {
             "64": null,
             "65": "102",
             "67": null,
             "69": null,
-            "71": null,
-            "72": "032",
+            "71": "032",
+            "72": null,
             "74": null,
             "76": "094"
           },
           "song": "battle-hymn",
-          "transpose": -20,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -65153,19 +65157,19 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 45
-            },
-            {
-              "seconds": 0.3,
-              "target_midi": 48
+              "target_midi": 40
             },
             {
               "seconds": 1.9,
-              "target_midi": 52
+              "target_midi": 47
             },
             {
               "seconds": 1.0,
-              "target_midi": 57
+              "target_midi": 50
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 52
             }
           ],
           "octave_moves": 1,
@@ -65173,19 +65177,19 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 18.11305002459923,
+          "plan_cost": 19.441158681685675,
           "recording_for_pitch": {
             "64": null,
-            "66": "002",
-            "67": null,
-            "69": "032",
+            "66": "095",
+            "67": "090",
+            "69": "002",
             "71": null,
-            "73": "095",
-            "74": "090",
+            "73": "032",
+            "74": null,
             "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -19,
+          "transpose": -24,
           "unlocked": false
         },
         {
@@ -66110,7 +66114,7 @@
               "target_midi": 50
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 52
             },
             {
@@ -67251,7 +67255,7 @@
               "target_midi": 47
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 49
             }
           ],
@@ -67423,11 +67427,11 @@
           "missing": [
             {
               "seconds": 2.0,
-              "target_midi": 49
+              "target_midi": 48
             },
             {
               "seconds": 1.0,
-              "target_midi": 54
+              "target_midi": 50
             }
           ],
           "octave_moves": 1,
@@ -67435,17 +67439,17 @@
             "covered": 4,
             "total": 6
           },
-          "plan_cost": 57.988258464253036,
+          "plan_cost": 59.482880070981146,
           "recording_for_pitch": {
             "68": "002",
             "69": null,
-            "71": "032",
+            "71": null,
             "72": "095",
-            "74": null,
+            "74": "032",
             "76": "090"
           },
           "song": "coventry-carol",
-          "transpose": -20,
+          "transpose": -21,
           "unlocked": false
         },
         {
@@ -68009,7 +68013,7 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 43
+              "target_midi": 46
             }
           ],
           "octave_moves": 1,
@@ -68017,15 +68021,15 @@
             "covered": 3,
             "total": 4
           },
-          "plan_cost": 20.834643342137753,
+          "plan_cost": 64.02832359086239,
           "recording_for_pitch": {
-            "70": "095",
+            "70": "090",
             "71": null,
-            "72": "090",
-            "74": "002"
+            "72": "002",
+            "74": "032"
           },
           "song": "stars-and-stripes",
-          "transpose": -28,
+          "transpose": -25,
           "unlocked": false
         },
         {
@@ -68171,8 +68175,8 @@
               "target_midi": 45
             },
             {
-              "seconds": 0.8,
-              "target_midi": 49
+              "seconds": 2.3,
+              "target_midi": 50
             },
             {
               "seconds": 0.8,
@@ -68188,14 +68192,14 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 74.78552974746985,
+          "plan_cost": 117.23373515572725,
           "recording_for_pitch": {
             "64": "095",
             "65": "090",
             "67": null,
             "69": "002",
-            "71": null,
-            "72": "032",
+            "71": "032",
+            "72": null,
             "74": null,
             "76": null
           },
@@ -69306,31 +69310,35 @@
           "missing": [
             {
               "seconds": 1.9,
-              "target_midi": 53
+              "target_midi": 54
             },
             {
               "seconds": 1.0,
-              "target_midi": 58
+              "target_midi": 57
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 59
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 6,
+            "covered": 5,
             "total": 8
           },
-          "plan_cost": 67.66433649169964,
+          "plan_cost": 44.67476469469345,
           "recording_for_pitch": {
             "64": "002",
             "66": "017",
             "67": "096",
-            "69": "022",
+            "69": "101",
             "71": null,
-            "73": "101",
-            "74": "097",
+            "73": "097",
+            "74": null,
             "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -18,
+          "transpose": -17,
           "unlocked": false
         },
         {
@@ -70110,7 +70118,7 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 55
             },
             {
@@ -71071,18 +71079,18 @@
             "covered": 6,
             "total": 7
           },
-          "plan_cost": 183.0109918034264,
+          "plan_cost": 249.64557062649058,
           "recording_for_pitch": {
-            "55": "002",
+            "55": "022",
             "57": "096",
-            "59": null,
-            "60": "101",
-            "62": "017",
-            "64": "022",
-            "67": "097"
+            "59": "002",
+            "60": "097",
+            "62": null,
+            "64": "017",
+            "67": "101"
           },
           "song": "grand-old-flag",
-          "transpose": -9,
+          "transpose": -12,
           "unlocked": false
         },
         {
@@ -71170,7 +71178,7 @@
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 57.11945836251233,
+          "plan_cost": 58.58477910544066,
           "recording_for_pitch": {
             "62": "022",
             "64": null,
@@ -71429,7 +71437,7 @@
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 48.94911477674229,
+          "plan_cost": 50.10043186927605,
           "recording_for_pitch": {
             "38": "017",
             "40": "101",
@@ -71695,22 +71703,27 @@
           "unlocked": true
         },
         {
-          "missing": [],
-          "octave_moves": 2,
+          "missing": [
+            {
+              "seconds": 2.0,
+              "target_midi": 38
+            }
+          ],
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 3,
             "total": 4
           },
-          "plan_cost": 158.84223853637272,
+          "plan_cost": 191.3706689837271,
           "recording_for_pitch": {
-            "70": "097",
+            "70": "017",
             "71": "002",
-            "72": "101",
+            "72": null,
             "74": "022"
           },
           "song": "stars-and-stripes",
-          "transpose": -22,
-          "unlocked": true
+          "transpose": -34,
+          "unlocked": false
         },
         {
           "missing": [
@@ -71843,7 +71856,7 @@
               "target_midi": 44
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 45
             }
           ],
@@ -72057,7 +72070,7 @@
             "covered": 5,
             "total": 6
           },
-          "plan_cost": 108.19656678488742,
+          "plan_cost": 109.8950312738553,
           "recording_for_pitch": {
             "62": "017",
             "64": "022",
@@ -73074,7 +73087,7 @@
               "target_midi": 53
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 56
             },
             {
@@ -74005,7 +74018,7 @@
               "target_midi": 55
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 57
             },
             {
@@ -75138,12 +75151,12 @@
         {
           "missing": [
             {
-              "seconds": 0.3,
-              "target_midi": 44
+              "seconds": 1.5,
+              "target_midi": 50
             },
             {
-              "seconds": 0.5,
-              "target_midi": 49
+              "seconds": 1.5,
+              "target_midi": 53
             }
           ],
           "octave_moves": 2,
@@ -75151,18 +75164,18 @@
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 107.21179060763093,
+          "plan_cost": 158.48669915542064,
           "recording_for_pitch": {
-            "55": null,
+            "55": "002",
             "57": "096",
-            "59": "002",
-            "60": null,
-            "62": "017",
+            "59": null,
+            "60": "017",
+            "62": null,
             "64": "059",
             "67": "086"
           },
           "song": "grand-old-flag",
-          "transpose": -11,
+          "transpose": -9,
           "unlocked": false
         },
         {
@@ -75904,23 +75917,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 50
+              "target_midi": 42
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 43
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 89.94996358875952,
+          "plan_cost": 33.05440691798903,
           "recording_for_pitch": {
-            "70": "002",
+            "70": "017",
             "71": null,
-            "72": "017",
-            "74": "059"
+            "72": null,
+            "74": "002"
           },
           "song": "stars-and-stripes",
-          "transpose": -21,
+          "transpose": -29,
           "unlocked": false
         },
         {
@@ -76066,7 +76083,7 @@
               "target_midi": 50
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 53
             },
             {
@@ -77256,7 +77273,7 @@
               "target_midi": 44
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 47
             }
           ],
@@ -78130,7 +78147,7 @@
             },
             {
               "seconds": 1.5,
-              "target_midi": 51
+              "target_midi": 49
             }
           ],
           "octave_moves": 2,
@@ -78138,7 +78155,7 @@
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 87.85458982504784,
+          "plan_cost": 95.00748224134294,
           "recording_for_pitch": {
             "66": "022",
             "67": "016",
@@ -78146,8 +78163,8 @@
             "71": "009",
             "73": "013",
             "74": null,
-            "76": "032",
-            "78": null
+            "76": null,
+            "78": "032"
           },
           "song": "yellow-rose-of-texas",
           "transpose": -27,
@@ -79181,12 +79198,12 @@
         {
           "missing": [
             {
-              "seconds": 0.3,
-              "target_midi": 36
+              "seconds": 1.5,
+              "target_midi": 47
             },
             {
-              "seconds": 1.5,
-              "target_midi": 40
+              "seconds": 0.5,
+              "target_midi": 48
             }
           ],
           "octave_moves": 2,
@@ -79194,18 +79211,18 @@
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 474.39792644328696,
+          "plan_cost": 590.9247204588685,
           "recording_for_pitch": {
-            "55": null,
-            "57": "016",
+            "55": "016",
+            "57": "009",
             "59": null,
-            "60": "022",
-            "62": "013",
-            "64": "009",
-            "67": "032"
+            "60": null,
+            "62": "032",
+            "64": "022",
+            "67": "013"
           },
           "song": "grand-old-flag",
-          "transpose": -19,
+          "transpose": -12,
           "unlocked": false
         },
         {
@@ -79360,7 +79377,7 @@
             "covered": 4,
             "total": 6
           },
-          "plan_cost": 194.42364772743082,
+          "plan_cost": 203.88374481840845,
           "recording_for_pitch": {
             "68": null,
             "69": null,
@@ -79893,23 +79910,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 52
+              "target_midi": 53
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 54
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 99.62894543172791,
+          "plan_cost": 99.3778752642987,
           "recording_for_pitch": {
             "70": "032",
             "71": null,
-            "72": "013",
-            "74": "022"
+            "72": null,
+            "74": "013"
           },
           "song": "stars-and-stripes",
-          "transpose": -19,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -80047,8 +80068,8 @@
               "target_midi": 46
             },
             {
-              "seconds": 0.8,
-              "target_midi": 48
+              "seconds": 2.3,
+              "target_midi": 49
             },
             {
               "seconds": 0.8,
@@ -80060,14 +80081,14 @@
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 803.2954299596204,
+          "plan_cost": 838.2930906104239,
           "recording_for_pitch": {
             "64": "022",
             "65": "099",
             "67": "009",
             "69": null,
-            "71": null,
-            "72": "032",
+            "71": "032",
+            "72": null,
             "74": null,
             "76": "013"
           },
@@ -80289,7 +80310,7 @@
             "covered": 4,
             "total": 6
           },
-          "plan_cost": 177.35607818324468,
+          "plan_cost": 186.48965067187186,
           "recording_for_pitch": {
             "62": "009",
             "64": "022",
@@ -81314,7 +81335,7 @@
               "target_midi": 45
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 48
             },
             {
@@ -82257,7 +82278,7 @@
               "target_midi": 48
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 50
             },
             {
@@ -83401,7 +83422,7 @@
               "target_midi": 47
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 49
             }
           ],
@@ -84183,7 +84204,7 @@
             "covered": 3,
             "total": 4
           },
-          "plan_cost": 142.31348193450762,
+          "plan_cost": 177.3585136919301,
           "recording_for_pitch": {
             "70": "017",
             "71": null,
@@ -84345,7 +84366,7 @@
               "target_midi": 49
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 52
             },
             {
@@ -84611,7 +84632,7 @@
             "covered": 3,
             "total": 6
           },
-          "plan_cost": 231.7650911160447,
+          "plan_cost": 253.4334683899862,
           "recording_for_pitch": {
             "62": "080",
             "64": null,
@@ -85623,8 +85644,8 @@
               "target_midi": 41
             },
             {
-              "seconds": 1.9,
-              "target_midi": 46
+              "seconds": 1.0,
+              "target_midi": 49
             },
             {
               "seconds": 1.0,
@@ -85636,15 +85657,15 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 48.04315765410422,
+          "plan_cost": 48.14941725314709,
           "recording_for_pitch": {
             "64": null,
             "66": null,
             "67": "019",
             "69": "009",
-            "71": null,
-            "73": "002",
-            "74": "032",
+            "71": "002",
+            "73": "032",
+            "74": null,
             "76": null
           },
           "song": "scarborough-fair",
@@ -86534,20 +86555,20 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 40
-            },
-            {
               "seconds": 1.0,
-              "target_midi": 43
+              "target_midi": 46
             },
             {
               "seconds": 0.8,
-              "target_midi": 48
+              "target_midi": 51
             },
             {
               "seconds": 1.5,
-              "target_midi": 52
+              "target_midi": 53
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 55
             }
           ],
           "octave_moves": 1,
@@ -86555,19 +86576,19 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 58.13114094666048,
+          "plan_cost": 61.965710584711154,
           "recording_for_pitch": {
-            "66": null,
+            "66": "009",
             "67": "019",
             "69": null,
-            "71": "009",
-            "73": "002",
+            "71": "002",
+            "73": "032",
             "74": null,
-            "76": "032",
+            "76": null,
             "78": null
           },
           "song": "yellow-rose-of-texas",
-          "transpose": -26,
+          "transpose": -23,
           "unlocked": false
         },
         {
@@ -87675,7 +87696,7 @@
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 551.6559629150133,
+          "plan_cost": 555.6394147554556,
           "recording_for_pitch": {
             "55": "009",
             "57": "096",
@@ -87857,8 +87878,8 @@
               "target_midi": 41
             },
             {
-              "seconds": 0.5,
-              "target_midi": 44
+              "seconds": 1.0,
+              "target_midi": 43
             }
           ],
           "octave_moves": 1,
@@ -87866,12 +87887,12 @@
             "covered": 3,
             "total": 6
           },
-          "plan_cost": 110.63195032478285,
+          "plan_cost": 123.5892113096289,
           "recording_for_pitch": {
             "68": null,
             "69": null,
-            "71": "009",
-            "72": null,
+            "71": null,
+            "72": "009",
             "74": "002",
             "76": "032"
           },
@@ -88440,7 +88461,7 @@
             "covered": 3,
             "total": 4
           },
-          "plan_cost": 126.58018495306703,
+          "plan_cost": 128.61398301043465,
           "recording_for_pitch": {
             "70": "009",
             "71": null,
@@ -88598,8 +88619,8 @@
               "target_midi": 38
             },
             {
-              "seconds": 0.8,
-              "target_midi": 43
+              "seconds": 2.3,
+              "target_midi": 41
             }
           ],
           "octave_moves": 4,
@@ -88607,15 +88628,15 @@
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 351.38166929424057,
+          "plan_cost": 440.38622431470594,
           "recording_for_pitch": {
             "64": "096",
             "65": "019",
             "67": null,
             "69": null,
             "71": "032",
-            "72": "009",
-            "74": null,
+            "72": null,
+            "74": "009",
             "76": "002"
           },
           "song": "battle-hymn",
@@ -88832,15 +88853,15 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 44
+              "target_midi": 45
             },
             {
               "seconds": 0.5,
-              "target_midi": 47
+              "target_midi": 48
             },
             {
-              "seconds": 0.5,
-              "target_midi": 49
+              "seconds": 1.5,
+              "target_midi": 52
             }
           ],
           "octave_moves": 1,
@@ -88848,17 +88869,17 @@
             "covered": 3,
             "total": 6
           },
-          "plan_cost": 82.5121622114952,
+          "plan_cost": 83.79252879382427,
           "recording_for_pitch": {
             "62": "009",
             "64": null,
             "66": "002",
             "67": null,
-            "69": null,
-            "71": "032"
+            "69": "032",
+            "71": null
           },
           "song": "god-rest-ye",
-          "transpose": -20,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -89857,7 +89878,7 @@
             },
             {
               "seconds": 1.0,
-              "target_midi": 56
+              "target_midi": 54
             }
           ],
           "octave_moves": 1,
@@ -89865,16 +89886,16 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 139.53759222864795,
+          "plan_cost": 143.86524186276452,
           "recording_for_pitch": {
             "64": null,
             "66": "080",
             "67": null,
             "69": "032",
             "71": null,
-            "73": "013",
-            "74": "101",
-            "76": null
+            "73": "101",
+            "74": null,
+            "76": "013"
           },
           "song": "scarborough-fair",
           "transpose": -20,
@@ -90783,19 +90804,19 @@
           "missing": [
             {
               "seconds": 0.3,
-              "target_midi": 46
-            },
-            {
-              "seconds": 1.0,
-              "target_midi": 48
+              "target_midi": 47
             },
             {
               "seconds": 0.8,
-              "target_midi": 53
+              "target_midi": 54
             },
             {
               "seconds": 1.5,
-              "target_midi": 57
+              "target_midi": 56
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 58
             }
           ],
           "octave_moves": 1,
@@ -90803,19 +90824,19 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 265.2364900918059,
+          "plan_cost": 274.41353763297286,
           "recording_for_pitch": {
             "66": "080",
             "67": null,
-            "69": null,
+            "69": "032",
             "71": "101",
-            "73": "032",
+            "73": "013",
             "74": null,
-            "76": "013",
+            "76": null,
             "78": null
           },
           "song": "yellow-rose-of-texas",
-          "transpose": -21,
+          "transpose": -20,
           "unlocked": false
         },
         {
@@ -91923,7 +91944,7 @@
               "target_midi": 48
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 53
             },
             {
@@ -92685,23 +92706,23 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 52
+              "target_midi": 45
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 2,
           "pitch_coverage": {
             "covered": 3,
             "total": 4
           },
-          "plan_cost": 100.93945978718142,
+          "plan_cost": 220.70751343339157,
           "recording_for_pitch": {
-            "70": "032",
+            "70": "013",
             "71": null,
-            "72": "101",
-            "74": "013"
+            "72": "080",
+            "74": "032"
           },
           "song": "stars-and-stripes",
-          "transpose": -19,
+          "transpose": -26,
           "unlocked": false
         },
         {
@@ -92851,8 +92872,8 @@
               "target_midi": 47
             },
             {
-              "seconds": 0.8,
-              "target_midi": 49
+              "seconds": 2.3,
+              "target_midi": 50
             },
             {
               "seconds": 0.8,
@@ -92864,14 +92885,14 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 684.479431770616,
+          "plan_cost": 726.9276371788734,
           "recording_for_pitch": {
             "64": "080",
             "65": "101",
             "67": null,
             "69": null,
-            "71": null,
-            "72": "032",
+            "71": "032",
+            "72": null,
             "74": null,
             "76": "013"
           },
@@ -94054,8 +94075,8 @@
               "target_midi": 54
             },
             {
-              "seconds": 0.5,
-              "target_midi": 56
+              "seconds": 1.0,
+              "target_midi": 57
             },
             {
               "seconds": 1.0,
@@ -94067,15 +94088,15 @@
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 43.604379877558046,
+          "plan_cost": 43.97740201709264,
           "recording_for_pitch": {
             "64": "002",
             "66": "032",
             "67": "103",
             "69": "017",
             "71": null,
-            "73": null,
-            "74": "094",
+            "73": "094",
+            "74": null,
             "76": null
           },
           "song": "scarborough-fair",
@@ -94931,7 +94952,7 @@
               "target_midi": 52
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 54
             },
             {
@@ -95987,12 +96008,12 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 50
+              "seconds": 0.3,
+              "target_midi": 44
             },
             {
-              "seconds": 0.8,
-              "target_midi": 54
+              "seconds": 0.5,
+              "target_midi": 49
             }
           ],
           "octave_moves": 2,
@@ -96000,18 +96021,18 @@
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 124.34435936115787,
+          "plan_cost": 137.85395253631154,
           "recording_for_pitch": {
-            "55": "002",
-            "57": "094",
-            "59": "032",
+            "55": null,
+            "57": "103",
+            "59": "002",
             "60": null,
-            "62": "017",
-            "64": null,
-            "67": "103"
+            "62": "032",
+            "64": "017",
+            "67": "094"
           },
           "song": "grand-old-flag",
-          "transpose": -10,
+          "transpose": -11,
           "unlocked": false
         },
         {
@@ -96112,7 +96133,7 @@
             "covered": 4,
             "total": 7
           },
-          "plan_cost": 30.956449253111245,
+          "plan_cost": 32.107766345645004,
           "recording_for_pitch": {
             "62": "017",
             "64": null,
@@ -96166,7 +96187,7 @@
             "covered": 4,
             "total": 6
           },
-          "plan_cost": 69.2525907622628,
+          "plan_cost": 72.01753964290386,
           "recording_for_pitch": {
             "68": "002",
             "69": null,
@@ -96390,15 +96411,15 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 43
+              "target_midi": 42
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 45
             },
             {
               "seconds": 1.5,
-              "target_midi": 48
-            },
-            {
-              "seconds": 1.5,
-              "target_midi": 50
+              "target_midi": 49
             }
           ],
           "octave_moves": 1,
@@ -96406,18 +96427,18 @@
             "covered": 4,
             "total": 7
           },
-          "plan_cost": 21.643970688550798,
+          "plan_cost": 22.60252494181878,
           "recording_for_pitch": {
             "38": "017",
             "40": null,
             "42": "094",
-            "43": "002",
-            "45": null,
+            "43": null,
+            "45": "002",
             "47": null,
             "48": "032"
           },
           "song": "doxology",
-          "transpose": 3,
+          "transpose": 2,
           "unlocked": false
         },
         {
@@ -96693,22 +96714,27 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 2,
+          "missing": [
+            {
+              "seconds": 3.0,
+              "target_midi": 47
+            }
+          ],
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 3,
             "total": 4
           },
-          "plan_cost": 69.68563285876284,
+          "plan_cost": 54.31423647056012,
           "recording_for_pitch": {
             "70": "094",
-            "71": "002",
-            "72": "017",
+            "71": null,
+            "72": "002",
             "74": "032"
           },
           "song": "stars-and-stripes",
           "transpose": -24,
-          "unlocked": true
+          "unlocked": false
         },
         {
           "missing": [
@@ -96846,15 +96872,15 @@
           "missing": [
             {
               "seconds": 0.8,
-              "target_midi": 44
+              "target_midi": 42
+            },
+            {
+              "seconds": 2.3,
+              "target_midi": 47
             },
             {
               "seconds": 0.8,
-              "target_midi": 51
-            },
-            {
-              "seconds": 0.6,
-              "target_midi": 53
+              "target_midi": 49
             }
           ],
           "octave_moves": 1,
@@ -96862,19 +96888,19 @@
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 108.42891295251358,
+          "plan_cost": 143.11787801471033,
           "recording_for_pitch": {
             "64": "017",
             "65": "099",
             "67": null,
             "69": "094",
             "71": "002",
-            "72": "032",
+            "72": null,
             "74": null,
-            "76": null
+            "76": "032"
           },
           "song": "battle-hymn",
-          "transpose": -23,
+          "transpose": -25,
           "unlocked": false
         },
         {
@@ -97087,7 +97113,7 @@
             "covered": 4,
             "total": 6
           },
-          "plan_cost": 77.05306821546633,
+          "plan_cost": 81.03652005590861,
           "recording_for_pitch": {
             "62": "017",
             "64": null,
@@ -98061,36 +98087,36 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 36
             },
             {
               "seconds": 1.9,
-              "target_midi": 41
+              "target_midi": 43
             },
             {
               "seconds": 1.0,
-              "target_midi": 46
+              "target_midi": 48
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 3,
           "pitch_coverage": {
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 155.58220667261463,
+          "plan_cost": 243.59005032186812,
           "recording_for_pitch": {
-            "64": "080",
-            "66": null,
+            "64": null,
+            "66": "095",
             "67": "098",
-            "69": "095",
+            "69": "090",
             "71": null,
-            "73": "090",
-            "74": "091",
+            "73": "091",
+            "74": "080",
             "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -30,
+          "transpose": -28,
           "unlocked": false
         },
         {
@@ -98934,7 +98960,7 @@
               "target_midi": 41
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 48
             },
             {
@@ -99992,23 +100018,23 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 50
+              "seconds": 1.5,
+              "target_midi": 48
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 4,
           "pitch_coverage": {
             "covered": 6,
             "total": 7
           },
-          "plan_cost": 526.7072062332431,
+          "plan_cost": 469.6721523427062,
           "recording_for_pitch": {
             "55": "098",
-            "57": "095",
+            "57": "090",
             "59": "080",
-            "60": "090",
-            "62": "091",
-            "64": null,
+            "60": "091",
+            "62": null,
+            "64": "095",
             "67": "086"
           },
           "song": "grand-old-flag",
@@ -100408,7 +100434,7 @@
             "covered": 4,
             "total": 7
           },
-          "plan_cost": 243.2987083195344,
+          "plan_cost": 269.6332064670913,
           "recording_for_pitch": {
             "38": "095",
             "40": "090",
@@ -100706,23 +100732,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 41
+              "target_midi": 42
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 45
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 263.4837913141321,
+          "plan_cost": 117.96501753119975,
           "recording_for_pitch": {
             "70": "095",
             "71": null,
-            "72": "090",
-            "74": "080"
+            "72": "080",
+            "74": null
           },
           "song": "stars-and-stripes",
-          "transpose": -30,
+          "transpose": -29,
           "unlocked": false
         },
         {
@@ -100860,7 +100890,7 @@
               "target_midi": 44
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 49
             },
             {
@@ -101915,7 +101945,7 @@
           "missing": [
             {
               "seconds": 1.9,
-              "target_midi": 50
+              "target_midi": 51
             }
           ],
           "octave_moves": 5,
@@ -101923,19 +101953,19 @@
             "covered": 7,
             "total": 8
           },
-          "plan_cost": 216.37754484515932,
+          "plan_cost": 250.83835310993868,
           "recording_for_pitch": {
             "64": "080",
             "66": "069",
             "67": "094",
             "69": "097",
             "71": null,
-            "73": "022",
-            "74": "090",
+            "73": "090",
+            "74": "022",
             "76": "059"
           },
           "song": "scarborough-fair",
-          "transpose": -21,
+          "transpose": -20,
           "unlocked": false
         },
         {
@@ -102634,7 +102664,7 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 58
             },
             {
@@ -102730,7 +102760,7 @@
             "covered": 7,
             "total": 7
           },
-          "plan_cost": 452.8900569406203,
+          "plan_cost": 477.0042372772233,
           "recording_for_pitch": {
             "62": "022",
             "64": "069",
@@ -103503,7 +103533,7 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 53
+              "target_midi": 49
             }
           ],
           "octave_moves": 4,
@@ -103511,18 +103541,18 @@
             "covered": 6,
             "total": 7
           },
-          "plan_cost": 266.9251568952479,
+          "plan_cost": 958.8237270118377,
           "recording_for_pitch": {
-            "55": "094",
-            "57": "022",
-            "59": null,
-            "60": "090",
-            "62": "069",
-            "64": "059",
-            "67": "097"
+            "55": "069",
+            "57": "097",
+            "59": "080",
+            "60": "094",
+            "62": null,
+            "64": "022",
+            "67": "090"
           },
           "song": "grand-old-flag",
-          "transpose": -6,
+          "transpose": -13,
           "unlocked": false
         },
         {
@@ -103602,7 +103632,7 @@
             "covered": 6,
             "total": 7
           },
-          "plan_cost": 325.69537489116794,
+          "plan_cost": 348.06994947859346,
           "recording_for_pitch": {
             "62": "022",
             "64": null,
@@ -103647,7 +103677,7 @@
             "covered": 5,
             "total": 6
           },
-          "plan_cost": 504.6601843411788,
+          "plan_cost": 514.1202814321564,
           "recording_for_pitch": {
             "68": null,
             "69": "080",
@@ -103843,7 +103873,7 @@
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 93.40819243728575,
+          "plan_cost": 106.19278066208268,
           "recording_for_pitch": {
             "38": "090",
             "40": "094",
@@ -104077,7 +104107,7 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 55
+              "target_midi": 42
             }
           ],
           "octave_moves": 1,
@@ -104085,15 +104115,15 @@
             "covered": 3,
             "total": 4
           },
-          "plan_cost": 75.44092455232034,
+          "plan_cost": 213.9381217150352,
           "recording_for_pitch": {
-            "70": "090",
+            "70": "022",
             "71": null,
-            "72": "094",
-            "74": "059"
+            "72": "080",
+            "74": "069"
           },
           "song": "stars-and-stripes",
-          "transpose": -16,
+          "transpose": -29,
           "unlocked": false
         },
         {
@@ -104215,7 +104245,7 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 52
             }
           ],
@@ -105225,27 +105255,31 @@
           "missing": [
             {
               "seconds": 1.9,
-              "target_midi": 53
+              "target_midi": 55
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 60
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 7,
+            "covered": 6,
             "total": 8
           },
-          "plan_cost": 92.13639504695257,
+          "plan_cost": 69.70517415434868,
           "recording_for_pitch": {
             "64": "002",
             "66": "017",
-            "67": "098",
-            "69": "101",
+            "67": "101",
+            "69": "090",
             "71": null,
-            "73": "090",
-            "74": "094",
-            "76": "013"
+            "73": "094",
+            "74": "013",
+            "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -18,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -105950,8 +105984,8 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 53
+              "seconds": 1.5,
+              "target_midi": 55
             },
             {
               "seconds": 1.5,
@@ -105963,15 +105997,15 @@
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 155.60000324936942,
+          "plan_cost": 168.2098922619981,
           "recording_for_pitch": {
             "66": "090",
             "67": "094",
             "69": "002",
             "71": "101",
             "73": "017",
-            "74": null,
-            "76": "013",
+            "74": "013",
+            "76": null,
             "78": null
           },
           "song": "yellow-rose-of-texas",
@@ -106046,7 +106080,7 @@
             "covered": 7,
             "total": 7
           },
-          "plan_cost": 413.8208263095293,
+          "plan_cost": 437.4028602850561,
           "recording_for_pitch": {
             "62": "101",
             "64": "013",
@@ -106830,25 +106864,30 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 3,
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 52
+            }
+          ],
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 7,
+            "covered": 6,
             "total": 7
           },
-          "plan_cost": 411.6630544602886,
+          "plan_cost": 360.3784774238034,
           "recording_for_pitch": {
             "55": "090",
             "57": "094",
             "59": "002",
             "60": "101",
-            "62": "017",
+            "62": null,
             "64": "013",
             "67": "097"
           },
           "song": "grand-old-flag",
           "transpose": -10,
-          "unlocked": true
+          "unlocked": false
         },
         {
           "missing": [
@@ -107167,7 +107206,7 @@
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 72.66180630505225,
+          "plan_cost": 78.06399306255918,
           "recording_for_pitch": {
             "38": "101",
             "40": "090",
@@ -107409,23 +107448,23 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 53
+              "target_midi": 55
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
             "total": 4
           },
-          "plan_cost": 85.65963322027908,
+          "plan_cost": 154.27447241187753,
           "recording_for_pitch": {
-            "70": "101",
+            "70": "090",
             "71": null,
-            "72": "090",
+            "72": "002",
             "74": "013"
           },
           "song": "stars-and-stripes",
-          "transpose": -18,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -107550,12 +107589,12 @@
         {
           "missing": [
             {
-              "seconds": 0.6,
-              "target_midi": 50
+              "seconds": 0.8,
+              "target_midi": 47
             },
             {
-              "seconds": 0.8,
-              "target_midi": 55
+              "seconds": 2.3,
+              "target_midi": 52
             }
           ],
           "octave_moves": 3,
@@ -107563,19 +107602,19 @@
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 197.6907096394954,
+          "plan_cost": 336.5425962664664,
           "recording_for_pitch": {
             "64": "097",
             "65": "090",
-            "67": "002",
-            "69": null,
+            "67": null,
+            "69": "002",
             "71": "017",
-            "72": "013",
-            "74": null,
+            "72": null,
+            "74": "013",
             "76": "094"
           },
           "song": "battle-hymn",
-          "transpose": -19,
+          "transpose": -20,
           "unlocked": false
         },
         {
@@ -107741,7 +107780,7 @@
             "covered": 6,
             "total": 6
           },
-          "plan_cost": 139.76786005018892,
+          "plan_cost": 170.55092958194916,
           "recording_for_pitch": {
             "62": "101",
             "64": "090",
@@ -108675,8 +108714,8 @@
               "target_midi": 50
             },
             {
-              "seconds": 0.5,
-              "target_midi": 52
+              "seconds": 1.0,
+              "target_midi": 53
             }
           ],
           "octave_moves": 1,
@@ -108684,15 +108723,15 @@
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 38.12302526063589,
+          "plan_cost": 38.24040330341335,
           "recording_for_pitch": {
             "64": null,
             "66": "069",
             "67": "086",
             "69": "002",
             "71": null,
-            "73": null,
-            "74": "101",
+            "73": "101",
+            "74": null,
             "76": "084"
           },
           "song": "scarborough-fair",
@@ -109517,7 +109556,7 @@
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 78.61148358477364,
+          "plan_cost": 82.27986085871515,
           "recording_for_pitch": {
             "66": "069",
             "67": "086",
@@ -110511,7 +110550,7 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 52
             }
           ],
@@ -111201,22 +111240,27 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 2,
+          "missing": [
+            {
+              "seconds": 3.0,
+              "target_midi": 55
+            }
+          ],
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 3,
             "total": 4
           },
-          "plan_cost": 182.97572954597416,
+          "plan_cost": 80.08870233166968,
           "recording_for_pitch": {
             "70": "101",
-            "71": "002",
-            "72": "069",
+            "71": null,
+            "72": "002",
             "74": "084"
           },
           "song": "stars-and-stripes",
-          "transpose": -27,
-          "unlocked": true
+          "transpose": -16,
+          "unlocked": false
         },
         {
           "missing": [],
@@ -111345,15 +111389,15 @@
           "missing": [
             {
               "seconds": 0.8,
-              "target_midi": 41
+              "target_midi": 42
+            },
+            {
+              "seconds": 0.8,
+              "target_midi": 49
             },
             {
               "seconds": 0.6,
-              "target_midi": 43
-            },
-            {
-              "seconds": 0.6,
-              "target_midi": 50
+              "target_midi": 51
             }
           ],
           "octave_moves": 2,
@@ -111361,19 +111405,19 @@
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 175.4938894207071,
+          "plan_cost": 309.0731249142076,
           "recording_for_pitch": {
             "64": "101",
             "65": "098",
             "67": null,
-            "69": null,
-            "71": "084",
-            "72": "069",
-            "74": "002",
+            "69": "084",
+            "71": "069",
+            "72": "002",
+            "74": null,
             "76": null
           },
           "song": "battle-hymn",
-          "transpose": -26,
+          "transpose": -25,
           "unlocked": false
         },
         {
@@ -111578,7 +111622,7 @@
             "covered": 4,
             "total": 6
           },
-          "plan_cost": 65.7839300449171,
+          "plan_cost": 69.45230731885862,
           "recording_for_pitch": {
             "62": "069",
             "64": "002",
@@ -112404,12 +112448,12 @@
         {
           "missing": [
             {
-              "seconds": 1.5,
-              "target_midi": 44
+              "seconds": 1.9,
+              "target_midi": 53
             },
             {
-              "seconds": 1.9,
-              "target_midi": 51
+              "seconds": 1.0,
+              "target_midi": 58
             }
           ],
           "octave_moves": 2,
@@ -112417,19 +112461,19 @@
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 144.51690094204778,
+          "plan_cost": 190.91953620291542,
           "recording_for_pitch": {
-            "64": null,
-            "66": "080",
+            "64": "080",
+            "66": "032",
             "67": "104",
             "69": "017",
             "71": null,
-            "73": "032",
-            "74": "090",
-            "76": "084"
+            "73": "090",
+            "74": "084",
+            "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -20,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -113164,7 +113208,7 @@
             },
             {
               "seconds": 1.5,
-              "target_midi": 50
+              "target_midi": 48
             }
           ],
           "octave_moves": 3,
@@ -113172,7 +113216,7 @@
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 116.45659279845538,
+          "plan_cost": 120.7030334052458,
           "recording_for_pitch": {
             "66": "017",
             "67": "016",
@@ -113180,8 +113224,8 @@
             "71": "090",
             "73": "080",
             "74": "084",
-            "76": "032",
-            "78": null
+            "76": null,
+            "78": "032"
           },
           "song": "yellow-rose-of-texas",
           "transpose": -28,
@@ -114071,7 +114115,7 @@
             "covered": 7,
             "total": 7
           },
-          "plan_cost": 575.6899777752851,
+          "plan_cost": 584.8235502639124,
           "recording_for_pitch": {
             "55": "016",
             "57": "104",
@@ -114170,7 +114214,7 @@
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 121.5995599599242,
+          "plan_cost": 124.36450884056526,
           "recording_for_pitch": {
             "62": "080",
             "64": null,
@@ -114672,23 +114716,23 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 53
+              "target_midi": 41
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 2,
           "pitch_coverage": {
             "covered": 3,
             "total": 4
           },
-          "plan_cost": 27.445361578609628,
+          "plan_cost": 177.3585136919301,
           "recording_for_pitch": {
-            "70": "032",
+            "70": "017",
             "71": null,
-            "72": "090",
+            "72": "080",
             "74": "084"
           },
           "song": "stars-and-stripes",
-          "transpose": -18,
+          "transpose": -30,
           "unlocked": false
         },
         {
@@ -114805,8 +114849,8 @@
         {
           "missing": [
             {
-              "seconds": 0.6,
-              "target_midi": 48
+              "seconds": 2.3,
+              "target_midi": 51
             },
             {
               "seconds": 0.8,
@@ -114818,14 +114862,14 @@
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 1529.1783164143158,
+          "plan_cost": 1589.8743118886573,
           "recording_for_pitch": {
             "64": "090",
             "65": "104",
             "67": "080",
-            "69": null,
-            "71": "017",
-            "72": "032",
+            "69": "017",
+            "71": "032",
+            "72": null,
             "74": null,
             "76": "084"
           },
@@ -115027,7 +115071,7 @@
             "covered": 5,
             "total": 6
           },
-          "plan_cost": 262.74850626360876,
+          "plan_cost": 266.4168835375503,
           "recording_for_pitch": {
             "62": "080",
             "64": null,
@@ -115964,15 +116008,15 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 46
+              "target_midi": 47
             },
             {
               "seconds": 0.8,
-              "target_midi": 48
+              "target_midi": 49
             },
             {
-              "seconds": 1.9,
-              "target_midi": 53
+              "seconds": 1.0,
+              "target_midi": 59
             }
           ],
           "octave_moves": 1,
@@ -115980,19 +116024,19 @@
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 43.42722098501588,
+          "plan_cost": 78.00319473725946,
           "recording_for_pitch": {
             "64": null,
             "66": null,
             "67": "096",
             "69": "101",
-            "71": null,
-            "73": "059",
-            "74": "094",
-            "76": "084"
+            "71": "084",
+            "73": "094",
+            "74": "059",
+            "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -18,
+          "transpose": -17,
           "unlocked": false
         },
         {
@@ -116791,36 +116835,36 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 62
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 63
+              "seconds": 1.0,
+              "target_midi": 51
             },
             {
               "seconds": 1.5,
-              "target_midi": 67
+              "target_midi": 58
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 60
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 77.2596720026933,
+          "plan_cost": 40.8304324604605,
           "recording_for_pitch": {
-            "66": "101",
-            "67": "019",
-            "69": "084",
-            "71": "094",
-            "73": null,
-            "74": null,
-            "76": "059",
+            "66": "094",
+            "67": "096",
+            "69": null,
+            "71": "101",
+            "73": "059",
+            "74": "084",
+            "76": null,
             "78": null
           },
           "song": "yellow-rose-of-texas",
-          "transpose": -11,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -116904,7 +116948,7 @@
             "covered": 6,
             "total": 7
           },
-          "plan_cost": 195.3831576786495,
+          "plan_cost": 224.90808944753846,
           "recording_for_pitch": {
             "62": "096",
             "64": null,
@@ -117819,26 +117863,26 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 50
+              "target_midi": 52
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
             "covered": 6,
             "total": 7
           },
-          "plan_cost": 137.02050108676457,
+          "plan_cost": 124.0752359596041,
           "recording_for_pitch": {
-            "55": "019",
-            "57": "096",
+            "55": "096",
+            "57": "098",
             "59": null,
             "60": "101",
-            "62": "059",
-            "64": "084",
+            "62": "084",
+            "64": "059",
             "67": "094"
           },
           "song": "grand-old-flag",
-          "transpose": -9,
+          "transpose": -7,
           "unlocked": false
         },
         {
@@ -117998,13 +118042,13 @@
             "covered": 4,
             "total": 6
           },
-          "plan_cost": 68.4989599390684,
+          "plan_cost": 76.68313168509091,
           "recording_for_pitch": {
             "68": null,
             "69": null,
-            "71": "059",
+            "71": "084",
             "72": "101",
-            "74": "084",
+            "74": "059",
             "76": "094"
           },
           "song": "coventry-carol",
@@ -118524,23 +118568,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 55
+              "target_midi": 53
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 54
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 33.458834487271766,
+          "plan_cost": 11.012409135376323,
           "recording_for_pitch": {
             "70": "101",
             "71": null,
-            "72": "094",
+            "72": null,
             "74": "084"
           },
           "song": "stars-and-stripes",
-          "transpose": -16,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -118681,7 +118729,7 @@
               "target_midi": 60
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 61
             },
             {
@@ -119904,35 +119952,39 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 40
+              "target_midi": 56
             },
             {
               "seconds": 1.9,
-              "target_midi": 47
+              "target_midi": 63
             },
             {
               "seconds": 1.0,
-              "target_midi": 52
+              "target_midi": 66
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 68
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 5,
+            "covered": 4,
             "total": 8
           },
-          "plan_cost": 88.84169296685,
+          "plan_cost": 20.369914706614274,
           "recording_for_pitch": {
             "64": null,
-            "66": "009",
-            "67": "016",
-            "69": "091",
+            "66": "091",
+            "67": "103",
+            "69": "097",
             "71": null,
-            "73": "097",
-            "74": "101",
+            "73": "101",
+            "74": null,
             "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -24,
+          "transpose": -8,
           "unlocked": false
         },
         {
@@ -120772,7 +120824,7 @@
               "target_midi": 48
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 50
             },
             {
@@ -121852,26 +121904,30 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 40
+              "target_midi": 52
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 55
             }
           ],
-          "octave_moves": 5,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 6,
+            "covered": 5,
             "total": 7
           },
-          "plan_cost": 338.6310403526148,
+          "plan_cost": 68.3872432698,
           "recording_for_pitch": {
             "55": "104",
             "57": "016",
             "59": null,
             "60": "101",
-            "62": "009",
+            "62": null,
             "64": "091",
             "67": "103"
           },
           "song": "grand-old-flag",
-          "transpose": -19,
+          "transpose": -7,
           "unlocked": false
         },
         {
@@ -122035,7 +122091,7 @@
             "covered": 3,
             "total": 6
           },
-          "plan_cost": 149.50909751540289,
+          "plan_cost": 179.41367743957125,
           "recording_for_pitch": {
             "68": null,
             "69": null,
@@ -122577,27 +122633,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 59
+              "target_midi": 40
             },
             {
-              "seconds": 1.0,
-              "target_midi": 62
+              "seconds": 2.0,
+              "target_midi": 41
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 2,
           "pitch_coverage": {
             "covered": 2,
             "total": 4
           },
-          "plan_cost": 6.323324676633183,
+          "plan_cost": 177.70430638038508,
           "recording_for_pitch": {
-            "70": "091",
+            "70": "101",
             "71": null,
-            "72": "097",
-            "74": null
+            "72": null,
+            "74": "009"
           },
           "song": "stars-and-stripes",
-          "transpose": -12,
+          "transpose": -31,
           "unlocked": false
         },
         {
@@ -122739,7 +122795,7 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 48
             },
             {
@@ -123805,11 +123861,11 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 49
+              "target_midi": 48
             },
             {
               "seconds": 1.0,
-              "target_midi": 61
+              "target_midi": 60
             }
           ],
           "octave_moves": 4,
@@ -123817,19 +123873,19 @@
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 66.22201672791184,
+          "plan_cost": 107.69697747437624,
           "recording_for_pitch": {
             "64": null,
             "66": "022",
             "67": "016",
             "69": "095",
             "71": "084",
-            "73": "059",
-            "74": "097",
+            "73": "097",
+            "74": "059",
             "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -15,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -124540,31 +124596,31 @@
           "missing": [
             {
               "seconds": 1.0,
-              "target_midi": 46
+              "target_midi": 49
             },
             {
-              "seconds": 0.8,
-              "target_midi": 51
+              "seconds": 1.5,
+              "target_midi": 58
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 4,
           "pitch_coverage": {
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 93.34027361516016,
+          "plan_cost": 76.49264139421261,
           "recording_for_pitch": {
-            "66": "095",
+            "66": "097",
             "67": "102",
             "69": null,
-            "71": "097",
-            "73": "022",
-            "74": null,
-            "76": "059",
-            "78": "084"
+            "71": "022",
+            "73": "095",
+            "74": "059",
+            "76": "084",
+            "78": null
           },
           "song": "yellow-rose-of-texas",
-          "transpose": -23,
+          "transpose": -20,
           "unlocked": false
         },
         {
@@ -124639,7 +124695,7 @@
             "covered": 7,
             "total": 7
           },
-          "plan_cost": 278.82700859857687,
+          "plan_cost": 288.14120822253585,
           "recording_for_pitch": {
             "62": "096",
             "64": "022",
@@ -125439,25 +125495,30 @@
           "unlocked": false
         },
         {
-          "missing": [],
-          "octave_moves": 5,
+          "missing": [
+            {
+              "seconds": 1.5,
+              "target_midi": 51
+            }
+          ],
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 7,
+            "covered": 6,
             "total": 7
           },
-          "plan_cost": 324.57284013570273,
+          "plan_cost": 185.6451543169068,
           "recording_for_pitch": {
             "55": "102",
             "57": "096",
-            "59": "084",
-            "60": "097",
-            "62": "022",
-            "64": "095",
-            "67": "059"
+            "59": null,
+            "60": "022",
+            "62": "084",
+            "64": "059",
+            "67": "097"
           },
           "song": "grand-old-flag",
-          "transpose": -12,
-          "unlocked": true
+          "transpose": -8,
+          "unlocked": false
         },
         {
           "missing": [
@@ -125544,7 +125605,7 @@
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 102.93804864561385,
+          "plan_cost": 105.84984901197117,
           "recording_for_pitch": {
             "62": "022",
             "64": null,
@@ -125593,7 +125654,7 @@
             "covered": 4,
             "total": 6
           },
-          "plan_cost": 53.04883985694957,
+          "plan_cost": 54.13543258496471,
           "recording_for_pitch": {
             "68": null,
             "69": null,
@@ -125785,7 +125846,7 @@
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 107.89930174126779,
+          "plan_cost": 124.08720824655227,
           "recording_for_pitch": {
             "38": "022",
             "40": "095",
@@ -126041,23 +126102,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 41
+              "target_midi": 39
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 40
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 52.75771997765934,
+          "plan_cost": 36.48664636641371,
           "recording_for_pitch": {
-            "70": "022",
+            "70": "095",
             "71": null,
-            "72": "095",
-            "74": "084"
+            "72": null,
+            "74": "022"
           },
           "song": "stars-and-stripes",
-          "transpose": -30,
+          "transpose": -32,
           "unlocked": false
         },
         {
@@ -126174,28 +126239,28 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 49
+              "seconds": 2.3,
+              "target_midi": 57
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 4,
           "pitch_coverage": {
             "covered": 7,
             "total": 8
           },
-          "plan_cost": 214.45853912726466,
+          "plan_cost": 288.452510813366,
           "recording_for_pitch": {
             "64": "096",
-            "65": "102",
-            "67": null,
-            "69": "022",
-            "71": "095",
-            "72": "084",
-            "74": "059",
+            "65": "016",
+            "67": "022",
+            "69": "095",
+            "71": "059",
+            "72": null,
+            "74": "084",
             "76": "097"
           },
           "song": "battle-hymn",
-          "transpose": -18,
+          "transpose": -15,
           "unlocked": false
         },
         {
@@ -127283,7 +127348,7 @@
               "target_midi": 51
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 54
             }
           ],
@@ -128109,15 +128174,15 @@
           "missing": [
             {
               "seconds": 1.0,
-              "target_midi": 48
+              "target_midi": 49
             },
             {
               "seconds": 0.8,
-              "target_midi": 53
+              "target_midi": 54
             },
             {
               "seconds": 1.5,
-              "target_midi": 57
+              "target_midi": 58
             }
           ],
           "octave_moves": 2,
@@ -128125,10 +128190,10 @@
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 41.40668720724335,
+          "plan_cost": 43.081246076574686,
           "recording_for_pitch": {
             "66": "002",
-            "67": "086",
+            "67": "103",
             "69": null,
             "71": "017",
             "73": "032",
@@ -128137,7 +128202,7 @@
             "78": null
           },
           "song": "yellow-rose-of-texas",
-          "transpose": -21,
+          "transpose": -20,
           "unlocked": false
         },
         {
@@ -129124,8 +129189,8 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 50
+              "seconds": 1.5,
+              "target_midi": 53
             }
           ],
           "octave_moves": 2,
@@ -129133,18 +129198,18 @@
             "covered": 6,
             "total": 7
           },
-          "plan_cost": 150.272428746634,
+          "plan_cost": 196.38206425342804,
           "recording_for_pitch": {
             "55": "086",
             "57": "002",
             "59": "032",
-            "60": null,
-            "62": "017",
+            "60": "017",
+            "62": null,
             "64": "084",
             "67": "103"
           },
           "song": "grand-old-flag",
-          "transpose": -10,
+          "transpose": -9,
           "unlocked": false
         },
         {
@@ -129245,7 +129310,7 @@
             "covered": 4,
             "total": 7
           },
-          "plan_cost": 32.8956433984857,
+          "plan_cost": 34.04696049101946,
           "recording_for_pitch": {
             "62": "017",
             "64": null,
@@ -129792,22 +129857,27 @@
           "unlocked": true
         },
         {
-          "missing": [],
-          "octave_moves": 2,
+          "missing": [
+            {
+              "seconds": 3.0,
+              "target_midi": 46
+            }
+          ],
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 3,
             "total": 4
           },
-          "plan_cost": 82.30542384040587,
+          "plan_cost": 64.95633973171135,
           "recording_for_pitch": {
             "70": "084",
-            "71": "002",
-            "72": "017",
+            "71": null,
+            "72": "002",
             "74": "032"
           },
           "song": "stars-and-stripes",
-          "transpose": -24,
-          "unlocked": true
+          "transpose": -25,
+          "unlocked": false
         },
         {
           "missing": [
@@ -129936,8 +130006,8 @@
         {
           "missing": [
             {
-              "seconds": 0.6,
-              "target_midi": 50
+              "seconds": 2.3,
+              "target_midi": 53
             },
             {
               "seconds": 0.8,
@@ -129949,14 +130019,14 @@
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 192.5402639786098,
+          "plan_cost": 221.97444579982252,
           "recording_for_pitch": {
             "64": "103",
             "65": "086",
             "67": "002",
-            "69": null,
-            "71": "017",
-            "72": "032",
+            "69": "017",
+            "71": "032",
+            "72": null,
             "74": null,
             "76": "084"
           },
@@ -130170,7 +130240,7 @@
             "covered": 4,
             "total": 6
           },
-          "plan_cost": 71.68659011874455,
+          "plan_cost": 72.25009164206328,
           "recording_for_pitch": {
             "62": "002",
             "64": null,
@@ -131068,35 +131138,35 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 50
+              "target_midi": 43
             },
             {
               "seconds": 1.9,
-              "target_midi": 57
+              "target_midi": 50
             },
             {
               "seconds": 1.0,
-              "target_midi": 62
+              "target_midi": 53
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 5,
           "pitch_coverage": {
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 47.805780376572585,
+          "plan_cost": 115.32088898040001,
           "recording_for_pitch": {
             "64": null,
-            "66": "017",
+            "66": "091",
             "67": "086",
-            "69": "069",
+            "69": "094",
             "71": null,
-            "73": "091",
-            "74": "094",
-            "76": null
+            "73": "017",
+            "74": null,
+            "76": "069"
           },
           "song": "scarborough-fair",
-          "transpose": -14,
+          "transpose": -21,
           "unlocked": false
         },
         {
@@ -131901,7 +131971,7 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 50
             },
             {
@@ -132895,26 +132965,30 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 46
+              "target_midi": 48
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 51
             }
           ],
-          "octave_moves": 4,
+          "octave_moves": 3,
           "pitch_coverage": {
-            "covered": 6,
+            "covered": 5,
             "total": 7
           },
-          "plan_cost": 963.5091117732826,
+          "plan_cost": 570.6693380125478,
           "recording_for_pitch": {
-            "55": "009",
-            "57": "094",
+            "55": "086",
+            "57": "069",
             "59": null,
-            "60": "069",
-            "62": "091",
+            "60": "094",
+            "62": null,
             "64": "017",
-            "67": "086"
+            "67": "091"
           },
           "song": "grand-old-flag",
-          "transpose": -13,
+          "transpose": -11,
           "unlocked": false
         },
         {
@@ -133056,7 +133130,7 @@
             "covered": 4,
             "total": 6
           },
-          "plan_cost": 166.8794598517929,
+          "plan_cost": 197.02994301729856,
           "recording_for_pitch": {
             "68": null,
             "69": null,
@@ -133284,7 +133358,7 @@
             "covered": 4,
             "total": 7
           },
-          "plan_cost": 69.59903457274132,
+          "plan_cost": 74.99388610234328,
           "recording_for_pitch": {
             "38": "017",
             "40": "009",
@@ -133571,18 +133645,22 @@
             {
               "seconds": 3.0,
               "target_midi": 41
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 42
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 131.01786184125115,
+          "plan_cost": 104.63646221295566,
           "recording_for_pitch": {
             "70": "017",
             "71": null,
-            "72": "009",
+            "72": null,
             "74": "069"
           },
           "song": "stars-and-stripes",
@@ -133712,8 +133790,8 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 49
+              "seconds": 2.3,
+              "target_midi": 47
             },
             {
               "seconds": 0.6,
@@ -133725,15 +133803,15 @@
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 636.6905982521092,
+          "plan_cost": 783.8138375228682,
           "recording_for_pitch": {
             "64": "017",
             "65": "099",
             "67": "009",
             "69": "094",
-            "71": "091",
-            "72": "069",
-            "74": null,
+            "71": "069",
+            "72": null,
+            "74": "091",
             "76": null
           },
           "song": "battle-hymn",
@@ -135006,15 +135084,15 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 23.243328498468067,
+          "plan_cost": 30.002146965947446,
           "recording_for_pitch": {
             "64": null,
             "66": null,
             "67": "103",
             "69": "022",
             "71": null,
-            "73": "084",
-            "74": "094",
+            "73": "094",
+            "74": "084",
             "76": null
           },
           "song": "scarborough-fair",
@@ -135976,7 +136054,7 @@
               "target_midi": 55
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 57
             },
             {
@@ -137165,7 +137243,7 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 62
             },
             {
@@ -137967,23 +138045,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 55
+              "target_midi": 53
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 54
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 56.81724700744873,
+          "plan_cost": 29.09749836652026,
           "recording_for_pitch": {
             "70": "022",
             "71": null,
-            "72": "094",
+            "72": null,
             "74": "084"
           },
           "song": "stars-and-stripes",
-          "transpose": -16,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -138149,7 +138231,7 @@
               "target_midi": 51
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 54
             }
           ],
@@ -139608,43 +139690,43 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 46
+              "target_midi": 44
             },
             {
               "seconds": 0.8,
-              "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 51
+              "target_midi": 46
             },
             {
               "seconds": 1.9,
-              "target_midi": 53
+              "target_midi": 51
             },
             {
               "seconds": 1.0,
-              "target_midi": 58
+              "target_midi": 54
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 56
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
             "total": 8
           },
-          "plan_cost": 9.15781308901831,
+          "plan_cost": 13.460884835745503,
           "recording_for_pitch": {
             "64": null,
             "66": null,
             "67": "104",
-            "69": null,
+            "69": "094",
             "71": null,
             "73": "090",
-            "74": "094",
+            "74": null,
             "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -18,
+          "transpose": -20,
           "unlocked": false
         },
         {
@@ -140699,7 +140781,7 @@
               "target_midi": 64
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 66
             },
             {
@@ -142004,7 +142086,7 @@
               "target_midi": 52
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 55
             },
             {
@@ -142901,20 +142983,24 @@
               "target_midi": 56
             },
             {
+              "seconds": 2.0,
+              "target_midi": 57
+            },
+            {
               "seconds": 1.0,
               "target_midi": 59
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 2,
+            "covered": 1,
             "total": 4
           },
-          "plan_cost": 2.0248667800279136,
+          "plan_cost": 0.3221476633457039,
           "recording_for_pitch": {
             "70": "090",
             "71": null,
-            "72": "094",
+            "72": null,
             "74": null
           },
           "song": "stars-and-stripes",
@@ -143100,7 +143186,7 @@
               "target_midi": 63
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 64
             },
             {
@@ -144445,7 +144531,7 @@
               "target_midi": 54
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 57
             },
             {
@@ -145428,7 +145514,7 @@
               "target_midi": 56
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 58
             },
             {
@@ -146622,15 +146708,15 @@
           "missing": [
             {
               "seconds": 0.3,
-              "target_midi": 48
+              "target_midi": 47
             },
             {
               "seconds": 0.5,
-              "target_midi": 53
+              "target_midi": 52
             },
             {
-              "seconds": 0.8,
-              "target_midi": 57
+              "seconds": 1.5,
+              "target_midi": 54
             }
           ],
           "octave_moves": 1,
@@ -146638,18 +146724,18 @@
             "covered": 4,
             "total": 7
           },
-          "plan_cost": 167.61090994551125,
+          "plan_cost": 285.6830206595006,
           "recording_for_pitch": {
             "55": null,
             "57": "017",
             "59": "032",
             "60": null,
-            "62": "013",
-            "64": null,
+            "62": null,
+            "64": "013",
             "67": "103"
           },
           "song": "grand-old-flag",
-          "transpose": -7,
+          "transpose": -8,
           "unlocked": false
         },
         {
@@ -147423,23 +147509,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 52
+              "target_midi": 53
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 54
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 112.05956458878146,
+          "plan_cost": 99.3778752642987,
           "recording_for_pitch": {
             "70": "032",
             "71": null,
-            "72": "017",
+            "72": null,
             "74": "013"
           },
           "song": "stars-and-stripes",
-          "transpose": -19,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -147593,8 +147683,8 @@
               "target_midi": 51
             },
             {
-              "seconds": 0.8,
-              "target_midi": 55
+              "seconds": 2.3,
+              "target_midi": 56
             },
             {
               "seconds": 0.8,
@@ -147610,14 +147700,14 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 144.59231404607985,
+          "plan_cost": 308.0590382540462,
           "recording_for_pitch": {
             "64": "032",
             "65": "103",
             "67": null,
             "69": "017",
-            "71": null,
-            "72": "013",
+            "71": "013",
+            "72": null,
             "74": null,
             "76": null
           },
@@ -148991,12 +149081,12 @@
               "target_midi": 45
             },
             {
-              "seconds": 0.5,
-              "target_midi": 50
-            },
-            {
               "seconds": 1.9,
               "target_midi": 52
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 55
             },
             {
               "seconds": 1.0,
@@ -149008,15 +149098,15 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 39.07858265687917,
+          "plan_cost": 44.112902005554574,
           "recording_for_pitch": {
             "64": null,
             "66": "069",
             "67": "098",
-            "69": null,
+            "69": "101",
             "71": null,
-            "73": "101",
-            "74": "090",
+            "73": "090",
+            "74": null,
             "76": null
           },
           "song": "scarborough-fair",
@@ -150011,7 +150101,7 @@
               "target_midi": 59
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 61
             },
             {
@@ -151216,16 +151306,16 @@
         {
           "missing": [
             {
+              "seconds": 0.3,
+              "target_midi": 38
+            },
+            {
               "seconds": 1.5,
-              "target_midi": 43
+              "target_midi": 42
             },
             {
-              "seconds": 0.5,
-              "target_midi": 44
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 48
+              "seconds": 1.5,
+              "target_midi": 45
             }
           ],
           "octave_moves": 1,
@@ -151233,18 +151323,18 @@
             "covered": 4,
             "total": 7
           },
-          "plan_cost": 185.45661668729613,
+          "plan_cost": 354.4632983136807,
           "recording_for_pitch": {
-            "55": "098",
-            "57": "090",
+            "55": null,
+            "57": "098",
             "59": null,
-            "60": null,
-            "62": "069",
-            "64": null,
+            "60": "090",
+            "62": null,
+            "64": "069",
             "67": "101"
           },
           "song": "grand-old-flag",
-          "transpose": -16,
+          "transpose": -17,
           "unlocked": false
         },
         {
@@ -152058,23 +152148,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 54
+              "target_midi": 42
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 43
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 135.3776561052831,
+          "plan_cost": 114.27027355083453,
           "recording_for_pitch": {
             "70": "101",
             "71": null,
-            "72": "090",
+            "72": null,
             "74": "069"
           },
           "song": "stars-and-stripes",
-          "transpose": -17,
+          "transpose": -29,
           "unlocked": false
         },
         {
@@ -152237,23 +152331,23 @@
           "missing": [
             {
               "seconds": 0.8,
-              "target_midi": 41
+              "target_midi": 55
             },
             {
               "seconds": 0.6,
-              "target_midi": 43
+              "target_midi": 57
+            },
+            {
+              "seconds": 2.3,
+              "target_midi": 60
             },
             {
               "seconds": 0.8,
-              "target_midi": 45
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 48
+              "target_midi": 62
             },
             {
               "seconds": 0.6,
-              "target_midi": 50
+              "target_midi": 64
             }
           ],
           "octave_moves": 1,
@@ -152261,19 +152355,19 @@
             "covered": 3,
             "total": 8
           },
-          "plan_cost": 129.15056234146778,
+          "plan_cost": 250.93237514465983,
           "recording_for_pitch": {
             "64": "101",
-            "65": "098",
+            "65": "090",
             "67": null,
             "69": null,
-            "71": null,
-            "72": "069",
+            "71": "069",
+            "72": null,
             "74": null,
             "76": null
           },
           "song": "battle-hymn",
-          "transpose": -26,
+          "transpose": -12,
           "unlocked": false
         },
         {
@@ -153630,7 +153724,7 @@
             },
             {
               "seconds": 1.0,
-              "target_midi": 55
+              "target_midi": 53
             }
           ],
           "octave_moves": 1,
@@ -153638,7 +153732,7 @@
             "covered": 3,
             "total": 8
           },
-          "plan_cost": 86.223150775828,
+          "plan_cost": 86.94140700716255,
           "recording_for_pitch": {
             "64": null,
             "66": "009",
@@ -153646,8 +153740,8 @@
             "69": null,
             "71": null,
             "73": "032",
-            "74": "013",
-            "76": null
+            "74": null,
+            "76": "013"
           },
           "song": "scarborough-fair",
           "transpose": -21,
@@ -154653,8 +154747,8 @@
               "target_midi": 50
             },
             {
-              "seconds": 0.8,
-              "target_midi": 53
+              "seconds": 1.5,
+              "target_midi": 55
             },
             {
               "seconds": 1.5,
@@ -154666,15 +154760,15 @@
             "covered": 3,
             "total": 8
           },
-          "plan_cost": 146.9493519026287,
+          "plan_cost": 159.55924091525736,
           "recording_for_pitch": {
             "66": "009",
             "67": null,
             "69": null,
             "71": null,
             "73": "032",
-            "74": null,
-            "76": "013",
+            "74": "013",
+            "76": null,
             "78": null
           },
           "song": "yellow-rose-of-texas",
@@ -155910,7 +156004,7 @@
               "target_midi": 46
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 48
             }
           ],
@@ -156109,8 +156203,8 @@
               "target_midi": 41
             },
             {
-              "seconds": 0.5,
-              "target_midi": 44
+              "seconds": 1.0,
+              "target_midi": 43
             }
           ],
           "octave_moves": 2,
@@ -156118,12 +156212,12 @@
             "covered": 3,
             "total": 6
           },
-          "plan_cost": 150.8675087097119,
+          "plan_cost": 163.82476969455792,
           "recording_for_pitch": {
             "68": null,
             "69": null,
-            "71": "009",
-            "72": null,
+            "71": null,
+            "72": "009",
             "74": "013",
             "76": "032"
           },
@@ -156756,23 +156850,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 45
+              "target_midi": 53
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 54
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 148.53016772278184,
+          "plan_cost": 99.3778752642987,
           "recording_for_pitch": {
-            "70": "009",
+            "70": "032",
             "71": null,
-            "72": "013",
-            "74": "032"
+            "72": null,
+            "74": "013"
           },
           "song": "stars-and-stripes",
-          "transpose": -26,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -156938,8 +157036,8 @@
               "target_midi": 48
             },
             {
-              "seconds": 0.8,
-              "target_midi": 50
+              "seconds": 2.3,
+              "target_midi": 51
             },
             {
               "seconds": 0.8,
@@ -156951,14 +157049,14 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 343.6050318203557,
+          "plan_cost": 387.36559402963746,
           "recording_for_pitch": {
             "64": "009",
             "65": "099",
             "67": null,
             "69": null,
-            "71": null,
-            "72": "032",
+            "71": "032",
+            "72": null,
             "74": null,
             "76": "013"
           },
@@ -157212,7 +157310,7 @@
             "covered": 3,
             "total": 6
           },
-          "plan_cost": 136.79877007604512,
+          "plan_cost": 138.74832024513842,
           "recording_for_pitch": {
             "62": "009",
             "64": null,
@@ -158236,39 +158334,39 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 43
+              "target_midi": 40
             },
             {
               "seconds": 1.9,
-              "target_midi": 50
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 52
+              "target_midi": 47
             },
             {
               "seconds": 1.0,
-              "target_midi": 55
+              "target_midi": 50
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 52
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 3,
           "pitch_coverage": {
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 155.76713198165166,
+          "plan_cost": 72.05568514865737,
           "recording_for_pitch": {
             "64": null,
-            "66": "009",
-            "67": "069",
-            "69": "097",
+            "66": "069",
+            "67": "090",
+            "69": "009",
             "71": null,
-            "73": null,
-            "74": "090",
+            "73": "097",
+            "74": null,
             "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -21,
+          "transpose": -24,
           "unlocked": false
         },
         {
@@ -159210,7 +159308,7 @@
               "target_midi": 48
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 50
             },
             {
@@ -160379,7 +160477,7 @@
               "target_midi": 46
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 49
             },
             {
@@ -160567,13 +160665,13 @@
             "covered": 4,
             "total": 6
           },
-          "plan_cost": 144.47665869316938,
+          "plan_cost": 157.3430697462474,
           "recording_for_pitch": {
             "68": null,
             "69": null,
-            "71": "009",
+            "71": "069",
             "72": "090",
-            "74": "069",
+            "74": "009",
             "76": "097"
           },
           "song": "coventry-carol",
@@ -160823,7 +160921,7 @@
             "covered": 4,
             "total": 7
           },
-          "plan_cost": 82.02149409504966,
+          "plan_cost": 87.41634562465164,
           "recording_for_pitch": {
             "38": "009",
             "40": "090",
@@ -161149,23 +161247,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 55
+              "target_midi": 42
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 43
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 155.50552026424725,
+          "plan_cost": 121.97290026394757,
           "recording_for_pitch": {
             "70": "090",
             "71": null,
-            "72": "097",
+            "72": null,
             "74": "069"
           },
           "song": "stars-and-stripes",
-          "transpose": -16,
+          "transpose": -29,
           "unlocked": false
         },
         {
@@ -161323,7 +161425,7 @@
               "target_midi": 51
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 52
             },
             {
@@ -162865,7 +162967,7 @@
               "target_midi": 48
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 49
             },
             {
@@ -164021,7 +164123,7 @@
               "target_midi": 49
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 51
             },
             {
@@ -165422,7 +165524,7 @@
               "target_midi": 46
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 48
             },
             {
@@ -166375,16 +166477,16 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 39
+              "seconds": 3.0,
+              "target_midi": 42
             },
             {
-              "seconds": 3.0,
-              "target_midi": 40
+              "seconds": 2.0,
+              "target_midi": 43
             },
             {
               "seconds": 1.0,
-              "target_midi": 43
+              "target_midi": 45
             }
           ],
           "octave_moves": 0,
@@ -166392,15 +166494,15 @@
             "covered": 1,
             "total": 4
           },
-          "plan_cost": 1.3655905541573286,
+          "plan_cost": 4.096771662471985,
           "recording_for_pitch": {
-            "70": null,
+            "70": "095",
             "71": null,
-            "72": "095",
+            "72": null,
             "74": null
           },
           "song": "stars-and-stripes",
-          "transpose": -31,
+          "transpose": -29,
           "unlocked": false
         },
         {
@@ -166590,7 +166692,7 @@
               "target_midi": 48
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 49
             },
             {
@@ -168140,7 +168242,7 @@
               "target_midi": 57
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 60
             },
             {
@@ -169236,7 +169338,7 @@
               "target_midi": 59
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 61
             },
             {
@@ -170561,7 +170663,7 @@
               "target_midi": 54
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 57
             },
             {
@@ -171467,27 +171569,31 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 56
+              "target_midi": 59
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 60
             },
             {
               "seconds": 1.0,
-              "target_midi": 59
+              "target_midi": 62
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 2,
+            "covered": 1,
             "total": 4
           },
-          "plan_cost": 1.516855311735653,
+          "plan_cost": 0.1340498704213001,
           "recording_for_pitch": {
-            "70": "090",
+            "70": "091",
             "71": null,
-            "72": "091",
+            "72": null,
             "74": null
           },
           "song": "stars-and-stripes",
-          "transpose": -15,
+          "transpose": -12,
           "unlocked": false
         },
         {
@@ -171665,7 +171771,7 @@
               "target_midi": 62
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 63
             },
             {
@@ -173023,19 +173129,19 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 45
-            },
-            {
-              "seconds": 0.8,
               "target_midi": 47
             },
             {
               "seconds": 1.9,
-              "target_midi": 52
+              "target_midi": 54
             },
             {
               "seconds": 1.0,
               "target_midi": 57
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 59
             }
           ],
           "octave_moves": 3,
@@ -173043,19 +173149,19 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 34.317215761697724,
+          "plan_cost": 44.62299831396562,
           "recording_for_pitch": {
             "64": null,
-            "66": null,
+            "66": "017",
             "67": "096",
-            "69": "017",
+            "69": "095",
             "71": null,
-            "73": "095",
-            "74": "059",
+            "73": "059",
+            "74": null,
             "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -19,
+          "transpose": -17,
           "unlocked": false
         },
         {
@@ -174011,19 +174117,19 @@
           "missing": [
             {
               "seconds": 0.5,
-              "target_midi": 46
+              "target_midi": 47
             },
             {
               "seconds": 1.0,
-              "target_midi": 49
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 54
+              "target_midi": 50
             },
             {
               "seconds": 1.5,
-              "target_midi": 58
+              "target_midi": 57
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 59
             }
           ],
           "octave_moves": 3,
@@ -174031,19 +174137,19 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 48.04915891745502,
+          "plan_cost": 48.63656759700446,
           "recording_for_pitch": {
             "66": null,
             "67": "096",
             "69": null,
             "71": "017",
             "73": "095",
-            "74": null,
-            "76": "059",
+            "74": "059",
+            "76": null,
             "78": null
           },
           "song": "yellow-rose-of-texas",
-          "transpose": -20,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -175207,7 +175313,7 @@
               "target_midi": 48
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 50
             }
           ],
@@ -176005,23 +176111,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 52
+              "target_midi": 53
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 54
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 75.68191330277857,
+          "plan_cost": 67.09553719438846,
           "recording_for_pitch": {
-            "70": "017",
+            "70": "095",
             "71": null,
-            "72": "095",
+            "72": null,
             "74": "059"
           },
           "song": "stars-and-stripes",
-          "transpose": -19,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -176171,7 +176281,7 @@
               "target_midi": 51
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 56
             },
             {
@@ -177533,19 +177643,19 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 46
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 48
+              "target_midi": 47
             },
             {
               "seconds": 1.9,
-              "target_midi": 53
+              "target_midi": 54
             },
             {
               "seconds": 1.0,
-              "target_midi": 58
+              "target_midi": 57
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 59
             }
           ],
           "octave_moves": 1,
@@ -177553,19 +177663,19 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 35.33974864474189,
+          "plan_cost": 35.577005204667955,
           "recording_for_pitch": {
             "64": null,
-            "66": null,
+            "66": "032",
             "67": "103",
-            "69": "032",
+            "69": "101",
             "71": null,
-            "73": "101",
-            "74": "097",
+            "73": "097",
+            "74": null,
             "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -18,
+          "transpose": -17,
           "unlocked": false
         },
         {
@@ -178543,7 +178653,7 @@
               "target_midi": 66
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 68
             },
             {
@@ -179752,7 +179862,7 @@
               "target_midi": 47
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 54
             },
             {
@@ -180574,23 +180684,27 @@
           "missing": [
             {
               "seconds": 3.0,
+              "target_midi": 48
+            },
+            {
+              "seconds": 2.0,
               "target_midi": 49
             }
           ],
           "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 69.7861321979218,
+          "plan_cost": 51.86111067398386,
           "recording_for_pitch": {
             "70": "097",
             "71": null,
-            "72": "101",
+            "72": null,
             "74": "032"
           },
           "song": "stars-and-stripes",
-          "transpose": -22,
+          "transpose": -23,
           "unlocked": false
         },
         {
@@ -180760,7 +180874,7 @@
               "target_midi": 56
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 57
             },
             {
@@ -182088,7 +182202,7 @@
             },
             {
               "seconds": 1.0,
-              "target_midi": 56
+              "target_midi": 54
             }
           ],
           "octave_moves": 0,
@@ -182096,16 +182210,16 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 19.145949440658253,
+          "plan_cost": 23.473599074774853,
           "recording_for_pitch": {
             "64": null,
             "66": "002",
             "67": "102",
             "69": null,
             "71": null,
-            "73": "013",
-            "74": "101",
-            "76": null
+            "73": "101",
+            "74": null,
+            "76": "013"
           },
           "song": "scarborough-fair",
           "transpose": -20,
@@ -183030,7 +183144,7 @@
               "target_midi": 54
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 56
             },
             {
@@ -184187,7 +184301,7 @@
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 391.3023156372953,
+          "plan_cost": 393.0007801262631,
           "recording_for_pitch": {
             "55": "016",
             "57": "102",
@@ -184968,23 +185082,23 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 50
+              "target_midi": 55
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
             "total": 4
           },
-          "plan_cost": 129.29761741040812,
+          "plan_cost": 155.74164886500998,
           "recording_for_pitch": {
-            "70": "002",
+            "70": "101",
             "71": null,
-            "72": "101",
+            "72": "002",
             "74": "013"
           },
           "song": "stars-and-stripes",
-          "transpose": -21,
+          "transpose": -16,
           "unlocked": false
         },
         {
@@ -185142,7 +185256,7 @@
               "target_midi": 50
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 51
             },
             {
@@ -186462,40 +186576,40 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 48
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 51
+              "seconds": 1.5,
+              "target_midi": 44
             },
             {
               "seconds": 1.9,
-              "target_midi": 53
+              "target_midi": 51
             },
             {
               "seconds": 1.0,
-              "target_midi": 58
+              "target_midi": 54
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 56
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 3,
           "pitch_coverage": {
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 180.7707088390293,
+          "plan_cost": 141.95208990588006,
           "recording_for_pitch": {
-            "64": "080",
-            "66": null,
+            "64": null,
+            "66": "080",
             "67": "104",
-            "69": null,
+            "69": "097",
             "71": null,
             "73": "059",
-            "74": "097",
+            "74": null,
             "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -18,
+          "transpose": -20,
           "unlocked": false
         },
         {
@@ -187419,39 +187533,43 @@
           "missing": [
             {
               "seconds": 1.0,
-              "target_midi": 47
+              "target_midi": 62
+            },
+            {
+              "seconds": 0.5,
+              "target_midi": 64
             },
             {
               "seconds": 0.8,
-              "target_midi": 51
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 52
+              "target_midi": 66
             },
             {
               "seconds": 1.5,
-              "target_midi": 56
+              "target_midi": 69
+            },
+            {
+              "seconds": 1.5,
+              "target_midi": 71
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 1,
           "pitch_coverage": {
-            "covered": 4,
+            "covered": 3,
             "total": 8
           },
-          "plan_cost": 214.78922555750785,
+          "plan_cost": 19.240147643998874,
           "recording_for_pitch": {
-            "66": "080",
+            "66": "097",
             "67": "104",
             "69": null,
-            "71": "097",
+            "71": null,
             "73": null,
-            "74": null,
-            "76": "059",
+            "74": "059",
+            "76": null,
             "78": null
           },
           "song": "yellow-rose-of-texas",
-          "transpose": -22,
+          "transpose": -7,
           "unlocked": false
         },
         {
@@ -188587,7 +188705,7 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 49
             },
             {
@@ -189372,7 +189490,7 @@
               "target_midi": 62
             },
             {
-              "seconds": 0.5,
+              "seconds": 2.0,
               "target_midi": 63
             }
           ],
@@ -189543,7 +189661,7 @@
               "target_midi": 51
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 54
             },
             {
@@ -190907,19 +191025,19 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 42
-            },
-            {
-              "seconds": 0.8,
-              "target_midi": 44
+              "target_midi": 37
             },
             {
               "seconds": 1.9,
-              "target_midi": 49
+              "target_midi": 44
             },
             {
               "seconds": 1.0,
-              "target_midi": 54
+              "target_midi": 47
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 49
             }
           ],
           "octave_moves": 2,
@@ -190927,19 +191045,19 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 18.823429824026654,
+          "plan_cost": 22.749707051014195,
           "recording_for_pitch": {
             "64": null,
-            "66": null,
-            "67": "102",
-            "69": "094",
+            "66": "017",
+            "67": "016",
+            "69": "101",
             "71": null,
-            "73": "017",
-            "74": "101",
+            "73": "094",
+            "74": null,
             "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -22,
+          "transpose": -27,
           "unlocked": false
         },
         {
@@ -191890,7 +192008,7 @@
               "target_midi": 54
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 56
             },
             {
@@ -193082,7 +193200,7 @@
               "target_midi": 45
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 48
             }
           ],
@@ -193892,27 +194010,31 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 55
+              "target_midi": 59
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 60
             },
             {
               "seconds": 1.0,
-              "target_midi": 58
+              "target_midi": 62
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 2,
+            "covered": 1,
             "total": 4
           },
-          "plan_cost": 9.317702424852008,
+          "plan_cost": 0.8339004600111719,
           "recording_for_pitch": {
-            "70": "101",
+            "70": "094",
             "71": null,
-            "72": "094",
+            "72": null,
             "74": null
           },
           "song": "stars-and-stripes",
-          "transpose": -16,
+          "transpose": -12,
           "unlocked": false
         },
         {
@@ -194074,7 +194196,7 @@
               "target_midi": 45
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 50
             },
             {
@@ -195494,7 +195616,7 @@
               "target_midi": 51
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 54
             },
             {
@@ -196518,7 +196640,7 @@
               "target_midi": 54
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 56
             },
             {
@@ -197767,7 +197889,7 @@
               "target_midi": 50
             },
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 52
             }
           ],
@@ -198612,16 +198734,16 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 65
+              "seconds": 3.0,
+              "target_midi": 68
             },
             {
-              "seconds": 3.0,
-              "target_midi": 66
+              "seconds": 2.0,
+              "target_midi": 69
             },
             {
               "seconds": 1.0,
-              "target_midi": 69
+              "target_midi": 71
             }
           ],
           "octave_moves": 0,
@@ -198629,15 +198751,15 @@
             "covered": 1,
             "total": 4
           },
-          "plan_cost": 0.7668079704989959,
+          "plan_cost": 2.3004239114969876,
           "recording_for_pitch": {
-            "70": null,
+            "70": "059",
             "71": null,
-            "72": "059",
+            "72": null,
             "74": null
           },
           "song": "stars-and-stripes",
-          "transpose": -5,
+          "transpose": -3,
           "unlocked": false
         },
         {
@@ -198803,7 +198925,7 @@
               "target_midi": 53
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 56
             },
             {
@@ -200171,7 +200293,7 @@
               "target_midi": 57
             },
             {
-              "seconds": 0.5,
+              "seconds": 1.0,
               "target_midi": 60
             },
             {
@@ -201148,7 +201270,7 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 37.5296273020665,
+          "plan_cost": 41.198004576008024,
           "recording_for_pitch": {
             "66": null,
             "67": "086",
@@ -202291,31 +202413,31 @@
         {
           "missing": [
             {
-              "seconds": 0.3,
+              "seconds": 0.5,
               "target_midi": 46
             },
             {
               "seconds": 1.5,
-              "target_midi": 50
+              "target_midi": 48
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 3,
           "pitch_coverage": {
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 151.37874945600194,
+          "plan_cost": 148.9630171132714,
           "recording_for_pitch": {
-            "55": null,
-            "57": "098",
-            "59": null,
-            "60": "101",
-            "62": "095",
-            "64": "084",
-            "67": "086"
+            "55": "098",
+            "57": "086",
+            "59": "084",
+            "60": null,
+            "62": null,
+            "64": "095",
+            "67": "101"
           },
           "song": "grand-old-flag",
-          "transpose": -9,
+          "transpose": -14,
           "unlocked": false
         },
         {
@@ -202437,7 +202559,7 @@
             "covered": 3,
             "total": 7
           },
-          "plan_cost": 20.923817473634458,
+          "plan_cost": 21.765700672909922,
           "recording_for_pitch": {
             "62": "095",
             "64": null,
@@ -203090,18 +203212,22 @@
             {
               "seconds": 3.0,
               "target_midi": 53
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 54
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 19.67263074651541,
+          "plan_cost": 11.012409135376323,
           "recording_for_pitch": {
             "70": "101",
             "71": null,
-            "72": "095",
+            "72": null,
             "74": "084"
           },
           "song": "stars-and-stripes",
@@ -203259,7 +203385,7 @@
               "target_midi": 53
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 58
             },
             {
@@ -204611,19 +204737,19 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 40
-            },
-            {
-              "seconds": 0.8,
               "target_midi": 42
             },
             {
               "seconds": 1.9,
-              "target_midi": 47
+              "target_midi": 49
             },
             {
               "seconds": 1.0,
               "target_midi": 52
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 54
             }
           ],
           "octave_moves": 2,
@@ -204631,19 +204757,19 @@
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 112.58839799538362,
+          "plan_cost": 123.47058183653108,
           "recording_for_pitch": {
             "64": null,
-            "66": null,
+            "66": "080",
             "67": "019",
-            "69": "080",
+            "69": "097",
             "71": null,
-            "73": "097",
-            "74": "101",
+            "73": "101",
+            "74": null,
             "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -24,
+          "transpose": -22,
           "unlocked": false
         },
         {
@@ -205585,7 +205711,7 @@
               "target_midi": 49
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 51
             },
             {
@@ -206761,7 +206887,7 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
+              "seconds": 1.5,
               "target_midi": 48
             },
             {
@@ -207575,23 +207701,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 43
+              "target_midi": 42
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 45
             }
           ],
-          "octave_moves": 3,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 313.3839407308403,
+          "plan_cost": 134.1285188049561,
           "recording_for_pitch": {
             "70": "101",
             "71": null,
-            "72": "097",
-            "74": "080"
+            "72": "080",
+            "74": null
           },
           "song": "stars-and-stripes",
-          "transpose": -28,
+          "transpose": -29,
           "unlocked": false
         },
         {
@@ -207753,7 +207883,7 @@
               "target_midi": 48
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 49
             },
             {
@@ -208873,31 +209003,31 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 44
+              "target_midi": 46
             },
             {
               "seconds": 1.9,
-              "target_midi": 51
+              "target_midi": 53
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 47.44369758164606,
+          "plan_cost": 100.90855836763296,
           "recording_for_pitch": {
             "64": null,
-            "66": "069",
+            "66": "032",
             "67": "104",
             "69": "017",
             "71": null,
-            "73": "032",
-            "74": "090",
+            "73": "090",
+            "74": "069",
             "76": "084"
           },
           "song": "scarborough-fair",
-          "transpose": -20,
+          "transpose": -18,
           "unlocked": false
         },
         {
@@ -209672,7 +209802,7 @@
         {
           "missing": [
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 58
             },
             {
@@ -210615,8 +210745,8 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 50
+              "seconds": 1.5,
+              "target_midi": 52
             }
           ],
           "octave_moves": 1,
@@ -210624,13 +210754,13 @@
             "covered": 6,
             "total": 7
           },
-          "plan_cost": 509.0201774186517,
+          "plan_cost": 564.7075817757368,
           "recording_for_pitch": {
             "55": "104",
             "57": "069",
             "59": "032",
-            "60": null,
-            "62": "017",
+            "60": "017",
+            "62": null,
             "64": "084",
             "67": "090"
           },
@@ -210723,7 +210853,7 @@
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 44.48959990749859,
+          "plan_cost": 47.25454878813965,
           "recording_for_pitch": {
             "62": "069",
             "64": null,
@@ -210768,7 +210898,7 @@
             "covered": 5,
             "total": 6
           },
-          "plan_cost": 143.81753851585918,
+          "plan_cost": 149.21239004546115,
           "recording_for_pitch": {
             "68": "084",
             "69": null,
@@ -211256,23 +211386,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 53
+              "target_midi": 54
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 55
             }
           ],
           "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 27.445361578609628,
+          "plan_cost": 22.32442215241172,
           "recording_for_pitch": {
-            "70": "032",
+            "70": "090",
             "71": null,
-            "72": "090",
+            "72": null,
             "74": "084"
           },
           "song": "stars-and-stripes",
-          "transpose": -18,
+          "transpose": -17,
           "unlocked": false
         },
         {
@@ -211394,8 +211528,8 @@
         {
           "missing": [
             {
-              "seconds": 0.6,
-              "target_midi": 48
+              "seconds": 2.3,
+              "target_midi": 51
             },
             {
               "seconds": 0.8,
@@ -211407,14 +211541,14 @@
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 449.30935202522346,
+          "plan_cost": 510.0053474995649,
           "recording_for_pitch": {
             "64": "090",
             "65": "104",
             "67": "069",
-            "69": null,
-            "71": "017",
-            "72": "032",
+            "69": "017",
+            "71": "032",
+            "72": null,
             "74": null,
             "76": "084"
           },
@@ -211616,7 +211750,7 @@
             "covered": 5,
             "total": 6
           },
-          "plan_cost": 100.63750557871131,
+          "plan_cost": 101.20100710203005,
           "recording_for_pitch": {
             "62": "069",
             "64": null,
@@ -212522,7 +212656,7 @@
             },
             {
               "seconds": 1.0,
-              "target_midi": 56
+              "target_midi": 54
             }
           ],
           "octave_moves": 1,
@@ -212530,7 +212664,7 @@
             "covered": 5,
             "total": 8
           },
-          "plan_cost": 54.76942998654555,
+          "plan_cost": 55.98628629682604,
           "recording_for_pitch": {
             "64": null,
             "66": "069",
@@ -212538,8 +212672,8 @@
             "69": "032",
             "71": null,
             "73": "095",
-            "74": "013",
-            "76": null
+            "74": null,
+            "76": "013"
           },
           "song": "scarborough-fair",
           "transpose": -20,
@@ -213358,7 +213492,7 @@
               "target_midi": 49
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 56
             },
             {
@@ -214370,8 +214504,8 @@
         {
           "missing": [
             {
-              "seconds": 0.5,
-              "target_midi": 51
+              "seconds": 1.5,
+              "target_midi": 52
             }
           ],
           "octave_moves": 1,
@@ -214379,18 +214513,18 @@
             "covered": 6,
             "total": 7
           },
-          "plan_cost": 666.9597885025156,
+          "plan_cost": 810.2716657001858,
           "recording_for_pitch": {
-            "55": "069",
-            "57": "096",
+            "55": "096",
+            "57": "069",
             "59": "032",
-            "60": null,
-            "62": "013",
-            "64": "095",
+            "60": "095",
+            "62": null,
+            "64": "013",
             "67": "103"
           },
           "song": "grand-old-flag",
-          "transpose": -9,
+          "transpose": -10,
           "unlocked": false
         },
         {
@@ -215053,23 +215187,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 46
+              "target_midi": 47
+            },
+            {
+              "seconds": 2.0,
+              "target_midi": 48
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 0,
           "pitch_coverage": {
-            "covered": 3,
+            "covered": 2,
             "total": 4
           },
-          "plan_cost": 88.08114113290634,
+          "plan_cost": 57.87850211170453,
           "recording_for_pitch": {
-            "70": "013",
+            "70": "069",
             "71": null,
-            "72": "069",
+            "72": null,
             "74": "032"
           },
           "song": "stars-and-stripes",
-          "transpose": -25,
+          "transpose": -24,
           "unlocked": false
         },
         {
@@ -215199,8 +215337,8 @@
               "target_midi": 49
             },
             {
-              "seconds": 0.6,
-              "target_midi": 58
+              "seconds": 2.3,
+              "target_midi": 54
             }
           ],
           "octave_moves": 3,
@@ -215208,16 +215346,16 @@
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 482.273397051329,
+          "plan_cost": 640.9252689885928,
           "recording_for_pitch": {
             "64": "096",
             "65": "103",
             "67": null,
             "69": "095",
             "71": "032",
-            "72": "013",
-            "74": "069",
-            "76": null
+            "72": null,
+            "74": "013",
+            "76": "069"
           },
           "song": "battle-hymn",
           "transpose": -18,
@@ -216454,40 +216592,40 @@
         {
           "missing": [
             {
-              "seconds": 0.8,
-              "target_midi": 36
+              "seconds": 1.5,
+              "target_midi": 37
             },
             {
               "seconds": 1.9,
-              "target_midi": 41
-            },
-            {
-              "seconds": 0.5,
-              "target_midi": 43
+              "target_midi": 44
             },
             {
               "seconds": 1.0,
-              "target_midi": 46
+              "target_midi": 47
+            },
+            {
+              "seconds": 1.0,
+              "target_midi": 49
             }
           ],
-          "octave_moves": 1,
+          "octave_moves": 2,
           "pitch_coverage": {
             "covered": 4,
             "total": 8
           },
-          "plan_cost": 149.93050659253876,
+          "plan_cost": 103.20639091943147,
           "recording_for_pitch": {
-            "64": "080",
-            "66": null,
+            "64": null,
+            "66": "017",
             "67": "098",
-            "69": "017",
+            "69": "080",
             "71": null,
-            "73": null,
-            "74": "094",
+            "73": "094",
+            "74": null,
             "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -30,
+          "transpose": -27,
           "unlocked": false
         },
         {
@@ -217417,7 +217555,7 @@
               "target_midi": 47
             },
             {
-              "seconds": 1.0,
+              "seconds": 1.5,
               "target_midi": 49
             },
             {
@@ -218583,7 +218721,7 @@
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 573.0845295495923,
+          "plan_cost": 602.276651259487,
           "recording_for_pitch": {
             "55": "104",
             "57": "098",
@@ -219356,27 +219494,27 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 35
+              "target_midi": 42
             },
             {
               "seconds": 1.0,
-              "target_midi": 38
+              "target_midi": 45
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 2,
             "total": 4
           },
-          "plan_cost": 254.06325480234347,
+          "plan_cost": 131.48883320975617,
           "recording_for_pitch": {
-            "70": "080",
+            "70": "017",
             "71": null,
-            "72": "017",
+            "72": "080",
             "74": null
           },
           "song": "stars-and-stripes",
-          "transpose": -36,
+          "transpose": -29,
           "unlocked": false
         },
         {
@@ -219534,7 +219672,7 @@
               "target_midi": 50
             },
             {
-              "seconds": 0.8,
+              "seconds": 2.3,
               "target_midi": 53
             },
             {
@@ -220642,32 +220780,32 @@
         {
           "missing": [
             {
-              "seconds": 1.9,
-              "target_midi": 41
+              "seconds": 1.5,
+              "target_midi": 35
             },
             {
               "seconds": 1.0,
-              "target_midi": 46
+              "target_midi": 47
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 3,
           "pitch_coverage": {
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 191.9596018624671,
+          "plan_cost": 578.6581891950401,
           "recording_for_pitch": {
-            "64": "080",
+            "64": null,
             "66": "017",
             "67": "098",
             "69": "022",
-            "71": null,
-            "73": "009",
-            "74": "094",
+            "71": "080",
+            "73": "094",
+            "74": "009",
             "76": null
           },
           "song": "scarborough-fair",
-          "transpose": -30,
+          "transpose": -29,
           "unlocked": false
         },
         {
@@ -221444,31 +221582,35 @@
           "missing": [
             {
               "seconds": 0.8,
+              "target_midi": 45
+            },
+            {
+              "seconds": 1.5,
               "target_midi": 47
             },
             {
               "seconds": 1.5,
-              "target_midi": 52
+              "target_midi": 49
             }
           ],
-          "octave_moves": 5,
+          "octave_moves": 2,
           "pitch_coverage": {
-            "covered": 6,
+            "covered": 5,
             "total": 8
           },
-          "plan_cost": 1026.8465643748357,
+          "plan_cost": 90.05682294618526,
           "recording_for_pitch": {
-            "66": "009",
+            "66": "017",
             "67": "098",
-            "69": "080",
-            "71": "094",
-            "73": null,
-            "74": "017",
-            "76": "022",
+            "69": "022",
+            "71": "009",
+            "73": "080",
+            "74": null,
+            "76": null,
             "78": null
           },
           "song": "yellow-rose-of-texas",
-          "transpose": -26,
+          "transpose": -29,
           "unlocked": false
         },
         {
@@ -221548,7 +221690,7 @@
             "covered": 6,
             "total": 7
           },
-          "plan_cost": 1438.6234237527099,
+          "plan_cost": 1452.3105311252052,
           "recording_for_pitch": {
             "62": "017",
             "64": "009",
@@ -222404,26 +222546,26 @@
           "missing": [
             {
               "seconds": 1.5,
-              "target_midi": 38
+              "target_midi": 40
             }
           ],
-          "octave_moves": 2,
+          "octave_moves": 3,
           "pitch_coverage": {
             "covered": 6,
             "total": 7
           },
-          "plan_cost": 1379.2435480531697,
+          "plan_cost": 867.7830165312101,
           "recording_for_pitch": {
-            "55": "080",
+            "55": "017",
             "57": "098",
             "59": null,
-            "60": "017",
-            "62": "009",
-            "64": "022",
+            "60": "022",
+            "62": "080",
+            "64": "009",
             "67": "094"
           },
           "song": "grand-old-flag",
-          "transpose": -21,
+          "transpose": -19,
           "unlocked": false
         },
         {
@@ -222770,7 +222912,7 @@
             "covered": 5,
             "total": 7
           },
-          "plan_cost": 238.58875405462015,
+          "plan_cost": 268.4933339787885,
           "recording_for_pitch": {
             "38": "017",
             "40": "080",
@@ -223039,23 +223181,23 @@
           "missing": [
             {
               "seconds": 3.0,
-              "target_midi": 35
+              "target_midi": 40
             }
           ],
-          "octave_moves": 0,
+          "octave_moves": 1,
           "pitch_coverage": {
             "covered": 3,
             "total": 4
           },
-          "plan_cost": 282.35978224496466,
+          "plan_cost": 172.09996074542664,
           "recording_for_pitch": {
-            "70": "080",
+            "70": "017",
             "71": null,
-            "72": "017",
+            "72": "080",
             "74": "022"
           },
           "song": "stars-and-stripes",
-          "transpose": -36,
+          "transpose": -31,
           "unlocked": false
         },
         {
@@ -223190,14 +223332,14 @@
             "covered": 6,
             "total": 8
           },
-          "plan_cost": 845.0138779323485,
+          "plan_cost": 941.7716841398084,
           "recording_for_pitch": {
             "64": "017",
             "65": "098",
             "67": null,
             "69": "022",
-            "71": "080",
-            "72": "009",
+            "71": "009",
+            "72": "080",
             "74": null,
             "76": "094"
           },

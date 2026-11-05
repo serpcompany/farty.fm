@@ -3,7 +3,8 @@
     2.0,
     8.0,
     14.0,
-    20.0
+    20.0,
+    26.0
   ],
   "beats_per_bar": 6,
   "bpm": 140,
@@ -12,14 +13,14 @@
   "import_args": {
     "beats_per_bar": 6,
     "bpm": 140,
-    "max_beats": 26,
+    "max_beats": 28,
     "start_beat": 4
   },
   "import_report": {
     "catalog_id": "god-of-mercy-and-compassion",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 19,
+    "note_count": 20,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-god-of-mercy-and-compassion.mid",
     "tempo_changes_ignored": 2,
@@ -29,7 +30,7 @@
       1
     ]
   },
-  "length_beats": 26.0,
+  "length_beats": 28.0,
   "notes": [
     {
       "dur": 1.0,
@@ -125,6 +126,11 @@
       "dur": 1.0,
       "pitch": 68,
       "start": 25.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 26.0
     }
   ],
   "pitches": [

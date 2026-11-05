@@ -2,17 +2,17 @@
   "library": "full",
   "max_abs_shift_semitones": 2.57,
   "metrics": {
-    "contour_pct": 88,
+    "contour_pct": 85,
     "distinct_recordings": 7,
-    "median_abs_cents": 102.6,
-    "notes": 36,
+    "median_abs_cents": 112.6,
+    "notes": 37,
     "notes_mostly_silent": 0,
     "notes_with_retrigger": 0,
-    "notes_with_second_burst": 3,
-    "on_pitch_pct": 17,
+    "notes_with_second_burst": 4,
+    "on_pitch_pct": 18,
     "onsets_on_time_pct": 100,
     "pitch_readable_pct": 97,
-    "sounding_pct": 94,
+    "sounding_pct": 93,
     "within_50c_any_octave_pct": 22,
     "within_50c_of_fart_pct": 100,
     "within_50c_pct": 22
@@ -558,6 +558,21 @@
       "shift_semitones": -1.23,
       "song_pitch": 60,
       "target_midi": 54
+    },
+    {
+      "fart_cents": 0,
+      "heard_cents": -142,
+      "index": 36,
+      "recording": "084",
+      "render": {
+        "gain_db": 1.1,
+        "lead_s": 0.0,
+        "len_s": 1.475,
+        "start_s": 14.5
+      },
+      "shift_semitones": -0.03,
+      "song_pitch": 62,
+      "target_midi": 56
     }
   ],
   "octave_moves": 0,
@@ -616,7 +631,7 @@
     "covered": 7,
     "total": 7
   },
-  "plan_cost": 82.6069724307941,
+  "plan_cost": 83.17047395411285,
   "render_settings": {
     "bpm": 120
   },
