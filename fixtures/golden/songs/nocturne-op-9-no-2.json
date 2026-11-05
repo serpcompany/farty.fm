@@ -9,7 +9,8 @@
     19.0,
     22.0,
     25.0,
-    28.0
+    28.0,
+    31.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +19,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 31
+    "max_beats": 34
   },
   "import_report": {
     "catalog_id": "nocturne-op-9-no-2",
     "chord_tones_dropped": 1,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 20,
+    "note_count": 21,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-nocturne-op-9-no-2.mid",
     "tempo_changes_ignored": 0,
@@ -34,7 +35,7 @@
       1
     ]
   },
-  "length_beats": 31.0,
+  "length_beats": 34.0,
   "notes": [
     {
       "dur": 1.0,
@@ -135,6 +136,11 @@
       "dur": 1.0,
       "pitch": 74,
       "start": 30.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 75,
+      "start": 31.0
     }
   ],
   "pitches": [

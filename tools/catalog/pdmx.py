@@ -49,6 +49,7 @@ NOT_THE_MELODY = {
 # A sensible excerpt and tempo, chosen from the score itself.
 EXCERPT_BEATS = 32  # the whole bars that fit in 32 quarter-note beats: 8 bars of 4/4, 10 of 3/4
 HELD_NOTE_BEATS = 2  # a note this long on the excerpt's closing bar line ends its phrase: the excerpt keeps it (#389)
+HELD_OVERRUN_BEATS = 4  # how far past EXCERPT_BEATS that note may run to finish: the furthest any Song's needs (#394)
 MIN_BPM, MAX_BPM = 72, 144  # the score's own tempo, kept inside this range
 
 # Melody sanity: a clean single-line melody with nothing important dropped.
@@ -286,8 +287,11 @@ def held_note_end(notes, start, end):
     """Where an excerpt from `start` to the bar line `end` ends: at the end of the melody's held note
     (HELD_NOTE_BEATS or more) that starts on that bar line, so the Song doesn't stop one note before
     its phrase does (#389), or at `end`. Grand Old Flag's excerpt stopped on "the home of the free and
-    the", and "brave" starts on its closing bar line. The excerpt still lasts at most EXCERPT_BEATS
-    from `start`, and takes in only that note: none other starts before its end.
+    the", and "brave" starts on its closing bar line. The note may run up to HELD_OVERRUN_BEATS past
+    EXCERPT_BEATS from `start` to finish (#394), and the excerpt takes in only that note: none other
+    starts before its end. It must follow on from the melody: after a rest of MOVED_TUNE_REST beats or
+    more, the Song would fall silent just before its last note, where moved_tune_problems looks for
+    the tune on another staff, as Rule, Britannia!'s left hand plays it up to its held note.
 
     `notes` is the melody's [(start, dur)] in beats, as melody.py reads them: a note's slot runs to
     the next onset unless a rest follows, and load_midi keeps each note that starts in the excerpt
@@ -296,7 +300,10 @@ def held_note_end(notes, start, end):
     if held is None or held[1] < HELD_NOTE_BEATS - EPS:
         return end
     held_end = held[0] + held[1]
-    if held_end > start + EXCERPT_BEATS + EPS or any(end + EPS < s < held_end - EPS for s, _ in notes):
+    heard_until = max((s + d for s, d in notes if s < end - EPS), default=end)
+    if (held_end > start + EXCERPT_BEATS + HELD_OVERRUN_BEATS + EPS
+            or end - heard_until > MOVED_TUNE_REST - EPS
+            or any(end + EPS < s < held_end - EPS for s, _ in notes)):
         return end
     return held_end
 

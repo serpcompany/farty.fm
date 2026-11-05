@@ -3,7 +3,8 @@
     0.0,
     8.0,
     16.0,
-    24.0
+    24.0,
+    32.0
   ],
   "beats_per_bar": 8,
   "bpm": 120,
@@ -12,13 +13,13 @@
   "import_args": {
     "beats_per_bar": 8,
     "bpm": 120,
-    "max_beats": 32
+    "max_beats": 34
   },
   "import_report": {
     "catalog_id": "god-is-working-his-purpose-out",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 19,
+    "note_count": 20,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-god-is-working-his-purpose-out.mid",
     "tempo_changes_ignored": 0,
@@ -27,7 +28,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 34.0,
   "notes": [
     {
       "dur": 2.0,
@@ -123,6 +124,11 @@
       "dur": 1.0,
       "pitch": 71,
       "start": 31.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 32.0
     }
   ],
   "pitches": [

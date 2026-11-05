@@ -7,7 +7,8 @@
     16.0,
     20.0,
     24.0,
-    28.0
+    28.0,
+    32.0
   ],
   "beats_per_bar": 4,
   "bpm": 144,
@@ -15,14 +16,14 @@
   "id": "deck-the-halls",
   "import_args": {
     "bpm": 144,
-    "max_beats": 32,
+    "max_beats": 35,
     "start_beat": 4
   },
   "import_report": {
     "catalog_id": "deck-the-halls",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 17,
+    "note_count": 18,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-deck-the-halls.mid",
     "tempo_changes_ignored": 2,
@@ -32,7 +33,7 @@
       1
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 35.0,
   "notes": [
     {
       "dur": 3.0,
@@ -118,6 +119,11 @@
       "dur": 4.0,
       "pitch": 60,
       "start": 28.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 67,
+      "start": 32.0
     }
   ],
   "pitches": [

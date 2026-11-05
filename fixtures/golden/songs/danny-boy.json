@@ -7,7 +7,8 @@
     16.0,
     20.0,
     24.0,
-    28.0
+    28.0,
+    32.0
   ],
   "beats_per_bar": 4,
   "bpm": 78,
@@ -16,14 +17,14 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 78,
-    "max_beats": 32,
+    "max_beats": 34.5,
     "start_beat": 9.5
   },
   "import_report": {
     "catalog_id": "danny-boy",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 43,
+    "note_count": 44,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-danny-boy.mid",
     "tempo_changes_ignored": 0,
@@ -34,7 +35,7 @@
       2
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 34.5,
   "notes": [
     {
       "dur": 0.5,
@@ -250,6 +251,11 @@
       "dur": 0.5,
       "pitch": 65,
       "start": 31.5
+    },
+    {
+      "dur": 2.5,
+      "pitch": 63,
+      "start": 32.0
     }
   ],
   "pitches": [

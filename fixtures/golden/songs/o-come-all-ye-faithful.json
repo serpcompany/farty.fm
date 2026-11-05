@@ -7,7 +7,8 @@
     16.0,
     20.0,
     24.0,
-    28.0
+    28.0,
+    32.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,14 +16,14 @@
   "id": "o-come-all-ye-faithful",
   "import_args": {
     "bpm": 120,
-    "max_beats": 32,
+    "max_beats": 36,
     "start_beat": 4
   },
   "import_report": {
     "catalog_id": "o-come-all-ye-faithful",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 25,
+    "note_count": 26,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-o-come-all-ye-faithful.mid",
     "tempo_changes_ignored": 0,
@@ -32,7 +33,7 @@
       1
     ]
   },
-  "length_beats": 31.999999999999996,
+  "length_beats": 36.0,
   "notes": [
     {
       "dur": 1.0,
@@ -158,6 +159,11 @@
       "dur": 0.3958333333333333,
       "pitch": 67,
       "start": 31.604166666666664
+    },
+    {
+      "dur": 4.0,
+      "pitch": 67,
+      "start": 32.0
     }
   ],
   "pitches": [

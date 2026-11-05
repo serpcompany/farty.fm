@@ -663,7 +663,8 @@ def main():
                   f"no rest of {pdmx.MOVED_TUNE_REST} beats or more while another staff of the score plays the tune "
                   "(then the staves that carry it are read as one); render with excerpt "
                   f"from the first note to the end of the whole bars that fit in {pdmx.EXCERPT_BEATS} beats from its bar, "
-                  f"or of the held note ({pdmx.HELD_NOTE_BEATS} beats or more) on that closing bar line when the full Fixture Library has a fart that lasts it, "
+                  f"or of the held note ({pdmx.HELD_NOTE_BEATS} beats or more) on that closing bar line, up to {pdmx.HELD_OVERRUN_BEATS} beats past them, "
+                  f"unless a rest of {pdmx.MOVED_TUNE_REST} beats or more comes before it, when the full Fixture Library has a fart that lasts it, "
                   f"and the score's tempo within {pdmx.MIN_BPM}-{pdmx.MAX_BPM} bpm"),
         "bar": BAR,
     }

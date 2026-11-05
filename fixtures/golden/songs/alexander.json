@@ -3,7 +3,8 @@
     0.0,
     8.0,
     16.0,
-    24.0
+    24.0,
+    32.0
   ],
   "beats_per_bar": 8,
   "bpm": 144,
@@ -12,13 +13,13 @@
   "import_args": {
     "beats_per_bar": 8,
     "bpm": 144,
-    "max_beats": 32
+    "max_beats": 34
   },
   "import_report": {
     "catalog_id": "alexander",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 18,
+    "note_count": 19,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-alexander.mid",
     "tempo_changes_ignored": 1,
@@ -27,7 +28,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 34.0,
   "notes": [
     {
       "dur": 2.0,
@@ -118,6 +119,11 @@
       "dur": 4.0,
       "pitch": 69,
       "start": 28.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 32.0
     }
   ],
   "pitches": [

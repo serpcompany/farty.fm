@@ -7,7 +7,8 @@
     16.0,
     20.0,
     24.0,
-    28.0
+    28.0,
+    32.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,14 +16,14 @@
   "id": "ave-maria-bach-gounod",
   "import_args": {
     "bpm": 120,
-    "max_beats": 32,
+    "max_beats": 34.5,
     "start_beat": 16
   },
   "import_report": {
     "catalog_id": "ave-maria-bach-gounod",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 20,
+    "note_count": 21,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-ave-maria-bach-gounod.mid",
     "tempo_changes_ignored": 0,
@@ -32,7 +33,7 @@
       1
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 34.5,
   "notes": [
     {
       "dur": 4.0,
@@ -133,6 +134,11 @@
       "dur": 2.0,
       "pitch": 72,
       "start": 30.0
+    },
+    {
+      "dur": 2.5,
+      "pitch": 84,
+      "start": 32.0
     }
   ],
   "pitches": [
@@ -144,7 +150,8 @@
     76,
     77,
     79,
-    81
+    81,
+    84
   ],
   "sha256": "11fcdc894fe62173d8ac47cc3405fcde87739cbca0cab9c2aeae33027a6f5ebc",
   "title": "Ave Maria Bach-Gounod"

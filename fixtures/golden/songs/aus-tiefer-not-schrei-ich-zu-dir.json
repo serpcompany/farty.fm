@@ -3,7 +3,8 @@
     0.0,
     8.0,
     16.0,
-    24.0
+    24.0,
+    32.0
   ],
   "beats_per_bar": 8,
   "bpm": 144,
@@ -12,13 +13,13 @@
   "import_args": {
     "beats_per_bar": 8,
     "bpm": 144,
-    "max_beats": 32
+    "max_beats": 34
   },
   "import_report": {
     "catalog_id": "aus-tiefer-not-schrei-ich-zu-dir",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 11,
+    "note_count": 12,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-aus-tiefer-not-schrei-ich-zu-dir.mid",
     "tempo_changes_ignored": 0,
@@ -28,7 +29,7 @@
       1
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 34.0,
   "notes": [
     {
       "dur": 4.0,
@@ -84,6 +85,11 @@
       "dur": 2.0,
       "pitch": 62,
       "start": 30.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 60,
+      "start": 32.0
     }
   ],
   "pitches": [
