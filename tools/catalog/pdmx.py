@@ -5,6 +5,7 @@ does the downloading, rendering and writing. ADR 0003 says why Songs come only f
 """
 import math
 import re
+import statistics
 import unicodedata
 from dataclasses import dataclass
 from pathlib import PurePosixPath
@@ -52,6 +53,15 @@ HELD_NOTE_BEATS = 2  # a note this long on the excerpt's closing bar line ends i
 HELD_OVERRUN_BEATS = 4  # how far past EXCERPT_BEATS that note may run to finish: the furthest any Song's needs (#394)
 HELD_NOTE_REST = 2  # beats: a rest this long before that note leaves it out, or the Song falls silent just before it ends (#394)
 MIN_BPM, MAX_BPM = 72, 144  # the score's own tempo, kept inside this range
+
+# Where an excerpt ends: the end of a strain, not a beat limit (#402, strain_cuts).
+STRAIN_MIN_BEATS = 20  # shorter than this, an end is only the tune's first phrase
+STRAIN_CLOSE_BEATS = 52  # how far any close may be. The nearest to EXCERPT_BEATS wins
+STRAIN_WHOLE_BEATS = 64  # how far the tune's end or a repeat on its tonic may be
+STRAIN_NEAR_REPEAT = 2  # beats: a Song already on a close still moves to a repeat on the tonic this near
+STRAIN_TRIES = 4  # how many ends are tried before a Song stays where it stops
+STRAIN_LANDED_TIER = 3  # a note a phrase can rest on but no strain end counts as a half close
+STRAIN_PHRASE_NOTES = 5  # fewer notes than this after a long rest (HELD_NOTE_REST) start a phrase, or are a score's tag
 
 # Melody sanity: a clean single-line melody with nothing important dropped.
 MIN_NOTES, MAX_NOTES = 8, 64
@@ -315,6 +325,187 @@ def excerpt_beats(start, end):
     the notes that start before it, leaves out a note that starts on `end` (a third of a beat
     doesn't round to 6 decimals)."""
     return _number(math.floor((end - start) * 1e6 + 1e-3) / 1e6)
+
+
+# A key signature's major or minor tonic, as mido names them ("Bb", "F#m").
+PITCH_CLASSES = {"C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3, "E": 4, "F": 5, "F#": 6, "Gb": 6, "G": 7,
+                 "G#": 8, "Ab": 8, "A": 9, "A#": 10, "Bb": 10, "B": 11, "Cb": 11}
+
+
+@dataclass(frozen=True)
+class StrainEnd:
+    index: int  # the melody's note it ends on
+    end: float  # where it ends, in beats from the excerpt's start
+    kind: str  # "tune": its last note. "repeat": a repeat, on the tonic. "close": a tonic closing a phrase. "half": any other
+    landed: bool = True  # whether a phrase can rest on the note (_landed). A Song moves only to one that does
+
+
+def score_marks(meters):
+    """The beats where a score's own MIDI marks the end of a section. PDMX writes the time signature
+    again at a repeat (The Female Saylor's 6/8 at beat 24), and splits a bar in two at a repeat sign,
+    each half a one-bar time signature of its own (3/4 + 1/4 before 4/4). `meters` as in render_options."""
+    meters = _meters(meters)
+    marks = []
+    for i in range(1, len(meters)):
+        before, at = meters[i - 1], meters[i]
+        if before[1:] == at[1:]:
+            marks.append(at[0])
+        elif i + 1 < len(meters):
+            after = meters[i + 1]
+            first, second, whole = (m[1] * 4 / m[2] for m in (before, at, after))
+            if (abs(at[0] - before[0] - first) < EPS and abs(after[0] - at[0] - second) < EPS
+                    and abs(first + second - whole) < EPS):
+                marks.append(at[0])
+    return marks
+
+
+def tonics(last_pitch, key):
+    """The pitch classes a tune closes on: that of its last note. When that isn't the key signature's
+    major or relative minor tonic, it may be the top of the last chord or a mode, so the signature's
+    major tonic counts too. `key` is the score's first key signature, or None."""
+    last = last_pitch % 12
+    if not key:
+        return {last}
+    minor = key.endswith("m")
+    major = PITCH_CLASSES[key[:-1] if minor else key]
+    major = (major + 3) % 12 if minor else major
+    return {last} if last in (major, (major + 9) % 12) else {last, major}
+
+
+def _rests_before(notes):
+    """The indexes of the notes that follow a long rest (HELD_NOTE_REST)."""
+    return [i for i in range(1, len(notes)) if notes[i][0] - notes[i - 1][0] - notes[i - 1][1] >= HELD_NOTE_REST - EPS]
+
+
+def _landed(notes, i, typical):
+    """Whether a phrase can rest on a melody's note (#402): the tune's last, one a rest of a beat or more
+    follows, or one held at twice the tune's typical note and no shorter than the next. Any other
+    leads on: a run's next step, a pickup, or the way to a longer note."""
+    if i + 1 == len(notes):
+        return True
+    at, dur, _ = notes[i]
+    following, next_dur, _ = notes[i + 1]
+    return following - at - dur >= 1 - EPS or (dur >= 2 * typical - EPS and dur >= next_dur - EPS)
+
+
+def _without_tag(notes):
+    """A melody without the few notes its score plays after the last long rest: Happy Birthday's
+    score has 4 after its last "you", which aren't where the tune ends, nor its tonic."""
+    after = _rests_before(notes)
+    return notes[:after[-1]] if after and len(notes) - after[-1] < STRAIN_PHRASE_NOTES else notes
+
+
+def _typical(notes):
+    """A melody's median note length, without its tag."""
+    return statistics.median(dur for _, dur, _ in _without_tag(notes))
+
+
+def strain_ends(notes, lines, marks, key, start=0.0):
+    """The notes of a melody a strain can end on, as StrainEnds in order. `notes` is the whole melody
+    from the excerpt's `start`, as [(start, dur, pitch)] in melody.py's beats; `lines` its bar lines
+    (melody.bar_lines), `marks` score_marks and `key` the score's first key signature.
+
+    A note ends where the next one starts, or where it stops when a rest of a beat or more follows.
+    The first notes after a long rest aren't an end: they start the next phrase, however well they
+    land (Hickory Dickory Dock's "the" on its 8th bar line, after "dock" and a rest).
+
+    It's held at twice the tune's typical note or more, or before such a rest. It closes a phrase of
+    the bars before its end, counted from the first bar line. A tune's pickup shifts that end a pickup
+    early, except that a run across a bar line in a pickup tune isn't a phrase's end. A held note also
+    closes its bar when at most half a bar is left, where the next phrase's pickup starts."""
+    notes = _without_tag(notes)
+    tonic = tonics(notes[-1][2], key)
+    typical = _typical(notes)
+    first_line = min((line for line in lines if line >= notes[0][0] - EPS), default=notes[0][0])
+    bar = lines[1] - lines[0] if len(lines) > 1 else 4
+    pickup = first_line - notes[0][0]
+    if pickup >= bar - EPS:
+        pickup = 0
+
+    def on_line(beat):
+        return any(abs(line - beat) < EPS for line in lines)
+
+    def bars_before(beat):
+        return sum(first_line - EPS <= line < beat - EPS for line in lines)
+
+    def phrase_bars(end, held, rest):
+        if rest:
+            return bars_before(end)
+        if on_line(end):
+            return bars_before(end) if pickup <= EPS or held else None
+        if pickup > EPS and on_line(end + pickup):
+            return bars_before(end + pickup)
+        next_line = min((line for line in lines if line >= end - EPS), default=None)
+        if held and next_line is not None and next_line - end <= bar / 2 + EPS:
+            return bars_before(next_line)
+        return None
+
+    after_rest = _rests_before(notes)
+    ends = []
+    for i, (at, dur, pitch) in enumerate(notes):
+        if any(0 <= i - r < STRAIN_PHRASE_NOTES - 1 for r in after_rest):
+            continue
+        following = notes[i + 1][0] if i + 1 < len(notes) else None
+        stops = at + dur
+        rest = following is not None and following - stops >= 1 - EPS
+        end = stops if following is None or rest else following
+        if end - start < STRAIN_MIN_BEATS - EPS or at - start >= STRAIN_WHOLE_BEATS - EPS or i + 1 > MAX_NOTES:
+            continue
+        held = dur >= 2 * typical - EPS or rest
+        bars = phrase_bars(end, held, rest)
+        closes = pitch % 12 in tonic
+        mark = any(stops - EPS <= m <= (stops if following is None else following) + EPS for m in marks)
+        if following is None:
+            kind = "tune"
+        elif mark and closes:
+            kind = "repeat"
+        elif closes and (bars in (8, 16, 32) or (held and bars == 4)):
+            kind = "close"
+        elif mark or (held and bars in (8, 16, 32)):
+            kind = "half"
+        else:
+            continue
+        ends.append(StrainEnd(i, end - start, kind, _landed(notes, i, typical)))
+    return ends
+
+
+def _strain_tier(end):
+    """How good an end is, best first, or None when it's too far. 1: a close within STRAIN_CLOSE_BEATS.
+    2: the tune's end or a repeat on its tonic within STRAIN_WHOLE_BEATS. 3: a half close."""
+    if end.kind != "half" and end.end <= STRAIN_CLOSE_BEATS + EPS:
+        return 1
+    if end.kind in ("tune", "repeat") and end.end <= STRAIN_WHOLE_BEATS + EPS:
+        return 2
+    if end.kind == "half" and end.end <= STRAIN_CLOSE_BEATS + EPS:
+        return 3
+    return None
+
+
+def strain_cuts(notes, lines, marks, key, start, stops_at):
+    """The ends worth moving an excerpt to, best first, or [] when it stays (#402). `stops_at` is its
+    `max_beats`. The other arguments are strain_ends'.
+
+    It moves only to an end a phrase can rest on, of a better tier than the end it's on, or to such a
+    repeat on the tonic within STRAIN_NEAR_REPEAT beats. Within a tier a repeat comes first, then the
+    end nearest to EXCERPT_BEATS, then the longer. A Song that already ends well stays: a whole tune
+    of 64 beats is no better than the close it stops on, and a note it can rest on is as good as a
+    half close, wherever in the phrase it falls (#389)."""
+    ends = strain_ends(notes, lines, marks, key, start)
+    last = max((i for i, (at, _, _) in enumerate(notes) if at - start < stops_at), default=None)
+    current = next((e for e in ends if e.index == last), None)
+    tier = _strain_tier(current) if current else None
+    if tier is None and last is not None and _landed(notes, last, _typical(notes)):
+        tier = STRAIN_LANDED_TIER
+
+    def better(end):
+        if not end.landed or end.index == last or _strain_tier(end) is None:
+            return False
+        if tier is None or _strain_tier(end) < tier:
+            return True
+        return (end.kind == "repeat" and current.kind != "repeat"
+                and abs(end.end - current.end) <= STRAIN_NEAR_REPEAT + EPS)
+
+    return sorted(filter(better, ends), key=lambda e: (_strain_tier(e), e.kind != "repeat", abs(e.end - EXCERPT_BEATS), -e.end))
 
 
 def _meters(meters):

@@ -16,13 +16,13 @@
   "id": "loch-lomond",
   "import_args": {
     "bpm": 72,
-    "max_beats": 34
+    "max_beats": 35
   },
   "import_report": {
     "catalog_id": "loch-lomond",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 43,
+    "note_count": 44,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-loch-lomond.mid",
     "tempo_changes_ignored": 0,
@@ -33,7 +33,7 @@
       2
     ]
   },
-  "length_beats": 34.0,
+  "length_beats": 35.0,
   "notes": [
     {
       "dur": 0.5,
@@ -249,6 +249,11 @@
       "dur": 2.0,
       "pitch": 74,
       "start": 32.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 34.0
     }
   ],
   "pitches": [

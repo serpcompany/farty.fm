@@ -8,7 +8,7 @@
       "target_midi": 37
     },
     {
-      "seconds": 0.8,
+      "seconds": 1.0,
       "target_midi": 38
     }
   ],
@@ -69,7 +69,7 @@
     "covered": 5,
     "total": 7
   },
-  "plan_cost": 226.04736391291783,
+  "plan_cost": 292.786747752959,
   "render_settings": null,
   "song": "streets-of-laredo",
   "transpose": -27,

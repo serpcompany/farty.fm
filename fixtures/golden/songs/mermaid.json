@@ -9,7 +9,16 @@
     18.25,
     21.25,
     24.25,
-    27.25
+    27.25,
+    30.25,
+    33.25,
+    36.25,
+    39.25,
+    42.25,
+    45.25,
+    48.25,
+    51.25,
+    54.25
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +27,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 30.25
+    "max_beats": 56.25
   },
   "import_report": {
     "catalog_id": "mermaid",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 28,
+    "note_count": 52,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-mermaid.mid",
     "tempo_changes_ignored": 0,
@@ -33,7 +42,7 @@
       0
     ]
   },
-  "length_beats": 30.25,
+  "length_beats": 56.25,
   "notes": [
     {
       "dur": 1.0,
@@ -174,6 +183,126 @@
       "dur": 1.0,
       "pitch": 73,
       "start": 29.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 30.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 31.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 32.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 33.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 34.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 35.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 36.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 37.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 38.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 39.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 40.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 41.25
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 42.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 43.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 44.25
+    },
+    {
+      "dur": 2.0,
+      "pitch": 66,
+      "start": 45.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 47.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 48.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 49.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 50.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 51.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 52.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 53.25
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 54.25
     }
   ],
   "pitches": [

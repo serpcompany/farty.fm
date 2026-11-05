@@ -266,7 +266,7 @@ describe('the generator', () => {
 
   test('carries each score’s MuseScore views and rating, and the melody’s length', () => {
     const [star, mary] = catalogSongs(sources, ['twinkle', 'mary'])
-    expect(star).toMatchObject({ views: 4171, rating: 4.59, lengthBeats: 32 })
+    expect(star).toMatchObject({ views: 4171, rating: 4.59, lengthBeats: 48 })
     // Mary's score has no ratings, so no rating.
     expect(mary).toMatchObject({ views: 51, lengthBeats: 16 })
     expect('rating' in mary).toBe(false)

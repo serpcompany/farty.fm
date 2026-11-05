@@ -16,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 32
+    "max_beats": 31
   },
   "import_report": {
     "catalog_id": "blackbird",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 49,
+    "note_count": 47,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-blackbird.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 31.0,
   "notes": [
     {
       "dur": 0.5,
@@ -267,16 +267,6 @@
       "dur": 1.0,
       "pitch": 62,
       "start": 30.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 62,
-      "start": 31.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 64,
-      "start": 31.5
     }
   ],
   "pitches": [

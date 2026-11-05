@@ -7,9 +7,7 @@
     13.0,
     16.0,
     19.0,
-    22.0,
-    25.0,
-    28.0
+    22.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 31
+    "max_beats": 24
   },
   "import_report": {
     "catalog_id": "sad-is-my-fate",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 45,
+    "note_count": 34,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-sad-is-my-fate.mid",
     "tempo_changes_ignored": 0,
@@ -33,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 31.0,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 0.3333333333333333,
@@ -204,61 +202,6 @@
       "dur": 2.0,
       "pitch": 62,
       "start": 22.0
-    },
-    {
-      "dur": 0.75,
-      "pitch": 69,
-      "start": 24.0
-    },
-    {
-      "dur": 0.25,
-      "pitch": 67,
-      "start": 24.75
-    },
-    {
-      "dur": 1.0,
-      "pitch": 69,
-      "start": 25.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 74,
-      "start": 26.0
-    },
-    {
-      "dur": 0.75,
-      "pitch": 74,
-      "start": 27.0
-    },
-    {
-      "dur": 0.25,
-      "pitch": 76,
-      "start": 27.75
-    },
-    {
-      "dur": 1.0,
-      "pitch": 77,
-      "start": 28.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 76,
-      "start": 29.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 29.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 72,
-      "start": 30.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 76,
-      "start": 30.5
     }
   ],
   "pitches": [
@@ -271,9 +214,7 @@
     71,
     72,
     73,
-    74,
-    76,
-    77
+    74
   ],
   "sha256": "ac1ec421e238098a5dbb90a8b4cdb83d5e415c13fcd45e2b19bc0519df753d42",
   "title": "Sad Is My Fate"

@@ -7,8 +7,7 @@
     16.5,
     20.5,
     24.5,
-    28.5,
-    31.5
+    28.5
   ],
   "beats_per_bar": 4,
   "bpm": 116,
@@ -17,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 116,
-    "max_beats": 32
+    "max_beats": 31.5
   },
   "import_report": {
     "catalog_id": "east-neuk-of-fife",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 53,
+    "note_count": 52,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-east-neuk-of-fife.mid",
     "tempo_changes_ignored": 1,
@@ -32,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 31.5,
   "notes": [
     {
       "dur": 0.5,
@@ -293,11 +292,6 @@
       "dur": 1.0,
       "pitch": 64,
       "start": 30.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 62,
-      "start": 31.5
     }
   ],
   "pitches": [

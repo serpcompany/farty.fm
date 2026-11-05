@@ -14,7 +14,8 @@
     22.5,
     24.5,
     26.5,
-    28.5
+    28.5,
+    30.5
   ],
   "beats_per_bar": 2,
   "bpm": 120,
@@ -23,13 +24,13 @@
   "import_args": {
     "beats_per_bar": 2,
     "bpm": 120,
-    "max_beats": 30.5
+    "max_beats": 32
   },
   "import_report": {
     "catalog_id": "dover-pier",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 56,
+    "note_count": 58,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-dover-pier.mid",
     "tempo_changes_ignored": 0,
@@ -38,7 +39,7 @@
       0
     ]
   },
-  "length_beats": 30.5,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 0.5,
@@ -319,6 +320,16 @@
       "dur": 0.5,
       "pitch": 77,
       "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 30.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 31.0
     }
   ],
   "pitches": [

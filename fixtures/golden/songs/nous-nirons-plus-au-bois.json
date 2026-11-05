@@ -14,7 +14,9 @@
     23.5,
     25.5,
     27.5,
-    29.5
+    29.5,
+    31.5,
+    33.5
   ],
   "beats_per_bar": 2,
   "bpm": 116,
@@ -22,14 +24,14 @@
   "id": "nous-nirons-plus-au-bois",
   "import_args": {
     "bpm": 116,
-    "max_beats": 31.5,
+    "max_beats": 34.5,
     "start_beat": 10.5
   },
   "import_report": {
     "catalog_id": "nous-nirons-plus-au-bois",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 44,
+    "note_count": 47,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-nous-nirons-plus-au-bois.mid",
     "tempo_changes_ignored": 0,
@@ -38,7 +40,7 @@
       0
     ]
   },
-  "length_beats": 31.5,
+  "length_beats": 34.5,
   "notes": [
     {
       "dur": 0.5,
@@ -259,6 +261,21 @@
       "dur": 0.5,
       "pitch": 76,
       "start": 31.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 31.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 32.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 33.5
     }
   ],
   "pitches": [

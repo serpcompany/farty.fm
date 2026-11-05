@@ -16,13 +16,13 @@
   "id": "go-down-moses",
   "import_args": {
     "bpm": 120,
-    "max_beats": 32
+    "max_beats": 36
   },
   "import_report": {
     "catalog_id": "go-down-moses",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 29,
+    "note_count": 30,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-go-down-moses.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 33.5,
+  "length_beats": 36.0,
   "notes": [
     {
       "dur": 1.0,
@@ -177,6 +177,11 @@
       "dur": 2.0,
       "pitch": 69,
       "start": 31.5
+    },
+    {
+      "dur": 2.5,
+      "pitch": 69,
+      "start": 33.5
     }
   ],
   "pitches": [

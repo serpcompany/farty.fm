@@ -7,9 +7,7 @@
     13.0,
     15.0,
     18.0,
-    21.0,
-    24.0,
-    27.0
+    21.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 23
   },
   "import_report": {
     "catalog_id": "mountains-of-mourne",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 29,
+    "note_count": 22,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-mountains-of-mourne.mid",
     "tempo_changes_ignored": 0,
@@ -33,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 23.0,
   "notes": [
     {
       "dur": 1.0,
@@ -144,41 +142,6 @@
       "dur": 2.0,
       "pitch": 65,
       "start": 21.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 60,
-      "start": 23.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 60,
-      "start": 24.0
-    },
-    {
-      "dur": 1.5,
-      "pitch": 69,
-      "start": 25.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 69,
-      "start": 26.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 69,
-      "start": 27.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 67,
-      "start": 28.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 65,
-      "start": 29.0
     }
   ],
   "pitches": [

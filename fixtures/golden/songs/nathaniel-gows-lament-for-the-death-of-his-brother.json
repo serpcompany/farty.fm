@@ -7,9 +7,7 @@
     12.5,
     15.5,
     18.5,
-    21.5,
-    24.5,
-    27.5
+    21.5
   ],
   "beats_per_bar": 3,
   "bpm": 72,
@@ -18,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 72,
-    "max_beats": 30.5
+    "max_beats": 24
   },
   "import_report": {
     "catalog_id": "nathaniel-gows-lament-for-the-death-of-his-brother",
     "chord_tones_dropped": 11,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 61,
+    "note_count": 47,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-nathaniel-gows-lament-for-the-death-of-his-brother.mid",
     "tempo_changes_ignored": 1,
@@ -33,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 30.5,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 0.25,
@@ -269,76 +267,6 @@
       "dur": 1.0,
       "pitch": 69,
       "start": 23.0
-    },
-    {
-      "dur": 0.25,
-      "pitch": 69,
-      "start": 24.0
-    },
-    {
-      "dur": 0.25,
-      "pitch": 71,
-      "start": 24.25
-    },
-    {
-      "dur": 0.75,
-      "pitch": 72,
-      "start": 24.5
-    },
-    {
-      "dur": 0.25,
-      "pitch": 71,
-      "start": 25.25
-    },
-    {
-      "dur": 0.5,
-      "pitch": 69,
-      "start": 25.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 76,
-      "start": 26.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 26.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 27.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 72,
-      "start": 27.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 69,
-      "start": 28.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 69,
-      "start": 28.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 69,
-      "start": 29.0
-    },
-    {
-      "dur": 0.25,
-      "pitch": 69,
-      "start": 30.0
-    },
-    {
-      "dur": 0.25,
-      "pitch": 71,
-      "start": 30.25
     }
   ],
   "pitches": [

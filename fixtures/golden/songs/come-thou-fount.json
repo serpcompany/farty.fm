@@ -7,9 +7,7 @@
     13.0,
     16.0,
     19.0,
-    22.0,
-    25.0,
-    28.0
+    22.0
   ],
   "beats_per_bar": 3,
   "bpm": 80,
@@ -18,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 80,
-    "max_beats": 31
+    "max_beats": 24
   },
   "import_report": {
     "catalog_id": "come-thou-fount",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 41,
+    "note_count": 30,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-come-thou-fount.mid",
     "tempo_changes_ignored": 0,
@@ -34,7 +32,7 @@
       1
     ]
   },
-  "length_beats": 31.0,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 0.5,
@@ -185,61 +183,6 @@
       "dur": 2.0,
       "pitch": 60,
       "start": 22.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 69,
-      "start": 24.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 24.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 72,
-      "start": 25.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 71,
-      "start": 26.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 69,
-      "start": 27.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 27.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 69,
-      "start": 28.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 28.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 64,
-      "start": 29.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 69,
-      "start": 30.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 30.5
     }
   ],
   "pitches": [
@@ -247,9 +190,7 @@
     62,
     64,
     67,
-    69,
-    71,
-    72
+    69
   ],
   "sha256": "36ab69bdea8b0d4c96969a76cf4406fabf55a000122d264498c9eae143c58a6c",
   "title": "Come Thou Fount"

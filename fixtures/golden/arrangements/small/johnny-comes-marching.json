@@ -4,7 +4,7 @@
   "metrics": null,
   "missing": [
     {
-      "seconds": 0.5,
+      "seconds": 0.8,
       "target_midi": 62
     },
     {
@@ -69,7 +69,7 @@
     "covered": 5,
     "total": 7
   },
-  "plan_cost": 568.7103161575709,
+  "plan_cost": 914.3195045332194,
   "render_settings": null,
   "song": "johnny-comes-marching",
   "transpose": -36,

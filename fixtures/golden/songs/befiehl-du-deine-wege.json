@@ -6,7 +6,16 @@
     13.0,
     17.0,
     21.0,
-    25.0
+    25.0,
+    29.0,
+    33.0,
+    37.0,
+    41.0,
+    45.0,
+    49.0,
+    53.0,
+    57.0,
+    61.0
   ],
   "beats_per_bar": 4,
   "bpm": 108,
@@ -15,13 +24,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 108,
-    "max_beats": 29
+    "max_beats": 63.854166
   },
   "import_report": {
     "catalog_id": "befiehl-du-deine-wege",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 25,
+    "note_count": 52,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-befiehl-du-deine-wege.mid",
     "tempo_changes_ignored": 0,
@@ -30,7 +39,7 @@
       0
     ]
   },
-  "length_beats": 29.0,
+  "length_beats": 63.854166666666664,
   "notes": [
     {
       "dur": 1.0,
@@ -156,6 +165,141 @@
       "dur": 1.0,
       "pitch": 68,
       "start": 28.0
+    },
+    {
+      "dur": 1.8958333333333333,
+      "pitch": 69,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 32.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 33.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 35.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 36.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 37.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 39.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 40.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 41.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 42.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 43.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 44.0
+    },
+    {
+      "dur": 1.8958333333333333,
+      "pitch": 65,
+      "start": 45.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 48.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 49.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 50.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 51.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 52.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 53.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 55.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 56.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 57.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 58.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 59.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 60.0
+    },
+    {
+      "dur": 2.8541666666666665,
+      "pitch": 62,
+      "start": 61.0
     }
   ],
   "pitches": [
@@ -166,7 +310,8 @@
     68,
     69,
     71,
-    72
+    72,
+    74
   ],
   "sha256": "e0559dd863b8dfb9a7bc64ecdea26dc7ba715d1175c10450ec1ba67eedffcc42",
   "title": "Befiehl du deine Wege"

@@ -3,7 +3,8 @@
     0.0,
     8.0,
     16.0,
-    24.0
+    24.0,
+    32.0
   ],
   "beats_per_bar": 8,
   "bpm": 120,
@@ -12,13 +13,13 @@
   "import_args": {
     "beats_per_bar": 8,
     "bpm": 120,
-    "max_beats": 32
+    "max_beats": 34
   },
   "import_report": {
     "catalog_id": "hostis-herodes-impie",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 32,
+    "note_count": 34,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-hostis-herodes-impie.mid",
     "tempo_changes_ignored": 0,
@@ -27,7 +28,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 34.0,
   "notes": [
     {
       "dur": 1.0,
@@ -188,6 +189,16 @@
       "dur": 1.0,
       "pitch": 55,
       "start": 31.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 32.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 33.0
     }
   ],
   "pitches": [

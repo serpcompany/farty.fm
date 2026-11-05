@@ -8,7 +8,12 @@
     20.0,
     24.0,
     28.0,
-    32.0
+    32.0,
+    36.0,
+    40.0,
+    44.0,
+    48.0,
+    56.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -16,13 +21,13 @@
   "id": "sometimes-i-feel-like-a-motherless-child",
   "import_args": {
     "bpm": 120,
-    "max_beats": 34
+    "max_beats": 60
   },
   "import_report": {
     "catalog_id": "sometimes-i-feel-like-a-motherless-child",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 40,
+    "note_count": 63,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-sometimes-i-feel-like-a-motherless-child.mid",
     "tempo_changes_ignored": 0,
@@ -31,7 +36,7 @@
       0
     ]
   },
-  "length_beats": 34.0,
+  "length_beats": 60.0,
   "notes": [
     {
       "dur": 0.5,
@@ -232,15 +237,133 @@
       "dur": 2.0,
       "pitch": 65,
       "start": 32.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 34.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 35.5
+    },
+    {
+      "dur": 4.0,
+      "pitch": 62,
+      "start": 36.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 40.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 41.5
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 69,
+      "start": 42.0
+    },
+    {
+      "dur": 0.3333333333333333,
+      "pitch": 65,
+      "start": 42.333333333333336
+    },
+    {
+      "dur": 0.8333333333333334,
+      "pitch": 62,
+      "start": 42.666666666666664
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 43.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 44.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 46.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 46.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 47.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 64,
+      "start": 48.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 49.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 65,
+      "start": 50.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 51.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 52.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 54.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 54.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 61,
+      "start": 55.5
+    },
+    {
+      "dur": 4.0,
+      "pitch": 62,
+      "start": 56.0
     }
   ],
   "pitches": [
     57,
+    61,
     62,
     64,
     65,
     67,
-    69
+    69,
+    72,
+    74
   ],
   "sha256": "953bb8a46425e488d740fed9faf3cefdd4131905ae2f857b3565fab485fb692f",
   "title": "Sometimes I feel like a motherless child"

@@ -7,7 +7,11 @@
     16.0,
     20.0,
     24.0,
-    28.0
+    28.0,
+    32.0,
+    36.0,
+    40.0,
+    44.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,13 +19,13 @@
   "id": "aunt-rhody",
   "import_args": {
     "bpm": 120,
-    "max_beats": 32
+    "max_beats": 48
   },
   "import_report": {
     "catalog_id": "aunt-rhody",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 38,
+    "note_count": 58,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-aunt-rhody.mid",
     "tempo_changes_ignored": 0,
@@ -31,7 +35,7 @@
       1
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 48.0,
   "notes": [
     {
       "dur": 1.0,
@@ -222,6 +226,106 @@
       "dur": 2.0,
       "pitch": 62,
       "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 32.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 33.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 33.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 35.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 36.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 57,
+      "start": 37.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 38.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 38.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 55,
+      "start": 39.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 40.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 41.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 41.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 42.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 59,
+      "start": 43.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 44.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 55,
+      "start": 44.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 57,
+      "start": 45.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 59,
+      "start": 45.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 55,
+      "start": 46.0
     }
   ],
   "pitches": [
