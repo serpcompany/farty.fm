@@ -3,7 +3,11 @@
     1.0,
     7.0,
     13.0,
-    19.0
+    19.0,
+    25.0,
+    31.0,
+    37.0,
+    43.0
   ],
   "beats_per_bar": 6,
   "bpm": 120,
@@ -12,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 6,
     "bpm": 120,
-    "max_beats": 24
+    "max_beats": 46
   },
   "import_report": {
     "catalog_id": "orange-nan",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 22,
+    "note_count": 42,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-orange-nan.mid",
     "tempo_changes_ignored": 4,
@@ -27,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 24.0,
+  "length_beats": 46.0,
   "notes": [
     {
       "dur": 1.0,
@@ -138,6 +142,106 @@
       "dur": 1.0,
       "pitch": 74,
       "start": 23.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 31.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 32.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 81,
+      "start": 35.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 36.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 37.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 38.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 39.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 40.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 41.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 42.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 43.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 44.0
     }
   ],
   "pitches": [

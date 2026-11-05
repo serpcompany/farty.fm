@@ -7,7 +7,10 @@
     13.0,
     16.0,
     19.0,
-    22.0
+    22.0,
+    25.0,
+    28.0,
+    30.0
   ],
   "beats_per_bar": 3,
   "bpm": 72,
@@ -16,13 +19,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 72,
-    "max_beats": 24
+    "max_beats": 31
   },
   "import_report": {
     "catalog_id": "dark-eyed-sailor",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 37,
+    "note_count": 48,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-dark-eyed-sailor.mid",
     "tempo_changes_ignored": 3,
@@ -31,7 +34,7 @@
       0
     ]
   },
-  "length_beats": 24.0,
+  "length_beats": 31.0,
   "notes": [
     {
       "dur": 1.0,
@@ -217,6 +220,61 @@
       "dur": 0.5,
       "pitch": 72,
       "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 24.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 74,
+      "start": 25.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 76,
+      "start": 25.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 25.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 27.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 30.0
     }
   ],
   "pitches": [

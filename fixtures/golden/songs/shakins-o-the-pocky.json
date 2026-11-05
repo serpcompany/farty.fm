@@ -6,8 +6,7 @@
     13.0,
     17.0,
     21.0,
-    25.0,
-    29.0
+    25.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -16,13 +15,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 33
+    "max_beats": 29
   },
   "import_report": {
     "catalog_id": "shakins-o-the-pocky",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 35,
+    "note_count": 30,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-shakins-o-the-pocky.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +30,7 @@
       0
     ]
   },
-  "length_beats": 33.0,
+  "length_beats": 29.0,
   "notes": [
     {
       "dur": 0.5,
@@ -182,38 +181,12 @@
       "dur": 0.5,
       "pitch": 62,
       "start": 28.5
-    },
-    {
-      "dur": 1.5,
-      "pitch": 63,
-      "start": 29.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 62,
-      "start": 30.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 60,
-      "start": 31.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 62,
-      "start": 32.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 60,
-      "start": 32.5
     }
   ],
   "pitches": [
     58,
     60,
     62,
-    63,
     65,
     67,
     69,

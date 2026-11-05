@@ -12,13 +12,13 @@
   "import_args": {
     "beats_per_bar": 6,
     "bpm": 120,
-    "max_beats": 24
+    "max_beats": 21
   },
   "import_report": {
     "catalog_id": "knives-and-forks",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 30,
+    "note_count": 27,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-knives-and-forks.mid",
     "tempo_changes_ignored": 1,
@@ -27,7 +27,7 @@
       0
     ]
   },
-  "length_beats": 24.0,
+  "length_beats": 21.0,
   "notes": [
     {
       "dur": 1.0,
@@ -163,21 +163,6 @@
       "dur": 2.0,
       "pitch": 67,
       "start": 19.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 71,
-      "start": 21.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 69,
-      "start": 22.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 67,
-      "start": 23.0
     }
   ],
   "pitches": [

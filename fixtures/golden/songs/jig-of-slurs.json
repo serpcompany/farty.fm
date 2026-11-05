@@ -16,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 24
+    "max_beats": 23.5
   },
   "import_report": {
     "catalog_id": "jig-of-slurs",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 47,
+    "note_count": 46,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-jig-of-slurs.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 24.0,
+  "length_beats": 23.5,
   "notes": [
     {
       "dur": 0.5,
@@ -262,11 +262,6 @@
       "dur": 1.0,
       "pitch": 74,
       "start": 22.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 23.5
     }
   ],
   "pitches": [

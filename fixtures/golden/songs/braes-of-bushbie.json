@@ -3,11 +3,7 @@
     1.5625,
     5.5625,
     9.5625,
-    13.5625,
-    17.3125,
-    18.875,
-    22.875,
-    26.875
+    13.5625
   ],
   "beats_per_bar": 25,
   "bpm": 120,
@@ -15,13 +11,13 @@
   "id": "braes-of-bushbie",
   "import_args": {
     "bpm": 120,
-    "max_beats": 29.625
+    "max_beats": 17.3125
   },
   "import_report": {
     "catalog_id": "braes-of-bushbie",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 64,
+    "note_count": 38,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-braes-of-bushbie.mid",
     "tempo_changes_ignored": 1,
@@ -30,7 +26,7 @@
       0
     ]
   },
-  "length_beats": 29.625,
+  "length_beats": 17.3125,
   "notes": [
     {
       "dur": 0.5,
@@ -221,136 +217,6 @@
       "dur": 0.75,
       "pitch": 67,
       "start": 16.5625
-    },
-    {
-      "dur": 0.5,
-      "pitch": 60,
-      "start": 17.3125
-    },
-    {
-      "dur": 0.5,
-      "pitch": 76,
-      "start": 17.8125
-    },
-    {
-      "dur": 0.5625,
-      "pitch": 72,
-      "start": 18.3125
-    },
-    {
-      "dur": 0.25,
-      "pitch": 62,
-      "start": 18.875
-    },
-    {
-      "dur": 0.75,
-      "pitch": 67,
-      "start": 19.125
-    },
-    {
-      "dur": 0.75,
-      "pitch": 67,
-      "start": 19.875
-    },
-    {
-      "dur": 0.25,
-      "pitch": 69,
-      "start": 20.625
-    },
-    {
-      "dur": 0.75,
-      "pitch": 70,
-      "start": 20.875
-    },
-    {
-      "dur": 0.25,
-      "pitch": 69,
-      "start": 21.625
-    },
-    {
-      "dur": 0.75,
-      "pitch": 67,
-      "start": 21.875
-    },
-    {
-      "dur": 0.25,
-      "pitch": 65,
-      "start": 22.625
-    },
-    {
-      "dur": 0.75,
-      "pitch": 60,
-      "start": 22.875
-    },
-    {
-      "dur": 0.25,
-      "pitch": 62,
-      "start": 23.625
-    },
-    {
-      "dur": 0.75,
-      "pitch": 65,
-      "start": 23.875
-    },
-    {
-      "dur": 0.25,
-      "pitch": 67,
-      "start": 24.625
-    },
-    {
-      "dur": 0.25,
-      "pitch": 69,
-      "start": 24.875
-    },
-    {
-      "dur": 0.75,
-      "pitch": 72,
-      "start": 25.125
-    },
-    {
-      "dur": 0.25,
-      "pitch": 70,
-      "start": 25.875
-    },
-    {
-      "dur": 0.25,
-      "pitch": 69,
-      "start": 26.125
-    },
-    {
-      "dur": 0.25,
-      "pitch": 67,
-      "start": 26.375
-    },
-    {
-      "dur": 0.25,
-      "pitch": 65,
-      "start": 26.625
-    },
-    {
-      "dur": 0.75,
-      "pitch": 67,
-      "start": 26.875
-    },
-    {
-      "dur": 0.25,
-      "pitch": 69,
-      "start": 27.625
-    },
-    {
-      "dur": 0.75,
-      "pitch": 70,
-      "start": 27.875
-    },
-    {
-      "dur": 0.25,
-      "pitch": 72,
-      "start": 28.625
-    },
-    {
-      "dur": 0.75,
-      "pitch": 74,
-      "start": 28.875
     }
   ],
   "pitches": [

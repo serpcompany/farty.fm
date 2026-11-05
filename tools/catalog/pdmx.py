@@ -60,6 +60,7 @@ STRAIN_CLOSE_BEATS = 52  # how far any close may be. The nearest to EXCERPT_BEAT
 STRAIN_WHOLE_BEATS = 64  # how far the tune's end or a repeat on its tonic may be
 STRAIN_NEAR_REPEAT = 2  # beats: a Song already on a close still moves to a repeat on the tonic this near
 STRAIN_TRIES = 4  # how many ends are tried before a Song stays where it stops
+STRAIN_LANDED_TIER = 3  # a note a phrase can rest on but no strain end counts as a half close
 STRAIN_PHRASE_NOTES = 5  # fewer notes than this after a long rest (HELD_NOTE_REST) start a phrase, or are a score's tag
 
 # Melody sanity: a clean single-line melody with nothing important dropped.
@@ -336,6 +337,7 @@ class StrainEnd:
     index: int  # the melody's note it ends on
     end: float  # where it ends, in beats from the excerpt's start
     kind: str  # "tune": its last note. "repeat": a repeat, on the tonic. "close": a tonic closing a phrase. "half": any other
+    landed: bool = True  # whether a phrase can rest on the note (_landed). A Song moves only to one that does
 
 
 def score_marks(meters):
@@ -375,11 +377,27 @@ def _rests_before(notes):
     return [i for i in range(1, len(notes)) if notes[i][0] - notes[i - 1][0] - notes[i - 1][1] >= HELD_NOTE_REST - EPS]
 
 
+def _landed(notes, i, typical):
+    """Whether a phrase can rest on a melody's note (#402): the tune's last, one a rest of a beat or more
+    follows, or one held at twice the tune's typical note and no shorter than the next. Any other
+    leads on: a run's next step, a pickup, or the way to a longer note."""
+    if i + 1 == len(notes):
+        return True
+    at, dur, _ = notes[i]
+    following, next_dur, _ = notes[i + 1]
+    return following - at - dur >= 1 - EPS or (dur >= 2 * typical - EPS and dur >= next_dur - EPS)
+
+
 def _without_tag(notes):
     """A melody without the few notes its score plays after the last long rest: Happy Birthday's
     score has 4 after its last "you", which aren't where the tune ends, nor its tonic."""
     after = _rests_before(notes)
     return notes[:after[-1]] if after and len(notes) - after[-1] < STRAIN_PHRASE_NOTES else notes
+
+
+def _typical(notes):
+    """A melody's median note length, without its tag."""
+    return statistics.median(dur for _, dur, _ in _without_tag(notes))
 
 
 def strain_ends(notes, lines, marks, key, start=0.0):
@@ -397,7 +415,7 @@ def strain_ends(notes, lines, marks, key, start=0.0):
     closes its bar when at most half a bar is left, where the next phrase's pickup starts."""
     notes = _without_tag(notes)
     tonic = tonics(notes[-1][2], key)
-    typical = statistics.median(dur for _, dur, _ in notes)
+    typical = _typical(notes)
     first_line = min((line for line in lines if line >= notes[0][0] - EPS), default=notes[0][0])
     bar = lines[1] - lines[0] if len(lines) > 1 else 4
     pickup = first_line - notes[0][0]
@@ -447,7 +465,7 @@ def strain_ends(notes, lines, marks, key, start=0.0):
             kind = "half"
         else:
             continue
-        ends.append(StrainEnd(i, end - start, kind))
+        ends.append(StrainEnd(i, end - start, kind, _landed(notes, i, typical)))
     return ends
 
 
@@ -467,17 +485,20 @@ def strain_cuts(notes, lines, marks, key, start, stops_at):
     """The ends worth moving an excerpt to, best first, or [] when it stays (#402). `stops_at` is its
     `max_beats`. The other arguments are strain_ends'.
 
-    It moves only to a better tier than the end it's on, or to a repeat on the tonic within
-    STRAIN_NEAR_REPEAT beats. Within a tier a repeat comes first, then the end nearest to
-    EXCERPT_BEATS, then the longer. A Song that already ends well stays: a whole tune of 64 beats
-    is no better than the close it stops on."""
+    It moves only to an end a phrase can rest on, of a better tier than the end it's on, or to such a
+    repeat on the tonic within STRAIN_NEAR_REPEAT beats. Within a tier a repeat comes first, then the
+    end nearest to EXCERPT_BEATS, then the longer. A Song that already ends well stays: a whole tune
+    of 64 beats is no better than the close it stops on, and a note it can rest on is as good as a
+    half close, wherever in the phrase it falls (#389)."""
     ends = strain_ends(notes, lines, marks, key, start)
     last = max((i for i, (at, _, _) in enumerate(notes) if at - start < stops_at), default=None)
     current = next((e for e in ends if e.index == last), None)
     tier = _strain_tier(current) if current else None
+    if tier is None and last is not None and _landed(notes, last, _typical(notes)):
+        tier = STRAIN_LANDED_TIER
 
     def better(end):
-        if end.index == last or _strain_tier(end) is None:
+        if not end.landed or end.index == last or _strain_tier(end) is None:
             return False
         if tier is None or _strain_tier(end) < tier:
             return True

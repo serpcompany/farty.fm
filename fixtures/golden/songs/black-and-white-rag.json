@@ -16,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 144,
-    "max_beats": 32
+    "max_beats": 33
   },
   "import_report": {
     "catalog_id": "black-and-white-rag",
     "chord_tones_dropped": 3,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 58,
+    "note_count": 60,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-black-and-white-rag.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 33.0,
   "notes": [
     {
       "dur": 1.0,
@@ -322,10 +322,21 @@
       "dur": 0.5,
       "pitch": 67,
       "start": 31.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 32.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 32.5
     }
   ],
   "pitches": [
     62,
+    64,
     66,
     67,
     68,

@@ -16,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 112,
-    "max_beats": 25
+    "max_beats": 24
   },
   "import_report": {
     "catalog_id": "black-nag",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 22,
+    "note_count": 21,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-black-nag.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 25.0,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 1.0,
@@ -137,11 +137,6 @@
       "dur": 2.0,
       "pitch": 72,
       "start": 22.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 72,
-      "start": 24.0
     }
   ],
   "pitches": [

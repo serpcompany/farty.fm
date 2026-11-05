@@ -17,6 +17,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
 
+import mido
+
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path[:0] = [str(HERE), str(ROOT / "tools/melody-lab")]
@@ -377,9 +379,20 @@ class StrainEnds(unittest.TestCase):
         # 7 bars isn't a phrase.
         self.assertEqual(cuts(played((D, 26, 1), (C, 1, 2), (D, 50, 1), (C, 1, 1))), [])
 
-    def test_a_tonic_that_is_not_held_closes_8_bars_or_more(self):
-        self.assertEqual(cuts(played((D, 31, 1), (C, 1, 1), (D, 50, 1), (C, 1, 1))), [(32.0, "close")])
-        self.assertEqual(cuts(played((D, 23, 1), (C, 1, 1), (D, 50, 1), (C, 1, 1))), [])
+    def test_a_note_that_leads_on_is_no_end(self):
+        # On the tonic on the 8th bar line, in a run.
+        self.assertEqual(cuts(played((D, 31, 1), (C, 1, 1), (D, 50, 1), (C, 1, 1))), [])
+        # Before a repeat: The Rising of the Moon's sixteenth note is the pickup to its next strain.
+        notes = played((G, 23, 1), (D, 1, 1), (G, 30, 1), (D, 1, 1))
+        self.assertEqual(cuts(notes, ((0.0, 6, 8), (24.0, 6, 8)), key="F"), [(55.0, "tune")])
+        # Held, on the way to a longer note: Nocturne Op. 9 No. 2's G5 between its G#5 and F5.
+        notes = played((D, 30, 1), (C, 1, 2), (D, 1, 3), (D, 20, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes), [(56.0, "tune")])
+
+    def test_a_note_a_rest_follows_has_landed_however_short(self):
+        # Drunken Sailor's "morn-ing", before the rest and its next "Way".
+        notes = played((D, 22, 1), (C, 1, 1), (None, 1, 1), (D, 10, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, ((0.0, 3, 4),), stops_at=30), [(35.0, "tune"), (23.0, "close")])
 
     def test_a_held_note_off_the_tonic_on_8_bars_is_a_half_close(self):
         self.assertEqual(cuts(played((D, 30, 1), (G, 1, 2), (D, 50, 1), (C, 1, 1))), [(32.0, "half")])
@@ -416,10 +429,10 @@ class StrainEnds(unittest.TestCase):
 
     def test_the_first_notes_after_a_long_rest_are_no_end(self):
         # Hickory Dickory Dock: a lone note lands on the tonic at the 8th bar line, starting a phrase.
-        notes = played((D, 18, 1), (D, 1, 3), (None, 1, 2), (C, 1, 1), (D, 40, 1), (C, 1, 1))
+        notes = played((D, 18, 1), (D, 1, 2), (None, 1, 2), (C, 1, 2), (D, 40, 1), (C, 1, 1))
         self.assertEqual(cuts(notes, ((0.0, 3, 4),), stops_at=30), [])
         # A rest of a beat is a breath, so the note after it can end a phrase.
-        notes = played((D, 18, 1), (D, 1, 4), (None, 1, 1), (C, 1, 1), (D, 40, 1), (C, 1, 1))
+        notes = played((D, 18, 1), (D, 1, 3), (None, 1, 1), (C, 1, 2), (D, 40, 1), (C, 1, 1))
         self.assertEqual(cuts(notes, ((0.0, 3, 4),), stops_at=30)[0], (24.0, "close"))
 
     def test_an_excerpt_is_at_least_20_beats(self):
@@ -438,7 +451,7 @@ class StrainEnds(unittest.TestCase):
         self.assertEqual(cuts(notes, ((0.0, 3, 4),)), [(40.0, "tune"), (24.0, "close")])
 
     def test_a_repeat_comes_first_in_its_tier(self):
-        notes = played((D, 30, 1), (C, 1, 2), (D, 3, 1), (C, 1, 1), (D, 12, 1), (C, 1, 1))
+        notes = played((D, 30, 1), (C, 1, 2), (D, 2, 1), (C, 1, 2), (D, 12, 1), (C, 1, 1))
         self.assertEqual(cuts(notes, ((0.0, 4, 4), (36.0, 4, 4)), stops_at=34),
                          [(36.0, "repeat"), (32.0, "close"), (49.0, "tune")])
 
@@ -458,15 +471,28 @@ class StrainEnds(unittest.TestCase):
         notes = played((D, 30, 1), (G, 1, 2), (D, 15, 1), (D, 1, 1), (D, 40, 1), (C, 1, 1))
         self.assertEqual(cuts(notes, stops_at=32), [])
 
+    def test_a_song_on_a_note_that_leads_on_stays_when_it_closes_a_phrase(self):
+        # A tonic on the 8th bar line isn't worth leaving, though no Song moves to one.
+        notes = played((D, 31, 1), (C, 1, 1), (D, 15, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, stops_at=32), [])
+
+    def test_a_song_on_a_held_note_moves_only_for_a_close(self):
+        # See the Conquering Hero Comes keeps its held D5, the run's arrival, that #389 kept.
+        # 7 bars isn't a phrase, so it's no strain end. A half close on the 8th bar line isn't better.
+        notes = played((D, 26, 1), (G, 1, 2), (D, 2, 1), (G, 1, 2), (D, 16, 1), (D, 40, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, stops_at=27), [])
+        notes = played((D, 26, 1), (G, 1, 2), (D, 2, 1), (C, 1, 2), (D, 16, 1), (D, 40, 1), (C, 1, 1))
+        self.assertEqual(cuts(notes, stops_at=27), [(32.0, "close")])
+
     def test_a_song_a_note_past_its_repeat_moves_back_to_it(self):
         # Nobody Knows stopped on the pickup after its repeat.
         notes = played((D, 29, 1), (C, 1, 2), (C, 1, 1), (D, 16, 1), (C, 1, 1))
         self.assertEqual(cuts(notes, ((0.0, 4, 4), (31.0, 4, 4)), stops_at=32)[0], (31.0, "repeat"))
 
     def test_a_song_on_a_close_moves_to_a_repeat_within_2_beats(self):
-        notes = played((D, 22, 1), (C, 1, 2), (D, 1, 1), (C, 1, 1), (D, 20, 1), (C, 1, 1))
+        notes = played((D, 22, 1), (C, 1, 2), (C, 1, 2), (D, 20, 1), (C, 1, 1))
         self.assertEqual(cuts(notes, ((0.0, 3, 4), (26.0, 3, 4)), stops_at=24), [(26.0, "repeat")])
-        notes = played((D, 22, 1), (C, 1, 2), (D, 2, 1), (C, 1, 1), (D, 20, 1), (C, 1, 1))
+        notes = played((D, 22, 1), (C, 1, 2), (D, 1, 1), (C, 1, 2), (D, 20, 1), (C, 1, 1))
         self.assertEqual(cuts(notes, ((0.0, 3, 4), (27.0, 3, 4)), stops_at=24), [])
 
     def test_an_end_counts_from_the_excerpts_start(self):
@@ -490,13 +516,22 @@ class StrainEnds(unittest.TestCase):
 
 # The Songs the rule would move further, where each of the ends it tries fails a gate (recut.py).
 STRAIN_ENDS_FAIL_A_GATE = {
-    "away-in-a-manger", "bouzer-castle", "cupids-garden", "deil-take-the-warr", "duke-of-gordons-birthday",
-    "farewell-to-whisky", "johnny-in-the-nether-mains", "lord-save-me-for-thy-glorious-name", "silent-night", "sloop-john-b",
-    "swan", "taps", "what-wondrous-love-is-this", "witches",
+    "bouzer-castle", "cupids-garden", "duke-of-gordons-birthday", "farewell-to-whisky", "johnny-in-the-nether-mains",
+    "for-ireland-i-wont-say-her-name", "hector-the-hero", "lord-save-me-for-thy-glorious-name", "silent-night",
+    "sloop-john-b", "swan", "taps", "witches",
     # These moved to a later choice, and the better end they passed over still fails.
-    "for-ireland-i-wont-say-her-name", "hector-the-hero", "itsy-bitsy", "my-bonnie", "plaisir-damour",
+    "itsy-bitsy", "my-bonnie", "plaisir-damour",
     # Its whole tune locks with the small library.
     "hickory-dickory-dock",
+}
+
+
+# Each Song's excerpt where the rule first stopped it, on a note that leads on (#410's review).
+LED_ON = {
+    "liberty-bell": 48.5, "nocturne-op-9-no-2": 25, "see-the-conquring-hero-comes": 32, "orange-nan": 24,
+    "dark-eyed-sailor": 24, "maid-in-the-meadow": 24, "careys-minuet": 48, "john-of-paris": 24.5,
+    "johnny-the-jumper": 24.5, "shakins-o-the-pocky": 33, "rising-of-the-moon": 35, "miss-mcleods": 33,
+    "bist-du-bei-mir": 48, "song-to-the-moon": 48, "bulocks-hornpipe": 24,
 }
 
 
@@ -513,13 +548,28 @@ class EverySong(unittest.TestCase):
             notes = [(n.start, n.dur, n.pitch) for n in whole.notes if n.start >= start - pdmx.EPS]
             _, meters = import_pdmx.score_meta(path)
             strain = (notes, import_pdmx.bar_lines(meters, notes[-1][0] + notes[-1][1] + 1), pdmx.score_marks(meters),
-                      import_pdmx.score_key(path), start)
+                      import_pdmx.score_key(path, whole.report["track_used"]), start)
             cls.songs.append((entry, path, whole, strain))
 
     def test_no_song_stops_short_of_a_better_end_unless_a_gate_stops_it(self):
         stopped = {e["id"] for e, _, _, strain in self.songs
                    if pdmx.strain_cuts(*strain, e["render"].get("max_beats", float("inf")))}
         self.assertEqual(stopped, STRAIN_ENDS_FAIL_A_GATE)
+
+    def test_no_song_stops_on_a_note_that_leads_on(self):
+        # Where the rule first stopped these (#410's review): a note in a run, or a pickup.
+        for song, entry, strain in ((s, e, st) for e, _, _, st in self.songs for s in [e["id"]] if s in LED_ON):
+            with self.subTest(song=song):
+                self.assertNotEqual(entry["render"]["max_beats"], LED_ON[song])
+                self.assertNotIn(LED_ON[song], [e.end for e in pdmx.strain_cuts(*strain, entry["render"]["max_beats"])])
+
+    def test_a_song_keeps_a_held_end_unless_a_close_or_the_whole_tune_beats_it(self):
+        ends = {e["id"]: e["render"].get("max_beats") for e, _, _, _ in self.songs}
+        for song, held in {"see-the-conquring-hero-comes": 34, "rising-of-the-moon": 34, "kalinka": 34,
+                           "studentsangen": 34, "ave-maria-bach-gounod": 34.5}.items():
+            self.assertEqual(ends[song], held, song)
+        # Its "Way" starts the next phrase, after "morn-ing" and a rest.
+        self.assertEqual(ends["drunken-sailor"], 31)
 
     def test_happy_birthday_ends_on_its_last_you(self):
         # Its score plays 4 more notes after a rest of 3 beats, and they aren't the tune's end or its tonic.
@@ -546,6 +596,33 @@ class EverySong(unittest.TestCase):
 
 def female_saylor():
     return next(e for e in json.loads((ROOT / "catalog/catalog.json").read_text()) if e["id"] == "female-saylor")
+
+
+class ScoreKey(unittest.TestCase):
+    def score(self, *tracks):
+        mid = mido.MidiFile()
+        for keys in tracks:
+            mid.tracks.append(mido.MidiTrack(mido.MetaMessage("key_signature", key=key, time=time) for key, time in keys))
+        path = Path(self.dir.name) / "score.mid"
+        mid.save(path)
+        return path
+
+    def setUp(self):
+        self.dir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.dir.cleanup)
+
+    def test_the_melodys_track_comes_first(self):
+        # Salut d'amour: F# on the melody's track, and E on the transposed parts at the same tick.
+        path = self.score([("F#", 0)], [("E", 0)])
+        self.assertEqual(import_pdmx.score_key(path, 0), "F#")
+        self.assertEqual(import_pdmx.score_key(path, [0]), "F#")
+        self.assertEqual(import_pdmx.score_key(path, 1), "E")
+
+    def test_another_tracks_counts_when_the_melodys_sets_none(self):
+        self.assertEqual(import_pdmx.score_key(self.score([], [("G", 0)]), 0), "G")
+
+    def test_a_score_that_sets_none(self):
+        self.assertIsNone(import_pdmx.score_key(self.score([], []), 0))
 
 
 class StrainOptions(unittest.TestCase):

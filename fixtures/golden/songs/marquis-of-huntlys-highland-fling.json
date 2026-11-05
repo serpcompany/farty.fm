@@ -16,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 72,
-    "max_beats": 32
+    "max_beats": 31.5
   },
   "import_report": {
     "catalog_id": "marquis-of-huntlys-highland-fling",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 64,
+    "note_count": 63,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-marquis-of-huntlys-highland-fling.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 31.5,
   "notes": [
     {
       "dur": 0.5,
@@ -347,11 +347,6 @@
       "dur": 1.0,
       "pitch": 74,
       "start": 30.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 31.5
     }
   ],
   "pitches": [

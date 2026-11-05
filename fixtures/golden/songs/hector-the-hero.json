@@ -7,7 +7,10 @@
     14.0,
     17.0,
     20.0,
-    23.0
+    23.0,
+    26.0,
+    29.0,
+    32.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -16,13 +19,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 25
+    "max_beats": 34
   },
   "import_report": {
     "catalog_id": "hector-the-hero",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 22,
+    "note_count": 31,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-hector-the-hero.mid",
     "tempo_changes_ignored": 2,
@@ -31,7 +34,7 @@
       0
     ]
   },
-  "length_beats": 25.0,
+  "length_beats": 34.0,
   "notes": [
     {
       "dur": 1.0,
@@ -142,6 +145,51 @@
       "dur": 2.0,
       "pitch": 72,
       "start": 23.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 25.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 27.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 28.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 31.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 77,
+      "start": 32.0
     }
   ],
   "pitches": [

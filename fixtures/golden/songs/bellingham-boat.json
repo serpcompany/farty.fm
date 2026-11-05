@@ -16,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 24
+    "max_beats": 23.5
   },
   "import_report": {
     "catalog_id": "bellingham-boat",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 40,
+    "note_count": 39,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-bellingham-boat.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 24.0,
+  "length_beats": 23.5,
   "notes": [
     {
       "dur": 0.5,
@@ -227,11 +227,6 @@
       "dur": 1.5,
       "pitch": 67,
       "start": 22.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 23.5
     }
   ],
   "pitches": [

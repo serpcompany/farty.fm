@@ -7,7 +7,9 @@
     13.0,
     16.0,
     19.0,
-    22.0
+    22.0,
+    25.0,
+    28.0
   ],
   "beats_per_bar": 3,
   "bpm": 144,
@@ -16,13 +18,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 144,
-    "max_beats": 24
+    "max_beats": 31
   },
   "import_report": {
     "catalog_id": "brian-borus-march",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 45,
+    "note_count": 59,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-brian-borus-march.mid",
     "tempo_changes_ignored": 3,
@@ -31,7 +33,7 @@
       0
     ]
   },
-  "length_beats": 24.0,
+  "length_beats": 31.0,
   "notes": [
     {
       "dur": 0.5,
@@ -257,6 +259,76 @@
       "dur": 0.5,
       "pitch": 69,
       "start": 23.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 24.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 25.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 25.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 26.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 30.5
     }
   ],
   "pitches": [

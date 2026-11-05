@@ -9,13 +9,7 @@
     18.0,
     21.0,
     24.0,
-    27.0,
-    30.0,
-    33.0,
-    36.5,
-    39.5,
-    42.5,
-    45.5
+    27.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -24,13 +18,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 48.5
+    "max_beats": 30
   },
   "import_report": {
     "catalog_id": "liberty-bell",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 45,
+    "note_count": 27,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-liberty-bell.mid",
     "tempo_changes_ignored": 2,
@@ -39,7 +33,7 @@
       0
     ]
   },
-  "length_beats": 48.5,
+  "length_beats": 30.0,
   "notes": [
     {
       "dur": 1.5,
@@ -175,108 +169,13 @@
       "dur": 0.5,
       "pitch": 67,
       "start": 29.5
-    },
-    {
-      "dur": 1.5,
-      "pitch": 76,
-      "start": 30.0
-    },
-    {
-      "dur": 1.5,
-      "pitch": 75,
-      "start": 31.5
-    },
-    {
-      "dur": 1.5,
-      "pitch": 76,
-      "start": 33.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 34.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 66,
-      "start": 35.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 36.0
-    },
-    {
-      "dur": 1.5,
-      "pitch": 71,
-      "start": 36.5
-    },
-    {
-      "dur": 1.5,
-      "pitch": 74,
-      "start": 38.0
-    },
-    {
-      "dur": 1.5,
-      "pitch": 72,
-      "start": 39.5
-    },
-    {
-      "dur": 1.5,
-      "pitch": 69,
-      "start": 41.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 67,
-      "start": 42.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 69,
-      "start": 43.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 65,
-      "start": 44.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 45.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 64,
-      "start": 45.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 65,
-      "start": 46.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 62,
-      "start": 47.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 63,
-      "start": 48.0
     }
   ],
   "pitches": [
-    62,
-    63,
     64,
     65,
     66,
     67,
-    69,
-    71,
-    72,
     73,
     74,
     75,

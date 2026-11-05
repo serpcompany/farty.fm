@@ -16,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 31.5
+    "max_beats": 32
   },
   "import_report": {
     "catalog_id": "mrs-brown-of-linkwood",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 61,
+    "note_count": 62,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-mrs-brown-of-linkwood.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 31.5,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 0.5,
@@ -337,6 +337,11 @@
       "dur": 0.5,
       "pitch": 76,
       "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 75,
+      "start": 31.5
     }
   ],
   "pitches": [

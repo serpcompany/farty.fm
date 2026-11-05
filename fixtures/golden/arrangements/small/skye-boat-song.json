@@ -20,22 +20,22 @@
     },
     {
       "octave_move": true,
-      "recording": "009",
-      "shift_semitones": 10.474079406339825,
+      "recording": "090",
+      "shift_semitones": -14.225920593660177,
       "song_pitch": 76,
       "target_midi": 41
     },
     {
-      "octave_move": false,
-      "recording": "069",
-      "shift_semitones": -0.4259205936601731,
+      "octave_move": true,
+      "recording": "009",
+      "shift_semitones": 13.474079406339825,
       "song_pitch": 79,
       "target_midi": 44
     },
     {
-      "octave_move": true,
-      "recording": "090",
-      "shift_semitones": -9.225920593660177,
+      "octave_move": false,
+      "recording": "069",
+      "shift_semitones": 1.574079406339827,
       "song_pitch": 81,
       "target_midi": 46
     },
@@ -58,7 +58,7 @@
     "covered": 5,
     "total": 6
   },
-  "plan_cost": 800.5979662985544,
+  "plan_cost": 1069.3340581099912,
   "render_settings": null,
   "song": "skye-boat-song",
   "transpose": -35,

@@ -7,7 +7,9 @@
     12.5,
     15.5,
     18.5,
-    21.5
+    21.5,
+    24.5,
+    27.5
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -16,13 +18,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 24.5
+    "max_beats": 30.5
   },
   "import_report": {
     "catalog_id": "miss-mcpherson-grant-of-ballindalloch",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 40,
+    "note_count": 50,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-miss-mcpherson-grant-of-ballindalloch.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +33,7 @@
       0
     ]
   },
-  "length_beats": 24.5,
+  "length_beats": 30.5,
   "notes": [
     {
       "dur": 0.5,
@@ -232,6 +234,56 @@
       "dur": 0.5,
       "pitch": 64,
       "start": 24.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 24.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 25.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 26.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 68,
+      "start": 27.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 28.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 30.0
     }
   ],
   "pitches": [

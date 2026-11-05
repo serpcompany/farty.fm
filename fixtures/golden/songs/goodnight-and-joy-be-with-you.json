@@ -6,7 +6,8 @@
     9.0,
     12.0,
     16.0,
-    21.0
+    21.0,
+    24.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -15,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 24
+    "max_beats": 26.5
   },
   "import_report": {
     "catalog_id": "goodnight-and-joy-be-with-you",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 39,
+    "note_count": 42,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-goodnight-and-joy-be-with-you.mid",
     "tempo_changes_ignored": 1,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 24.0,
+  "length_beats": 26.5,
   "notes": [
     {
       "dur": 1.0,
@@ -226,6 +227,21 @@
       "dur": 0.5,
       "pitch": 67,
       "start": 23.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 25.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 25.5
     }
   ],
   "pitches": [

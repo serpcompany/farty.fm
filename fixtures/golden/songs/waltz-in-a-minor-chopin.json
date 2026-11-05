@@ -7,7 +7,9 @@
     13.0,
     16.0,
     19.0,
-    22.0
+    22.0,
+    25.0,
+    28.0
   ],
   "beats_per_bar": 3,
   "bpm": 110,
@@ -16,13 +18,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 110,
-    "max_beats": 22.958333
+    "max_beats": 31
   },
   "import_report": {
     "catalog_id": "waltz-in-a-minor-chopin",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 33,
+    "note_count": 41,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-waltz-in-a-minor-chopin.mid",
     "tempo_changes_ignored": 1,
@@ -32,7 +34,7 @@
       1
     ]
   },
-  "length_beats": 22.958333333333332,
+  "length_beats": 31.0,
   "notes": [
     {
       "dur": 1.0,
@@ -198,6 +200,46 @@
       "dur": 0.9583333333333334,
       "pitch": 72,
       "start": 22.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 24.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 25.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 25.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 26.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 27.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 28.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 28.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 77,
+      "start": 29.0
     }
   ],
   "pitches": [

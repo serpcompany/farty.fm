@@ -185,17 +185,20 @@ def score_meta(path):
     return sorted(tempos.items()), [(at, *m) for at, m in sorted(meters.items())]
 
 
-def score_key(path):
-    """A MIDI file's first key signature as mido names it ("Bb", "F#m"), or None when it sets none."""
+def score_key(path, melody_track=None):
+    """A MIDI file's first key signature as mido names it ("Bb", "F#m"), or None when it sets none.
+    The melody's track (an index or several, as load_midi reports it) comes first, since a transposing
+    part writes another key at the same tick. Another track's counts only when it sets none."""
     mid = mido.MidiFile(path)
+    own = [melody_track] if isinstance(melody_track, int) else melody_track or []
     keys = []
-    for track in mid.tracks:
+    for index, track in enumerate(mid.tracks):
         tick = 0
         for msg in track:
             tick += msg.time
             if msg.type == "key_signature":
-                keys.append((tick, msg.key))
-    return min(keys)[1] if keys else None
+                keys.append((index not in own, tick, msg.key))
+    return min(keys)[2] if keys else None
 
 
 def score_notes(path):
@@ -312,7 +315,7 @@ def strain_options(midi, title, options, library):
     notes = [(n.start, n.dur, n.pitch) for n in whole.notes if n.start >= start - pdmx.EPS]
     _, meters = score_meta(midi)
     ends = pdmx.strain_cuts(notes, bar_lines(meters, notes[-1][0] + notes[-1][1] + 1), pdmx.score_marks(meters),
-                            score_key(midi), start, options.get("max_beats", float("inf")))
+                            score_key(midi, whole.report["track_used"]), start, options.get("max_beats", float("inf")))
     if not ends:
         return options
     small = [s for s in library if s.id in SMALL_LIBRARY]

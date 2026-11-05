@@ -15,13 +15,13 @@
   "id": "tipperary-hills",
   "import_args": {
     "bpm": 120,
-    "max_beats": 36
+    "max_beats": 34
   },
   "import_report": {
     "catalog_id": "tipperary-hills",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 46,
+    "note_count": 42,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-tipperary-hills.mid",
     "tempo_changes_ignored": 1,
@@ -30,7 +30,7 @@
       0
     ]
   },
-  "length_beats": 36.0,
+  "length_beats": 34.0,
   "notes": [
     {
       "dur": 1.5,
@@ -241,26 +241,6 @@
       "dur": 1.0,
       "pitch": 69,
       "start": 33.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 34.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 66,
-      "start": 34.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 64,
-      "start": 35.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 62,
-      "start": 35.5
     }
   ],
   "pitches": [

@@ -355,7 +355,7 @@
     },
     {
       "id": "pop-goes-the-weasel",
-      "notes": 27,
+      "notes": 35,
       "title": "Pop Goes the Weasel",
       "transpose": {
         "full": -29,
@@ -667,15 +667,15 @@
     },
     {
       "id": "we-three-kings",
-      "notes": 16,
+      "notes": 18,
       "title": "We Three Kings",
       "transpose": {
         "full": -13,
-        "small": -27
+        "small": -25
       },
       "unlocked": {
         "full": true,
-        "small": true
+        "small": false
       }
     },
     {
@@ -693,7 +693,7 @@
     },
     {
       "id": "minuet-in-g",
-      "notes": 35,
+      "notes": 43,
       "title": "Minuet in G",
       "transpose": {
         "full": -18,
@@ -1018,7 +1018,7 @@
     },
     {
       "id": "nobody-knows",
-      "notes": 31,
+      "notes": 32,
       "title": "Nobody Knows the Trouble I've Seen",
       "transpose": {
         "full": -14,
@@ -1044,7 +1044,7 @@
     },
     {
       "id": "down-by-the-riverside",
-      "notes": 26,
+      "notes": 23,
       "title": "Down by the Riverside",
       "transpose": {
         "full": -11,
@@ -1109,10 +1109,10 @@
     },
     {
       "id": "skye-boat-song",
-      "notes": 30,
+      "notes": 38,
       "title": "The Skye Boat Song",
       "transpose": {
-        "full": -25,
+        "full": -26,
         "small": -35
       },
       "unlocked": {
@@ -1161,7 +1161,7 @@
     },
     {
       "id": "santa-lucia",
-      "notes": 23,
+      "notes": 29,
       "title": "Santa Lucia",
       "transpose": {
         "full": -13,
@@ -1213,7 +1213,7 @@
     },
     {
       "id": "kalinka",
-      "notes": 48,
+      "notes": 49,
       "title": "Kalinka",
       "transpose": {
         "full": -11,
@@ -1239,14 +1239,14 @@
     },
     {
       "id": "daisy-bell",
-      "notes": 12,
+      "notes": 15,
       "title": "Daisy Bell",
       "transpose": {
-        "full": -26,
-        "small": -28
+        "full": -31,
+        "small": -29
       },
       "unlocked": {
-        "full": true,
+        "full": false,
         "small": false
       }
     },
@@ -1538,7 +1538,7 @@
     },
     {
       "id": "la-donna",
-      "notes": 24,
+      "notes": 30,
       "title": "La donna è mobile",
       "transpose": {
         "full": -18,
@@ -1603,7 +1603,7 @@
     },
     {
       "id": "radetzky",
-      "notes": 25,
+      "notes": 26,
       "title": "Radetzky March",
       "transpose": {
         "full": -27,
@@ -1629,7 +1629,7 @@
     },
     {
       "id": "stars-and-stripes",
-      "notes": 20,
+      "notes": 17,
       "title": "The Stars and Stripes Forever",
       "transpose": {
         "full": -26,
@@ -1655,11 +1655,11 @@
     },
     {
       "id": "liberty-bell",
-      "notes": 45,
+      "notes": 27,
       "title": "The Liberty Bell",
       "transpose": {
-        "full": -21,
-        "small": -21
+        "full": -22,
+        "small": -32
       },
       "unlocked": {
         "full": true,
@@ -1798,7 +1798,7 @@
     },
     {
       "id": "star-spangled-banner",
-      "notes": 25,
+      "notes": 33,
       "title": "The Star-Spangled Banner",
       "transpose": {
         "full": -14,
