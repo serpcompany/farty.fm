@@ -744,6 +744,18 @@ async function openIfAllowed(): Promise<void> {
 }
 
 /**
+ * Whether the browser will remember the grant this page got (#374):
+ * - `remembered`: it said granted before this page had it, so it won't ask again.
+ * - `forgotten`: it hadn't, and this page was granted it, so the next launch asks again.
+ * - `unknown`: nothing granted yet, or a reload's granted answer, which may be the page's own.
+ */
+export function microphoneGrantMemory(): 'remembered' | 'forgotten' | 'unknown' {
+  if (mayLetGo) return 'remembered'
+  if (granted && !remembered) return 'forgotten'
+  return 'unknown'
+}
+
+/**
  * Asks for the microphone before the first take, as Welcome does. Once Record has shown, it opens
  * the microphone and keeps it, so the first tap captures at once with its pre-roll; before that it
  * closes it again. Throws `MicrophoneDeniedError` when the person says no.
@@ -753,6 +765,9 @@ export async function askForMicrophone(): Promise<void> {
     await openMicrophone()
     return
   }
+  // The browser's answer from before this page's grant, so its own grant, such as Safari's
+  // Microphone at Allow, isn't taken for the page's. `getUserMedia` still starts in the tap.
+  const heard = mayOpenWithoutTap()
   let stream: MediaStream
   try {
     stream = await navigator.mediaDevices.getUserMedia(microphoneConstraints)
@@ -763,6 +778,7 @@ export async function askForMicrophone(): Promise<void> {
     throw error
   }
   for (const track of stream.getTracks()) track.stop()
+  await heard
   pageGranted()
   captureStoppedAt = Date.now()
 }

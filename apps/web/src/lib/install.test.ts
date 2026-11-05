@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { installGuideFor, installRouteFor } from './install'
+import { installGuideFor, installRouteFor, usesSafariMicrophoneSetting } from './install'
 
 const userAgents = {
   iPhoneSafari:
@@ -152,5 +152,29 @@ describe('installGuideFor', () => {
     expect(guide(userAgents.iPhoneSafari, { standalone: true })).toBe('installed')
     expect(guide(userAgents.androidChrome, { canPrompt: true, standalone: true })).toBe('installed')
     expect(guide(userAgents.windowsChrome, { standalone: true })).toBe('installed')
+  })
+})
+
+describe('usesSafariMicrophoneSetting', () => {
+  const uses = (userAgent: string, standalone = false) =>
+    usesSafariMicrophoneSetting({ userAgent, standalone })
+
+  it('is true in Safari on an iPhone, and in Farty on its Home Screen', () => {
+    expect(uses(userAgents.iPhoneSafari)).toBe(true)
+    expect(uses(userAgents.iPhoneSafari, true)).toBe(true)
+    // A Home Screen app's user agent leaves out "Safari/".
+    expect(uses(userAgents.iPhoneSafari.replace(/ Safari\/\S+/, ''), true)).toBe(true)
+  })
+
+  it('is false in other iPhone browsers, which have settings of their own', () => {
+    expect(uses(userAgents.iPhoneChrome)).toBe(false)
+    expect(uses(userAgents.iPhoneInstagram)).toBe(false)
+    expect(uses(userAgents.iPhoneGoogleApp)).toBe(false)
+  })
+
+  it('is false away from an iPhone', () => {
+    expect(uses(userAgents.iPadSafari)).toBe(false)
+    expect(uses(userAgents.androidChrome)).toBe(false)
+    expect(uses(userAgents.androidChrome, true)).toBe(false)
   })
 })

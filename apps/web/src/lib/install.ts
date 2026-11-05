@@ -105,11 +105,45 @@ export function currentInstallGuide(): InstallGuide | null {
     userAgent: navigator.userAgent,
     maxTouchPoints: navigator.maxTouchPoints,
     // Chrome's appinstalled counts too: Farty is on the Home Screen, though this tab isn't it.
-    standalone:
-      installed ||
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (navigator as Navigator & { standalone?: boolean }).standalone === true,
+    standalone: installed || runsFromHomeScreen(),
     canPrompt: deferredPrompt !== null
+  })
+}
+
+function runsFromHomeScreen(): boolean {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  )
+}
+
+/**
+ * Safari's Microphone setting decides what this browser remembers: it's Safari on an iPhone, or
+ * Farty on an iPhone's Home Screen (#374). Other iPhone browsers have settings of their own, and
+ * in-app browsers built on SFSafariViewController can't be told apart from Safari.
+ */
+export function usesSafariMicrophoneSetting({
+  userAgent,
+  standalone
+}: {
+  userAgent: string
+  standalone: boolean
+}): boolean {
+  if (!/iPhone/.test(userAgent)) return false
+  if (standalone) return true
+  return (
+    /Safari\//.test(userAgent) &&
+    !/CriOS|FxiOS|EdgiOS/.test(userAgent) &&
+    !inAppBrowser.test(userAgent)
+  )
+}
+
+/** `usesSafariMicrophoneSetting` for this browser, and false on the server. */
+export function currentlyUsesSafariMicrophoneSetting(): boolean {
+  if (typeof window === 'undefined') return false
+  return usesSafariMicrophoneSetting({
+    userAgent: navigator.userAgent,
+    standalone: runsFromHomeScreen()
   })
 }
 
