@@ -11,7 +11,7 @@ Agents run every `gh` command, and every `git` command that reaches GitHub, as s
 
 ## 1. Start the app
 
-Use your own port so parallel agents don't collide: `lsof -nP -iTCP:<port> -sTCP:LISTEN` must print nothing before you start. The examples use 4109.
+Use your own port so parallel agents don't collide: `lsof -nP -iTCP:<port> -sTCP:LISTEN` must print nothing before you start. If it prints a line, another session holds that port, so pick another and use it in every command below. The examples use 4109.
 
 - **Inner loop:** `pnpm dev` (http://localhost:3000, no gate). `pnpm test:e2e` starts its own `next dev` on `E2E_PORT` (default 3100).
 - **Tap-through, on the local Workers build behind the Staging gate:**
