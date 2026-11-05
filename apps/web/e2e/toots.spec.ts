@@ -2,7 +2,7 @@ import { type BrowserContext, expect, type Locator, type Page, test } from '@pla
 import { songs } from '../src/lib/catalog/songs.generated'
 import { newEmail, signInByApi } from './account'
 import { songsTheFixtureLibraryUnlocks } from './golden'
-import { payToSave } from './pay'
+import { savePayingIfAsked } from './pay'
 
 // The Toots tab, a Toot's screen and Profile, on the Staging build with the Fixture Library
 // loaded, which unlocks most Songs (`golden.ts`). The first test is the owner's check on a phone:
@@ -558,7 +558,7 @@ async function loadTheFixtureLibrary(page: Page) {
   })
 }
 
-/** Opens a Song from Compose, waits for its Toot, pays to save it, and goes back to Compose. */
+/** Opens a Song from Compose, waits for its Toot, saves it, and goes back to Compose. */
 async function makeAToot(page: Page, songId: string) {
   await tab(page, 'Compose').click()
   await page
@@ -567,7 +567,7 @@ async function makeAToot(page: Page, songId: string) {
     .getByRole('link')
     .click({ timeout: 60_000 })
   await expect(page.getByTestId('song-creator-state')).toBeVisible({ timeout: 60_000 })
-  await payToSave(page)
+  await savePayingIfAsked(page)
   await page.getByRole('link', { name: 'Back to Compose' }).click()
   await expect(page).toHaveURL(/\/compose\/$/)
 }

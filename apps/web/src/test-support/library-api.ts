@@ -10,7 +10,9 @@ import * as tootAudioRoute from '@/app/api/toots/[id]/audio/route'
 import * as tootRoute from '@/app/api/toots/[id]/route'
 import { createDatabase } from '@/db/database'
 import type { Kind } from '@/db/library'
+import { markFullAccessPaid, startFullAccess } from '@/db/payments'
 import { session, user } from '@/db/schema'
+import { FULL_ACCESS_PRICE } from '@/lib/pricing'
 import { encodeWav } from '@/lib/wav'
 
 import { TEST_SESSION_COOKIE } from './workers-session'
@@ -33,6 +35,12 @@ export type As = {
 }
 
 /** A user with an account and a signed-in browser. */
+/** Gives the account Full Access, as paying for it does (ADR 0022). */
+export async function giveFullAccess(userId: string): Promise<void> {
+  await startFullAccess(testDb(), userId, `cs_test_${userId}`, FULL_ACCESS_PRICE)
+  await markFullAccessPaid(testDb(), userId, `cs_test_${userId}`, null)
+}
+
 export async function signUp(name: string): Promise<{ id: string; cookie: string }> {
   const now = new Date()
   const id = `user${name}`

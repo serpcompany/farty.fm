@@ -4,13 +4,14 @@ import { expect, type Locator, type Page, test } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
 import { newEmail, signInByApi } from './account'
 import { songsTheFixtureLibraryUnlocks } from './golden'
-import { payAtTheDevCheckout } from './pay'
+import { payAtTheDevCheckout, payOnTheSheet } from './pay'
 
 // Song Creator on the Staging build, with the whole Fixture Library loaded, which unlocks most Songs
 // (`golden.ts`; Songs play each fart raw, every burst of it, ADR 0012 and ADR 0016). Each of the
 // journey's Songs opens from Compose, is made and starts playing, plays one tapped note, and
-// is paid for and saved (ADR 0010); the Toots are then read back from IndexedDB. Then a direct load, a failed render, a
-// locked and an unknown Song, and a Song opened offline.
+// is saved, with Full Access paid for once, on the first (ADR 0022); the Toots are then read back
+// from IndexedDB. Then a direct load, a failed render, a locked and an unknown Song, and a Song
+// opened offline.
 //
 // With E2E_EVIDENCE_DIR set, the test also writes each Toot's WAV, the time each took to make,
 // and screenshots there, for `evaluate_renders.py` and the PR.
@@ -68,6 +69,15 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
   await page.reload()
   await loadTheFixtureLibrary(page)
   if (out) await page.screenshot({ path: join(out, 'compose.png') })
+
+  // Every payment started, and every Pay: one, however many Songs are saved.
+  const payments: string[] = []
+  page.on('request', request => {
+    const { pathname } = new URL(request.url())
+    if (request.method() !== 'POST') return
+    if (pathname === '/api/full-access/checkout/' || pathname === '/api/dev/checkout/')
+      payments.push(pathname)
+  })
 
   const timings: { song: string; tapToReadyMs: number; makingMs: number }[] = []
   expect(journeySongs.map(s => s.id).at(-1)).toBe('hot-cross-buns')
@@ -144,10 +154,11 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
       const lowest = song.notes.filter(n => n.pitch === song.pitches[0]).length
       await expect(noteView.getByRole('button', { name: /, highlighted/ })).toHaveCount(lowest)
 
-      // Save asks for $0.99, then turns into a disabled "Saved to Toots" once it's paid. Two taps,
-      // before it can go to the checkout, still make one Toot (checked below).
-      await expect(save).toHaveText('Save to Toots · $0.99')
-      if (song === songs[0]) {
+      // The first Save offers Full Access, then turns into a disabled "Saved to Toots" once it's
+      // paid. Every Song after that saves with nothing to pay. Two taps, before Save is answered,
+      // still make one Toot (checked below), paying or not.
+      await expect(save).toHaveText('Save to Toots')
+      if (song === journeySongs[0] || song === journeySongs[1]) {
         await save.evaluate(button => {
           ;(button as HTMLButtonElement).click()
           ;(button as HTMLButtonElement).click()
@@ -155,7 +166,15 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
       } else {
         await save.click()
       }
-      await payAtTheDevCheckout(page)
+      if (song === journeySongs[0]) {
+        await payOnTheSheet(page)
+        await payAtTheDevCheckout(page)
+      } else {
+        await expect(page.getByRole('button', { name: 'Saved to Toots' })).toBeDisabled({
+          timeout: 60_000
+        })
+        await expect(page.getByTestId('full-access-sheet')).toBeHidden()
+      }
       // Without the guard the second tap starts a second checkout, or a second write of the same id.
       await expect(page.getByText("Couldn't save this Toot.")).toHaveCount(0)
       if (out && song.id === 'mary') await page.screenshot({ path: join(out, 'mary-saved.png') })
@@ -171,6 +190,8 @@ test('plays each Song with your farts, plays a tapped note, and saves it as a To
       await expect(page).toHaveURL(/\/compose\/$/)
     })
   }
+
+  expect(payments).toEqual(['/api/full-access/checkout/', '/api/dev/checkout/'])
 
   // The Toots in IndexedDB: one per Song, each with its audio as a 44.1 kHz mono 16-bit WAV.
   const toots = await page.evaluate(async () => {

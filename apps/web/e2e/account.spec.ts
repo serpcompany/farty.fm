@@ -8,8 +8,8 @@ import {
   type Page,
   test
 } from '@playwright/test'
-import { codeFor, newEmail, ownClient, session, signInByApi } from './account'
-import { payAtTheDevCheckout } from './pay'
+import { codeFor, newEmail, onTheLocalDatabase, ownClient, session, signInByApi } from './account'
+import { payAtTheDevCheckout, payOnTheSheet, payToSave, saveWithFullAccess } from './pay'
 import { recordAndSave, skipWelcome, withFakeMicrophone } from './record'
 import { onPhone } from './screens'
 
@@ -61,8 +61,8 @@ test("a guest's first Result offers the account step, and Not now goes where the
   expect(await page.evaluate(() => localStorage.getItem('pedos.accountStep'))).toBe('once')
 })
 
-// Saving a Toot needs an account and $0.99 for it (ADR 0010). A local run has no Stripe key, so
-// Save goes to the dev checkout (`/dev/checkout/`), which stands in for Stripe Checkout.
+// Saving a Toot needs an account with Full Access, $4.99 once (ADR 0022). A local run has no Stripe
+// key, so Pay goes to the dev checkout (`/dev/checkout/`), which stands in for Stripe Checkout.
 
 test("a guest's Toot plays free, and Save asks for an account first", async ({ page, request }) => {
   test.setTimeout(180_000)
@@ -73,7 +73,7 @@ test("a guest's Toot plays free, and Save asks for an account first", async ({ p
   await openASong(page, 'mary')
 
   const save = page.getByRole('button', { name: 'Save to Toots' })
-  await expect(save).toHaveText('Save to Toots · $0.99')
+  await expect(save).toHaveText('Save to Toots')
   await expectTappable(save)
   await save.click()
   const step = page.getByRole('dialog', { name: 'Keep your farts' })
@@ -97,7 +97,7 @@ test("a guest's Toot plays free, and Save asks for an account first", async ({ p
   await expect(step).toBeVisible()
 })
 
-test('a guest who signs in at Save pays $0.99, and the Toot is saved to the account', async ({
+test('a guest who signs in at Save pays $4.99, and the Toot is saved to the account', async ({
   page,
   request
 }, testInfo) => {
@@ -110,7 +110,7 @@ test('a guest who signs in at Save pays $0.99, and the Toot is saved to the acco
   await loadTheFixtureLibrary(page)
   await openASong(page, 'mary')
 
-  await page.getByRole('button', { name: 'Save to Toots · $0.99' }).click()
+  await page.getByRole('button', { name: 'Save to Toots' }).click()
   const step = page.getByRole('dialog', { name: 'Keep your farts' })
   await step.getByLabel('Email').fill(email)
   await step.getByRole('button', { name: 'Send code' }).click()
@@ -118,13 +118,18 @@ test('a guest who signs in at Save pays $0.99, and the Toot is saved to the acco
   await step.getByRole('button', { name: 'Sign in' }).click()
   await expect(step).toBeHidden()
 
-  // Signed in, Save goes on to the checkout by itself, and paid, the Toot is saved.
+  // Signed in, Save goes on to the offer by itself, and paid, the Toot is saved.
+  const offer = page.getByTestId('full-access-sheet')
+  await expect(offer).toContainText('$4.99, once.')
+  await expectTappable(offer.getByRole('button', { name: 'Pay $4.99' }))
+  await expectTappable(offer.getByRole('button', { name: 'Not now' }))
+  await payOnTheSheet(page)
   const checkout = await checkoutToot(page)
-  await expectTappable(page.getByRole('button', { name: 'Pay $0.99' }))
+  await expectTappable(page.getByRole('button', { name: 'Pay $4.99' }))
   await payAtTheDevCheckout(page)
   expect(await recordingsStored(page, 'toots')).toBe(1)
   await uploaded(page)
-  // And it's in the account, as the Toot that was paid for.
+  // And it's in the account, as the Toot Save was tapped on.
   const kept = await page.evaluate(
     async account =>
       (await (
@@ -139,7 +144,7 @@ test('a guest who signs in at Save pays $0.99, and the Toot is saved to the acco
   await expect(page.getByTestId('toot-row')).toContainText('Mary Had a Little Lamb')
 })
 
-test('cancelled at the checkout, the Toot is still unsaved, and Save pays for that same Toot', async ({
+test('cancelled at the checkout, the Toot is still unsaved, and paying saves that same Toot', async ({
   page,
   request
 }, testInfo) => {
@@ -152,8 +157,9 @@ test('cancelled at the checkout, the Toot is still unsaved, and Save pays for th
   await loadTheFixtureLibrary(page)
   await openASong(page, 'mary')
 
-  const save = page.getByRole('button', { name: 'Save to Toots · $0.99' })
+  const save = page.getByRole('button', { name: 'Save to Toots' })
   await save.click()
+  await payOnTheSheet(page)
   const toot = await checkoutToot(page)
   await page.getByRole('link', { name: 'Cancel' }).click()
   // Back on Song Creator with the same Toot, which isn't saved, and the address is clean again.
@@ -163,9 +169,97 @@ test('cancelled at the checkout, the Toot is still unsaved, and Save pays for th
   expect(await recordingsStored(page, 'toots')).toBe(0)
 
   await save.click()
+  await payOnTheSheet(page)
   expect(await checkoutToot(page)).toBe(toot)
   await payAtTheDevCheckout(page)
   expect(await recordingsStored(page, 'toots')).toBe(1)
+})
+
+test('Not now on the offer saves nothing, and starts no checkout', async ({
+  page,
+  request
+}, testInfo) => {
+  test.setTimeout(180_000)
+  await needsTheFixtureLibrary(request)
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, newEmail(testInfo, 'not-now'))
+  await page.reload()
+  await loadTheFixtureLibrary(page)
+  await openASong(page, 'mary')
+
+  await page.getByRole('button', { name: 'Save to Toots' }).click()
+  const offer = page.getByTestId('full-access-sheet')
+  await offer.getByRole('button', { name: 'Not now' }).click()
+  await expect(offer).toBeHidden()
+  await expect(page).toHaveURL(/\/compose\/mary\/$/)
+  expect(await recordingsStored(page, 'toots')).toBe(0)
+  // The Toot still plays, free.
+  await expect(page.getByTestId('song-creator-state')).toBeVisible()
+})
+
+test('someone who paid for a Toot before Full Access saves with nothing to pay', async ({
+  page,
+  request
+}, testInfo) => {
+  test.setTimeout(180_000)
+  await needsTheFixtureLibrary(request)
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, newEmail(testInfo, 'past-buyer'))
+  await page.reload()
+  await expect.poll(() => accountOf(page)).toBeTruthy()
+  onTheLocalDatabase(
+    `INSERT INTO toot_payments (user_id, toot_id, checkout_session_id, amount, currency, created_at, paid_at)
+     VALUES ('${await accountOf(page)}', 'paid-before', 'dev_before', 99, 'usd', ${Date.now()}, ${Date.now()})`
+  )
+  await loadTheFixtureLibrary(page)
+  await openASong(page, 'mary')
+
+  await saveWithFullAccess(page)
+  await expect(page).toHaveURL(/\/compose\/mary\/$/)
+  expect(await recordingsStored(page, 'toots')).toBe(1)
+})
+
+test('a refund ends Full Access: the saved Toot stays, and the next Save offers it again', async ({
+  page,
+  request
+}, testInfo) => {
+  test.setTimeout(180_000)
+  await needsTheFixtureLibrary(request)
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, newEmail(testInfo, 'refund'))
+  await page.reload()
+  await loadTheFixtureLibrary(page)
+  await openASong(page, 'mary')
+  await payToSave(page)
+  await uploaded(page)
+
+  // As Stripe's `charge.refunded` webhook records it (`payments.workers.test.ts`).
+  onTheLocalDatabase(
+    `UPDATE full_access SET refunded_at = ${Date.now()} WHERE user_id = '${await accountOf(page)}'`
+  )
+
+  await openASong(page, 'hot-cross-buns')
+  await page.getByRole('button', { name: 'Save to Toots' }).click()
+  const offer = page.getByTestId('full-access-sheet')
+  await expect(offer).toContainText('$4.99, once.')
+  await offer.getByRole('button', { name: 'Not now' }).click()
+  await expect(offer).toBeHidden()
+
+  // The Toot saved before the refund stays, here and in the account.
+  await tab(page, 'Toots').click()
+  await expect(page.getByTestId('toot-row')).toHaveCount(1)
+  await expect(page.getByTestId('toot-row')).toContainText('Mary Had a Little Lamb')
+  const kept = await page.evaluate(
+    async account =>
+      (await (
+        await fetch('/api/library/', { headers: { 'x-pedos-library': account } })
+      ).json()) as { toots: { id: string }[] },
+    await accountOf(page)
+  )
+  expect(kept.toots).toHaveLength(1)
 })
 
 test('signing up from the first Result goes where they tapped, and Farty opens again with their Recording', async ({

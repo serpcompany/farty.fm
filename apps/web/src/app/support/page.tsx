@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { MONEY_BACK_DAYS } from '@/lib/pricing'
 
 export const metadata: Metadata = { title: 'Support · Farty' }
 
@@ -19,6 +20,10 @@ const questions = [
   {
     q: 'Where are my Recordings? Can you recover them?',
     a: 'Without an account, they’re gone when you close Farty, except ones you made before October 28, 2026. We never receive them, so we can’t recover them. With a free account, they’re kept with your account, on any phone or tablet you sign in on.'
+  },
+  {
+    q: 'Can I get my money back?',
+    a: `Yes, within ${MONEY_BACK_DAYS} days of paying for Full Access. Email devin@serp.co from your account’s email. The Toots you’ve saved stay, and saving another one asks for Full Access again.`
   }
 ]
 

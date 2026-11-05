@@ -6,9 +6,7 @@ import * as shareRecordingRoute from '@/app/api/share/recordings/[id]/route'
 import * as sharesRoute from '@/app/api/share/route'
 import * as shareTootRoute from '@/app/api/share/toots/[id]/route'
 import type { Kind } from '@/db/library'
-import { markTootPaid, startTootPayment } from '@/db/payments'
 import { handles, rateLimit, shareReports, shares } from '@/db/schema'
-import { TOOT_PRICE } from '@/lib/pricing'
 import { encodeWav } from '@/lib/wav'
 import {
   findSharedRecording,
@@ -24,6 +22,7 @@ import { readWavHeader } from '@/server/wav-header'
 import {
   type As,
   api,
+  giveFullAccess,
   media,
   ORIGIN,
   padTootMetadata,
@@ -177,20 +176,14 @@ const playing = (recordingId: string) => ({
   ]
 })
 
-/** Pays for the Toot `id`, as Checkout does (ADR 0010), without saving it. */
-async function payFor(user: { id: string }, id: string, songId: string | null = 'twinkle') {
-  await startTootPayment(testDb(), user.id, id, songId, `cs_test_${id}`, TOOT_PRICE)
-  expect(await markTootPaid(testDb(), user.id, id, `cs_test_${id}`)).toBe(true)
-}
-
-/** Pays for the Toot `id` and saves it to the account, as Song Creator's Save does. */
+/** Saves the Toot `id` to an account with Full Access, as Song Creator's Save does. */
 async function saveToot(
   id: string,
   user: { id: string; cookie: string },
   audio = tootWav(),
   metadata: { songId: string | null } = tootMetadata(id)
 ) {
-  await payFor(user, id, metadata.songId)
+  await giveFullAccess(user.id)
   const response = await api.put('toots', id, uploadBody(metadata, audio), user)
   expect(response.status).toBe(201)
 }
@@ -676,9 +669,7 @@ describe('Sharing a saved Toot', () => {
     expect(await (await share.put(T1, alice, 'toots')).json()).toEqual({ error: 'no_handle' })
 
     await share.pick('alice', alice)
-    // Never saved: one Song Creator only previewed, or one paid for and not saved yet.
-    expect((await share.put(T2, alice, 'toots')).status).toBe(404)
-    await payFor(alice, T2)
+    // Never saved: one Song Creator only previewed.
     expect((await share.put(T2, alice, 'toots')).status).toBe(404)
     // A Recording isn't a Toot.
     await upload(R1, alice.cookie)

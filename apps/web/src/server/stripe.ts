@@ -1,10 +1,10 @@
-import { builtFor, savingIsPaid, TOOT_PRICE } from '@/lib/pricing'
+import { builtFor, FULL_ACCESS_PRICE, savingIsPaid } from '@/lib/pricing'
 
 import type { SiteEnv } from '@/lib/site'
 
 import { type DeploymentEnv, deployment, isLocalHost } from './environment'
 
-// Stripe, for paying to save a Toot (ADR 0010): Checkout Sessions through Stripe's API with
+// Stripe, for paying for Full Access (ADR 0022): Checkout Sessions through Stripe's API with
 // `fetch`, and webhook signatures with Web Crypto, so no Stripe SDK. No Next.js imports, so the
 // unit tests run it in Node. A secret key never leaves this file, and no error names one.
 
@@ -80,6 +80,8 @@ export type CheckoutSession = {
   client_reference_id: string | null
   metadata: Record<string, string> | null
   livemode: boolean
+  /** Stripe's payment, once there is one, which a refund's event names. */
+  payment_intent?: string | null
   /**
    * What it charges, in the currency's smallest unit: the price it was created with. Adaptive
    * Pricing doesn't change these; what the buyer paid in their own currency is in
@@ -137,22 +139,24 @@ async function stripeRequest(
   return response.json()
 }
 
+/** What a Full Access Checkout Session's metadata says it's for (`purchase`). */
+export const FULL_ACCESS_PURCHASE = 'full_access'
+
 export type NewCheckout = {
   userId: string
+  /** The Toot whose Save asked for it, to make again and save on the way back from Checkout. */
   tootId: string
-  /** The Song's title, or null for a Sound Pad Toot (ADR 0017). */
-  songTitle: string | null
   successUrl: string
   cancelUrl: string
-  /** The session this one follows for the Toot, if any: it expired, or Stripe no longer has it. */
+  /** The account's last session, if any: it expired, or Stripe no longer has it. */
   replaces: string | null
 }
 
 /**
- * Starts a Checkout Session that pays `TOOT_PRICE` to save one Toot. Its metadata names the user
- * and the Toot, which is how the webhook and the return find what was paid for. Cards only, with
- * Apple Pay and Google Pay, which pay at once: a slower method would leave the Toot unsaved after
- * the return, and Save would start a second payment.
+ * Starts a Checkout Session that pays `FULL_ACCESS_PRICE` for the account. Its metadata names the
+ * account and the Toot it goes back to, which is how the webhook and the return find what was paid
+ * for. Cards only, with Apple Pay and Google Pay, which pay at once: a slower method would leave the
+ * Toot unsaved after the return.
  *
  * Its idempotency key names the user, the Toot and the session it replaces, so two requests that
  * cross, or a retry, get the same session from Stripe instead of a second one to pay.
@@ -165,25 +169,35 @@ export async function createCheckoutSession(
     mode: 'payment',
     'payment_method_types[0]': 'card',
     'line_items[0][quantity]': '1',
-    'line_items[0][price_data][currency]': TOOT_PRICE.currency,
-    'line_items[0][price_data][unit_amount]': String(TOOT_PRICE.amount),
-    'line_items[0][price_data][product_data][name]':
-      checkout.songTitle === null
-        ? 'Save your Sound Pad Toot'
-        : `Save your Toot of ${checkout.songTitle}`,
-    client_reference_id: checkout.tootId,
+    'line_items[0][price_data][currency]': FULL_ACCESS_PRICE.currency,
+    'line_items[0][price_data][unit_amount]': String(FULL_ACCESS_PRICE.amount),
+    'line_items[0][price_data][product_data][name]': 'Farty Full Access',
+    client_reference_id: checkout.userId,
+    'metadata[purchase]': FULL_ACCESS_PURCHASE,
     'metadata[user_id]': checkout.userId,
     'metadata[toot_id]': checkout.tootId,
+    'payment_intent_data[metadata][purchase]': FULL_ACCESS_PURCHASE,
     'payment_intent_data[metadata][user_id]': checkout.userId,
-    'payment_intent_data[metadata][toot_id]': checkout.tootId,
     success_url: checkout.successUrl,
     cancel_url: checkout.cancelUrl
   })
-  const idempotencyKey = `toot-checkout/${checkout.userId}/${checkout.tootId}/${checkout.replaces ?? 'first'}`
+  const idempotencyKey = `full-access/${checkout.userId}/${checkout.tootId}/${checkout.replaces ?? 'first'}`
   return (await stripeRequest(secretKey, '/checkout/sessions', {
     body: params,
     idempotencyKey
   })) as CheckoutSession
+}
+
+/**
+ * Ends an open Checkout Session, so a new one for another Toot leaves one to pay, not two. Stripe
+ * refuses it for a session paid in the meantime, and the next tap then finds that.
+ */
+export async function expireCheckoutSession(secretKey: string, id: string): Promise<void> {
+  if (!isCheckoutSessionId(id)) throw new StripeError(400)
+  await stripeRequest(secretKey, `/checkout/sessions/${id}/expire`, {
+    body: new URLSearchParams(),
+    idempotencyKey: `expire/${id}`
+  })
 }
 
 /** A Checkout Session, as Stripe has it now. */
@@ -195,25 +209,42 @@ export async function retrieveCheckoutSession(
   return (await stripeRequest(secretKey, `/checkout/sessions/${id}`)) as CheckoutSession
 }
 
-/** The price a Toot's checkout started at, as its payment row keeps it (`startTootPayment`). */
+/** The price a checkout started at, as its row keeps it. */
 export type Price = { amount: number; currency: string }
 
+/** Whether Stripe says `session` is paid, at `price`, at once and in full. */
+const paidAt = (session: CheckoutSession, price: Price) =>
+  session.mode === 'payment' &&
+  session.payment_status === 'paid' &&
+  session.amount_total === price.amount &&
+  session.currency === price.currency
+
 /**
- * Whether Stripe says `session` paid `price` for `tootId`, for `userId`. `price` is the one the
- * Toot's payment row recorded when its checkout started, not today's `TOOT_PRICE`, so a session
- * paid before the price changed still counts.
+ * Whether Stripe says `session` paid `price` for `userId`'s Full Access. `price` is the one its row
+ * recorded when the checkout started, not today's `FULL_ACCESS_PRICE`, so a session paid before the
+ * price changed still counts.
  */
-export function paidFor(
+export function paidForFullAccess(session: CheckoutSession, userId: string, price: Price): boolean {
+  return (
+    paidAt(session, price) &&
+    session.client_reference_id === userId &&
+    session.metadata?.purchase === FULL_ACCESS_PURCHASE &&
+    session.metadata?.user_id === userId
+  )
+}
+
+/**
+ * Whether Stripe says `session`, from before Full Access, paid `price` for `tootId`, for `userId`.
+ * Such a session may still be open when Full Access comes, and the webhook honors it.
+ */
+export function paidForToot(
   session: CheckoutSession,
   userId: string,
   tootId: string,
   price: Price
 ): boolean {
   return (
-    session.mode === 'payment' &&
-    session.payment_status === 'paid' &&
-    session.amount_total === price.amount &&
-    session.currency === price.currency &&
+    paidAt(session, price) &&
     session.client_reference_id === tootId &&
     session.metadata?.toot_id === tootId &&
     session.metadata?.user_id === userId

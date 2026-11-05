@@ -1,12 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { savingIsPaid, TOOT_PRICE } from '@/lib/pricing'
+import { FULL_ACCESS_PRICE, savingIsPaid } from '@/lib/pricing'
 
 import {
   type CheckoutSession,
   createCheckoutSession,
   isCheckoutSessionId,
-  paidFor,
+  paidForFullAccess,
+  paidForToot,
   paymentsConfig,
   retrieveCheckoutSession,
   SIGNATURE_TOLERANCE_SECONDS,
@@ -173,65 +174,87 @@ const session = (fields: Partial<CheckoutSession> = {}): CheckoutSession => ({
   mode: 'payment',
   status: 'complete',
   payment_status: 'paid',
-  client_reference_id: TOOT,
-  metadata: { user_id: 'userA', toot_id: TOOT },
+  client_reference_id: 'userA',
+  metadata: { purchase: 'full_access', user_id: 'userA', toot_id: TOOT },
   livemode: false,
-  amount_total: 99,
+  amount_total: 499,
   currency: 'usd',
   ...fields
 })
 
-describe('paidFor', () => {
-  it('is true for a paid session for this user and Toot', () => {
-    expect(paidFor(session(), 'userA', TOOT, TOOT_PRICE)).toBe(true)
+describe('paidForFullAccess', () => {
+  const paid = (fields: Partial<CheckoutSession> = {}, userId = 'userA') =>
+    paidForFullAccess(session(fields), userId, FULL_ACCESS_PRICE)
+
+  it('is true for a paid session for this user', () => {
+    expect(paid()).toBe(true)
   })
 
-  it('is false for an unpaid session, or one for another user or Toot', () => {
-    expect(paidFor(session({ payment_status: 'unpaid' }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+  it('is false for an unpaid session, or one for another user or purchase', () => {
+    expect(paid({ payment_status: 'unpaid' })).toBe(false)
+    expect(paid({ payment_status: 'no_payment_required' })).toBe(false)
+    expect(paid({ mode: 'subscription' })).toBe(false)
+    expect(paid({}, 'userB')).toBe(false)
+    expect(paid({ client_reference_id: 'userB' })).toBe(false)
+    expect(paid({ metadata: null })).toBe(false)
+    expect(paid({ metadata: { user_id: 'userA', toot_id: TOOT } })).toBe(false)
+  })
+
+  it('is false for a session that charged anything but the price', () => {
+    expect(paid({ amount_total: 1 })).toBe(false)
+    expect(paid({ amount_total: 0 })).toBe(false)
+    expect(paid({ amount_total: null })).toBe(false)
+    expect(paid({ currency: 'eur' })).toBe(false)
+    expect(paid({ currency: null })).toBe(false)
+  })
+
+  it('is true with Adaptive Pricing: the session keeps 499 usd, the buyer paid in their currency', () => {
     expect(
-      paidFor(session({ payment_status: 'no_payment_required' }), 'userA', TOOT, TOOT_PRICE)
-    ).toBe(false)
-    expect(paidFor(session({ mode: 'subscription' }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
-    expect(paidFor(session(), 'userB', TOOT, TOOT_PRICE)).toBe(false)
-    const other = '44444444-4444-4444-8444-444444444444'
-    expect(paidFor(session(), 'userA', other, TOOT_PRICE)).toBe(false)
-    expect(paidFor(session({ client_reference_id: other }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
-    expect(paidFor(session({ metadata: null }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+      paid({ presentment_details: { presentment_currency: 'jpy', presentment_amount: 820 } })
+    ).toBe(true)
   })
 
-  it('is false for a session that charged anything but the Toot’s price', () => {
-    expect(paidFor(session({ amount_total: 1 }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
-    expect(paidFor(session({ amount_total: 0 }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
-    expect(paidFor(session({ amount_total: null }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
-    expect(paidFor(session({ currency: 'eur' }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
-    expect(paidFor(session({ currency: null }), 'userA', TOOT, TOOT_PRICE)).toBe(false)
+  it('judges by the price its checkout started at, not today’s', () => {
+    const before = { amount: 299, currency: 'usd' }
+    const paidThen = session({ amount_total: 299 })
+    expect(paidForFullAccess(paidThen, 'userA', before)).toBe(true)
+    expect(paidForFullAccess(paidThen, 'userA', FULL_ACCESS_PRICE)).toBe(false)
+    expect(paidForFullAccess(session(), 'userA', before)).toBe(false)
   })
+})
 
-  it('is true with Adaptive Pricing: the session keeps 99 usd, the buyer paid in their currency', () => {
-    const local = session({
-      presentment_details: { presentment_currency: 'jpy', presentment_amount: 163 }
+describe('paidForToot', () => {
+  const PRICE = { amount: 99, currency: 'usd' }
+  const old = (fields: Partial<CheckoutSession> = {}) =>
+    session({
+      client_reference_id: TOOT,
+      metadata: { user_id: 'userA', toot_id: TOOT },
+      amount_total: 99,
+      ...fields
     })
-    expect(paidFor(local, 'userA', TOOT, TOOT_PRICE)).toBe(true)
+
+  it('is true for a paid session from before Full Access, for this user and Toot', () => {
+    expect(paidForToot(old(), 'userA', TOOT, PRICE)).toBe(true)
   })
 
-  it('judges by the price the Toot’s checkout started at, not today’s', () => {
-    const before = { amount: 149, currency: 'usd' }
-    const paidThen = session({ amount_total: 149 })
-    expect(paidFor(paidThen, 'userA', TOOT, before)).toBe(true)
-    expect(paidFor(paidThen, 'userA', TOOT, TOOT_PRICE)).toBe(false)
-    expect(paidFor(session(), 'userA', TOOT, before)).toBe(false)
+  it('is false for an unpaid session, one for another user or Toot, or another price', () => {
+    const other = '44444444-4444-4444-8444-444444444444'
+    expect(paidForToot(old({ payment_status: 'unpaid' }), 'userA', TOOT, PRICE)).toBe(false)
+    expect(paidForToot(old(), 'userB', TOOT, PRICE)).toBe(false)
+    expect(paidForToot(old(), 'userA', other, PRICE)).toBe(false)
+    expect(paidForToot(old({ client_reference_id: other }), 'userA', TOOT, PRICE)).toBe(false)
+    expect(paidForToot(old({ amount_total: 499 }), 'userA', TOOT, PRICE)).toBe(false)
   })
 })
 
 describe('createCheckoutSession', () => {
-  it('asks Stripe for a $0.99 payment for one Toot, named by its user and id', async () => {
+  it('asks Stripe for a $4.99 payment for Full Access, named by its user, coming back to the Toot', async () => {
     const fetch = vi
       .spyOn(globalThis, 'fetch')
       .mockResolvedValue(Response.json(session({ status: 'open', payment_status: 'unpaid' })))
     const created = await createCheckoutSession(TEST_KEY, {
       userId: 'userA',
       tootId: TOOT,
-      songTitle: 'Twinkle Twinkle Little Star',
       successUrl: `https://staging.farty.fm/compose/twinkle/?toot=${TOOT}&checkout=done`,
       cancelUrl: `https://staging.farty.fm/compose/twinkle/?toot=${TOOT}`,
       replaces: null
@@ -243,20 +266,20 @@ describe('createCheckoutSession', () => {
     const headers = new Headers(init?.headers)
     expect(headers.get('authorization')).toBe(`Bearer ${TEST_KEY}`)
     expect(headers.get('stripe-version')).toBe(STRIPE_API_VERSION)
-    expect(headers.get('idempotency-key')).toBe(`toot-checkout/userA/${TOOT}/first`)
+    expect(headers.get('idempotency-key')).toBe(`full-access/userA/${TOOT}/first`)
     expect(Object.fromEntries(init?.body as URLSearchParams)).toEqual({
       mode: 'payment',
       'payment_method_types[0]': 'card',
       'line_items[0][quantity]': '1',
       'line_items[0][price_data][currency]': 'usd',
-      'line_items[0][price_data][unit_amount]': '99',
-      'line_items[0][price_data][product_data][name]':
-        'Save your Toot of Twinkle Twinkle Little Star',
-      client_reference_id: TOOT,
+      'line_items[0][price_data][unit_amount]': '499',
+      'line_items[0][price_data][product_data][name]': 'Farty Full Access',
+      client_reference_id: 'userA',
+      'metadata[purchase]': 'full_access',
       'metadata[user_id]': 'userA',
       'metadata[toot_id]': TOOT,
+      'payment_intent_data[metadata][purchase]': 'full_access',
       'payment_intent_data[metadata][user_id]': 'userA',
-      'payment_intent_data[metadata][toot_id]': TOOT,
       success_url: `https://staging.farty.fm/compose/twinkle/?toot=${TOOT}&checkout=done`,
       cancel_url: `https://staging.farty.fm/compose/twinkle/?toot=${TOOT}`
     })
@@ -272,7 +295,6 @@ describe('createCheckoutSession', () => {
     const failed = await createCheckoutSession(TEST_KEY, {
       userId: 'userA',
       tootId: TOOT,
-      songTitle: 'Twinkle',
       successUrl: 'https://staging.farty.fm/',
       cancelUrl: 'https://staging.farty.fm/',
       replaces: null
@@ -289,7 +311,6 @@ describe('createCheckoutSession', () => {
     const checkout = {
       userId: 'userA',
       tootId: TOOT,
-      songTitle: 'Twinkle',
       successUrl: 'https://staging.farty.fm/',
       cancelUrl: 'https://staging.farty.fm/'
     }
@@ -299,8 +320,8 @@ describe('createCheckoutSession', () => {
       new Headers(init?.headers).get('idempotency-key')
     )
     expect(keys).toEqual([
-      `toot-checkout/userA/${TOOT}/first`,
-      `toot-checkout/userA/${TOOT}/cs_test_expired1`
+      `full-access/userA/${TOOT}/first`,
+      `full-access/userA/${TOOT}/cs_test_expired1`
     ])
   })
 

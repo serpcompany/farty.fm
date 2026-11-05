@@ -3,14 +3,14 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Account } from '@/lib/account'
 import { songs } from '@/lib/catalog/songs.generated'
+import type { CheckoutReturn } from '@/lib/full-access'
 import type { SongTootDraft } from '@/lib/toot'
-import type { CheckoutReturn } from '@/lib/toot-payment'
 
-// Song Creator's Save where saving is paid (ADR 0010, #213), in a DOM: what Save says when
-// payments are off or limited, when the payment hasn't come through, and when the account can't be
-// read after a paid return; that a paid Toot never saved is saved instead of paying twice; and that
-// a guest's Save asks for an account first, paid or free, while a free one saves offline in an
-// account's browser (#237). The server is `fetch`, answering as the routes do.
+// Song Creator's Save where saving is paid (ADR 0022), in a DOM: an account with Full Access saves,
+// one without is offered it on a sheet, and Pay goes to Checkout; what Save says when payments are
+// off or limited, when the payment hasn't come through, and when the account can't be read after a
+// paid return; and that a guest's Save asks for an account first, paid or free, while a free one
+// saves offline in an account's browser (#237). The server is `fetch`, answering as the routes do.
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean
@@ -18,7 +18,6 @@ declare global {
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
 const TOOT = '33333333-3333-4333-8333-333333333333'
-const PAID_TOOT = '44444444-4444-4444-8444-444444444444'
 
 const page = vi.hoisted(() => ({
   account: {
@@ -60,11 +59,11 @@ vi.mock('@/lib/recording-store', () => ({}))
 vi.mock('@/lib/toot-renderer', () => ({ TootError: class extends Error {} }))
 vi.mock('@/lib/stale-build', () => ({ holdReload: () => undefined }))
 vi.mock('@/lib/telemetry/errors', () => ({ reportError: vi.fn() }))
-vi.mock('@/lib/toot-payment', async importOriginal => ({
-  ...(await importOriginal<typeof import('@/lib/toot-payment')>()),
+vi.mock('@/lib/full-access', async importOriginal => ({
+  ...(await importOriginal<typeof import('@/lib/full-access')>()),
   // Saving is paid in this build unless a test says so, and the wait for a payment is cut short.
   saveAsksForPayment: () => page.paid,
-  waitUntilPaid: vi.fn(async () => false),
+  waitForFullAccess: vi.fn(async () => false),
   clearCheckoutReturn: vi.fn()
 }))
 
@@ -93,11 +92,29 @@ async function render(back: CheckoutReturn | null = null) {
   )
 }
 
-/** The server answers the checkout with `body`, at `status`. */
-function checkoutAnswers(body: unknown, status = 200) {
+const CHECKOUT_PATH = '/api/full-access/checkout/'
+const ACCESS_PATH = '/api/full-access/'
+const STRIPE_PAGE = 'https://checkout.stripe.com/c/pay/cs_test_a'
+
+/** The server answers as its routes do: no Full Access and a Checkout page, unless a test says. */
+function server({
+  access = { active: false },
+  accessStatus = 200,
+  checkout = { url: STRIPE_PAGE },
+  checkoutStatus = 200
+}: {
+  access?: unknown
+  accessStatus?: number
+  checkout?: unknown
+  checkoutStatus?: number
+} = {}) {
   return vi
     .spyOn(globalThis, 'fetch')
-    .mockImplementation(async () => Response.json(body, { status }))
+    .mockImplementation(async input =>
+      String(input) === CHECKOUT_PATH
+        ? Response.json(checkout, { status: checkoutStatus })
+        : Response.json(access, { status: accessStatus })
+    )
 }
 
 const saveButton = () => {
@@ -110,6 +127,28 @@ const saveButton = () => {
 
 async function tapSave() {
   await act(async () => saveButton().click())
+}
+
+// The sheet opens over the page, outside `container`.
+const sheet = () => document.querySelector<HTMLElement>('[data-testid="full-access-sheet"]')
+
+async function tapOnSheet(label: string) {
+  const button = [...(sheet()?.querySelectorAll('button') ?? [])].find(
+    b => b.textContent?.trim() === label
+  )
+  if (!button) throw new Error(`no ${label} on the sheet`)
+  await act(async () => button.click())
+}
+
+/** Save, which offers Full Access, then Pay on its sheet. */
+async function payOnTheSheet() {
+  await tapSave()
+  expect(sheet()).not.toBeNull()
+  await tapOnSheet('Pay $4.99')
+}
+
+function asked(fetch: ReturnType<typeof server>, path: string) {
+  return fetch.mock.calls.filter(([input]) => String(input) === path).length
 }
 
 beforeEach(() => {
@@ -131,24 +170,114 @@ afterEach(() => {
 })
 
 describe('Save to Toots, where saving is paid', () => {
-  it('says payments aren’t available when the server has none (payments_unavailable)', async () => {
-    const fetch = checkoutAnswers({ error: 'payments_unavailable' }, 503)
+  it('saves on an account with Full Access, offering nothing and starting no Checkout', async () => {
+    const fetch = server({ access: { active: true } })
     await render()
-    expect(saveButton().textContent).toBe('Save to Toots · $0.99')
+    expect(saveButton().textContent).toBe('Save to Toots')
     await tapSave()
-    expect(fetch).toHaveBeenCalledOnce()
+    expect(sheet()).toBeNull()
+    expect(asked(fetch, CHECKOUT_PATH)).toBe(0)
+    expect(page.saveToot).toHaveBeenCalledWith(draft)
+  })
+
+  it('offers Full Access on a sheet to an account without it, with the price and the money back', async () => {
+    const fetch = server()
+    await render()
+    await tapSave()
+    expect(sheet()?.textContent).toContain('Full Access')
+    expect(sheet()?.textContent).toContain('$4.99, once.')
+    expect(sheet()?.textContent).toContain('within 14 days')
+    expect(asked(fetch, CHECKOUT_PATH)).toBe(0)
+    expect(page.saveToot).not.toHaveBeenCalled()
+  })
+
+  it('goes to Checkout from Pay, and stays busy while the page goes', async () => {
+    const fetch = server()
+    const assign = vi.fn()
+    vi.spyOn(window, 'location', 'get').mockReturnValue({
+      ...window.location,
+      origin: window.location.origin,
+      assign
+    } as Location)
+    await render()
+    await payOnTheSheet()
+    expect(asked(fetch, CHECKOUT_PATH)).toBe(1)
+    const body = fetch.mock.calls.find(([input]) => String(input) === CHECKOUT_PATH)?.[1]?.body
+    expect(JSON.parse(String(body))).toEqual({ tootId: TOOT, songId: 'twinkle' })
+    expect(assign).toHaveBeenCalledWith(STRIPE_PAGE)
+    expect(saveButton().disabled).toBe(true)
+    expect(page.saveToot).not.toHaveBeenCalled()
+  })
+
+  it('saves nothing and starts no Checkout on Not now, and Save offers again', async () => {
+    const fetch = server()
+    await render()
+    await tapSave()
+    await tapOnSheet('Not now')
+    expect(sheet()).toBeNull()
+    expect(asked(fetch, CHECKOUT_PATH)).toBe(0)
+    expect(page.saveToot).not.toHaveBeenCalled()
+    expect(saveButton().disabled).toBe(false)
+    await tapSave()
+    expect(sheet()).not.toBeNull()
+  })
+
+  it('saves instead of paying twice when Pay finds Full Access has started', async () => {
+    const assign = vi.fn()
+    vi.spyOn(window, 'location', 'get').mockReturnValue({
+      ...window.location,
+      origin: window.location.origin,
+      assign
+    } as Location)
+    server({ checkout: { active: true } })
+    await render()
+    await payOnTheSheet()
+    expect(assign).not.toHaveBeenCalled()
+    expect(sheet()).toBeNull()
+    expect(page.saveToot).toHaveBeenCalledWith(draft)
+  })
+
+  it('says an account with Full Access has kept as many Toots as it can', async () => {
+    server({ access: { active: true, limitReached: true } })
+    await render()
+    await tapSave()
+    expect(sheet()).toBeNull()
+    expect(page.saveToot).not.toHaveBeenCalled()
+    expect(container.textContent).toContain(
+      "You've kept as many Toots as an account can. Delete one to save this one."
+    )
+  })
+
+  it('says so when Farty can’t say whether the account has Full Access', async () => {
+    const fetch = server({ access: { error: 'internal' }, accessStatus: 500 })
+    await render()
+    await tapSave()
+    expect(sheet()).toBeNull()
+    expect(asked(fetch, CHECKOUT_PATH)).toBe(0)
+    expect(page.saveToot).not.toHaveBeenCalled()
+    expect(container.textContent).toContain("Couldn't reach your account. Tap Save to try again.")
+    expect(saveButton().disabled).toBe(false)
+  })
+
+  it('says payments aren’t available when the server has none (payments_unavailable)', async () => {
+    const fetch = server({ checkout: { error: 'payments_unavailable' }, checkoutStatus: 503 })
+    await render()
+    await payOnTheSheet()
+    expect(asked(fetch, CHECKOUT_PATH)).toBe(1)
+    expect(sheet()).toBeNull()
     expect(container.textContent).toContain("Payments aren't available right now.")
     expect(saveButton().disabled).toBe(false)
   })
 
   it('starts no Checkout when the take can’t be kept to make again back from it (ADR 0017)', async () => {
-    const fetch = checkoutAnswers({ url: 'https://checkout.stripe.com/c/pay/cs_test_a' })
+    const fetch = server()
     const keep = vi.fn(() => false)
     const { SaveToToots } = await import('./song-creator')
     await act(async () => root?.render(<SaveToToots draft={draft} back={null} keep={keep} />))
-    await tapSave()
+    await payOnTheSheet()
     expect(keep).toHaveBeenCalledOnce()
-    expect(fetch).not.toHaveBeenCalled()
+    expect(asked(fetch, CHECKOUT_PATH)).toBe(0)
+    expect(sheet()).toBeNull()
     expect(container.textContent).toContain(
       "This take can't be saved in this browser: it can't keep the take while you pay."
     )
@@ -156,18 +285,18 @@ describe('Save to Toots, where saving is paid', () => {
   })
 
   it('says to try later past the checkout limit', async () => {
-    checkoutAnswers({ error: 'rate_limited' }, 429)
+    server({ checkout: { error: 'rate_limited' }, checkoutStatus: 429 })
     await render()
-    await tapSave()
+    await payOnTheSheet()
     expect(container.textContent).toContain("You've started a lot of payments. Try again later.")
   })
 
   it('says the user was charged and links Support when the paid session doesn’t match (payment_mismatch)', async () => {
-    checkoutAnswers({ error: 'payment_mismatch' }, 409)
+    server({ checkout: { error: 'payment_mismatch' }, checkoutStatus: 409 })
     await render()
-    await tapSave()
+    await payOnTheSheet()
     expect(container.textContent).toContain(
-      "You were charged, but this Toot couldn't be saved. Contact support for a refund."
+      "You were charged, but Full Access didn't start. Contact support for a refund."
     )
     // next/link drops the trailing slash outside a Next build, which adds it back (trailingSlash).
     const link = [...container.querySelectorAll('a')].find(a => a.textContent === 'Contact support')
@@ -175,35 +304,26 @@ describe('Save to Toots, where saving is paid', () => {
   })
 
   it('says the payment hasn’t come through yet, back from Checkout, and checks again on Save', async () => {
-    const { waitUntilPaid } = await import('@/lib/toot-payment')
+    const { waitForFullAccess } = await import('@/lib/full-access')
     await render({ tootId: TOOT, done: true })
-    expect(waitUntilPaid).toHaveBeenCalledWith(TOOT, 'userA')
+    expect(waitForFullAccess).toHaveBeenCalledWith('userA')
     expect(container.textContent).toContain(
       "Your payment hasn't come through yet. Tap Save to check again."
     )
     expect(page.saveToot).not.toHaveBeenCalled()
 
     // Paid by now: Save asks the server, which says so, and saves.
-    checkoutAnswers({ paid: true })
+    server({ access: { active: true } })
     await tapSave()
     expect(page.saveToot).toHaveBeenCalledWith(draft)
   })
 
-  it('saves a paid Toot of the Song never saved, instead of paying again', async () => {
-    checkoutAnswers({ paidToot: PAID_TOOT })
-    const replace = vi.fn()
-    const assign = vi.fn()
-    vi.spyOn(window, 'location', 'get').mockReturnValue({
-      ...window.location,
-      origin: window.location.origin,
-      replace,
-      assign
-    } as Location)
-    await render()
-    await tapSave()
-    expect(replace).toHaveBeenCalledWith(`/compose/twinkle/?toot=${PAID_TOOT}&checkout=done`)
-    expect(assign).not.toHaveBeenCalled()
-    expect(saveButton().disabled).toBe(true)
+  it('saves by itself back from Checkout once the account has Full Access', async () => {
+    const { waitForFullAccess, clearCheckoutReturn } = await import('@/lib/full-access')
+    vi.mocked(waitForFullAccess).mockResolvedValueOnce(true)
+    await render({ tootId: TOOT, done: true })
+    expect(page.saveToot).toHaveBeenCalledWith(draft)
+    expect(clearCheckoutReturn).toHaveBeenCalled()
   })
 
   it('offers a retry when the account can’t be read after a paid return', async () => {
@@ -217,7 +337,7 @@ describe('Save to Toots, where saving is paid', () => {
     expect(fetch).not.toHaveBeenCalled()
 
     // Read again and signed in: the return confirms the payment by itself.
-    const { waitUntilPaid } = await import('@/lib/toot-payment')
+    const { waitForFullAccess } = await import('@/lib/full-access')
     page.account = {
       status: 'signedIn',
       id: 'userA',
@@ -225,7 +345,7 @@ describe('Save to Toots, where saving is paid', () => {
       marketingEmail: false
     }
     await render({ tootId: TOOT, done: true })
-    expect(waitUntilPaid).toHaveBeenCalledWith(TOOT, 'userA')
+    expect(waitForFullAccess).toHaveBeenCalledWith('userA')
   })
 
   it('reads the account again when Save is tapped while it can’t be read', async () => {
@@ -254,32 +374,57 @@ describe('Save to Toots, as a guest', () => {
     })
   })
 
-  it.each([
-    ['paid', true, 'Save to Toots · $0.99'],
-    ['free', false, 'Save to Toots']
-  ])('asks for an account before saving or paying, where saving is %s', async (_, paid, label) => {
-    page.paid = paid
-    // The server says this Toot is paid, so Save goes on to save it once the step signs in.
-    const fetch = checkoutAnswers({ paid: true })
+  const signedIn: Account = {
+    status: 'signedIn',
+    id: 'userA',
+    email: 'a@example.test',
+    marketingEmail: false
+  }
+
+  it('asks for an account before saving, where saving is free', async () => {
+    page.paid = false
+    const fetch = server()
     await render()
-    expect(saveButton().textContent).toBe(label)
+    expect(saveButton().textContent).toBe('Save to Toots')
+    await tapSave()
+    expect(page.openStep).toHaveBeenCalledOnce()
+    expect(page.saveToot).not.toHaveBeenCalled()
+
+    // The step signs in and closes: straight to saving.
+    page.account = signedIn
+    page.stepOpen = false
+    await render()
+    expect(fetch).not.toHaveBeenCalled()
+    expect(page.saveToot).toHaveBeenCalledWith(draft)
+  })
+
+  it('asks for an account before offering anything, where saving is paid', async () => {
+    const fetch = server()
+    await render()
+    expect(saveButton().textContent).toBe('Save to Toots')
     await tapSave()
     expect(page.openStep).toHaveBeenCalledOnce()
     expect(fetch).not.toHaveBeenCalled()
-    expect(page.saveToot).not.toHaveBeenCalled()
+    expect(sheet()).toBeNull()
 
-    // The step signs in and closes: on to Checkout where saving is paid, or straight to saving.
-    page.account = {
-      status: 'signedIn',
-      id: 'userA',
-      email: 'a@example.test',
-      marketingEmail: false
-    }
+    // The step signs in and closes: on to the offer.
+    page.account = signedIn
     page.stepOpen = false
     await render()
-    if (paid) {
-      expect(fetch).toHaveBeenCalledWith(`/api/toots/${TOOT}/checkout/`, expect.anything())
-    } else expect(fetch).not.toHaveBeenCalled()
+    expect(asked(fetch, ACCESS_PATH)).toBe(1)
+    expect(asked(fetch, CHECKOUT_PATH)).toBe(0)
+    expect(sheet()).not.toBeNull()
+    expect(page.saveToot).not.toHaveBeenCalled()
+  })
+
+  it('saves once the step signs in to an account with Full Access', async () => {
+    server({ access: { active: true } })
+    await render()
+    await tapSave()
+    page.account = signedIn
+    page.stepOpen = false
+    await render()
+    expect(sheet()).toBeNull()
     expect(page.saveToot).toHaveBeenCalledWith(draft)
   })
 

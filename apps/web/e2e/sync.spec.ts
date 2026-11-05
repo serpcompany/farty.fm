@@ -2,7 +2,7 @@ import { writeFileSync } from 'node:fs'
 import { type BrowserContext, expect, type Page, test } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
 import { newEmail, signInByApi } from './account'
-import { payToSave } from './pay'
+import { savePayingIfAsked } from './pay'
 import { recordAndSave, withFakeMicrophone } from './record'
 import { onPhone } from './screens'
 
@@ -309,7 +309,7 @@ async function listenToThePage(context: BrowserContext) {
   })
 }
 
-/** Opens a Song from Compose, waits for its Toot, pays to save it, and goes back to Compose. */
+/** Opens a Song from Compose, waits for its Toot, saves it, and goes back to Compose. */
 async function makeAToot(page: Page, songId: string) {
   await tab(page, 'Compose').click()
   await page
@@ -318,7 +318,7 @@ async function makeAToot(page: Page, songId: string) {
     .getByRole('link')
     .click({ timeout: 60_000 })
   await expect(page.getByTestId('song-creator-state')).toBeVisible({ timeout: 60_000 })
-  await payToSave(page)
+  await savePayingIfAsked(page)
   await page.getByRole('link', { name: 'Back to Compose' }).click()
   await expect(page).toHaveURL(/\/compose\/$/)
 }

@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process'
 import { randomInt } from 'node:crypto'
 import { type BrowserContext, expect, type Page, type TestInfo } from '@playwright/test'
 
@@ -76,4 +77,16 @@ export function session(
   page: Page
 ): Promise<{ user: { email: string; marketingEmail: boolean } } | null> {
   return page.evaluate(async () => (await fetch('/api/auth/get-session')).json())
+}
+
+/**
+ * Runs `sql` on the local run's database, for what no local request can do: a payment from before
+ * Full Access, or a refund, which only Stripe's webhook records.
+ */
+export function onTheLocalDatabase(sql: string): void {
+  execFileSync(
+    'pnpm',
+    ['exec', 'wrangler', 'd1', 'execute', 'pedos-local', '--local', '--command', sql],
+    { stdio: 'pipe' }
+  )
 }

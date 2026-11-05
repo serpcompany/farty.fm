@@ -92,6 +92,10 @@ _Avoid_: Smart choose, AI pick, best fit
 A saved result, of one of two kinds: a Song played with the user's Recordings, made in Song Creator, which keeps which Recording played each pitch; or a Sound Pad Performance, which keeps which Pad's Recording was tapped and when (ADR 0017). It is not a conventional song or a music release.
 _Avoid_: Created Melody, Melody, Created Song, generated song, track, output
 
+**Full Access**:
+One purchase per account that lets every Save keep its Toot (ADR 0022). An account that paid for a Toot before it has it too, and a full refund ends it. It doesn't change which Songs are Unlocked Songs.
+_Avoid_: Premium, Pro, subscription, unlock
+
 ## Creation areas
 
 **Song Creator**:

@@ -89,10 +89,11 @@ export default function PrivacyPage() {
 
       <h2>Payments</h2>
       <p>
-        When you pay to save a Toot, Stripe processes the payment on its own checkout page. Your
-        card details go to Stripe and never reach Farty. Farty keeps which Toot was paid for, when,
-        and Stripe&apos;s reference for the payment. Stripe&apos;s use of your data is described in
-        its <a href="https://stripe.com/privacy">privacy policy</a>.
+        When you pay for Full Access, Stripe processes the payment on its own checkout page. Your
+        card details go to Stripe and never reach Farty. Farty keeps that your account paid, when,
+        any refund, and Stripe&apos;s reference for the payment, and for a payment from before Full
+        Access, which Toot it was for. Stripe&apos;s use of your data is described in its{' '}
+        <a href="https://stripe.com/privacy">privacy policy</a>.
       </p>
 
       <h2>The microphone</h2>
