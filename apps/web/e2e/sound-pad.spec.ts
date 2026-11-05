@@ -9,14 +9,14 @@ import {
   getUserMediaMs,
   waitForOpenMicrophone
 } from './fake-microphone'
-import { payAtTheDevCheckout } from './pay'
+import { payOnTheSheet, payToSave, saveWithFullAccess } from './pay'
 import { skipWelcome } from './record'
 
 // The Sound Pad (#277), with two Recordings made through the fake microphone: 095 (F2) and 090
 // (G3). A probe notes each sound a Pad starts, and the press that started it, so the journey sees
 // playback start, raw, at the Pads' one level, and how long after the press. Then a take (#278):
-// what the Pads play from Record to Stop, heard back, paid for at the dev checkout and saved as a
-// Toot (ADR 0017).
+// what the Pads play from Record to Stop, heard back, and saved as a Toot (ADR 0017), with Full
+// Access paid for at the dev checkout, once (ADR 0022).
 //
 // With E2E_EVIDENCE_DIR set, the take's journey also writes its Toot's WAV, its presses and
 // screenshots there, for the PR.
@@ -177,7 +177,7 @@ type Kept = {
   performance: { recordings: string[]; taps: [number, number][] }
 }
 
-test('records a take on the Pads, plays it back, and saves it as a Toot for $0.99', async ({
+test('records a take on the Pads, plays it back, and saves it as a Toot, paying once', async ({
   page
 }, testInfo) => {
   test.setTimeout(180_000)
@@ -231,11 +231,9 @@ test('records a take on the Pads, plays it back, and saves it as a Toot for $0.9
   if (out) await page.screenshot({ path: join(out, 'pad-made.png') })
   await expect(toot).toHaveText('Ready', { timeout: 15_000 })
 
-  // Hearing it is free; saving it is $0.99, through the checkout, back to the Sound Pad.
-  const save = page.getByRole('button', { name: 'Save to Toots · $0.99' })
-  await expect(save).toBeVisible()
-  await save.click()
-  await payAtTheDevCheckout(page, 'pad')
+  // Hearing it is free; saving it takes Full Access, through the checkout, back to the Sound Pad.
+  await expect(page.getByRole('button', { name: 'Save to Toots' })).toBeVisible()
+  await payToSave(page, 'pad')
   await expect(page.getByTestId('pad-toot-state')).toHaveText('Ready')
   if (out) await page.screenshot({ path: join(out, 'pad-saved.png') })
 
@@ -299,7 +297,7 @@ test('saves a paid take on the next open when the return from Checkout never loa
   page.on('request', request => {
     const { pathname } = new URL(request.url())
     if (request.method() !== 'POST') return
-    if (/^\/api\/toots\/[\w-]+\/checkout\/$/.test(pathname) || pathname === '/api/dev/checkout/')
+    if (pathname === '/api/full-access/checkout/' || pathname === '/api/dev/checkout/')
       checkouts.push(pathname)
   })
   // Pay goes through, but the page closes at Checkout: the return never loads.
@@ -310,16 +308,18 @@ test('saves a paid take on the next open when the return from Checkout never loa
     paidReturn = paid.headers().location ?? ''
     await route.fulfill({ contentType: 'text/html', body: '<p>Closed at Checkout</p>' })
   })
-  await page.getByRole('button', { name: 'Save to Toots · $0.99' }).click()
+  await page.getByRole('button', { name: 'Save to Toots' }).click()
+  await payOnTheSheet(page)
   await expect(page).toHaveURL(/\/dev\/checkout\/\?toot=[\w-]+$/)
   const tootId = new URL(page.url()).searchParams.get('toot')
-  await page.getByRole('button', { name: 'Pay $0.99' }).click()
+  await page.getByRole('button', { name: 'Pay $4.99' }).click()
   await expect(page.getByText('Closed at Checkout')).toBeVisible()
   expect(paidReturn).toContain(`/compose/pad/?toot=${tootId}&checkout=done`)
   await page.unroute('**/api/dev/checkout/')
   expect(await toots(page)).toEqual([])
 
-  // Opened again, with no return: the Sound Pad saves the take it was paid for, by itself.
+  // Opened again, with no return: the account has Full Access, so the Sound Pad saves the take, by
+  // itself.
   await page.goto('/compose/pad/')
   await expect(page.getByRole('button', { name: 'Saved to Toots' })).toBeDisabled({
     timeout: 60_000
@@ -334,7 +334,16 @@ test('saves a paid take on the next open when the return from Checkout never loa
   await expect(pad(page, 1)).toHaveAttribute('data-ready', 'true')
   await expect(page.getByTestId('pad-take-state')).toHaveText('Record')
   expect((await toots(page)).map(toot => toot.id)).toEqual([tootId])
-  expect(checkouts).toEqual([`/api/toots/${tootId}/checkout/`, '/api/dev/checkout/'])
+  expect(checkouts).toEqual(['/api/full-access/checkout/', '/api/dev/checkout/'])
+
+  // Another take saves with nothing to pay, as Song Creator's Toots do.
+  await page.getByTestId('pad-take-record').tap()
+  await pad(page, 1).tap()
+  await page.getByTestId('pad-take-stop').tap()
+  await expect(page.getByTestId('pad-toot-state')).toHaveText('Ready', { timeout: 60_000 })
+  await saveWithFullAccess(page)
+  expect(await toots(page)).toHaveLength(2)
+  expect(checkouts).toEqual(['/api/full-access/checkout/', '/api/dev/checkout/'])
 })
 
 /** The Toots in this browser's IndexedDB. */

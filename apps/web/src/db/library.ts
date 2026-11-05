@@ -97,6 +97,16 @@ export async function uploadState(
   return { status: statusOf(status), live }
 }
 
+/** How many live items of `kind` the user has. */
+export async function liveItems(db: Database, kind: Kind, userId: string): Promise<number> {
+  const table = tables[kind]
+  const [row] = await db
+    .select({ live: count() })
+    .from(table)
+    .where(and(eq(table.userId, userId), isNull(table.deletedAt)))
+  return row?.live ?? 0
+}
+
 export async function itemStatus(
   db: Database,
   kind: Kind,
@@ -133,59 +143,26 @@ export async function insertRecording(
   return added.length === 1
 }
 
-/** The insert of `insertToot`, and with `paid`, only while the Toot's payment is paid and unused. */
-function tootInsert(db: Database, userId: string, t: NewToot, limit: number, paid: boolean) {
-  const payment = paid
-    ? sql`and exists (select 1 from toot_payments where user_id = ${userId}
-        and toot_id = ${t.id} and paid_at is not null and saved_at is null)`
-    : sql``
-  return db.all(sql`
-    insert into toots (user_id, id, title, song_id, created_at, seconds, arrangement,
-      performance, score, audio_bytes, updated_at)
-    select ${userId}, ${t.id}, ${t.title}, ${t.songId}, ${t.createdAt}, ${t.seconds},
-      ${json(t.arrangement)}, ${json(t.performance)}, ${json(t.score)}, ${t.audioBytes}, ${d1Now}
-    where (select count(*) from toots where user_id = ${userId} and deleted_at is null)
-      < ${limit} ${payment}
-    on conflict do nothing
-    returning id`)
-}
-
-/** Adds the Toot, as `insertRecording` adds a Recording. True if added. */
+/**
+ * Adds the Toot unless the user already has a row with its id or already has `limit` live Toots, as
+ * `insertRecording` adds a Recording. True if added.
+ */
 export async function insertToot(
   db: Database,
   userId: string,
   t: NewToot,
   limit: number
 ): Promise<boolean> {
-  return (await tootInsert(db, userId, t, limit, false)).length === 1
-}
-
-/**
- * Adds a paid Toot, as `insertToot`, while its payment is paid and unused, and uses the payment up
- * (`saved_at`) in the same transaction, so a Toot paid for once is saved once (ADR 0010): deleted,
- * it can't come back, even after its tombstone is purged. True if added.
- */
-export async function insertPaidToot(
-  db: Database,
-  userId: string,
-  t: NewToot,
-  limit: number
-): Promise<boolean> {
-  const useUp = db.run(sql`
-    update toot_payments set saved_at = ${d1Now}
-    where user_id = ${userId} and toot_id = ${t.id} and paid_at is not null
-      and saved_at is null
-      and exists (select 1 from toots where user_id = ${userId} and id = ${t.id})`)
-  // D1's batch is one transaction. Drizzle's own `batch` can't run a raw query with parameters.
-  const statement = (query: { getQuery(): { sql: string; params: unknown[] } }) => {
-    const built = query.getQuery()
-    return db.$client.prepare(built.sql).bind(...built.params)
-  }
-  const [added] = await db.$client.batch([
-    statement(tootInsert(db, userId, t, limit, true)),
-    statement(useUp)
-  ])
-  return added.results.length === 1
+  const added = await db.all(sql`
+    insert into toots (user_id, id, title, song_id, created_at, seconds, arrangement,
+      performance, score, audio_bytes, updated_at)
+    select ${userId}, ${t.id}, ${t.title}, ${t.songId}, ${t.createdAt}, ${t.seconds},
+      ${json(t.arrangement)}, ${json(t.performance)}, ${json(t.score)}, ${t.audioBytes}, ${d1Now}
+    where (select count(*) from toots where user_id = ${userId} and deleted_at is null)
+      < ${limit}
+    on conflict do nothing
+    returning id`)
+  return added.length === 1
 }
 
 /**

@@ -26,6 +26,15 @@ import type { Song, SongSummary } from '@/lib/catalog/song'
 import { type Arrangement, type MissingNote, songPitches } from '@/lib/engine/auto-map'
 import { arrangeChoices, type FartChoices, sameFartChoices } from '@/lib/engine/fart-choices'
 import { changedChoices, changeLine, type FartChange, fartSheet } from '@/lib/fart-sheet'
+import {
+  type CheckoutReturn,
+  clearCheckoutReturn,
+  readCheckoutReturn,
+  saveAsksForPayment,
+  saveCheck,
+  startCheckout,
+  waitForFullAccess
+} from '@/lib/full-access'
 import { noteName } from '@/lib/pitch'
 import {
   autoMapRecordings,
@@ -35,7 +44,6 @@ import {
   formattedFartLength,
   missingNotes
 } from '@/lib/pitch-coverage'
-import { TOOT_PRICE_LABEL } from '@/lib/pricing'
 import * as store from '@/lib/recording-store'
 import { playedPart, type Recording, recordingName, songPitch } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
@@ -49,15 +57,6 @@ import {
   type TootArrangement,
   type TootDraft
 } from '@/lib/toot'
-import {
-  type CheckoutReturn,
-  clearCheckoutReturn,
-  paidReturnPath,
-  readCheckoutReturn,
-  saveAsksForPayment,
-  startCheckout,
-  waitUntilPaid
-} from '@/lib/toot-payment'
 import { TootError, tootArrangement } from '@/lib/toot-renderer'
 import { cn } from '@/lib/utils'
 import { decodeWav } from '@/lib/wav'
@@ -65,6 +64,7 @@ import { waveformLevels } from '@/lib/waveform'
 import { useAccount } from './account-provider'
 import { FartSheetView } from './fart-sheet'
 import { FavoriteButton } from './favorite-button'
+import { FullAccessSheet } from './full-access-sheet'
 import { NoteView, pitchColor } from './note-view'
 import { tootPlayback, usePedos } from './pedos-provider'
 import { pianoSchedule, stopPiano } from './piano-preview'
@@ -138,7 +138,7 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
     [pitches, melodic, choices, sheetPitch]
   )
 
-  // Back from Checkout, the same Toot is made again, with the id it was paid for (ADR 0010).
+  // Back from Checkout, the same Toot is made again, with the id it went with (ADR 0022).
   const make = useEffectEvent(async (song: Song) => {
     const back = readCheckoutReturn()
     return { draft: await pedos.makeToot(song, back?.tootId, choices), back }
@@ -411,7 +411,7 @@ const SAVE_PROBLEMS = {
   limitReached: "You've kept as many Toots as an account can. Delete one to save this one.",
   charged: (
     <>
-      You were charged, but this Toot couldn't be saved.{' '}
+      You were charged, but Full Access didn't start.{' '}
       <Link href="/support/" className="underline">
         Contact support
       </Link>{' '}
@@ -438,9 +438,9 @@ function heldByAnAccount(): boolean {
  * Save to Toots, pinned above the tabs, for a made Toot: of a Song (Song Creator), or of a Sound
  * Pad Performance (the Sound Pad, ADR 0017). Saving needs an account everywhere (#237): a guest's
  * Save opens the account step first, and carries on once it signs in. Where saving is paid
- * (ADR 0010), Save goes to Checkout for this Toot; back from Checkout, it saves the Toot once the
- * server says it's paid. A Toot of this Song paid for and never saved is saved instead of paying
- * again. Where it's free, Save saves, offline too in an account's browser.
+ * (ADR 0022), Save saves on an account with Full Access. Without it, Save offers it, and Pay goes to
+ * Checkout; back from Checkout, it saves the Toot once the server says the account has it. Where
+ * saving is free, Save saves, offline too in an account's browser.
  *
  * `keep`, before Checkout, keeps what makes the Toot again back from it (the Sound Pad's take):
  * false when this browser can't, and then Checkout isn't started, so nothing is paid for that
@@ -463,7 +463,9 @@ export function SaveToToots({
   const returnedPaid = isPaid && back?.done === true && back.tootId === draft.id
   const [busy, setBusy] = useState<'saving' | 'paying' | 'confirming' | null>(null)
   const [problem, setProblem] = useState<keyof typeof SAVE_PROBLEMS | null>(null)
-  /** Save opened the account step: once it signs in, on to Checkout, or to saving. */
+  /** Save found no Full Access: its sheet is open. */
+  const [offering, setOffering] = useState(false)
+  /** Save opened the account step: once it signs in, on to the offer, or to saving. */
   const [savesAfterSignIn, setSavesAfterSignIn] = useState(false)
   /** A second tap, before the first one's answer, starts nothing. */
   const paying = useRef(false)
@@ -489,6 +491,7 @@ export function SaveToToots({
   const pay = async (accountId: string) => {
     if (paying.current) return
     if (keepForCheckout && !keepForCheckout(accountId)) {
+      setOffering(false)
       setProblem('notKept')
       return
     }
@@ -501,19 +504,29 @@ export function SaveToToots({
       window.location.assign(checkout.url)
       return
     }
-    if (checkout.kind === 'paidToot' && draft.song) {
-      // That Toot is made again and saved, as back from its Checkout. This one is left unpaid.
-      window.location.replace(paidReturnPath(draft.song.id, checkout.tootId))
-      return
-    }
     paying.current = false
     setBusy(null)
-    if (checkout.kind === 'paid') {
+    setOffering(false)
+    if (checkout.kind === 'active') {
       if (await save()) clearCheckoutReturn()
-    } else setProblem(checkout.kind === 'failed' ? checkout.problem : 'failed')
+    } else setProblem(checkout.problem)
   }
-  /** Saves the Toot, paying first where saving is paid. */
-  const keep = (accountId: string) => void (isPaid ? pay(accountId) : save())
+  /** Saves the Toot if the account has Full Access, and offers it if not. */
+  const saveOrOffer = async (accountId: string) => {
+    if (paying.current) return
+    paying.current = true
+    setBusy('paying')
+    setProblem(null)
+    const check = await saveCheck(accountId)
+    paying.current = false
+    setBusy(null)
+    if (check === null) setProblem('unreachable')
+    else if (check === 'limitReached') setProblem('limitReached')
+    else if (check === 'offer') setOffering(true)
+    else if (await save()) clearCheckoutReturn()
+  }
+  /** Saves the Toot, with Full Access first where saving is paid. */
+  const keep = (accountId: string) => void (isPaid ? saveOrOffer(accountId) : save())
   const keepAfterSignIn = useEffectEvent(keep)
 
   const tapSave = () => {
@@ -537,12 +550,12 @@ export function SaveToToots({
     }
   }
 
-  // The account is back: Save can pay.
+  // The account is back: Save can carry on.
   useEffect(() => {
     if (accountId) setProblem(current => (current === 'unreachable' ? null : current))
   }, [accountId])
 
-  // The account step that Save opened: signed in, on to Checkout or saving; Not now saves nothing.
+  // The account step that Save opened: signed in, on to the offer or saving; Not now saves nothing.
   useEffect(() => {
     if (!savesAfterSignIn) return
     if (accountId) {
@@ -562,14 +575,15 @@ export function SaveToToots({
     return () => window.removeEventListener('pageshow', shown)
   }, [])
 
-  // Back from Checkout for this Toot: saved once it's paid, which Stripe usually says at once. A
-  // paid Toot is saved even if the screen has been left meanwhile. Until it's saved, the address
-  // keeps the return, so a reload makes the same Toot and checks again.
+  // Back from Checkout for this Toot: saved once the account has Full Access, which Stripe usually
+  // says at once. It's saved even if the screen has been left meanwhile. Until it's saved, the
+  // address keeps the return, so a reload makes the same Toot and checks again.
   const confirm = useEffectEvent(async (accountId: string) => {
     setBusy('confirming')
-    const paid = await waitUntilPaid(draft.id, accountId)
+    const access = await waitForFullAccess(accountId)
     setBusy(null)
-    if (!paid) setProblem('notPaidYet')
+    if (access === null) setProblem('notPaidYet')
+    else if (access === 'limitReached') setProblem('limitReached')
     else if (await save()) clearCheckoutReturn()
   })
   // The account isn't read yet: the confirming waits for it. If it can't be read, Save reads it
@@ -609,8 +623,6 @@ export function SaveToToots({
             <Spinner className="size-5" />
             Confirming payment…
           </>
-        ) : isPaid ? (
-          `Save to Toots · ${TOOT_PRICE_LABEL}`
         ) : (
           'Save to Toots'
         )}
@@ -620,6 +632,15 @@ export function SaveToToots({
           {SAVE_PROBLEMS[shownProblem]}
         </p>
       )}
+      <FullAccessSheet
+        open={offering}
+        busy={busy === 'paying'}
+        onPay={() => {
+          if (accountId) void pay(accountId)
+          else setOffering(false)
+        }}
+        onClose={() => setOffering(false)}
+      />
     </div>
   )
 }

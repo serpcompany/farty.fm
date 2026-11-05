@@ -1,13 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
-  paidReturnPath,
+  canSaveFromStored,
   readCheckoutReturn,
+  saveCheck,
   startCheckout,
-  tootPaid,
-  tootPaymentState,
-  waitUntilPaid
-} from './toot-payment'
+  waitForFullAccess
+} from './full-access'
 
 const TOOT = '33333333-3333-4333-8333-333333333333'
 
@@ -28,17 +27,17 @@ const answering = (response: Response | Error) =>
     )
 
 describe('startCheckout', () => {
-  it('asks for the Toot’s checkout as the account’s library', async () => {
+  it('asks for Full Access’s checkout as the account’s library, naming the Toot to come back to', async () => {
     const fetch = answering(Response.json({ url: 'https://checkout.stripe.com/c/pay/cs_test_a' }))
     expect(await startCheckout(TOOT, 'twinkle', 'userA')).toEqual({
       kind: 'pay',
       url: 'https://checkout.stripe.com/c/pay/cs_test_a'
     })
     const [path, init] = fetch.mock.calls[0]
-    expect(path).toBe(`/api/toots/${TOOT}/checkout/`)
+    expect(path).toBe('/api/full-access/checkout/')
     expect(init?.method).toBe('POST')
     expect(new Headers(init?.headers).get('x-pedos-library')).toBe('userA')
-    expect(JSON.parse(String(init?.body))).toEqual({ songId: 'twinkle' })
+    expect(JSON.parse(String(init?.body))).toEqual({ tootId: TOOT, songId: 'twinkle' })
   })
 
   it('goes to the dev checkout on this site', async () => {
@@ -64,27 +63,9 @@ describe('startCheckout', () => {
     }
   })
 
-  it('has nothing to pay for a paid Toot', async () => {
-    answering(Response.json({ paid: true }))
-    expect(await startCheckout(TOOT, 'twinkle', 'userA')).toEqual({ kind: 'paid' })
-  })
-
-  it('names another Toot of the Song that is paid for and was never saved', async () => {
-    const other = '44444444-4444-4444-8444-444444444444'
-    answering(Response.json({ paidToot: other }))
-    expect(await startCheckout(TOOT, 'twinkle', 'userA')).toEqual({
-      kind: 'paidToot',
-      tootId: other
-    })
-    vi.restoreAllMocks()
-    for (const paidToot of ['../profile', `${other}x`, 42]) {
-      answering(Response.json({ paidToot }))
-      expect(await startCheckout(TOOT, 'twinkle', 'userA')).toEqual({
-        kind: 'failed',
-        problem: 'failed'
-      })
-      vi.restoreAllMocks()
-    }
+  it('has nothing to pay on an account with Full Access', async () => {
+    answering(Response.json({ active: true }))
+    expect(await startCheckout(TOOT, 'twinkle', 'userA')).toEqual({ kind: 'active' })
   })
 
   it('says why it failed', async () => {
@@ -94,6 +75,7 @@ describe('startCheckout', () => {
       [Response.json({ error: 'payment_mismatch' }, { status: 409 }), 'charged'],
       [Response.json({ error: 'rate_limited' }, { status: 429 }), 'tooMany'],
       [Response.json({ error: 'wrong_library' }, { status: 409 }), 'failed'],
+      [Response.json({ error: 'deleted' }, { status: 410 }), 'failed'],
       [Response.json({ error: 'payments_failed' }, { status: 502 }), 'failed'],
       [new TypeError('offline'), 'failed']
     ]
@@ -105,53 +87,63 @@ describe('startCheckout', () => {
   })
 })
 
-describe('tootPaid', () => {
-  it('is the server’s answer, or null when it couldn’t say', async () => {
-    answering(Response.json({ paid: true }))
-    expect(await tootPaid(TOOT, 'userA')).toBe(true)
-    vi.restoreAllMocks()
-    answering(Response.json({ paid: false }))
-    expect(await tootPaid(TOOT, 'userA')).toBe(false)
-    vi.restoreAllMocks()
-    answering(Response.json({ error: 'signed_out' }, { status: 401 }))
-    expect(await tootPaid(TOOT, 'userA')).toBeNull()
-  })
-})
-
-describe('tootPaymentState', () => {
-  it('is unused only for a payment no save has used, and null when the server can’t say', async () => {
-    const cases: [Response, Awaited<ReturnType<typeof tootPaymentState>>][] = [
-      [Response.json({ paid: true, unused: true }), 'unused'],
-      [Response.json({ paid: true, unused: false }), 'used'],
-      [Response.json({ paid: false, unused: false }), 'unpaid'],
-      // A Worker from before `unused`: it can't tell a used payment from an unused one.
-      [Response.json({ paid: true }), null],
-      [Response.json({ error: 'signed_out' }, { status: 401 }), null]
+describe('saveCheck', () => {
+  it('is what Save does on this account, and null when Farty couldn’t say', async () => {
+    const cases: [Response | Error, Awaited<ReturnType<typeof saveCheck>>][] = [
+      [Response.json({ active: true, limitReached: false }), 'save'],
+      [Response.json({ active: true, limitReached: true }), 'limitReached'],
+      [Response.json({ active: false, limitReached: false }), 'offer'],
+      [Response.json({ error: 'signed_out' }, { status: 401 }), null],
+      [Response.json({}), null],
+      [new TypeError('offline'), null]
     ]
-    for (const [response, state] of cases) {
+    for (const [response, then] of cases) {
       const fetch = answering(response)
-      expect(await tootPaymentState(TOOT, 'userA')).toBe(state)
-      // What D1 has: the Sound Pad's open never spends the Stripe checks a return waits on.
-      expect(fetch.mock.calls[0][0]).toBe(`/api/toots/${TOOT}/payment/?check=stored`)
+      expect(await saveCheck('userA')).toBe(then)
+      const [path, init] = fetch.mock.calls[0]
+      expect(path).toBe('/api/full-access/')
+      expect(new Headers(init?.headers).get('x-pedos-library')).toBe('userA')
       vi.restoreAllMocks()
     }
   })
 })
 
-describe('waitUntilPaid', () => {
+describe('canSaveFromStored', () => {
+  it('asks what D1 has, so the Sound Pad’s open never spends the Stripe checks a return waits on', async () => {
+    const cases: [Response, boolean | null][] = [
+      [Response.json({ active: true, limitReached: false }), true],
+      [Response.json({ active: true, limitReached: true }), false],
+      [Response.json({ active: false, limitReached: false }), false],
+      [Response.json({ error: 'signed_out' }, { status: 401 }), null]
+    ]
+    for (const [response, then] of cases) {
+      const fetch = answering(response)
+      expect(await canSaveFromStored('userA')).toBe(then)
+      expect(fetch.mock.calls[0][0]).toBe('/api/full-access/?check=stored')
+      vi.restoreAllMocks()
+    }
+  })
+})
+
+describe('waitForFullAccess', () => {
   it('asks again until the payment comes through', async () => {
-    const answers = [{ paid: false }, { error: 'payments_failed' }, { paid: true }]
+    const answers = [{ active: false }, { error: 'payments_failed' }, { active: true }]
     const fetch = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
       const body = answers.shift()
       return Response.json(body, { status: body && 'error' in body ? 502 : 200 })
     })
-    expect(await waitUntilPaid(TOOT, 'userA', { tries: 5, intervalMs: 1 })).toBe(true)
+    expect(await waitForFullAccess('userA', { tries: 5, intervalMs: 1 })).toBe('save')
     expect(fetch).toHaveBeenCalledTimes(3)
   })
 
+  it('says when the account has Full Access but no room for the Toot', async () => {
+    answering(Response.json({ active: true, limitReached: true }))
+    expect(await waitForFullAccess('userA', { tries: 3, intervalMs: 1 })).toBe('limitReached')
+  })
+
   it('gives up after its tries', async () => {
-    const fetch = answering(Response.json({ paid: false }))
-    expect(await waitUntilPaid(TOOT, 'userA', { tries: 3, intervalMs: 1 })).toBe(false)
+    const fetch = answering(Response.json({ active: false }))
+    expect(await waitForFullAccess('userA', { tries: 3, intervalMs: 1 })).toBeNull()
     expect(fetch).toHaveBeenCalledTimes(3)
   })
 })
@@ -169,16 +161,5 @@ describe('readCheckoutReturn', () => {
     for (const search of ['', '?checkout=done', '?toot=abc&checkout=done', `?toot=${TOOT}x`]) {
       expect(readCheckoutReturn(search)).toBeNull()
     }
-  })
-})
-
-describe('paidReturnPath', () => {
-  it('is the Song Creator address a paid Checkout comes back to', () => {
-    const path = paidReturnPath('twinkle', TOOT)
-    expect(path).toBe(`/compose/twinkle/?toot=${TOOT}&checkout=done`)
-    expect(readCheckoutReturn(new URL(path, 'https://farty.fm').search)).toEqual({
-      tootId: TOOT,
-      done: true
-    })
   })
 })

@@ -8,12 +8,12 @@ import {
   waitForOpenMicrophone
 } from './fake-microphone'
 import { fixtureRecordings, songsUnlockedBy } from './golden'
-import { payAtTheDevCheckout } from './pay'
+import { payAtTheDevCheckout, payOnTheSheet } from './pay'
 import { skipWelcome } from './record'
 
-// Saving a Toot on a Production build, where it costs $0.99 as everywhere (ADR 0010, #258): signed
-// in, Save to Toots shows the price and goes to the payment step, never a free save; two taps
-// start one checkout; and the Toot saves once it's paid, once. Mary Had a Little Lamb unlocks with
+// Saving a Toot on a Production build, where it takes Full Access as everywhere (ADR 0010, ADR 0022,
+// #258): signed in, Save to Toots offers it with its price and goes to the payment step, never a
+// free save; two taps start one checkout; and the Toot saves once it's paid, once. Mary Had a Little Lamb unlocks with
 // fixtures 095, 017, 022 and 002, as in `compose.spec.ts`.
 //
 // It runs on the Production build's own Worker, run locally with no `--env`: sign-in has the dev
@@ -49,7 +49,7 @@ async function accountToots(page: Page): Promise<string[]> {
   })
 }
 
-test('a signed-in save pays $0.99 first, and two taps pay for and save one Toot', async ({
+test('a signed-in save pays $4.99 first, and two taps pay for and save one Toot', async ({
   page
 }, testInfo) => {
   test.setTimeout(180_000)
@@ -81,19 +81,22 @@ test('a signed-in save pays $0.99 first, and two taps pay for and save one Toot'
   await expect(page).toHaveURL(/\/compose\/mary\/$/)
   await expect(page.getByTestId('song-creator-state')).toBeVisible({ timeout: 60_000 })
 
-  // Save shows the price. Two taps before the first is answered go to the payment step once.
+  // The offer shows the price. Two taps before the first is answered offer it once.
   const save = page.getByRole('button', { name: 'Save to Toots' })
-  await expect(save).toHaveText('Save to Toots · $0.99')
+  await expect(save).toHaveText('Save to Toots')
   const writes: string[] = []
   page.on('request', request => {
     const { pathname } = new URL(request.url())
-    if (request.method() === 'GET' || !/^\/api\/(toots|dev\/checkout)\//.test(pathname)) return
+    if (request.method() === 'GET' || !/^\/api\/(toots|full-access|dev\/checkout)\//.test(pathname))
+      return
     writes.push(`${request.method()} ${pathname.replace(/[0-9a-f-]{36}/, '{id}')}`)
   })
   await save.evaluate(button => {
     ;(button as HTMLButtonElement).click()
     ;(button as HTMLButtonElement).click()
   })
+  await expect(page.getByTestId('full-access-sheet')).toContainText('$4.99, once.')
+  await payOnTheSheet(page)
   await payAtTheDevCheckout(page)
   await expect(page.getByText("Couldn't save this Toot.")).toHaveCount(0)
 
@@ -102,7 +105,7 @@ test('a signed-in save pays $0.99 first, and two taps pay for and save one Toot'
   await page.waitForTimeout(1000)
   expect(await accountToots(page)).toHaveLength(1)
   expect(writes).toEqual([
-    'POST /api/toots/{id}/checkout/',
+    'POST /api/full-access/checkout/',
     'POST /api/dev/checkout/',
     'PUT /api/toots/{id}/'
   ])

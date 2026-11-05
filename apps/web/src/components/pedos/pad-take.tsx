@@ -1,10 +1,16 @@
 'use client'
 
 import { CircleAlert, Play, Square } from 'lucide-react'
-import Link from 'next/link'
 import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
+import {
+  type CheckoutReturn,
+  canSaveFromStored,
+  clearCheckoutReturn,
+  readCheckoutReturn,
+  saveAsksForPayment
+} from '@/lib/full-access'
 import { libraryPulled, onLibraryPulled } from '@/lib/library-sync'
 import {
   forgetTake,
@@ -23,13 +29,6 @@ import {
 } from '@/lib/performance'
 import { reportError } from '@/lib/telemetry/errors'
 import { formattedTootLength, type PadToot, type PadTootDraft } from '@/lib/toot'
-import {
-  type CheckoutReturn,
-  clearCheckoutReturn,
-  readCheckoutReturn,
-  saveAsksForPayment,
-  tootPaymentState
-} from '@/lib/toot-payment'
 import { TootError } from '@/lib/toot-renderer'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
@@ -37,13 +36,13 @@ import { tootPlayback, usePedos } from './pedos-provider'
 
 // The Sound Pad's take (#278, ADR 0017): Record, play the Pads, Stop, and the taps become a
 // Performance, made into a Toot in the render worker. Hearing it is free; Save to Toots saves it
-// as any Toot (ADR 0010).
+// as any Toot (ADR 0022).
 
 /** A take being made into its Toot `id`, or that couldn't be. */
 type Take = {
   played: Performance
   id: string
-  /** The return from Checkout it's made for, or a paid take saved on the Pad's open. */
+  /** The return from Checkout it's made for, or a take saved on the Pad's open. */
   back: CheckoutReturn | null
   /** Made, it plays once: a take just stopped on a page in view. */
   plays: boolean
@@ -52,7 +51,7 @@ type Take = {
 }
 
 type Phase =
-  /** `lost`: a paid take couldn't be made again, which the Pad says. */
+  /** `lost`: a take back from Checkout couldn't be made again, which the Pad says. */
   | { kind: 'idle'; lost?: boolean }
   /** `firstTapAt`: when the first tap played (`performance.now()`), the take's start. */
   | { kind: 'recording'; firstTapAt: number | null }
@@ -78,12 +77,12 @@ export type PadTake = {
  * The Sound Pad's take: up to `MAX_PERFORMANCE_SECONDS` from its first tap, or `MAX_TAPS` taps,
  * then it stops by itself, as hiding the page does. Stopped, it's kept in this browser
  * (`pad-take.ts`) until it's saved, by its Toot id, and made: it plays once, unless the page is
- * hidden. Back from Checkout the same Toot is made again with the id it was paid for. Opened, the
- * Pad shows the newest kept take again, ready to play, and where saving is paid it asks the account
- * about each kept take: one paid whose return never loaded is made again and saved, one whose
- * payment a save used is let go, and nothing else is. A paid take that can't be made again is said
- * and reported, for a refund: signed in, only once the account's changes are read, as its
- * Recordings may still be on their way. Only this library's takes are read (`pad-take.ts`).
+ * hidden. Back from Checkout the same Toot is made again with the same id. Opened, the
+ * Pad shows the newest kept take again, ready to play. Where saving is paid, once the account has
+ * Full Access, the newest take that started a Checkout whose return never loaded is made again and
+ * saved. A take back from Checkout that can't be made again is said: signed in, only once the
+ * account's changes are read, as its Recordings may still be on their way. Only this library's
+ * takes are read (`pad-take.ts`).
  */
 export function usePadTake(): PadTake {
   const pedos = usePedos()
@@ -180,13 +179,13 @@ export function usePadTake(): PadTake {
   const canMake = (take: KeptTake) =>
     take.performance.recordings.every(id => pedos.recording(id) !== undefined)
   /**
-   * A paid take with a Recording not here yet, saved as back from its Checkout `back` once the
+   * A take back from Checkout with a Recording not here yet, saved as `back` once the
    * account's changes are read, or said to be lost if it's still missing then.
    */
   const awaiting = useRef<{ take: KeptTake; back: CheckoutReturn } | null>(null)
   /**
-   * What's on the Pad can give way to a kept take: nothing recorded, no Checkout return, no paid
-   * take waiting for its Recordings, and no lost take being said.
+   * What's on the Pad can give way to a kept take: nothing recorded, no Checkout return, no take
+   * waiting for its Recordings, and no lost take being said.
    */
   const replaceable = () => {
     const current = shown.current
@@ -194,14 +193,13 @@ export function usePadTake(): PadTake {
     if (current.kind === 'idle') return !current.lost
     return current.kind !== 'recording' && current.back === null
   }
-  /** A paid take that can't be made again: said on the Pad, reported for a refund, let go. */
+  /** A take back from Checkout that can't be made again: said on the Pad, and let go. */
   const lose = (tootId: string) => {
-    reportError('pad-paid-take-lost')
     forgetTake(tootId)
     setPhase({ kind: 'idle', lost: true })
   }
   /**
-   * Makes a paid take again, to save as back from its Checkout `back`. With a Recording missing
+   * Makes a take again, to save as back from its Checkout `back`. With a Recording missing
    * it's lost, once the account's changes are read: before, the Recording may still arrive.
    */
   const makePaid = (take: KeptTake, back: CheckoutReturn) => {
@@ -238,12 +236,12 @@ export function usePadTake(): PadTake {
         setPhase({ kind: 'making', ...take, plays: false, restored: false })
         return
       } else if (kept && back.done) {
-        // Paid for, with a Recording deleted since paying, or not read from the account yet.
+        // Back from paying, with a Recording deleted since, or not read from the account yet.
         clearCheckoutReturn()
         makePaid(kept, back)
         return
       } else if (back.done) {
-        // Paid for, and gone: storage cleared since paying.
+        // Back from paying, and gone: storage cleared since.
         clearCheckoutReturn()
         lose(back.tootId)
         return
@@ -253,7 +251,7 @@ export function usePadTake(): PadTake {
     for (const take of keptTakes()) {
       if (pedos.toot(take.tootId)) forgetTake(take.tootId)
       else if (!canMake(take)) {
-        // Where saving is paid, the account says first whether it was paid for.
+        // Where saving is paid, the account says first whether it can be saved.
         if (!saveAsksForPayment()) forgetTake(take.tootId)
       } else if (!restored) {
         restored = true
@@ -269,36 +267,18 @@ export function usePadTake(): PadTake {
     opened()
   }, [libraryRead])
 
-  // Where saving is paid, each kept take's payment, as D1 has it: paid and unused (its return never
-  // loaded), the take is made again and saved, as back from Checkout; used by a save, it's let go,
-  // and off the Pad if it's there. Unpaid, or not known, it stays kept: a payment whose webhook
-  // hasn't landed yet reads unpaid, and the next open asks again.
+  // Where saving is paid, a kept take that started a Checkout and whose return never loaded: with
+  // Full Access and room for it, as D1 has it, the newest is made again and saved, as back from
+  // Checkout, and any other waits for the next open. Otherwise, or not known, it stays kept: a
+  // purchase whose webhook hasn't landed yet reads as none, and the next open asks again.
   const recover = useEffectEvent(async (accountId: string) => {
     for (const take of keptTakes()) {
-      if (!replaceable()) return
-      if (pedos.toot(take.tootId)) {
-        forgetTake(take.tootId)
-        continue
-      }
-      const state = await tootPaymentState(take.tootId, accountId)
-      if (!replaceable()) return
-      if (state === 'used') {
-        forgetTake(take.tootId)
-        const current = shown.current
-        if (current.kind === 'ready' && current.draft.id === take.tootId) {
-          pedos.stopPlayback()
-          setPhase({ kind: 'idle' })
-        } else if (
-          (current.kind === 'making' || current.kind === 'failed') &&
-          current.id === take.tootId
-        ) {
-          setPhase({ kind: 'idle' })
-        }
-      } else if (state === 'unused') {
-        makePaidNow(take, { tootId: take.tootId, done: true })
-        return
-      }
+      if (pedos.toot(take.tootId)) forgetTake(take.tootId)
     }
+    const take = keptTakes().find(kept => kept.checkout)
+    if (!take || !replaceable()) return
+    const canSave = await canSaveFromStored(accountId)
+    if (canSave && replaceable()) makePaidNow(take, { tootId: take.tootId, done: true })
   })
   const isChecked = useRef(false)
   useEffect(() => {
@@ -318,10 +298,12 @@ export function usePadTake(): PadTake {
   useEffect(() => {
     if (!making || !loaded) return
     let left = false
+    // Only if it's still this take: another can be set in the same batch, before this effect leaves.
+    const settle = (next: Phase) => setPhase(now => (now === making ? next : now))
     make(making.played, making.id).then(
       draft => {
         if (left) return
-        setPhase({ kind: 'ready', draft, back: making.back })
+        settle({ kind: 'ready', draft, back: making.back })
         if (making.plays) playOnce(draft)
       },
       error => {
@@ -330,10 +312,10 @@ export function usePadTake(): PadTake {
         if (left) return
         if (making.restored && !saveAsksForPayment()) {
           // Shown again on the open where saving is free, it's let go rather than failing on every
-          // open. Where it's paid it may be paid for, so it stays kept, to try again.
+          // open. Where it's paid it may have paid, so it stays kept, to try again.
           forgetTake(making.id)
-          setPhase({ kind: 'idle' })
-        } else setPhase({ ...making, kind: 'failed' })
+          settle({ kind: 'idle' })
+        } else settle({ ...making, kind: 'failed' })
       }
     )
     return () => {
@@ -377,11 +359,8 @@ export function PadTakeControls({ take, disabled }: { take: PadTake; disabled: b
       <div className="flex flex-col gap-3">
         {lost && (
           <output className="block text-sm text-muted-foreground" data-testid="pad-take-lost">
-            Your payment went through, but this take couldn't be made again here.{' '}
-            <Link href="/support/" className="underline">
-              Contact support
-            </Link>{' '}
-            for a refund.
+            You have Full Access, but this take couldn't be made again here. Record it again to save
+            it.
           </output>
         )}
         <div className="flex items-center gap-4">

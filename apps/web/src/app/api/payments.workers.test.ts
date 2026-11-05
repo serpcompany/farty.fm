@@ -2,20 +2,20 @@ import { env } from 'cloudflare:test'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as devCheckoutRoute from '@/app/api/dev/checkout/route'
+import * as checkoutRoute from '@/app/api/full-access/checkout/route'
+import * as accessRoute from '@/app/api/full-access/route'
 import * as webhookRoute from '@/app/api/stripe/webhook/route'
-import * as checkoutRoute from '@/app/api/toots/[id]/checkout/route'
-import * as paymentRoute from '@/app/api/toots/[id]/payment/route'
-import { startTootPayment, tootPayment } from '@/db/payments'
+import { fullAccessPurchase, startFullAccess, tootPayment } from '@/db/payments'
 import { stepCounts } from '@/db/schema'
-import { TOOT_PRICE } from '@/lib/pricing'
-import type { CheckoutSession, Payments } from '@/server/stripe'
+import { FULL_ACCESS_PRICE } from '@/lib/pricing'
 import {
   devCheckoutServes,
-  getTootPayment,
+  getFullAccess,
   PAYMENT_LIMITS,
   receiveStripeEvent,
   startCheckout
-} from '@/server/toot-payments'
+} from '@/server/full-access'
+import type { CheckoutSession, Payments } from '@/server/stripe'
 import {
   api,
   ORIGIN,
@@ -27,9 +27,9 @@ import {
   wav
 } from '@/test-support/library-api'
 
-// Paying to save a Toot (ADR 0010), in workerd with a real D1: a Toot uploads only once it's paid
-// for, through the dev checkout on a local run or Stripe Checkout (its API stubbed) with its
-// webhook. Production pays the same way, in live mode (#258).
+// Paying for Full Access (ADR 0022), in workerd with a real D1: a new Toot uploads only on an
+// account that has it, through the dev checkout on a local run or Stripe Checkout (its API stubbed)
+// with its webhook. Production pays the same way, in live mode (#258).
 
 /** What the Worker's env has on top of wrangler.jsonc's, as each test sets it. */
 const extraEnv = vi.hoisted(() => ({}) as Record<string, unknown>)
@@ -48,6 +48,7 @@ const T2 = '44444444-4444-4444-8444-444444444444'
 const T3 = '55555555-5555-4555-8555-555555555555'
 /** The test requests' host: a local run on this machine. */
 const HOST = new URL(ORIGIN).host
+const noParams = { params: Promise.resolve({}) }
 
 beforeEach(() => {
   for (const key of Object.keys(extraEnv)) delete extraEnv[key]
@@ -74,23 +75,20 @@ function headersFor(method: string, { cookie, library, host = HOST }: As, extra:
   return headers
 }
 
-const params = (id: string) => ({ params: Promise.resolve({ id }) })
+const checkoutRequest = (as: As, body: unknown) =>
+  new Request(`${ORIGIN}/api/full-access/checkout/`, {
+    method: 'POST',
+    headers: headersFor('POST', as, { 'content-type': 'application/json' }),
+    body: JSON.stringify(body)
+  })
 
-const checkout = (id: string, as: As, songId: unknown = 'twinkle') =>
-  checkoutRoute.POST(
-    new Request(`${ORIGIN}/api/toots/${id}/checkout/`, {
-      method: 'POST',
-      headers: headersFor('POST', as, { 'content-type': 'application/json' }),
-      body: JSON.stringify({ songId })
-    }),
-    params(id)
-  )
+const checkout = (tootId: string, as: As, songId: unknown = 'twinkle') =>
+  checkoutRoute.POST(checkoutRequest(as, { tootId, songId }), noParams)
 
-const payment = (id: string, as: As, query = '') =>
-  paymentRoute.GET(
-    new Request(`${ORIGIN}/api/toots/${id}/payment/${query}`, { headers: headersFor('GET', as) }),
-    params(id)
-  )
+const accessRequest = (as: As, query = '') =>
+  new Request(`${ORIGIN}/api/full-access/${query}`, { headers: headersFor('GET', as) })
+
+const access = (as: As, query = '') => accessRoute.GET(accessRequest(as, query), noParams)
 
 /** The dev checkout's Pay, for a Toot of `song`, or with no `song` for a Sound Pad Toot. */
 const payDev = (toot: string, as: As, song: string | null = 'twinkle') =>
@@ -100,7 +98,7 @@ const payDev = (toot: string, as: As, song: string | null = 'twinkle') =>
       headers: headersFor('POST', as, { 'content-type': 'application/x-www-form-urlencoded' }),
       body: new URLSearchParams(song === null ? { toot } : { toot, song })
     }),
-    { params: Promise.resolve({}) }
+    noParams
   )
 
 const save = (id: string, as: As) =>
@@ -114,10 +112,10 @@ const savePad = (id: string, as: As) =>
     headers: { host: as.host ?? HOST }
   })
 
-async function paid(id: string, as: As): Promise<boolean> {
-  const response = await payment(id, as)
+async function hasIt(as: As): Promise<boolean> {
+  const response = await access(as)
   expect(response.status).toBe(200)
-  return ((await response.json()) as { paid: boolean }).paid
+  return ((await response.json()) as { active: boolean }).active
 }
 
 /** The user's Toots in D1, deleted ones included. */
@@ -130,8 +128,36 @@ async function tootRows(userId: string) {
   return results
 }
 
+/** `count` live Toots, in D1 alone. */
+async function fillToots(userId: string, count: number) {
+  await env.DB.prepare(
+    `with recursive n(i) as (select 1 union all select i + 1 from n where i < ?2)
+     insert into toots (user_id, id, title, song_id, created_at, seconds, arrangement,
+       audio_bytes, updated_at)
+     select ?1, 'toot-' || i, '', 'twinkle', 0, 0.1,
+       '{"transposition":0,"recordingForPitch":{}}', 100, 0 from n`
+  )
+    .bind(userId, count)
+    .run()
+}
+
+/** A 99¢ payment for a Toot, from before Full Access (ADR 0010). */
+async function pastPayment(
+  userId: string,
+  tootId: string,
+  { paidAt = 1, refundedAt = null }: { paidAt?: number | null; refundedAt?: number | null } = {}
+) {
+  await env.DB.prepare(
+    `insert into toot_payments (user_id, toot_id, checkout_session_id, amount, currency, song_id,
+       created_at, paid_at, refunded_at)
+     values (?1, ?2, ?3, 99, 'usd', 'twinkle', 0, ?4, ?5)`
+  )
+    .bind(userId, tootId, `cs_test_old_${tootId}`, paidAt, refundedAt)
+    .run()
+}
+
 describe('on a local run, with the dev checkout', () => {
-  it('saves a Toot once it is paid for, and not before', async () => {
+  it('saves every Toot once the account has Full Access, for one payment, and none before', async () => {
     const a = await signUp('A')
     expect(await (await save(T1, a)).json()).toEqual({ error: 'payment_required' })
     expect((await save(T1, a)).status).toBe(402)
@@ -144,7 +170,7 @@ describe('on a local run, with the dev checkout', () => {
     })
     expect(await counted('checkout-started')).toBe(1)
     expect(await counted('paid')).toBe(0)
-    expect(await paid(T1, a)).toBe(false)
+    expect(await hasIt(a)).toBe(false)
     expect((await save(T1, a)).status).toBe(402)
 
     const paying = await payDev(T1, a)
@@ -152,30 +178,41 @@ describe('on a local run, with the dev checkout', () => {
     expect(paying.headers.get('location')).toBe(
       `${ORIGIN}/compose/twinkle/?toot=${T1}&checkout=done`
     )
-    expect(await paid(T1, a)).toBe(true)
+    expect(await hasIt(a)).toBe(true)
     expect(await counted('paid')).toBe(1)
     expect((await save(T1, a)).status).toBe(201)
-    expect(await (await checkout(T1, a)).json()).toEqual({ paid: true })
+
+    // The next Toots, of any Song or the Sound Pad, need nothing more.
+    expect((await save(T2, a)).status).toBe(201)
+    expect((await savePad(T3, a)).status).toBe(201)
+    expect(await (await checkout(T1, a)).json()).toEqual({ active: true })
     expect(await counted('checkout-started')).toBe(1)
+    expect(await counted('paid')).toBe(1)
   })
 
-  it('pays for one Toot at a time', async () => {
+  it('records one purchase, at the price it started at', async () => {
     const a = await signUp('A')
     await checkout(T1, a)
-    await payDev(T1, a)
-    expect((await save(T1, a)).status).toBe(201)
-    expect((await save(T2, a)).status).toBe(402)
-    expect(await paid(T2, a)).toBe(false)
+    await checkout(T2, a)
+    await payDev(T2, a)
+    expect(await fullAccessPurchase(testDb(), a.id)).toMatchObject({
+      amount: FULL_ACCESS_PRICE.amount,
+      currency: FULL_ACCESS_PRICE.currency,
+      refundedAt: null
+    })
+    expect((await fullAccessPurchase(testDb(), a.id))?.paidAt).toBeInstanceOf(Date)
+    // The price itself: a change to it is a deliberate one, with its copy.
+    expect(FULL_ACCESS_PRICE).toEqual({ amount: 499, currency: 'usd' })
   })
 
-  it('never lets one user pay for, or save, another’s Toot', async () => {
+  it('never lets one user pay for, or use, another’s Full Access', async () => {
     const a = await signUp('A')
     const b = await signUp('B')
     await checkout(T1, a)
     expect((await payDev(T1, b)).status).toBe(404)
-    expect(await paid(T1, a)).toBe(false)
+    expect(await hasIt(a)).toBe(false)
     await payDev(T1, a)
-    expect(await paid(T1, b)).toBe(false)
+    expect(await hasIt(b)).toBe(false)
     expect((await save(T1, b)).status).toBe(402)
   })
 
@@ -196,7 +233,7 @@ describe('on a local run, with the dev checkout', () => {
     })
     extraEnv.STRIPE_SECRET_KEY = TEST_KEY
     expect((await payDev(T1, a)).status).toBe(404)
-    expect(await paid(T1, a)).toBe(false)
+    expect((await fullAccessPurchase(testDb(), a.id))?.paidAt).toBeNull()
   })
 
   it('keeps the score a paid Toot was rendered from (#254)', async () => {
@@ -219,7 +256,7 @@ describe('on a local run, with the dev checkout', () => {
     expect(JSON.parse(row?.score ?? 'null')).toEqual(score)
   })
 
-  it('saves a Sound Pad Toot once it is paid for, back to the Sound Pad (ADR 0017)', async () => {
+  it('pays from a Sound Pad Toot, back to the Sound Pad, and then a Song’s saves too (ADR 0017)', async () => {
     const a = await signUp('A')
     expect(await (await savePad(T1, a)).json()).toEqual({ error: 'payment_required' })
     expect((await savePad(T1, a)).status).toBe(402)
@@ -227,133 +264,74 @@ describe('on a local run, with the dev checkout', () => {
     const started = await checkout(T1, a, null)
     expect(started.status).toBe(200)
     expect(await started.json()).toEqual({ url: `${ORIGIN}/dev/checkout/?toot=${T1}` })
-    expect(await tootPayment(testDb(), a.id, T1)).toMatchObject({ songId: null, paidAt: null })
     expect((await savePad(T1, a)).status).toBe(402)
 
     const paying = await payDev(T1, a, null)
     expect(paying.status).toBe(303)
     expect(paying.headers.get('location')).toBe(`${ORIGIN}/compose/pad/?toot=${T1}&checkout=done`)
-    expect(await paid(T1, a)).toBe(true)
+    expect(await hasIt(a)).toBe(true)
     expect((await savePad(T1, a)).status).toBe(201)
-    expect((await tootPayment(testDb(), a.id, T1))?.savedAt).toBeInstanceOf(Date)
-    expect(await (await checkout(T1, a, null)).json()).toEqual({ paid: true })
     const library = (await (await api.library(a)).json()) as { toots: unknown[] }
     expect(library.toots).toMatchObject([
       { id: T1, songId: null, arrangement: null, performance: padTootMetadata(T1).performance }
     ])
-  })
-
-  it('says a payment is unused until a save uses it, so a kept take saves only then (ADR 0017)', async () => {
-    const a = await signUp('A')
-    const answer = async (id: string) => (await payment(id, a)).json()
-    expect(await answer(T1)).toEqual({ paid: false, unused: false })
-    await checkout(T1, a, null)
-    expect(await answer(T1)).toEqual({ paid: false, unused: false })
-    await payDev(T1, a, null)
-    expect(await answer(T1)).toEqual({ paid: true, unused: true })
-    expect((await savePad(T1, a)).status).toBe(201)
-    expect(await answer(T1)).toEqual({ paid: true, unused: false })
-    // Deleted, its payment stays used.
-    expect((await api.delete('toots', T1, a)).status).toBe(204)
-    expect(await answer(T1)).toEqual({ paid: true, unused: false })
-  })
-
-  it('never offers a paid Sound Pad Toot for a Song’s, or a Song’s for the Sound Pad', async () => {
-    const a = await signUp('A')
-    await checkout(T1, a, null)
-    await payDev(T1, a, null)
-    // T1, paid, was never saved: a Toot of a Song pays as usual.
-    expect(await (await checkout(T2, a)).json()).toEqual({
-      url: `${ORIGIN}/dev/checkout/?toot=${T2}&song=twinkle`
-    })
-    await payDev(T2, a)
-    // T2, paid, was never saved: a new Sound Pad Toot pays as usual too.
-    expect(await (await checkout(T3, a, null)).json()).toEqual({
-      url: `${ORIGIN}/dev/checkout/?toot=${T3}`
-    })
+    expect((await save(T2, a)).status).toBe(201)
   })
 
   it('refuses a checkout for a bad id, an unknown Song, or another library', async () => {
     const a = await signUp('A')
-    expect((await checkout('not-a-toot', a)).status).toBe(404)
+    expect((await checkout('not-a-toot', a)).status).toBe(400)
     expect(await (await checkout(T1, a, 'no-such-song')).json()).toEqual({
       error: 'invalid_request'
     })
     // No Song is a Sound Pad Toot only when it says so: `songId: null`.
-    const noSongId = await checkoutRoute.POST(
-      new Request(`${ORIGIN}/api/toots/${T1}/checkout/`, {
-        method: 'POST',
-        headers: headersFor('POST', a, { 'content-type': 'application/json' }),
-        body: '{}'
-      }),
-      params(T1)
-    )
+    const noSongId = await checkoutRoute.POST(checkoutRequest(a, { tootId: T1 }), noParams)
     expect(noSongId.status).toBe(400)
     expect((await checkout(T1, a, '')).status).toBe(400)
     expect((await payDev(T1, a, 'no-such-song')).status).toBe(400)
     expect((await checkout(T1, { ...a, library: 'userB' })).status).toBe(409)
+    expect((await access({ ...a, library: 'userB' })).status).toBe(409)
     expect((await checkout(T1, {})).status).toBe(401)
+    expect((await access({})).status).toBe(401)
   })
 
-  it('saves a paid Toot once: deleted, it can’t be saved again, even once its tombstone is purged', async () => {
+  it('keeps a deleted Toot deleted, and takes no payment for it', async () => {
     const a = await signUp('A')
     await checkout(T1, a)
     await payDev(T1, a)
     expect((await save(T1, a)).status).toBe(201)
-    expect((await tootPayment(testDb(), a.id, T1))?.savedAt).toBeInstanceOf(Date)
     expect((await api.delete('toots', T1, a)).status).toBe(204)
-    expect((await save(T1, a)).status).toBe(410)
-
-    // 30 days on, the delete's tombstone is purged (`purgeTombstones`).
-    await env.DB.prepare('delete from toots where user_id = ?1').bind(a.id).run()
-    expect(await tootRows(a.id)).toEqual([])
     const again = await save(T1, a)
     expect(again.status).toBe(410)
     expect(await again.json()).toEqual({ error: 'deleted' })
-    expect(await (await checkout(T1, a)).json()).toEqual({ error: 'deleted' })
-    expect(await tootRows(a.id)).toEqual([])
+    // Checkout refuses it too, with Full Access, as that Save would be refused.
+    const refusedWithIt = await checkout(T1, a)
+    expect(refusedWithIt.status).toBe(410)
+    expect(await refusedWithIt.json()).toEqual({ error: 'deleted' })
+
+    // Without Full Access, Checkout refuses it before anything is paid.
+    const b = await signUp('B')
+    await env.DB.prepare(
+      `insert into toots (user_id, id, title, song_id, created_at, seconds, arrangement,
+        audio_bytes, updated_at, deleted_at)
+       values (?1, ?2, '', 'twinkle', 0, 0.1, '{"transposition":0,"recordingForPitch":{}}', 100,
+        0, 0)`
+    )
+      .bind(b.id, T1)
+      .run()
+    const refused = await checkout(T1, b)
+    expect(refused.status).toBe(410)
+    expect(await refused.json()).toEqual({ error: 'deleted' })
+    expect(await fullAccessPurchase(testDb(), b.id)).toBeNull()
   })
 
-  it('saves a paid Toot once when two saves cross', async () => {
+  it('saves a Toot once when two saves cross', async () => {
     const a = await signUp('A')
     await checkout(T1, a)
     await payDev(T1, a)
     const statuses = (await Promise.all([save(T1, a), save(T1, a)])).map(r => r.status)
     expect(statuses.sort()).toEqual([200, 201])
     expect(await tootRows(a.id)).toEqual([{ id: T1, deleted_at: null }])
-  })
-
-  it('offers a paid Toot of the Song that was never saved, rather than a second payment', async () => {
-    const a = await signUp('A')
-    await checkout(T1, a)
-    await payDev(T1, a)
-    // The page closed before the return saved T1. Save on a new Toot of the same Song:
-    const offered = await checkout(T2, a)
-    expect(offered.status).toBe(200)
-    expect(await offered.json()).toEqual({ paidToot: T1 })
-    expect(await tootPayment(testDb(), a.id, T2)).toBeNull()
-    expect(await tootPayment(testDb(), a.id, T1)).toMatchObject({ songId: 'twinkle' })
-    // Another Song's Toot pays as usual.
-    expect(await (await checkout(T3, a, 'mary')).json()).toEqual({
-      url: `${ORIGIN}/dev/checkout/?toot=${T3}&song=mary`
-    })
-
-    // Saved, T1 is offered no more.
-    expect((await save(T1, a)).status).toBe(201)
-    expect(await (await checkout(T2, a)).json()).toEqual({
-      url: `${ORIGIN}/dev/checkout/?toot=${T2}&song=twinkle`
-    })
-  })
-
-  it('never offers another user’s paid Toot, or one saved and deleted', async () => {
-    const a = await signUp('A')
-    const b = await signUp('B')
-    await checkout(T1, a)
-    await payDev(T1, a)
-    expect(await (await checkout(T2, b)).json()).toHaveProperty('url')
-    expect((await save(T1, a)).status).toBe(201)
-    expect((await api.delete('toots', T1, a)).status).toBe(204)
-    expect(await (await checkout(T2, a)).json()).toHaveProperty('url')
   })
 
   it('limits how many checkouts one user starts', async () => {
@@ -368,39 +346,72 @@ describe('on a local run, with the dev checkout', () => {
     expect(retryAfter).toBeGreaterThan(0)
     expect(retryAfter).toBeLessThanOrEqual(window)
     expect((await checkout(T2, a)).status).toBe(429)
-    // Another user's are their own, and a paid Toot needs no checkout to save.
+    // Another user's are their own, and the account that's paid needs no checkout to save.
     expect((await checkout(T1, b)).status).toBe(200)
     await payDev(T1, a)
-    expect(await (await checkout(T1, a)).json()).toEqual({ paid: true })
+    expect(await (await checkout(T1, a)).json()).toEqual({ active: true })
     expect((await save(T1, a)).status).toBe(201)
   })
 
-  it('refuses a deleted Toot, and one past the Toot limit, before anything is paid', async () => {
+  it('refuses a checkout at the Toot limit before anything is paid', async () => {
     const a = await signUp('A')
-    await env.DB.prepare(
-      `insert into toots (user_id, id, title, song_id, created_at, seconds, arrangement,
-        audio_bytes, updated_at, deleted_at)
-       values (?1, ?2, '', 'twinkle', 0, 0.1, '{"transposition":0,"recordingForPitch":{}}', 100,
-        0, 0)`
-    )
-      .bind(a.id, T1)
-      .run()
-    expect(await (await checkout(T1, a)).json()).toEqual({ error: 'deleted' })
-
-    // 300 live Toots, the limit.
-    await env.DB.prepare(
-      `with recursive n(i) as (select 1 union all select i + 1 from n where i < 300)
-       insert into toots (user_id, id, title, song_id, created_at, seconds, arrangement,
-         audio_bytes, updated_at)
-       select ?1, 'toot-' || i, '', 'twinkle', 0, 0.1,
-         '{"transposition":0,"recordingForPitch":{}}', 100, 0 from n`
-    )
-      .bind(a.id)
-      .run()
+    await fillToots(a.id, 300)
     const full = await checkout(T2, a)
     expect(full.status).toBe(409)
     expect(await full.json()).toEqual({ error: 'limit_reached' })
-    expect(await tootPayment(testDb(), a.id, T2)).toBeNull()
+    expect(await fullAccessPurchase(testDb(), a.id)).toBeNull()
+  })
+
+  it('says when an account with Full Access is at the Toot limit, as Save has to say it', async () => {
+    const a = await signUp('A')
+    await fillToots(a.id, 299)
+    expect(await (await access(a)).json()).toEqual({ active: false, limitReached: false })
+    await checkout(T1, a)
+    await payDev(T1, a)
+    expect(await (await access(a)).json()).toEqual({ active: true, limitReached: false })
+    expect((await save(T1, a)).status).toBe(201)
+    expect(await (await access(a)).json()).toEqual({ active: true, limitReached: true })
+    expect((await save(T2, a)).status).toBe(409)
+    // Pay on a sheet shown before this: it says the limit, rather than saving what can't upload.
+    const started = await checkout(T2, a)
+    expect(started.status).toBe(409)
+    expect(await started.json()).toEqual({ error: 'limit_reached' })
+  })
+})
+
+describe('someone who paid for a Toot before Full Access', () => {
+  it('has Full Access, with nothing more to pay', async () => {
+    const a = await signUp('A')
+    await pastPayment(a.id, T1)
+    const stripe = vi.spyOn(globalThis, 'fetch')
+    expect(await hasIt(a)).toBe(true)
+    expect(await (await checkout(T2, a)).json()).toEqual({ active: true })
+    expect((await save(T2, a)).status).toBe(201)
+    expect((await savePad(T3, a)).status).toBe(201)
+    expect(await fullAccessPurchase(testDb(), a.id)).toBeNull()
+    expect(stripe).not.toHaveBeenCalled()
+    // Their row stays as it was.
+    expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeInstanceOf(Date)
+  })
+
+  it('doesn’t, from a payment never finished, or refunded, or someone else’s', async () => {
+    const a = await signUp('A')
+    const b = await signUp('B')
+    const c = await signUp('C')
+    await pastPayment(a.id, T1, { paidAt: null })
+    await pastPayment(b.id, T1, { refundedAt: 2 })
+    expect(await hasIt(a)).toBe(false)
+    expect(await hasIt(b)).toBe(false)
+    expect(await hasIt(c)).toBe(false)
+    expect((await save(T2, a)).status).toBe(402)
+    expect((await save(T2, b)).status).toBe(402)
+  })
+
+  it('still has it from another payment when one is refunded', async () => {
+    const a = await signUp('A')
+    await pastPayment(a.id, T1)
+    await pastPayment(a.id, T2, { refundedAt: 2 })
+    expect(await hasIt(a)).toBe(true)
   })
 })
 
@@ -414,11 +425,34 @@ const sessionFor = (
   mode: 'payment',
   status: 'open',
   payment_status: 'unpaid',
+  client_reference_id: userId,
+  metadata: { purchase: 'full_access', user_id: userId, toot_id: tootId },
+  livemode: false,
+  amount_total: 499,
+  currency: 'usd',
+  ...fields
+})
+
+/** `sessionFor`, paid. */
+const paidSessionFor = (userId: string, tootId: string, fields: Partial<CheckoutSession> = {}) =>
+  sessionFor(userId, tootId, {
+    status: 'complete',
+    payment_status: 'paid',
+    payment_intent: 'pi_test_first',
+    ...fields
+  })
+
+/** A 99¢ Checkout Session from before Full Access, still open when it came. */
+const oldSessionFor = (
+  userId: string,
+  tootId: string,
+  fields: Partial<CheckoutSession> = {}
+): CheckoutSession => ({
+  ...sessionFor(userId, tootId),
+  id: `cs_test_old_${tootId}`,
   client_reference_id: tootId,
   metadata: { user_id: userId, toot_id: tootId },
-  livemode: false,
   amount_total: 99,
-  currency: 'usd',
   ...fields
 })
 
@@ -479,13 +513,27 @@ const completed = (session: CheckoutSession, type = 'checkout.session.completed'
   data: { object: session }
 })
 
+/** Stripe's `charge.refunded`: `refunded` is true only once all of the charge is refunded. */
+const refundedCharge = (
+  charge: { refunded?: boolean; payment_intent?: string; metadata?: Record<string, string> } = {},
+  livemode = false
+) => ({
+  id: 'evt_test_refund',
+  object: 'event',
+  type: 'charge.refunded',
+  livemode,
+  data: {
+    object: { id: 'ch_test_1', refunded: true, payment_intent: 'pi_test_first', ...charge }
+  }
+})
+
 describe('with Stripe Checkout in test mode', () => {
   beforeEach(() => {
     extraEnv.STRIPE_SECRET_KEY = TEST_KEY
     extraEnv.STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRET
   })
 
-  it('starts a Checkout Session for the Toot, back to its Song Creator', async () => {
+  it('starts a Checkout Session for $4.99, back to the Toot’s Song Creator', async () => {
     const a = await signUp('A')
     const stripe = stubStripe(sessionFor(a.id, T1))
     expect(await (await checkout(T1, a)).json()).toEqual({
@@ -496,43 +544,38 @@ describe('with Stripe Checkout in test mode', () => {
     expect(url).toBe('https://api.stripe.com/v1/checkout/sessions')
     // Two requests that cross, or a retry, get this session from Stripe, not a second one.
     expect(new Headers(init?.headers).get('idempotency-key')).toBe(
-      `toot-checkout/${a.id}/${T1}/first`
+      `full-access/${a.id}/${T1}/first`
     )
     const sent = init?.body as URLSearchParams
-    expect(sent.get('client_reference_id')).toBe(T1)
+    expect(sent.get('client_reference_id')).toBe(a.id)
+    expect(sent.get('metadata[purchase]')).toBe('full_access')
     expect(sent.get('metadata[user_id]')).toBe(a.id)
-    expect(sent.get('line_items[0][price_data][unit_amount]')).toBe('99')
+    expect(sent.get('metadata[toot_id]')).toBe(T1)
+    expect(sent.get('customer_email')).toBe(a.email)
+    expect(sent.get('line_items[0][price_data][unit_amount]')).toBe('499')
     expect(sent.get('success_url')).toBe(`${ORIGIN}/compose/twinkle/?toot=${T1}&checkout=done`)
     expect(sent.get('cancel_url')).toBe(`${ORIGIN}/compose/twinkle/?toot=${T1}`)
-    expect(await tootPayment(testDb(), a.id, T1)).toMatchObject({
+    expect(await fullAccessPurchase(testDb(), a.id)).toMatchObject({
       checkoutSessionId: 'cs_test_first',
-      amount: 99,
+      amount: 499,
       currency: 'usd',
       paidAt: null
     })
   })
 
-  it('starts a Checkout Session for a Sound Pad Toot, back to the Sound Pad (ADR 0017)', async () => {
+  it('goes back to the Sound Pad for a Sound Pad Toot (ADR 0017)', async () => {
     const a = await signUp('A')
     const stripe = stubStripe(sessionFor(a.id, T1))
     expect(await (await checkout(T1, a, null)).json()).toEqual({
       url: 'https://checkout.stripe.com/c/pay/cs_test_first'
     })
     const sent = stripe.mock.calls[0][1]?.body as URLSearchParams
-    expect(sent.get('line_items[0][price_data][product_data][name]')).toBe(
-      'Save your Sound Pad Toot'
-    )
-    expect(sent.get('line_items[0][price_data][unit_amount]')).toBe('99')
+    expect(sent.get('line_items[0][price_data][unit_amount]')).toBe('499')
     expect(sent.get('success_url')).toBe(`${ORIGIN}/compose/pad/?toot=${T1}&checkout=done`)
     expect(sent.get('cancel_url')).toBe(`${ORIGIN}/compose/pad/?toot=${T1}`)
-    expect(await tootPayment(testDb(), a.id, T1)).toMatchObject({
-      songId: null,
-      checkoutSessionId: 'cs_test_first',
-      paidAt: null
-    })
   })
 
-  it('reuses an open session, so two taps can’t pay twice', async () => {
+  it('reuses an open session for the same Toot, so two taps can’t pay twice', async () => {
     const a = await signUp('A')
     const stripe = stubStripe(sessionFor(a.id, T1), sessionFor(a.id, T1))
     await checkout(T1, a)
@@ -543,6 +586,44 @@ describe('with Stripe Checkout in test mode', () => {
       'https://api.stripe.com/v1/checkout/sessions',
       'https://api.stripe.com/v1/checkout/sessions/cs_test_first'
     ])
+  })
+
+  it('ends an open session for another Toot first, so only one can be paid', async () => {
+    const a = await signUp('A')
+    const next = sessionFor(a.id, T2, {
+      id: 'cs_test_second',
+      url: 'https://checkout.stripe.com/c/pay/cs_test_second'
+    })
+    const stripe = stubStripe(
+      sessionFor(a.id, T1),
+      sessionFor(a.id, T1),
+      sessionFor(a.id, T1, { status: 'expired', url: null }),
+      next
+    )
+    await checkout(T1, a)
+    expect(await (await checkout(T2, a)).json()).toEqual({ url: next.url })
+    expect(stripe.mock.calls.map(([url]) => String(url))).toEqual([
+      'https://api.stripe.com/v1/checkout/sessions',
+      'https://api.stripe.com/v1/checkout/sessions/cs_test_first',
+      'https://api.stripe.com/v1/checkout/sessions/cs_test_first/expire',
+      'https://api.stripe.com/v1/checkout/sessions'
+    ])
+    expect((await fullAccessPurchase(testDb(), a.id))?.checkoutSessionId).toBe('cs_test_second')
+    expect(new Headers(stripe.mock.calls[3][1]?.headers).get('idempotency-key')).toBe(
+      `full-access/${a.id}/${T2}/cs_test_first`
+    )
+  })
+
+  it('finds the payment on the next tap when ending a session fails because it was just paid', async () => {
+    const a = await signUp('A')
+    const justPaid = () =>
+      Response.json({ error: { message: 'Only open sessions' } }, { status: 400 })
+    stubStripe(sessionFor(a.id, T1), sessionFor(a.id, T1), justPaid(), paidSessionFor(a.id, T1))
+    await checkout(T1, a)
+    const failed = await checkout(T2, a)
+    expect(failed.status).toBe(502)
+    expect(await (await checkout(T2, a)).json()).toEqual({ active: true })
+    expect(await counted('paid')).toBe(1)
   })
 
   it('starts a new session once the last one expired', async () => {
@@ -558,10 +639,10 @@ describe('with Stripe Checkout in test mode', () => {
     )
     await checkout(T1, a)
     expect(await (await checkout(T1, a)).json()).toEqual({ url: next.url })
-    expect((await tootPayment(testDb(), a.id, T1))?.checkoutSessionId).toBe('cs_test_second')
+    expect((await fullAccessPurchase(testDb(), a.id))?.checkoutSessionId).toBe('cs_test_second')
     // A new idempotency key, or Stripe would answer with the expired one.
     expect(new Headers(stripe.mock.calls[2][1]?.headers).get('idempotency-key')).toBe(
-      `toot-checkout/${a.id}/${T1}/cs_test_first`
+      `full-access/${a.id}/${T1}/cs_test_first`
     )
   })
 
@@ -574,92 +655,80 @@ describe('with Stripe Checkout in test mode', () => {
     const gone = () => Response.json({ error: { message: 'No such session' } }, { status: 404 })
     stubStripe(sessionFor(a.id, T1), gone(), gone(), next)
     await checkout(T1, a)
-    expect(await paid(T1, a)).toBe(false)
+    expect(await hasIt(a)).toBe(false)
     expect(await (await checkout(T1, a)).json()).toEqual({ url: next.url })
-    expect((await tootPayment(testDb(), a.id, T1))?.checkoutSessionId).toBe('cs_test_second')
+    expect((await fullAccessPurchase(testDb(), a.id))?.checkoutSessionId).toBe('cs_test_second')
   })
 
-  it('saves once Stripe says it’s paid, on the return, before the webhook', async () => {
+  it('has Full Access once Stripe says it’s paid, on the return, before the webhook', async () => {
     const a = await signUp('A')
-    stubStripe(
-      sessionFor(a.id, T1),
-      sessionFor(a.id, T1),
-      sessionFor(a.id, T1, { status: 'complete', payment_status: 'paid' })
-    )
+    stubStripe(sessionFor(a.id, T1), sessionFor(a.id, T1), paidSessionFor(a.id, T1))
     await checkout(T1, a)
-    expect(await paid(T1, a)).toBe(false)
+    expect(await hasIt(a)).toBe(false)
     expect((await save(T1, a)).status).toBe(402)
-    // Paid at Stripe on this check: no save has used it yet.
-    expect(await (await payment(T1, a)).json()).toEqual({ paid: true, unused: true })
+    expect(await hasIt(a)).toBe(true)
+    expect((await fullAccessPurchase(testDb(), a.id))?.paymentIntent).toBe('pi_test_first')
     expect((await save(T1, a)).status).toBe(201)
+    expect((await save(T2, a)).status).toBe(201)
   })
 
-  it('never takes a session that charged anything but the Toot’s price as paid', async () => {
+  it('never takes a session that charged anything but the price as paid', async () => {
     const a = await signUp('A')
-    const paidSession = sessionFor(a.id, T1, { status: 'complete', payment_status: 'paid' })
-    stubStripe(
-      sessionFor(a.id, T1),
-      { ...paidSession, amount_total: 1 },
-      { ...paidSession, currency: 'eur' }
-    )
+    const paid = paidSessionFor(a.id, T1)
+    stubStripe(sessionFor(a.id, T1), { ...paid, amount_total: 1 }, { ...paid, currency: 'eur' })
     await checkout(T1, a)
-    expect(await paid(T1, a)).toBe(false)
-    expect(await paid(T1, a)).toBe(false)
+    expect(await hasIt(a)).toBe(false)
+    expect(await hasIt(a)).toBe(false)
     for (const wrong of [{ amount_total: 0 }, { amount_total: null }, { currency: 'jpy' }]) {
-      expect((await deliver(completed({ ...paidSession, ...wrong }))).status).toBe(200)
+      expect((await deliver(completed({ ...paid, ...wrong }))).status).toBe(200)
     }
-    expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeNull()
+    // The old price alone isn't this purchase's.
+    expect((await deliver(completed({ ...paid, amount_total: 99 }))).status).toBe(200)
+    expect((await fullAccessPurchase(testDb(), a.id))?.paidAt).toBeNull()
     expect((await save(T1, a)).status).toBe(402)
   })
 
-  it('takes a payment in the buyer’s own currency (Adaptive Pricing): the session keeps 99 usd', async () => {
+  it('takes a payment in the buyer’s own currency (Adaptive Pricing): the session keeps 499 usd', async () => {
     const a = await signUp('A')
     stubStripe(sessionFor(a.id, T1))
     await checkout(T1, a)
-    const local = sessionFor(a.id, T1, {
-      status: 'complete',
-      payment_status: 'paid',
-      presentment_details: { presentment_currency: 'jpy', presentment_amount: 163 }
+    const local = paidSessionFor(a.id, T1, {
+      presentment_details: { presentment_currency: 'jpy', presentment_amount: 820 }
     })
     expect((await deliver(completed(local))).status).toBe(200)
-    expect(await paid(T1, a)).toBe(true)
+    expect(await hasIt(a)).toBe(true)
     expect((await save(T1, a)).status).toBe(201)
   })
 
   it('takes a session paid at the price its checkout started at, after the price changed', async () => {
     const a = await signUp('A')
-    // The checkout started when a Toot cost 149, and TOOT_PRICE has changed since.
-    const before = { amount: 149, currency: 'usd' }
-    expect(before.amount).not.toBe(TOOT_PRICE.amount)
-    await startTootPayment(testDb(), a.id, T1, 'twinkle', 'cs_test_first', before)
-    const paidThen = sessionFor(a.id, T1, {
-      status: 'complete',
-      payment_status: 'paid',
-      amount_total: before.amount
-    })
+    // The checkout started at 299, and the price has changed since.
+    const before = { amount: 299, currency: 'usd' }
+    expect(before.amount).not.toBe(FULL_ACCESS_PRICE.amount)
+    await startFullAccess(testDb(), a.id, 'cs_test_first', before)
+    const paidThen = paidSessionFor(a.id, T1, { amount_total: before.amount })
     const stripe = stubStripe(paidThen)
-    expect(await (await checkout(T1, a)).json()).toEqual({ paid: true })
+    expect(await (await checkout(T1, a)).json()).toEqual({ active: true })
     // Stripe was asked about that session, and no new one was made.
     expect(stripe.mock.calls.map(([url]) => String(url))).toEqual([
       'https://api.stripe.com/v1/checkout/sessions/cs_test_first'
     ])
-    expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeInstanceOf(Date)
     expect((await save(T1, a)).status).toBe(201)
 
     // The webhook judges by the row's price too.
-    await startTootPayment(testDb(), a.id, T2, 'twinkle', 'cs_test_second', before)
-    const webhookPaid = { ...paidThen, id: 'cs_test_second', client_reference_id: T2 }
-    webhookPaid.metadata = { user_id: a.id, toot_id: T2 }
+    const b = await signUp('B')
+    await startFullAccess(testDb(), b.id, 'cs_test_second', before)
+    const webhookPaid = paidSessionFor(b.id, T2, {
+      id: 'cs_test_second',
+      amount_total: before.amount
+    })
     expect((await deliver(completed(webhookPaid))).status).toBe(200)
-    expect((await tootPayment(testDb(), a.id, T2))?.paidAt).toBeInstanceOf(Date)
+    expect(await hasIt(b)).toBe(true)
   })
 
-  it('never starts a second payment for a Toot whose last session is paid at another price', async () => {
+  it('never starts a second payment when the last session is paid at another price', async () => {
     const a = await signUp('A')
-    const stripe = stubStripe(
-      sessionFor(a.id, T1),
-      sessionFor(a.id, T1, { status: 'complete', payment_status: 'paid', amount_total: 1 })
-    )
+    const stripe = stubStripe(sessionFor(a.id, T1), paidSessionFor(a.id, T1, { amount_total: 1 }))
     const log = vi.spyOn(console, 'error').mockImplementation(() => {})
     await checkout(T1, a)
     const refused = await checkout(T1, a)
@@ -669,7 +738,7 @@ describe('with Stripe Checkout in test mode', () => {
     expect(log).toHaveBeenCalledWith(
       JSON.stringify({ event: 'stripe_paid_session_refused', session: 'cs_test_first' })
     )
-    expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeNull()
+    expect((await fullAccessPurchase(testDb(), a.id))?.paidAt).toBeNull()
   })
 
   it('answers the Sound Pad’s check on open from D1 alone, never asking Stripe (ADR 0017)', async () => {
@@ -679,28 +748,26 @@ describe('with Stripe Checkout in test mode', () => {
     vi.restoreAllMocks()
     const stripe = vi
       .spyOn(globalThis, 'fetch')
-      .mockImplementation(async () =>
-        Response.json(sessionFor(a.id, T1, { status: 'complete', payment_status: 'paid' }))
-      )
+      .mockImplementation(async () => Response.json(paidSessionFor(a.id, T1)))
     const checksSpent = () =>
       env.DB.prepare('SELECT count FROM rate_limit WHERE key = ?')
         .bind(`stripeChecks|${a.id}`)
         .first<number>('count')
-    // Paid at Stripe, but no webhook yet: the open reads unpaid, and spends no Stripe check.
+    // Paid at Stripe, but no webhook yet: the open reads none, and spends no Stripe check.
     for (let i = 0; i < 3; i++) {
-      const opened = await payment(T1, a, '?check=stored')
-      expect(await opened.json()).toEqual({ paid: false, unused: false })
+      const opened = await access(a, '?check=stored')
+      expect(await opened.json()).toEqual({ active: false, limitReached: false })
     }
     expect(stripe).not.toHaveBeenCalled()
     expect(await checksSpent()).toBeNull()
     // The return from Checkout still asks Stripe, which marks it paid in D1.
-    expect(await (await payment(T1, a)).json()).toEqual({ paid: true, unused: true })
+    expect(await hasIt(a)).toBe(true)
     expect(stripe).toHaveBeenCalledOnce()
     expect(await checksSpent()).toBe(1)
     // The next open reads that from D1.
-    expect(await (await payment(T1, a, '?check=stored')).json()).toEqual({
-      paid: true,
-      unused: true
+    expect(await (await access(a, '?check=stored')).json()).toEqual({
+      active: true,
+      limitReached: false
     })
     expect(stripe).toHaveBeenCalledOnce()
   })
@@ -714,27 +781,24 @@ describe('with Stripe Checkout in test mode', () => {
       .spyOn(globalThis, 'fetch')
       .mockImplementation(async () => Response.json(sessionFor(a.id, T1)))
     const { max } = PAYMENT_LIMITS.stripeChecks
-    for (let i = 0; i < max; i++) expect(await paid(T1, a)).toBe(false)
+    for (let i = 0; i < max; i++) expect(await hasIt(a)).toBe(false)
     expect(stripe).toHaveBeenCalledTimes(max)
-    expect(await paid(T1, a)).toBe(false)
+    expect(await hasIt(a)).toBe(false)
     expect(stripe).toHaveBeenCalledTimes(max)
 
     // The webhook still marks it paid, and D1 says so.
-    const session = sessionFor(a.id, T1, { status: 'complete', payment_status: 'paid' })
-    expect((await deliver(completed(session))).status).toBe(200)
-    expect(await paid(T1, a)).toBe(true)
+    expect((await deliver(completed(paidSessionFor(a.id, T1)))).status).toBe(200)
+    expect(await hasIt(a)).toBe(true)
     expect(stripe).toHaveBeenCalledTimes(max)
   })
 
-  it('offers a paid Toot of the Song never saved, without asking Stripe again', async () => {
+  it('never asks Stripe with no purchase, or with Full Access', async () => {
     const a = await signUp('A')
-    stubStripe(sessionFor(a.id, T1))
-    await checkout(T1, a)
-    const session = sessionFor(a.id, T1, { status: 'complete', payment_status: 'paid' })
-    await deliver(completed(session))
-    vi.restoreAllMocks()
     const stripe = vi.spyOn(globalThis, 'fetch')
-    expect(await (await checkout(T2, a)).json()).toEqual({ paidToot: T1 })
+    expect(await hasIt(a)).toBe(false)
+    await pastPayment(a.id, T1)
+    expect(await hasIt(a)).toBe(true)
+    expect(await (await checkout(T2, a)).json()).toEqual({ active: true })
     expect(stripe).not.toHaveBeenCalled()
   })
 
@@ -744,21 +808,22 @@ describe('with Stripe Checkout in test mode', () => {
     const failed = await checkout(T1, a)
     expect(failed.status).toBe(502)
     expect(await failed.json()).toEqual({ error: 'payments_failed' })
-    expect(await tootPayment(testDb(), a.id, T1)).toBeNull()
+    expect(await fullAccessPurchase(testDb(), a.id)).toBeNull()
   })
 
-  it('marks a Toot paid from a signed paid event', async () => {
+  it('gives Full Access from a signed paid event', async () => {
     const a = await signUp('A')
     stubStripe(sessionFor(a.id, T1))
     await checkout(T1, a)
     vi.restoreAllMocks()
     const stripe = vi.spyOn(globalThis, 'fetch')
 
-    const event = completed(sessionFor(a.id, T1, { status: 'complete', payment_status: 'paid' }))
+    const event = completed(paidSessionFor(a.id, T1))
     const received = await deliver(event)
     expect(received.status).toBe(200)
     expect(received.headers.get('cache-control')).toBe('no-store')
-    expect(await paid(T1, a)).toBe(true)
+    expect(await hasIt(a)).toBe(true)
+    expect((await fullAccessPurchase(testDb(), a.id))?.paymentIntent).toBe('pi_test_first')
     expect((await save(T1, a)).status).toBe(201)
     // Stripe sends an event again until it's answered: a second delivery changes nothing.
     expect((await deliver(event)).status).toBe(200)
@@ -770,18 +835,16 @@ describe('with Stripe Checkout in test mode', () => {
     const a = await signUp('A')
     stubStripe(sessionFor(a.id, T1))
     await checkout(T1, a)
-    const session = sessionFor(a.id, T1, { status: 'complete', payment_status: 'paid' })
-    expect(
-      (await deliver(completed(session, 'checkout.session.async_payment_succeeded'))).status
-    ).toBe(200)
-    expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeInstanceOf(Date)
+    const event = completed(paidSessionFor(a.id, T1), 'checkout.session.async_payment_succeeded')
+    expect((await deliver(event)).status).toBe(200)
+    expect((await fullAccessPurchase(testDb(), a.id))?.paidAt).toBeInstanceOf(Date)
   })
 
   it('refuses a forged or stale event, and changes nothing', async () => {
     const a = await signUp('A')
     stubStripe(sessionFor(a.id, T1))
     await checkout(T1, a)
-    const event = completed(sessionFor(a.id, T1, { status: 'complete', payment_status: 'paid' }))
+    const event = completed(paidSessionFor(a.id, T1))
 
     const forged = await deliver(event, { secret: 'whsec_forgedByAnAttacker' })
     expect(forged.status).toBe(400)
@@ -797,29 +860,31 @@ describe('with Stripe Checkout in test mode', () => {
       })
     )
     expect(unsigned.status).toBe(400)
-    expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeNull()
+    expect((await fullAccessPurchase(testDb(), a.id))?.paidAt).toBeNull()
   })
 
   it('changes nothing for an unpaid, live, mismatched or other event', async () => {
     const a = await signUp('A')
     const b = await signUp('B')
+    const c = await signUp('C')
     stubStripe(sessionFor(a.id, T1))
     await checkout(T1, a)
-    const paidSession = sessionFor(a.id, T1, { status: 'complete', payment_status: 'paid' })
+    const paid = paidSessionFor(a.id, T1)
     const events = [
       completed(sessionFor(a.id, T1, { status: 'complete' })),
-      completed({ ...paidSession, livemode: true }),
-      { ...completed(paidSession), livemode: true },
-      completed({ ...paidSession, metadata: { user_id: b.id, toot_id: T1 } }),
-      completed({ ...paidSession, client_reference_id: T2 }),
-      completed(paidSession, 'checkout.session.expired'),
-      completed(sessionFor(a.id, T2, { status: 'complete', payment_status: 'paid' })),
+      completed({ ...paid, livemode: true }),
+      { ...completed(paid), livemode: true },
+      completed({ ...paid, metadata: { purchase: 'full_access', user_id: b.id, toot_id: T1 } }),
+      completed({ ...paid, client_reference_id: b.id }),
+      completed(paid, 'checkout.session.expired'),
+      // An account that never started one has nothing to mark.
+      completed(paidSessionFor(c.id, T2)),
       { type: 'customer.created', livemode: false, data: { object: { id: 'cus_test_1' } } }
     ]
     for (const event of events) expect((await deliver(event)).status).toBe(200)
-    expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeNull()
-    expect(await tootPayment(testDb(), a.id, T2)).toBeNull()
-    expect(await tootPayment(testDb(), b.id, T1)).toBeNull()
+    expect((await fullAccessPurchase(testDb(), a.id))?.paidAt).toBeNull()
+    expect(await fullAccessPurchase(testDb(), b.id)).toBeNull()
+    expect(await fullAccessPurchase(testDb(), c.id)).toBeNull()
   })
 
   it('refuses a body far larger than an event', async () => {
@@ -834,6 +899,175 @@ describe('with Stripe Checkout in test mode', () => {
     delete extraEnv.STRIPE_SECRET_KEY
     expect((await deliver(event)).status).toBe(503)
   })
+
+  describe('refunds', () => {
+    /** An account that has paid, through Checkout and its webhook. */
+    async function buyer(name: string, paymentIntent = 'pi_test_first') {
+      const user = await signUp(name)
+      const started = stubStripe(sessionFor(user.id, T1))
+      await checkout(T1, user)
+      started.mockRestore()
+      const session = paidSessionFor(user.id, T1, { payment_intent: paymentIntent })
+      expect((await deliver(completed(session))).status).toBe(200)
+      return user
+    }
+
+    it('ends Full Access on a full refund, and the saved Toots stay', async () => {
+      const a = await buyer('A')
+      expect((await save(T1, a)).status).toBe(201)
+      expect(await hasIt(a)).toBe(true)
+
+      const received = await deliver(refundedCharge())
+      expect(received.status).toBe(200)
+      expect(await hasIt(a)).toBe(false)
+      expect((await fullAccessPurchase(testDb(), a.id))?.refundedAt).toBeInstanceOf(Date)
+      expect(await tootRows(a.id)).toEqual([{ id: T1, deleted_at: null }])
+      // Its row stays, so a retried upload of what's saved still answers kept.
+      expect((await save(T1, a)).status).toBe(200)
+      // The next new Toot asks again.
+      expect(await (await save(T2, a)).json()).toEqual({ error: 'payment_required' })
+
+      // Stripe sends an event again until it's answered: a second delivery changes nothing.
+      const refundedAt = (await fullAccessPurchase(testDb(), a.id))?.refundedAt
+      expect((await deliver(refundedCharge())).status).toBe(200)
+      expect((await fullAccessPurchase(testDb(), a.id))?.refundedAt).toEqual(refundedAt)
+    })
+
+    it('changes nothing on a partial refund', async () => {
+      const a = await buyer('A')
+      expect((await deliver(refundedCharge({ refunded: false }))).status).toBe(200)
+      expect(await hasIt(a)).toBe(true)
+      expect((await fullAccessPurchase(testDb(), a.id))?.refundedAt).toBeNull()
+    })
+
+    it('changes nothing for another payment, a live event, or a forged one', async () => {
+      const a = await buyer('A')
+      const events = [
+        refundedCharge({ payment_intent: 'pi_test_other' }),
+        refundedCharge({}, true),
+        { ...refundedCharge(), data: {} }
+      ]
+      for (const event of events) expect((await deliver(event)).status).toBe(200)
+      const forged = await deliver(refundedCharge(), { secret: 'whsec_forgedByAnAttacker' })
+      expect(forged.status).toBe(400)
+      expect(await hasIt(a)).toBe(true)
+    })
+
+    it('ends only the Full Access that payment bought', async () => {
+      const a = await buyer('A')
+      const b = await buyer('B', 'pi_test_second')
+      expect((await deliver(refundedCharge())).status).toBe(200)
+      expect(await hasIt(a)).toBe(false)
+      expect(await hasIt(b)).toBe(true)
+    })
+
+    it('lets someone refunded buy again, with a new session and nothing left of the old one', async () => {
+      const a = await buyer('A')
+      expect((await deliver(refundedCharge())).status).toBe(200)
+
+      const next = sessionFor(a.id, T2, {
+        id: 'cs_test_second',
+        url: 'https://checkout.stripe.com/c/pay/cs_test_second'
+      })
+      const stripe = stubStripe(next)
+      expect(await (await checkout(T2, a)).json()).toEqual({ url: next.url })
+      // It never asks about the refunded session, and it doesn't reuse it.
+      expect(stripe.mock.calls.map(([url]) => String(url))).toEqual([
+        'https://api.stripe.com/v1/checkout/sessions'
+      ])
+      expect(new Headers(stripe.mock.calls[0][1]?.headers).get('idempotency-key')).toBe(
+        `full-access/${a.id}/${T2}/cs_test_first`
+      )
+      expect(await fullAccessPurchase(testDb(), a.id)).toMatchObject({
+        checkoutSessionId: 'cs_test_second',
+        paymentIntent: null,
+        paidAt: null,
+        refundedAt: null
+      })
+      stripe.mockRestore()
+
+      // The old refund arrives again: it isn't this purchase's.
+      expect((await deliver(refundedCharge())).status).toBe(200)
+      const paid = paidSessionFor(a.id, T2, {
+        id: 'cs_test_second',
+        payment_intent: 'pi_test_second'
+      })
+      expect((await deliver(completed(paid))).status).toBe(200)
+      expect(await hasIt(a)).toBe(true)
+      expect((await deliver(refundedCharge())).status).toBe(200)
+      expect(await hasIt(a)).toBe(true)
+      expect(await counted('paid')).toBe(2)
+    })
+
+    it('never gives it back from a paid event sent again after the refund', async () => {
+      const a = await buyer('A')
+      expect((await deliver(refundedCharge())).status).toBe(200)
+      expect((await deliver(completed(paidSessionFor(a.id, T1)))).status).toBe(200)
+      expect(await hasIt(a)).toBe(false)
+    })
+
+    it('ends what a 99¢ payment gave, by its metadata, leaving any other it paid', async () => {
+      const a = await signUp('A')
+      await pastPayment(a.id, T1)
+      await pastPayment(a.id, T2)
+      const oldCharge = (tootId: string) =>
+        refundedCharge({
+          payment_intent: `pi_test_old_${tootId}`,
+          metadata: { user_id: a.id, toot_id: tootId }
+        })
+      expect((await deliver(oldCharge(T1))).status).toBe(200)
+      expect((await tootPayment(testDb(), a.id, T1))?.refundedAt).toBeInstanceOf(Date)
+      expect(await hasIt(a)).toBe(true)
+      expect((await deliver(oldCharge(T2))).status).toBe(200)
+      expect(await hasIt(a)).toBe(false)
+    })
+
+    it('leaves a 99¢ payment alone when the refund is of the $4.99', async () => {
+      const a = await buyer('A')
+      await pastPayment(a.id, T2)
+      const charge = refundedCharge({ metadata: { purchase: 'full_access', user_id: a.id } })
+      expect((await deliver(charge)).status).toBe(200)
+      expect((await tootPayment(testDb(), a.id, T2))?.refundedAt).toBeNull()
+      // That earlier payment still gives it.
+      expect(await hasIt(a)).toBe(true)
+    })
+  })
+
+  describe('a 99¢ session still open when Full Access came', () => {
+    it('gives Full Access once it’s paid, by the webhook alone', async () => {
+      const a = await signUp('A')
+      await pastPayment(a.id, T1, { paidAt: null })
+      const stripe = vi.spyOn(globalThis, 'fetch')
+      expect(await hasIt(a)).toBe(false)
+      const paid = oldSessionFor(a.id, T1, { status: 'complete', payment_status: 'paid' })
+      expect((await deliver(completed(paid))).status).toBe(200)
+      expect(await hasIt(a)).toBe(true)
+      expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeInstanceOf(Date)
+      expect(await counted('paid')).toBe(1)
+      // Sent again, it counts once.
+      expect((await deliver(completed(paid))).status).toBe(200)
+      expect(await counted('paid')).toBe(1)
+      expect((await save(T1, a)).status).toBe(201)
+      expect(stripe).not.toHaveBeenCalled()
+    })
+
+    it('counts only for its own Toot, its own user and the price it started at', async () => {
+      const a = await signUp('A')
+      const b = await signUp('B')
+      await pastPayment(a.id, T1, { paidAt: null })
+      const paid = { status: 'complete', payment_status: 'paid' } as const
+      const events = [
+        completed(oldSessionFor(a.id, T1, { ...paid, amount_total: 499 })),
+        completed(oldSessionFor(a.id, T1, { ...paid, client_reference_id: T2 })),
+        completed(oldSessionFor(a.id, T2, paid)),
+        completed(oldSessionFor(b.id, T1, paid)),
+        completed(oldSessionFor(a.id, T1))
+      ]
+      for (const event of events) expect((await deliver(event)).status).toBe(200)
+      expect(await hasIt(a)).toBe(false)
+      expect(await hasIt(b)).toBe(false)
+    })
+  })
 })
 
 describe('live and test mode', () => {
@@ -846,56 +1080,60 @@ describe('live and test mode', () => {
 
   it('takes only live events in live mode, and only test events in test mode', async () => {
     const a = await signUp('A')
-    await startTootPayment(testDb(), a.id, T1, 'twinkle', 'cs_live_first', TOOT_PRICE)
-    await startTootPayment(testDb(), a.id, T2, 'twinkle', 'cs_test_first', TOOT_PRICE)
-    const live = sessionFor(a.id, T1, {
-      id: 'cs_live_first',
-      status: 'complete',
-      payment_status: 'paid',
-      livemode: true
-    })
-    const test = sessionFor(a.id, T2, { status: 'complete', payment_status: 'paid' })
-    const receive = async (livemode: boolean, session: CheckoutSession) => {
-      const request = await eventRequest(completed(session))
+    const b = await signUp('B')
+    await startFullAccess(testDb(), a.id, 'cs_live_first', FULL_ACCESS_PRICE)
+    await startFullAccess(testDb(), b.id, 'cs_test_first', FULL_ACCESS_PRICE)
+    const live = paidSessionFor(a.id, T1, { id: 'cs_live_first', livemode: true })
+    const test = paidSessionFor(b.id, T2)
+    const receive = async (livemode: boolean, event: unknown) => {
+      const request = await eventRequest(event)
       return (await receiveStripeEvent({ db: testDb() }, payments(livemode), request)).status
     }
 
-    expect(await receive(true, test)).toBe(200)
-    expect(await receive(false, live)).toBe(200)
-    expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeNull()
-    expect((await tootPayment(testDb(), a.id, T2))?.paidAt).toBeNull()
+    expect(await receive(true, completed(test))).toBe(200)
+    expect(await receive(false, completed(live))).toBe(200)
+    expect((await fullAccessPurchase(testDb(), a.id))?.paidAt).toBeNull()
+    expect((await fullAccessPurchase(testDb(), b.id))?.paidAt).toBeNull()
 
-    expect(await receive(true, live)).toBe(200)
-    expect(await receive(false, test)).toBe(200)
-    expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeInstanceOf(Date)
-    expect((await tootPayment(testDb(), a.id, T2))?.paidAt).toBeInstanceOf(Date)
+    expect(await receive(true, completed(live))).toBe(200)
+    expect(await receive(false, completed(test))).toBe(200)
+    expect((await fullAccessPurchase(testDb(), a.id))?.paidAt).toBeInstanceOf(Date)
+    expect((await fullAccessPurchase(testDb(), b.id))?.paidAt).toBeInstanceOf(Date)
+  })
+
+  it('takes a refund only from an event of its own mode', async () => {
+    const a = await signUp('A')
+    await startFullAccess(testDb(), a.id, 'cs_live_first', FULL_ACCESS_PRICE)
+    const live = paidSessionFor(a.id, T1, { id: 'cs_live_first', livemode: true })
+    const receive = async (livemode: boolean, event: unknown) => {
+      const request = await eventRequest(event)
+      return (await receiveStripeEvent({ db: testDb() }, payments(livemode), request)).status
+    }
+    expect(await receive(true, completed(live))).toBe(200)
+    expect(await receive(true, refundedCharge({}, false))).toBe(200)
+    expect((await fullAccessPurchase(testDb(), a.id))?.refundedAt).toBeNull()
+    expect(await receive(true, refundedCharge({}, true))).toBe(200)
+    expect((await fullAccessPurchase(testDb(), a.id))?.refundedAt).toBeInstanceOf(Date)
   })
 })
 
 describe('with saving free', () => {
   // No environment saves free today, but a page loaded before a rollback to free saving still asks
-  // to pay, and needs `{ paid: true }` from both to save.
-  it('answers paid to checkout and payment, with no checkout and no Stripe', async () => {
+  // to pay, and needs `{ active: true }` from both to save.
+  it('answers active to checkout and the check, with no purchase and no Stripe', async () => {
     const a = await signUp('A')
     const stripe = vi.spyOn(globalThis, 'fetch')
     const free: Payments = { kind: 'free' }
-    const request = (path: string, init: RequestInit = {}) =>
-      new Request(`${ORIGIN}/api/toots/${T1}/${path}/`, {
-        ...init,
-        headers: headersFor(init.method ?? 'GET', a, { 'content-type': 'application/json' })
-      })
     const started = await startCheckout(
       { db: testDb() },
       free,
       a,
-      T1,
-      request('checkout', { method: 'POST', body: JSON.stringify({ songId: 'twinkle' }) })
+      checkoutRequest(a, { tootId: T1, songId: 'twinkle' })
     )
-    expect(await started.json()).toEqual({ paid: true })
-    const payment = await getTootPayment({ db: testDb() }, free, a, T1, request('payment'))
-    // Paid, but never a payment left unused: a kept Sound Pad take isn't saved by itself.
-    expect(await payment.json()).toEqual({ paid: true, unused: false })
-    expect(await tootPayment(testDb(), a.id, T1)).toBeNull()
+    expect(await started.json()).toEqual({ active: true })
+    const check = await getFullAccess({ db: testDb() }, free, a, accessRequest(a))
+    expect(await check.json()).toEqual({ active: true, limitReached: false })
+    expect(await fullAccessPurchase(testDb(), a.id)).toBeNull()
     expect(stripe).not.toHaveBeenCalled()
   })
 })
@@ -965,22 +1203,22 @@ describe('on Production, where saving is paid too (#258)', () => {
     expect(devCheckoutServes(HOST)).toBe(false)
     expect((await save(T1, a)).status).toBe(402)
 
-    // Back from Checkout, Stripe says it's paid, and the Toot saves once.
-    expect(await paid(T1, a)).toBe(true)
+    // Back from Checkout, Stripe says it's paid, and the Toot saves.
+    expect(await hasIt(a)).toBe(true)
     expect((await save(T1, a)).status).toBe(201)
     expect(stripe).toHaveBeenCalledTimes(2)
   })
 
-  it('marks a Toot paid from a signed live event, never from a test one', async () => {
+  it('gives Full Access from a signed live event, never from a test one', async () => {
     extraEnv.STRIPE_SECRET_KEY = LIVE_KEY
     extraEnv.STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRET
     const a = await signUp('A')
-    await startTootPayment(testDb(), a.id, T1, 'twinkle', 'cs_live_first', TOOT_PRICE)
+    await startFullAccess(testDb(), a.id, 'cs_live_first', FULL_ACCESS_PRICE)
     const session = liveSession(a.id, T1, { status: 'complete', payment_status: 'paid' })
     expect((await deliver(completed({ ...session, livemode: false }))).status).toBe(200)
-    expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeNull()
+    expect((await fullAccessPurchase(testDb(), a.id))?.paidAt).toBeNull()
     expect((await deliver(completed(session))).status).toBe(200)
-    expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeInstanceOf(Date)
+    expect((await fullAccessPurchase(testDb(), a.id))?.paidAt).toBeInstanceOf(Date)
     expect((await save(T1, a)).status).toBe(201)
   })
 
