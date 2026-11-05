@@ -6,14 +6,13 @@ import * as handleRoute from '@/app/api/handle/route'
 import * as shareRecordingRoute from '@/app/api/share/recordings/[id]/route'
 import * as shareTootRoute from '@/app/api/share/toots/[id]/route'
 import { createDatabase } from '@/db/database'
-import { markTootPaid, startTootPayment } from '@/db/payments'
 import { profileReports, rateLimit, shares } from '@/db/schema'
 import { songs } from '@/lib/catalog/songs.generated'
-import { TOOT_PRICE } from '@/lib/pricing'
 import { findProfile } from '@/server/profiles'
 import {
   type As,
   api,
+  giveFullAccess,
   ORIGIN,
   padTootMetadata,
   recordingMetadata,
@@ -97,9 +96,8 @@ async function savedToot(
   metadata: { id: string; songId: string | null },
   { minute = 0, share = true } = {}
 ) {
-  const { id, songId } = metadata
-  await startTootPayment(testDb(), user.id, id, songId, `cs_test_${id}`, TOOT_PRICE)
-  expect(await markTootPaid(testDb(), user.id, id, `cs_test_${id}`)).toBe(true)
+  const { id } = metadata
+  await giveFullAccess(user.id)
   expect((await api.put('toots', id, uploadBody(metadata, wav()), user)).status).toBe(201)
   if (!share) return
   const shared = await shareTootRoute.PUT(

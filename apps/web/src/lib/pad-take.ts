@@ -3,21 +3,21 @@ import { isPerformance, type Performance } from './performance'
 
 // The Sound Pad's takes (#278), kept in this browser while they're unsaved, by Toot id: Checkout
 // leaves the page, and back from it, or on the next open of the Sound Pad if the return never
-// loaded, the Pad makes the same Toot again from its take, with the id it was paid for (ADR 0010,
-// ADR 0017), as Song Creator makes a Song's again. Only Recording ids and times, never audio.
-// Storage that can't be read keeps nothing: the take then lasts the page, and isn't paid for.
+// loaded, the Pad makes the same Toot again from its take, with the id it went with (ADR 0017,
+// ADR 0022), as Song Creator makes a Song's again. Only Recording ids and times, never audio.
+// Storage that can't be read keeps nothing: the take then lasts the page, and Pay isn't offered.
 //
 // Each take is whose library it was made in (`pedos.account`, or a guest's visit), and only that
 // library's are read, so one browser never shows one person's take to another. A guest's new visit
 // lets go of the last one's takes, and Sign out or another account's sign-in lets go of the
 // account's takes that never started a Checkout. A take that started one stays for its account,
-// since it may be paid for.
+// since it may have paid.
 
 const KEY = 'pedos.padTakes'
 
 /**
  * At most this many takes that never started a Checkout are kept, and as many that did: past it,
- * the oldest of its kind is let go, so a new take never pushes out one that may be paid for.
+ * the oldest of its kind is let go, so a new take never pushes out one that may have paid.
  */
 export const MAX_KEPT_TAKES = 5
 
@@ -138,7 +138,7 @@ function forget(drops: (take: KeptTake) => boolean): void {
   }
 }
 
-/** Lets go of the Toot `tootId`'s kept take: it's saved, its payment is used, or it's gone. */
+/** Lets go of the Toot `tootId`'s kept take: it's saved, or it's gone. */
 export function forgetTake(tootId: string): void {
   forget(take => take.tootId === tootId)
 }
@@ -146,7 +146,7 @@ export function forgetTake(tootId: string): void {
 /**
  * Lets go of `account`'s takes (null: a guest's) that never started a Checkout, as its library
  * leaves this browser: a guest's new visit, Sign out, or another account's sign-in. Those that
- * started one stay for the account, which may have paid for them.
+ * started one stay for the account, which may have paid.
  */
 export function releaseTakes(account: string | null): void {
   forget(take => take.account === account && !take.checkout)

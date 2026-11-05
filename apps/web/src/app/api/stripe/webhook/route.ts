@@ -1,12 +1,12 @@
 import { getDb } from '@/db'
+import { receiveStripeEvent, requestPayments } from '@/server/full-access'
 import { apiError } from '@/server/require-user'
-import { receiveStripeEvent, requestPayments } from '@/server/toot-payments'
 
-// Stripe's events (ADR 0010). The one route outside `api/auth/` and `api/telemetry/` with no
+// Stripe's events (ADR 0022). The one route outside `api/auth/` and `api/telemetry/` with no
 // session: Stripe signs each event with the endpoint's secret, which `receiveStripeEvent` checks
 // before reading anything. The Staging gate lets it through (`src/lib/staging-access.ts`).
 
-/** A paid Checkout Session marks its Toot paid. */
+/** A paid Checkout Session gives Full Access, and a full refund ends it. */
 export async function POST(request: Request): Promise<Response> {
   let response: Response
   try {

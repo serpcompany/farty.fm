@@ -1,6 +1,6 @@
+import { payDevCheckout, requestPayments } from '@/server/full-access'
 import { requestStores } from '@/server/library'
 import { userRoute } from '@/server/require-user'
-import { payDevCheckout, requestPayments } from '@/server/toot-payments'
 
 /** The dev checkout's Pay (`/dev/checkout/`), on a local run only. */
 export const POST = userRoute((user, request) =>

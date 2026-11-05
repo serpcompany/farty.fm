@@ -2,13 +2,12 @@ import { env } from 'cloudflare:test'
 import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 
-import { markTootPaid, startTootPayment } from '@/db/payments'
-import { recordings, session, tootPayments, toots, user, verification } from '@/db/schema'
-import { TOOT_PRICE } from '@/lib/pricing'
+import { fullAccess, recordings, session, toots, user, verification } from '@/db/schema'
 import { deleteAccount } from '@/server/library'
 import {
   api,
   bucketKeys,
+  giveFullAccess,
   ORIGIN,
   recordingMetadata,
   signUp,
@@ -30,17 +29,16 @@ async function rowsOf(userId: string) {
     sessions: await db.select().from(session).where(eq(session.userId, userId)),
     recordings: await db.select().from(recordings).where(eq(recordings.userId, userId)),
     toots: await db.select().from(toots).where(eq(toots.userId, userId)),
-    tootPayments: await db.select().from(tootPayments).where(eq(tootPayments.userId, userId))
+    fullAccess: await db.select().from(fullAccess).where(eq(fullAccess.userId, userId))
   }
 }
 
 const deleteRequest = () => new Request(`${ORIGIN}/api/account/`, { method: 'DELETE' })
 
-/** A Recording and a paid-for Toot (ADR 0010). */
+/** A Recording, Full Access and a Toot (ADR 0022). */
 async function fill({ id, cookie }: { id: string; cookie: string }) {
   await api.put('recordings', R1, uploadBody(recordingMetadata(R1), wav()), { cookie })
-  await startTootPayment(testDb(), id, T1, 'twinkle', 'dev_test', TOOT_PRICE)
-  await markTootPaid(testDb(), id, T1, 'dev_test')
+  await giveFullAccess(id)
   await api.put('toots', T1, uploadBody(tootMetadata(T1), wav()), { cookie })
 }
 
@@ -104,7 +102,7 @@ describe('DELETE /api/account/', () => {
       sessions: [],
       recordings: [],
       toots: [],
-      tootPayments: []
+      fullAccess: []
     })
     expect(await bucketKeys(`users/${a.id}/`)).toEqual([])
     // Signed out everywhere: the session went with the user.
@@ -113,7 +111,7 @@ describe('DELETE /api/account/', () => {
     const others = await rowsOf(b.id)
     expect([others.users.length, others.sessions.length]).toEqual([1, 1])
     expect([others.recordings.length, others.toots.length]).toEqual([1, 1])
-    expect(others.tootPayments).toHaveLength(1)
+    expect(others.fullAccess).toHaveLength(1)
     expect(bKeys).toHaveLength(2)
     expect(await bucketKeys(`users/${b.id}/`)).toEqual(bKeys)
   })
@@ -140,7 +138,7 @@ describe('DELETE /api/account/', () => {
       sessions: [],
       recordings: [],
       toots: [],
-      tootPayments: []
+      fullAccess: []
     })
   })
 
@@ -153,7 +151,7 @@ describe('DELETE /api/account/', () => {
     } as unknown as R2Bucket
 
     await expect(
-      deleteAccount({ db: testDb(), media: failing }, { id: a.id }, deleteRequest())
+      deleteAccount({ db: testDb(), media: failing }, a, deleteRequest())
     ).rejects.toThrow()
 
     expect((await rowsOf(a.id)).users).toHaveLength(1)
@@ -180,7 +178,7 @@ describe('DELETE /api/account/', () => {
       delete: (keys: string[]) => env.MEDIA.delete(keys)
     } as unknown as R2Bucket
 
-    await deleteAccount({ db: testDb(), media: racing }, { id: a.id }, deleteRequest())
+    await deleteAccount({ db: testDb(), media: racing }, a, deleteRequest())
 
     expect(written).toBe(true)
     expect(await bucketKeys()).toEqual([])

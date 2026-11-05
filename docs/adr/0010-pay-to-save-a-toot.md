@@ -2,6 +2,8 @@
 
 Farty's first paywall (#204). The owner decided it on 2026-10-25: anyone can make and hear a Toot for free, and keeping one costs $0.99. There are still no ads (ADR 0008).
 
+**2026-11-06 (#406, ADR 0022):** one purchase of Full Access, $4.99 per account, replaces $0.99 per Toot. "One payment, one Toot", the price and the fee below no longer hold. Where saving is paid, Stripe Checkout and the keys still do. Anyone who paid for a Toot has Full Access.
+
 **2026-10-28 (#237, ADR 0013):** there's no free guest Toot. Saving a Toot needs an account everywhere, Production's free saves included, since a payment belongs to an account: a guest's Save opens the account step, then Checkout where saving is paid, or saves straight away where it's free. The rest of this decision is unchanged.
 
 **2026-10-28 (#258):** saving is paid on Production too, in Stripe's live mode, now that the owner has set its live keys (owner: "Yes, open the PR that makes saving cost $0.99 on Production."). No environment saves free. `savingIsPaid` in `pricing.ts` is still the one switch, and the free path stays, so Production could save free again with a one-line change. Google Play's billing is still #114's, before the Play app ships.

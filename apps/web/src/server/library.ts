@@ -4,7 +4,6 @@ import {
   clearFartChoices,
   deleteUser,
   favoriteSong,
-  insertPaidToot,
   insertRecording,
   insertToot,
   itemStatus,
@@ -22,10 +21,11 @@ import {
   unfavoriteSong,
   uploadState
 } from '@/db/library'
-import { tootPayment } from '@/db/payments'
+import { hasFullAccess } from '@/db/payments'
 import { removeShare } from '@/db/sharing'
 import { parseFartChoices } from '@/lib/engine/fart-choices'
 import type { Performance } from '@/lib/performance'
+import { MAX_SAVED_TOOTS } from '@/lib/pricing'
 import type { Recording, RecordingTrim } from '@/lib/recordings'
 import type { Toot, TootArrangement } from '@/lib/toot'
 
@@ -62,7 +62,7 @@ export const LIMITS: Record<Kind, { maxAudioBytes: number; maxItems: number }> =
    * own rate: about 2.9 MB at 48 kHz, and 5,760,044 bytes at 96 kHz, which 6 MiB still keeps.
    */
   recordings: { maxAudioBytes: 6 * 1024 * 1024, maxItems: 300 },
-  toots: { maxAudioBytes: 16 * 1024 * 1024, maxItems: 300 }
+  toots: { maxAudioBytes: 16 * 1024 * 1024, maxItems: MAX_SAVED_TOOTS }
 }
 
 /**
@@ -296,9 +296,8 @@ export async function deleteFartChoices(
  * `PUT /api/{recordings|toots}/{id}/`: keeps a new Recording or Toot and its WAV. 201 once kept,
  * 200 if it already was (an upload that's retried changes nothing), 410 if it was deleted, 409 at
  * the limit, or when `LIBRARY_HEADER` names another account (`wrong_account`). With `paidOnly`,
- * where saving a Toot is paid (ADR 0010), 402 for a new one that isn't paid for
- * (`payment_required`), and the first save uses its payment up: 410 for one saved and deleted
- * since, even once its tombstone is purged.
+ * where saving a Toot is paid (ADR 0022), 402 for a new one on an account without Full Access
+ * (`payment_required`). One already kept stays, Full Access or not.
  */
 export async function putItem(
   kind: Kind,
@@ -324,19 +323,14 @@ export async function putItem(
     }
   } else {
     const toot = parseToot(upload.metadata, id)
-    const insert = paidOnly ? insertPaidToot : insertToot
-    if (toot) add = audioBytes => insert(db, user.id, { ...toot, audioBytes }, maxItems)
+    if (toot) add = audioBytes => insertToot(db, user.id, { ...toot, audioBytes }, maxItems)
   }
   if (!add) return apiError(400, 'invalid_request')
 
   const before = await uploadState(db, kind, user.id, id)
   if (before.status === 'live') return Response.json({ id }, { status: 200 })
   if (before.status === 'deleted') return gone()
-  if (paidOnly) {
-    const payment = await tootPayment(db, user.id, id)
-    if (payment?.savedAt) return gone()
-    if (!payment?.paidAt) return apiError(402, 'payment_required')
-  }
+  if (paidOnly && !(await hasFullAccess(db, user.id))) return apiError(402, 'payment_required')
   if (before.live >= maxItems) return apiError(409, 'limit_reached')
 
   const key = audioKey(user.id, kind, id)

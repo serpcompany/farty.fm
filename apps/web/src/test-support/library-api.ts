@@ -10,7 +10,9 @@ import * as tootAudioRoute from '@/app/api/toots/[id]/audio/route'
 import * as tootRoute from '@/app/api/toots/[id]/route'
 import { createDatabase } from '@/db/database'
 import type { Kind } from '@/db/library'
+import { markFullAccessPaid, startFullAccess } from '@/db/payments'
 import { session, user } from '@/db/schema'
+import { FULL_ACCESS_PRICE } from '@/lib/pricing'
 import { encodeWav } from '@/lib/wav'
 
 import { TEST_SESSION_COOKIE } from './workers-session'
@@ -33,13 +35,18 @@ export type As = {
 }
 
 /** A user with an account and a signed-in browser. */
-export async function signUp(name: string): Promise<{ id: string; cookie: string }> {
+/** Gives the account Full Access, as paying for it does (ADR 0022). */
+export async function giveFullAccess(userId: string): Promise<void> {
+  await startFullAccess(testDb(), userId, `cs_test_${userId}`, FULL_ACCESS_PRICE)
+  await markFullAccessPaid(testDb(), userId, `cs_test_${userId}`, null)
+}
+
+export async function signUp(name: string): Promise<{ id: string; email: string; cookie: string }> {
   const now = new Date()
   const id = `user${name}`
+  const email = `${name}@example.test`
   const token = `${name}-${crypto.randomUUID()}`
-  await testDb()
-    .insert(user)
-    .values({ id, name: '', email: `${name}@example.test`, createdAt: now, updatedAt: now })
+  await testDb().insert(user).values({ id, name: '', email, createdAt: now, updatedAt: now })
   await testDb()
     .insert(session)
     .values({
@@ -50,7 +57,7 @@ export async function signUp(name: string): Promise<{ id: string; cookie: string
       createdAt: now,
       updatedAt: now
     })
-  return { id, cookie: `${TEST_SESSION_COOKIE}=${token}` }
+  return { id, email, cookie: `${TEST_SESSION_COOKIE}=${token}` }
 }
 
 function headers(

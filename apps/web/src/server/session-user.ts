@@ -1,7 +1,7 @@
 import { getSessionUser as readSession } from './auth'
 
-/** Who is signed in: the session's user. Only the id is needed to scope a request. */
-export type SessionUser = { id: string }
+/** Who is signed in: the session's user. The id scopes a request, and Checkout is given the email. */
+export type SessionUser = { id: string; email: string }
 
 /**
  * The signed-in user of `request`, or null. The one place `requireUser()` takes its session from:

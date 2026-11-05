@@ -1,16 +1,23 @@
 import type { SiteEnv } from './site'
 
-// What saving a Toot costs (ADR 0010). Making and hearing one is free; Save to Toots is paid, one
-// Toot at a time, through Stripe Checkout. The browser and the server both read this file.
+// What saving Toots costs (ADR 0022). Making and hearing them is free; Save to Toots needs Full
+// Access, one payment per account, through Stripe Checkout. The browser and the server both read
+// this file.
 
-/** The price of saving one Toot, in the currency's smallest unit. The one place it is set. */
-export const TOOT_PRICE = { amount: 99, currency: 'usd' } as const
+/** The price of Full Access, in the currency's smallest unit. The one place it is set. */
+export const FULL_ACCESS_PRICE = { amount: 499, currency: 'usd' } as const
 
-/** The price as people read it: "$0.99". */
-export const TOOT_PRICE_LABEL = new Intl.NumberFormat('en-US', {
+/** The price as people read it: "$4.99". */
+export const FULL_ACCESS_PRICE_LABEL = new Intl.NumberFormat('en-US', {
   style: 'currency',
-  currency: TOOT_PRICE.currency
-}).format(TOOT_PRICE.amount / 100)
+  currency: FULL_ACCESS_PRICE.currency
+}).format(FULL_ACCESS_PRICE.amount / 100)
+
+/** How many Toots an account can keep at once: what Full Access says, and what the server holds. */
+export const MAX_SAVED_TOOTS = 300
+
+/** How many days after paying someone can have their money back, by asking Support. */
+export const MONEY_BACK_DAYS = 14
 
 /**
  * Where Save to Toots is free: nowhere since #258, when Production took Stripe's live keys. Putting
@@ -20,8 +27,8 @@ export const TOOT_PRICE_LABEL = new Intl.NumberFormat('en-US', {
 const FREE_SAVING: readonly SiteEnv[] = []
 
 /**
- * Whether Save to Toots costs `TOOT_PRICE` in `environment`: everywhere outside `FREE_SAVING`,
- * Production included, in Stripe's live mode (ADR 0010).
+ * Whether Save to Toots needs Full Access in `environment`: everywhere outside `FREE_SAVING`,
+ * Production included, in Stripe's live mode (ADR 0022).
  */
 export function savingIsPaid(environment: SiteEnv): boolean {
   return !FREE_SAVING.includes(environment)

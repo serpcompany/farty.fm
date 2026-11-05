@@ -269,12 +269,11 @@ export const fartChoices = sqliteTable(
 )
 
 /**
- * A Toot's payment (ADR 0010): one row per Toot a user has started to pay for, keyed by the user
- * and the Toot's id, made before its Toot is saved. `paid_at` is set once Stripe says it's paid
- * (the webhook, or the return from Checkout asking Stripe), and only then does the Toot upload.
- * `saved_at` is set with the Toot's first save, which uses the payment up: a Toot deleted since
- * can't be saved again, even once its tombstone is gone. Stripe keeps the payment itself; no card
- * data is here.
+ * Toot payments from before Full Access (ADR 0010, ADR 0022): one row for a user's Toot, by Stripe's
+ * Checkout Session for it. No new row is made since #406. One with `paid_at`, and no `refunded_at`,
+ * gives its account Full Access, and a session still open then is honored by the webhook.
+ * `saved_at` isn't written any more, and stays for what it says of those Toots. Stripe keeps the
+ * payment itself; no card data is here.
  */
 export const tootPayments = sqliteTable(
   'toot_payments',
@@ -295,10 +294,33 @@ export const tootPayments = sqliteTable(
     songId: text('song_id'),
     createdAt: timestamp('created_at').notNull(),
     paidAt: timestamp('paid_at'),
-    savedAt: timestamp('saved_at')
+    savedAt: timestamp('saved_at'),
+    refundedAt: timestamp('refunded_at')
   },
   table => [primaryKey({ columns: [table.userId, table.tootId] })]
 )
+
+/**
+ * An account's purchase of Full Access (ADR 0022), one row per account, by Stripe's Checkout Session
+ * for it. `paid_at` is set once Stripe says it's paid (the webhook, or the return from Checkout
+ * asking Stripe), and `refunded_at` once Stripe says it's fully refunded. Bought again after a
+ * refund, the same row starts over. Stripe keeps the payment itself; no card data is here.
+ */
+export const fullAccess = sqliteTable('full_access', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  /** The latest Checkout Session for it: `cs_test_…` from Stripe, `dev_…` on a local run. */
+  checkoutSessionId: text('checkout_session_id').notNull(),
+  /** Stripe's payment, which a refund names. Null until paid, and on a local run. */
+  paymentIntent: text('payment_intent'),
+  /** What the session charges, in the currency's smallest unit. */
+  amount: integer('amount').notNull(),
+  currency: text('currency').notNull(),
+  createdAt: timestamp('created_at').notNull(),
+  paidAt: timestamp('paid_at'),
+  refundedAt: timestamp('refunded_at')
+})
 
 // Sharing (ADR 0020): nothing is public until its owner shares it. A shared item's page and audio
 // are found by joining `shares` to the owner's Handle and to the live item, so Stop sharing,
