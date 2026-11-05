@@ -6,7 +6,8 @@
     14.0,
     18.0,
     22.0,
-    26.0
+    26.0,
+    30.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 34
   },
   "import_report": {
     "catalog_id": "minstrel-boy",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 19,
+    "note_count": 20,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-minstrel-boy.mid",
     "tempo_changes_ignored": 1,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 34.0,
   "notes": [
     {
       "dur": 2.0,
@@ -126,6 +127,11 @@
       "dur": 4.0,
       "pitch": 69,
       "start": 26.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 67,
+      "start": 30.0
     }
   ],
   "pitches": [

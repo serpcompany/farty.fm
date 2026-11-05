@@ -4,7 +4,8 @@
     9.0,
     15.0,
     21.0,
-    27.0
+    27.0,
+    30.0
   ],
   "beats_per_bar": 6,
   "bpm": 105,
@@ -12,13 +13,13 @@
   "id": "o-holy-night",
   "import_args": {
     "bpm": 105,
-    "max_beats": 30
+    "max_beats": 32.5
   },
   "import_report": {
     "catalog_id": "o-holy-night",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 24,
+    "note_count": 25,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-o-holy-night.mid",
     "tempo_changes_ignored": 4,
@@ -27,7 +28,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 32.5,
   "notes": [
     {
       "dur": 1.5,
@@ -148,6 +149,11 @@
       "dur": 0.5,
       "pitch": 66,
       "start": 29.5
+    },
+    {
+      "dur": 2.5,
+      "pitch": 69,
+      "start": 30.0
     }
   ],
   "pitches": [

@@ -9,7 +9,9 @@
     18.0,
     21.0,
     24.0,
-    27.0
+    27.0,
+    30.0,
+    33.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -17,13 +19,13 @@
   "id": "down-in-the-valley",
   "import_args": {
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 34
   },
   "import_report": {
     "catalog_id": "down-in-the-valley",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 13,
+    "note_count": 14,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-down-in-the-valley.mid",
     "tempo_changes_ignored": 0,
@@ -32,7 +34,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 34.0,
   "notes": [
     {
       "dur": 1.0,
@@ -98,6 +100,11 @@
       "dur": 3.0,
       "pitch": 70,
       "start": 27.0
+    },
+    {
+      "dur": 4.0,
+      "pitch": 67,
+      "start": 30.0
     }
   ],
   "pitches": [

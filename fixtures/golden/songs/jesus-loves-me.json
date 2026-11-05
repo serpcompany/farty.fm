@@ -7,7 +7,8 @@
     16.0,
     20.0,
     24.0,
-    28.0
+    28.0,
+    32.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,14 +16,14 @@
   "id": "jesus-loves-me",
   "import_args": {
     "bpm": 120,
-    "max_beats": 32,
+    "max_beats": 34,
     "start_beat": 8
   },
   "import_report": {
     "catalog_id": "jesus-loves-me",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 23,
+    "note_count": 24,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-jesus-loves-me.mid",
     "tempo_changes_ignored": 0,
@@ -32,7 +33,7 @@
       1
     ]
   },
-  "length_beats": 31.0,
+  "length_beats": 34.0,
   "notes": [
     {
       "dur": 1.0,
@@ -148,6 +149,11 @@
       "dur": 1.0,
       "pitch": 60,
       "start": 30.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 32.0
     }
   ],
   "pitches": [

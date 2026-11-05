@@ -9,7 +9,8 @@
     19.0,
     22.0,
     25.0,
-    28.0
+    28.0,
+    31.0
   ],
   "beats_per_bar": 3,
   "bpm": 144,
@@ -18,13 +19,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 144,
-    "max_beats": 31
+    "max_beats": 33
   },
   "import_report": {
     "catalog_id": "black-velvet-band",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 26,
+    "note_count": 27,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-black-velvet-band.mid",
     "tempo_changes_ignored": 1,
@@ -33,7 +34,7 @@
       0
     ]
   },
-  "length_beats": 31.0,
+  "length_beats": 33.0,
   "notes": [
     {
       "dur": 0.5,
@@ -164,6 +165,11 @@
       "dur": 1.0,
       "pitch": 64,
       "start": 30.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 31.0
     }
   ],
   "pitches": [

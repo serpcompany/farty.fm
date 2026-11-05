@@ -239,20 +239,47 @@ class HeldNote(unittest.TestCase):
         self.assertEqual(held(two)["max_beats"], 31)
         self.assertEqual(held(CADENCE[:29] + [(29.0, 1.75), (30.75, 1.0)])["max_beats"], 29)
 
-    def test_the_excerpt_stays_within_32_beats_of_its_start(self):
-        # 4/4 from beat 0: the closing bar line is already 32 beats from the start.
-        self.assertEqual(held([(b, 1.0) for b in range(32)] + [(32.0, 2.0)], [(0.0, 4, 4)])["max_beats"], 32)
-        # 3/4: ten bars, then a dotted half to beat 33 doesn't fit, a half to 32 does.
-        bars = [(b, 1.0) for b in range(30)]
-        self.assertEqual(held(bars + [(30.0, 3.0)], [(0.0, 3, 4)])["max_beats"], 30)
-        self.assertEqual(held(bars + [(30.0, 2.0), (32.0, 1.0)], [(0.0, 3, 4)])["max_beats"], 32)
-        # From a first note on beat 3 of a full bar, 32 beats run to 35: the note to 34 fits.
-        late = [(b, 1.0) for b in range(3, 32)] + [(32.0, 2.0), (34.0, 1.0)]
-        self.assertEqual(held(late, [(0.0, 4, 4)], 3.0), {"bpm": 120, "start_beat": 3, "max_beats": 31})
+    def test_the_held_note_ends_at_most_4_beats_past_32(self):
+        # 4/4 from beat 0: the closing bar line is 32 beats from the start, so the note may last 4 beats.
+        four_four = [(0.0, 4, 4)]
+        bars = [(b, 1.0) for b in range(32)]
+        self.assertEqual(held(bars + [(32.0, 2.0)], four_four)["max_beats"], 34)
+        self.assertEqual(held(bars + [(32.0, 4.0)], four_four)["max_beats"], 36)
+        self.assertEqual(held(bars + [(32.0, 4.5)], four_four)["max_beats"], 32)
+        # 3/4: ten bars, then a dotted half to beat 33 runs 1 beat past 32.
+        self.assertEqual(held(bars[:30] + [(30.0, 3.0)], [(0.0, 3, 4)])["max_beats"], 33)
+        # The limit counts from the excerpt's start, not its bar: a first note on beat 3 of a full
+        # bar has 36 beats to 39, so a note on the closing bar line at 32 may last 7.
+        late = bars[3:]
+        self.assertEqual(held(late + [(32.0, 7.0)], four_four, 3.0), {"bpm": 120, "start_beat": 3, "max_beats": 36})
+        self.assertEqual(held(late + [(32.0, 7.5)], four_four, 3.0), {"bpm": 120, "start_beat": 3, "max_beats": 29})
+
+    def test_only_the_held_note_is_taken_in_past_32(self):
+        # The note after it stays out, however soon it starts, even a held one of its own.
+        bars = [(b, 1.0) for b in range(32)]
+        self.assertEqual(held(bars + [(32.0, 2.0), (34.0, 1.0)], [(0.0, 4, 4)])["max_beats"], 34)
+        self.assertEqual(held(bars + [(32.0, 2.0), (34.0, 2.0)], [(0.0, 4, 4)])["max_beats"], 34)
 
     def test_no_other_note_starts_inside_the_held_note(self):
         overlapping = CADENCE[:29] + [(29.0, 3.0), (31.0, 1.0), (32.0, 1.0)]
         self.assertEqual(held(overlapping)["max_beats"], 29)
+        # Past 32 too: a note inside it leaves the excerpt on the bar line.
+        self.assertEqual(held(CADENCE[:29] + [(29.0, 5.0), (33.0, 1.0)])["max_beats"], 29)
+
+    def test_the_held_note_follows_on_from_the_melody(self):
+        # After a rest of 2 beats or more the Song would fall silent just before its last note.
+        self.assertEqual(held(CADENCE[:28] + [(29.0, 3.0)])["max_beats"], 32)  # a rest of 1 beat
+        self.assertEqual(held(CADENCE[:27] + [(29.0, 3.0)])["max_beats"], 29)  # of 2 beats
+
+    def test_rule_britannia_stops_before_the_rest_its_left_hand_fills(self):
+        # The left hand plays the tune up to the held note, so taking it in alone would silence the
+        # 3 beats before it (#380). The Song keeps its bar-line excerpt (#394).
+        path = ROOT / "catalog/midi/pdmx-rule-britannia.mid"
+        whole = load_midi(path)
+        self.assertEqual([(n.start, n.dur) for n in whole.notes if 28 <= n.start < 35], [(28.0, 1.0), (32.0, 3.0)])
+        opts = pdmx.render_options(*import_pdmx.score_meta(path), whole.notes[0].start,
+                                   [(n.start, n.dur) for n in whole.notes])
+        self.assertEqual(opts["max_beats"], 32)
 
     def test_a_held_note_that_ends_on_a_third_of_a_beat(self):
         # max_beats rounds down, so load_midi leaves out the next note, which starts on that end.
@@ -273,11 +300,21 @@ class HeldNote(unittest.TestCase):
         notes = load_midi(path, **entry["render"]).notes
         self.assertEqual((len(notes), notes[-1].pitch, notes[-1].dur), (37, 62, 3.0))  # "brave": D4 for 3 beats
 
+    def test_o_come_all_ye_faithful_runs_past_32_beats_to_finish_its_note(self):
+        # The closing bar line is 32 beats from its start, and the note there lasts 4: the furthest
+        # any Song runs (#394).
+        path = ROOT / "catalog/midi/pdmx-o-come-all-ye-faithful.mid"
+        entry = next(e for e in json.loads((ROOT / "catalog/catalog.json").read_text()) if e["id"] == "o-come-all-ye-faithful")
+        self.assertEqual(entry["render"]["max_beats"], pdmx.EXCERPT_BEATS + pdmx.HELD_OVERRUN_BEATS)
+        notes = load_midi(path, **entry["render"]).notes
+        self.assertEqual((notes[-1].start, notes[-1].dur), (32.0, 4.0))
+
     def test_every_imported_song_ends_on_its_held_note(self):
         # An imported Song's excerpt ends on its closing bar line, or takes in the held note that
         # starts there, unless the full Fixture Library has no fart that lasts it (import_pdmx.excerpt).
         # A hand-entered Song's excerpt is chosen by hand. The closing bar line is the rule's, from the
         # Song's own start: a Song of the first batches starts on its first bar line, not its first note.
+        # None runs past the held note's limit (#394).
         from engine import load_library, melody_fit
         library = load_library()
         for entry in json.loads((ROOT / "catalog/catalog.json").read_text()):
@@ -293,6 +330,7 @@ class HeldNote(unittest.TestCase):
                 if longer != shorter and not melody_fit(load_midi(path, **{**r, "max_beats": longer}), library).unlocked:
                     longer = shorter
                 self.assertEqual(r["max_beats"], longer)
+                self.assertLessEqual(r["max_beats"], pdmx.EXCERPT_BEATS + pdmx.HELD_OVERRUN_BEATS)
 
 
 class Gates(unittest.TestCase):

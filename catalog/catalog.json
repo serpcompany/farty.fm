@@ -747,7 +747,7 @@
   "retrieved": "2026-10-21",
   "render": {
    "bpm": 120,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -820,7 +820,7 @@
   "retrieved": "2026-10-21",
   "render": {
    "bpm": 120,
-   "max_beats": 32
+   "max_beats": 36
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -1152,7 +1152,7 @@
   "render": {
    "bpm": 78,
    "start_beat": 9.5,
-   "max_beats": 32,
+   "max_beats": 34.5,
    "beats_per_bar": 4
   },
   "import": {
@@ -1189,7 +1189,7 @@
   "retrieved": "2026-10-21",
   "render": {
    "bpm": 144,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -1338,7 +1338,7 @@
   "render": {
    "bpm": 144,
    "start_beat": 4,
-   "max_beats": 32
+   "max_beats": 35
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -1523,7 +1523,7 @@
   "render": {
    "bpm": 120,
    "start_beat": 4,
-   "max_beats": 32
+   "max_beats": 36
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -2628,7 +2628,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 72,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -3031,7 +3031,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32,
+   "max_beats": 34,
    "beats_per_bar": 2
   },
   "import": {
@@ -3444,7 +3444,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -3591,7 +3591,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 105,
-   "max_beats": 30
+   "max_beats": 32.5
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -3737,7 +3737,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 144,
-   "max_beats": 31,
+   "max_beats": 33,
    "beats_per_bar": 6
   },
   "import": {
@@ -3813,7 +3813,7 @@
   "render": {
    "bpm": 120,
    "start_beat": 8,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -4149,7 +4149,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 144,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -4186,7 +4186,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 108,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -4934,7 +4934,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 31,
+   "max_beats": 34,
    "beats_per_bar": 3
   },
   "import": {
@@ -5569,7 +5569,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32,
+   "max_beats": 34,
    "beats_per_bar": 4
   },
   "import": {
@@ -6536,7 +6536,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 72,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -6759,7 +6759,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -7058,7 +7058,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32,
+   "max_beats": 34,
    "beats_per_bar": 6
   },
   "import": {
@@ -7245,7 +7245,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -7356,7 +7356,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32,
+   "max_beats": 34,
    "beats_per_bar": 4
   },
   "import": {
@@ -7620,7 +7620,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -7695,7 +7695,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 100,
-   "max_beats": 31,
+   "max_beats": 33,
    "beats_per_bar": 3
   },
   "import": {
@@ -7955,7 +7955,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 29,
+   "max_beats": 32.5,
    "beats_per_bar": 4
   },
   "import": {
@@ -8177,7 +8177,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -8509,7 +8509,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32,
+   "max_beats": 34,
    "beats_per_bar": 3
   },
   "import": {
@@ -11947,7 +11947,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 31,
+   "max_beats": 35.5,
    "beats_per_bar": 3
   },
   "import": {
@@ -12316,7 +12316,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 140,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -12427,7 +12427,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 31,
+   "max_beats": 33,
    "beats_per_bar": 3
   },
   "import": {
@@ -12796,7 +12796,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 31,
+   "max_beats": 33,
    "beats_per_bar": 3
   },
   "import": {
@@ -13316,7 +13316,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 30,
+   "max_beats": 34,
    "beats_per_bar": 4
   },
   "import": {
@@ -13391,7 +13391,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 31,
+   "max_beats": 33,
    "beats_per_bar": 6
   },
   "import": {
@@ -18008,7 +18008,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 31,
+   "max_beats": 33,
    "beats_per_bar": 3
   },
   "import": {
@@ -18823,7 +18823,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 30
+   "max_beats": 33
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -19120,7 +19120,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32
+   "max_beats": 35
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -19193,7 +19193,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 30,
+   "max_beats": 33,
    "beats_per_bar": 4
   },
   "import": {
@@ -19266,7 +19266,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -19413,7 +19413,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 140,
-   "max_beats": 32,
+   "max_beats": 34,
    "beats_per_bar": 4
   },
   "import": {
@@ -20817,7 +20817,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 31,
+   "max_beats": 33,
    "beats_per_bar": 6
   },
   "import": {
@@ -22591,7 +22591,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 144,
-   "max_beats": 32,
+   "max_beats": 34,
    "beats_per_bar": 4
   },
   "import": {
@@ -22850,7 +22850,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 30
+   "max_beats": 33
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -23146,7 +23146,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -24328,7 +24328,7 @@
   "render": {
    "bpm": 120,
    "start_beat": 0.5,
-   "max_beats": 28.5,
+   "max_beats": 32.5,
    "beats_per_bar": 4
   },
   "import": {
@@ -24404,7 +24404,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 31
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -24881,7 +24881,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -25359,7 +25359,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32,
+   "max_beats": 34,
    "beats_per_bar": 4
   },
   "import": {
@@ -25396,7 +25396,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 144,
-   "max_beats": 32,
+   "max_beats": 34,
    "beats_per_bar": 8
   },
   "import": {
@@ -28090,7 +28090,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32,
+   "max_beats": 34,
    "beats_per_bar": 3
   },
   "import": {
@@ -28276,7 +28276,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 30
+   "max_beats": 33
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -30380,7 +30380,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 31,
+   "max_beats": 33,
    "beats_per_bar": 6
   },
   "import": {
@@ -31339,7 +31339,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 30.5
+   "max_beats": 32.5
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -31712,7 +31712,7 @@
   "render": {
    "bpm": 120,
    "start_beat": 16,
-   "max_beats": 32
+   "max_beats": 34.5
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -31750,7 +31750,7 @@
   "render": {
    "bpm": 144,
    "start_beat": 4.5,
-   "max_beats": 30.5,
+   "max_beats": 32.5,
    "beats_per_bar": 3
   },
   "import": {
@@ -32082,7 +32082,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 104,
-   "max_beats": 31,
+   "max_beats": 34,
    "beats_per_bar": 2
   },
   "import": {
@@ -32380,7 +32380,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 30.5,
+   "max_beats": 33,
    "beats_per_bar": 3
   },
   "import": {
@@ -32567,7 +32567,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32,
+   "max_beats": 34,
    "beats_per_bar": 8
   },
   "import": {
@@ -32677,7 +32677,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 126,
-   "max_beats": 32
+   "max_beats": 35
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -33457,7 +33457,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32,
+   "max_beats": 34,
    "beats_per_bar": 4
   },
   "import": {
@@ -33827,7 +33827,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 30
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -34200,7 +34200,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 144,
-   "max_beats": 31,
+   "max_beats": 33,
    "beats_per_bar": 3
   },
   "import": {
@@ -35348,7 +35348,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 144,
-   "max_beats": 32,
+   "max_beats": 34,
    "beats_per_bar": 8
   },
   "import": {
@@ -35721,7 +35721,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 30.5,
+   "max_beats": 32.5,
    "beats_per_bar": 2
   },
   "import": {
@@ -35982,7 +35982,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",
@@ -36388,7 +36388,7 @@
   "retrieved": "2026-10-25",
   "render": {
    "bpm": 120,
-   "max_beats": 32
+   "max_beats": 34
   },
   "import": {
    "tool": "tools/catalog/import_pdmx.py",

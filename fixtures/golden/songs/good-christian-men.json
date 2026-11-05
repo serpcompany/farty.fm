@@ -4,7 +4,8 @@
     7.0,
     13.0,
     19.0,
-    25.0
+    25.0,
+    31.0
   ],
   "beats_per_bar": 6,
   "bpm": 144,
@@ -13,13 +14,13 @@
   "import_args": {
     "beats_per_bar": 6,
     "bpm": 144,
-    "max_beats": 31
+    "max_beats": 33
   },
   "import_report": {
     "catalog_id": "good-christian-men",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 20,
+    "note_count": 21,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-good-christian-men.mid",
     "tempo_changes_ignored": 1,
@@ -28,7 +29,7 @@
       0
     ]
   },
-  "length_beats": 31.0,
+  "length_beats": 33.0,
   "notes": [
     {
       "dur": 1.0,
@@ -129,6 +130,11 @@
       "dur": 1.0,
       "pitch": 70,
       "start": 30.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 31.0
     }
   ],
   "pitches": [

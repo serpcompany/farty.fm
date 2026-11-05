@@ -7,7 +7,8 @@
     16.0,
     20.0,
     24.0,
-    28.0
+    28.0,
+    32.0
   ],
   "beats_per_bar": 4,
   "bpm": 126,
@@ -15,13 +16,13 @@
   "id": "i-shall-not-be-moved",
   "import_args": {
     "bpm": 126,
-    "max_beats": 32
+    "max_beats": 35
   },
   "import_report": {
     "catalog_id": "i-shall-not-be-moved",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 25,
+    "note_count": 26,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-i-shall-not-be-moved.mid",
     "tempo_changes_ignored": 0,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 35.0,
   "notes": [
     {
       "dur": 1.0,
@@ -156,6 +157,11 @@
       "dur": 1.0,
       "pitch": 67,
       "start": 31.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 65,
+      "start": 32.0
     }
   ],
   "pitches": [

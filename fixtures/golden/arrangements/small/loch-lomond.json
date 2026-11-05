@@ -12,8 +12,8 @@
       "target_midi": 37
     },
     {
-      "seconds": 0.9,
-      "target_midi": 41
+      "seconds": 1.7,
+      "target_midi": 39
     }
   ],
   "notes": null,
@@ -41,16 +41,16 @@
       "target_midi": 37
     },
     {
-      "octave_move": false,
-      "recording": "022",
-      "shift_semitones": -1.3259205936601859,
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
       "song_pitch": 74,
       "target_midi": 39
     },
     {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
+      "octave_move": false,
+      "recording": "022",
+      "shift_semitones": 0.6740794063398141,
       "song_pitch": 76,
       "target_midi": 41
     },
@@ -80,7 +80,7 @@
     "covered": 5,
     "total": 8
   },
-  "plan_cost": 172.82462382705427,
+  "plan_cost": 173.37506436004276,
   "render_settings": null,
   "song": "loch-lomond",
   "transpose": -35,

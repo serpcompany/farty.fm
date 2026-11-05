@@ -14,7 +14,9 @@
     23.0,
     25.0,
     27.0,
-    29.0
+    29.0,
+    31.0,
+    33.0
   ],
   "beats_per_bar": 2,
   "bpm": 104,
@@ -23,13 +25,13 @@
   "import_args": {
     "beats_per_bar": 2,
     "bpm": 104,
-    "max_beats": 31
+    "max_beats": 34
   },
   "import_report": {
     "catalog_id": "rising-of-the-moon",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 59,
+    "note_count": 60,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-rising-of-the-moon.mid",
     "tempo_changes_ignored": 0,
@@ -38,7 +40,7 @@
       0
     ]
   },
-  "length_beats": 31.0,
+  "length_beats": 34.0,
   "notes": [
     {
       "dur": 0.5,
@@ -334,6 +336,11 @@
       "dur": 0.5,
       "pitch": 64,
       "start": 30.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 62,
+      "start": 31.0
     }
   ],
   "pitches": [

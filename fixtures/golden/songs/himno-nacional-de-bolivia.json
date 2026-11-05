@@ -7,7 +7,8 @@
     16.0,
     20.0,
     24.0,
-    28.0
+    28.0,
+    32.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,13 +16,13 @@
   "id": "himno-nacional-de-bolivia",
   "import_args": {
     "bpm": 120,
-    "max_beats": 32
+    "max_beats": 34
   },
   "import_report": {
     "catalog_id": "himno-nacional-de-bolivia",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 46,
+    "note_count": 47,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-himno-nacional-de-bolivia.mid",
     "tempo_changes_ignored": 0,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 34.0,
   "notes": [
     {
       "dur": 1.75,
@@ -261,6 +262,11 @@
       "dur": 0.25,
       "pitch": 74,
       "start": 31.75
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 32.0
     }
   ],
   "pitches": [

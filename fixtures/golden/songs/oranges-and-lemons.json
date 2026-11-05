@@ -7,7 +7,8 @@
     16.0,
     20.0,
     24.0,
-    28.0
+    28.0,
+    32.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,13 +16,13 @@
   "id": "oranges-and-lemons",
   "import_args": {
     "bpm": 120,
-    "max_beats": 32
+    "max_beats": 35
   },
   "import_report": {
     "catalog_id": "oranges-and-lemons",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 40,
+    "note_count": 41,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-oranges-and-lemons.mid",
     "tempo_changes_ignored": 0,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 35.0,
   "notes": [
     {
       "dur": 1.0,
@@ -231,6 +232,11 @@
       "dur": 0.5,
       "pitch": 81,
       "start": 31.5
+    },
+    {
+      "dur": 3.0,
+      "pitch": 83,
+      "start": 32.0
     }
   ],
   "pitches": [
@@ -240,7 +246,8 @@
     76,
     78,
     79,
-    81
+    81,
+    83
   ],
   "sha256": "e97eb37ad19cfd1535e2c6a209770cf3f326623a4f39ee048923d5158bd7cda9",
   "title": "Oranges and Lemons"

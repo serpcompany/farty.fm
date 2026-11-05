@@ -7,7 +7,8 @@
     16.0,
     20.0,
     24.0,
-    28.0
+    28.0,
+    32.0
   ],
   "beats_per_bar": 4,
   "bpm": 144,
@@ -16,13 +17,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 144,
-    "max_beats": 32
+    "max_beats": 34
   },
   "import_report": {
     "catalog_id": "canaries",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 24,
+    "note_count": 25,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-canaries.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +32,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 34.0,
   "notes": [
     {
       "dur": 2.0,
@@ -152,6 +153,11 @@
       "dur": 1.0,
       "pitch": 67,
       "start": 31.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 32.0
     }
   ],
   "pitches": [

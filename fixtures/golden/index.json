@@ -407,10 +407,10 @@
     },
     {
       "id": "skip-to-my-lou",
-      "notes": 31,
+      "notes": 32,
       "title": "Skip to My Lou",
       "transpose": {
-        "full": -5,
+        "full": -14,
         "small": -14
       },
       "unlocked": {
@@ -433,15 +433,15 @@
     },
     {
       "id": "oh-susanna",
-      "notes": 29,
+      "notes": 30,
       "title": "Oh! Susanna",
       "transpose": {
-        "full": -10,
-        "small": -31
+        "full": -13,
+        "small": -26
       },
       "unlocked": {
         "full": true,
-        "small": true
+        "small": false
       }
     },
     {
@@ -550,11 +550,11 @@
     },
     {
       "id": "danny-boy",
-      "notes": 43,
+      "notes": 44,
       "title": "Danny Boy",
       "transpose": {
-        "full": -21,
-        "small": -19
+        "full": -17,
+        "small": -17
       },
       "unlocked": {
         "full": true,
@@ -563,10 +563,10 @@
     },
     {
       "id": "drunken-sailor",
-      "notes": 36,
+      "notes": 37,
       "title": "Drunken Sailor",
       "transpose": {
-        "full": -9,
+        "full": -8,
         "small": -22
       },
       "unlocked": {
@@ -615,7 +615,7 @@
     },
     {
       "id": "deck-the-halls",
-      "notes": 17,
+      "notes": 18,
       "title": "Deck the Halls",
       "transpose": {
         "full": -13,
@@ -680,11 +680,11 @@
     },
     {
       "id": "o-come-all-ye-faithful",
-      "notes": 25,
+      "notes": 26,
       "title": "O Come, All Ye Faithful",
       "transpose": {
-        "full": -26,
-        "small": -24
+        "full": -18,
+        "small": -30
       },
       "unlocked": {
         "full": true,
@@ -1070,7 +1070,7 @@
     },
     {
       "id": "loch-lomond",
-      "notes": 42,
+      "notes": 43,
       "title": "Loch Lomond",
       "transpose": {
         "full": -26,
@@ -1213,7 +1213,7 @@
     },
     {
       "id": "kalinka",
-      "notes": 48,
+      "notes": 49,
       "title": "Kalinka",
       "transpose": {
         "full": -11,
@@ -1356,10 +1356,10 @@
     },
     {
       "id": "angels-we-have-heard",
-      "notes": 28,
+      "notes": 29,
       "title": "Angels We Have Heard on High",
       "transpose": {
-        "full": -17,
+        "full": -18,
         "small": -31
       },
       "unlocked": {
@@ -1408,7 +1408,7 @@
     },
     {
       "id": "o-holy-night",
-      "notes": 24,
+      "notes": 25,
       "title": "O Holy Night",
       "transpose": {
         "full": -18,
@@ -1460,7 +1460,7 @@
     },
     {
       "id": "good-christian-men",
-      "notes": 20,
+      "notes": 21,
       "title": "Good Christian Men, Rejoice",
       "transpose": {
         "full": -17,
@@ -1486,7 +1486,7 @@
     },
     {
       "id": "jesus-loves-me",
-      "notes": 23,
+      "notes": 24,
       "title": "Jesus Loves Me",
       "transpose": {
         "full": -11,
@@ -1603,7 +1603,7 @@
     },
     {
       "id": "radetzky",
-      "notes": 25,
+      "notes": 26,
       "title": "Radetzky March",
       "transpose": {
         "full": -27,
@@ -1616,7 +1616,7 @@
     },
     {
       "id": "trumpet-voluntary",
-      "notes": 59,
+      "notes": 60,
       "title": "Trumpet Voluntary",
       "transpose": {
         "full": -28,

@@ -9,7 +9,8 @@
     19.0,
     22.0,
     25.0,
-    28.0
+    28.0,
+    31.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +19,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 31
+    "max_beats": 33
   },
   "import_report": {
     "catalog_id": "planxty-fanny-power",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 26,
+    "note_count": 27,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-planxty-fanny-power.mid",
     "tempo_changes_ignored": 2,
@@ -33,7 +34,7 @@
       0
     ]
   },
-  "length_beats": 31.0,
+  "length_beats": 33.0,
   "notes": [
     {
       "dur": 1.0,
@@ -164,6 +165,11 @@
       "dur": 1.0,
       "pitch": 74,
       "start": 30.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 31.0
     }
   ],
   "pitches": [
@@ -174,7 +180,8 @@
     69,
     71,
     72,
-    74
+    74,
+    76
   ],
   "sha256": "9497546e2a08fcec2269b6ea35f541d2bd7513fa879fb0aa4d3279000983c6d5",
   "title": "Planxty Fanny Power"

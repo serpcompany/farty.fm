@@ -734,14 +734,14 @@ describe('Compose’s listing', () => {
     expect(locked.map(r => missingNotes(coverageOf(r.song, without002)))).toEqual(['E3 (3.0 s)'])
   })
 
-  it('locks 41 more of the catalog’s Songs without 002, Amazing Grace among them', () => {
+  it('locks 42 more of the catalog’s Songs without 002, Amazing Grace among them', () => {
     // `e2e/fixture-library.spec.ts` deletes 002 and expects Compose to lock these more. 40 until
     // #357 pulled one of them as under copyright, 39 until Scarborough Fair and The Flower of the
-    // Quern took in the held note they end on (#389).
+    // Quern took in the held note they end on (#389), 41 until Nocturne Op 9 No 2 did (#394).
     const ids = (rows: { song: SongSummary }[]) => rows.map(r => r.song.id)
     const withAll = new Set(ids(listing(all).locked))
     const lockedNow = ids(listing(without002).locked).filter(id => !withAll.has(id))
-    expect(lockedNow).toHaveLength(41)
+    expect(lockedNow).toHaveLength(42)
     expect(lockedNow).toContain('amazing')
     expect(listing(without002).unlocked.every(r => !withAll.has(r.song.id))).toBe(true)
   })
