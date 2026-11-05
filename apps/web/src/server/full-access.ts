@@ -129,9 +129,10 @@ async function paidAtStripe(
  * Checkout's page (or `/dev/checkout/` on a local run), or `{ active: true }` when there's nothing
  * to pay: the account has it, or saving is free here. An open Checkout Session for the same Toot is
  * reused, and one for another Toot is ended first, as it returns elsewhere, so two taps or two tabs
- * can't pay twice. 410 for a Toot that's been deleted, 409 at the Toot limit (before anything is paid), 409 `payment_mismatch` when its
- * last session is paid but not at the price its row recorded (logged, and never paid for twice), 429
- * past `PAYMENT_LIMITS.checkouts`, 503 when payments aren't set up here.
+ * can't pay twice. 410 for a Toot that's been deleted and 409 at the Toot limit, with Full Access or
+ * not and before anything is paid, 409 `payment_mismatch` when its last session is paid but not at
+ * the price its row recorded (logged, and never paid for twice), 429 past
+ * `PAYMENT_LIMITS.checkouts`, 503 when payments aren't set up here.
  */
 export async function startCheckout(
   { db }: Pick<Stores, 'db'>,

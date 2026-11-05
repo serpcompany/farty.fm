@@ -91,10 +91,10 @@ export default function PrivacyPage() {
       <p>
         When you pay for Full Access, Stripe processes the payment on its own checkout page. Your
         card details go to Stripe and never reach Farty. Farty gives Stripe your account&apos;s
-        email, for your receipt and to find the payment if you ask for your money back. Farty keeps
-        that your account paid, when, any refund, and Stripe&apos;s reference for the payment, and
-        for a payment from before Full Access, which Toot it was for. Stripe&apos;s use of your data
-        is described in its <a href="https://stripe.com/privacy">privacy policy</a>.
+        email, to find the payment if you ask for your money back. Farty keeps that your account
+        paid, when, any refund, and Stripe&apos;s reference for the payment, and for a payment from
+        before Full Access, which Toot it was for. Stripe&apos;s use of your data is described in
+        its <a href="https://stripe.com/privacy">privacy policy</a>.
       </p>
 
       <h2>The microphone</h2>
