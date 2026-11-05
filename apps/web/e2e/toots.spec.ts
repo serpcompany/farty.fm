@@ -537,6 +537,8 @@ test.describe('installed', () => {
     // A reload, offline, opens the same Toot.
     await page.reload()
     await expect(page.getByRole('heading', { level: 1, name: mary.title })).toBeVisible()
+    // And draws its notes, which it keeps itself (#254).
+    await expect(page.locator('[data-testid^="note "]')).toHaveCount(mary.notes.length)
     await context.setOffline(false)
   })
 })
