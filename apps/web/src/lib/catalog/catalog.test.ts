@@ -279,8 +279,8 @@ describe('the generator', () => {
     expect(() => catalogSongs(withSource(source), ['twinkle'])).toThrow(/n_views/)
   })
 
-  // #383 tagged every Song, and Compose's chips, search and Most popular read the tags (#384): only
-  // the values, so the index stays small.
+  // #383 tagged every Song, and Compose's Kind menu, search and Most popular read the tags (#384,
+  // #397): only the values, so the index stays small.
   test('carries each Song’s kind, origin, fame and Well known, and nothing of their sources', () => {
     const entries = new Map(sources.catalog.map(e => [e.id, e]))
     for (const s of songs) {

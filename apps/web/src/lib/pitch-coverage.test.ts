@@ -642,11 +642,11 @@ describe('Compose’s listing', () => {
     })
   })
 
-  describe('the Kind chips (#384)', () => {
+  describe('the Kind filter (#384, #397)', () => {
     const ids = (rows: { song: SongSummary }[]) => rows.map(r => r.song.id)
     const every = (l: { unlocked: SongRow[]; locked: SongRow[] }) => [...l.unlocked, ...l.locked]
     const kinded = (kind: KindChoice, recordings: Recording[] = ten, filters: SongFilters = {}) =>
-      listing(recordings, '', 'closestToUnlocking', { ...filters, kind })
+      listing(recordings, '', 'closestToUnlocking', { ...filters, kinds: [kind] })
 
     it('shows only the Songs of the kind chosen, every kind having some', () => {
       for (const kind of songKinds) {
@@ -675,8 +675,25 @@ describe('Compose’s listing', () => {
       expect(new Set(known.map(r => r.song.kind)).size).toBe(songKinds.length)
       // The iPhone app's 12 are all Well known.
       expect(ids(known)).toEqual(expect.arrayContaining(iPhone.map(s => s.id)))
-      // A null kind shows every Song.
-      expect(listing(ten, '', 'closestToUnlocking', { kind: null })).toEqual(listing(ten))
+      // No Kind shows every Song.
+      expect(listing(ten, '', 'closestToUnlocking', { kinds: [] })).toEqual(listing(ten))
+    })
+
+    it('shows a Song in any of several Kinds, once', () => {
+      const several = every(listing(ten, '', 'alphabetical', { kinds: ['Christmas', 'Hymns'] }))
+      expect(ids(several).sort()).toEqual(
+        songs
+          .filter(s => s.kind === 'Christmas' || s.kind === 'Hymns')
+          .map(s => s.id)
+          .sort()
+      )
+      // A Well known Hymn is in both Kinds, and still lists once.
+      const hymn = song('amazing')
+      expect([hymn.kind, hymn.wellKnown]).toEqual(['Hymns', true])
+      const both = ids(every(listing(ten, '', 'alphabetical', { kinds: ['Well known', 'Hymns'] })))
+      expect(both.filter(id => id === hymn.id)).toEqual([hymn.id])
+      expect(both).toHaveLength(new Set(both).size)
+      expect(both.length).toBe(songs.filter(s => s.wellKnown || s.kind === 'Hymns').length)
     })
 
     it('keeps both sections and the order chosen', () => {
@@ -684,7 +701,7 @@ describe('Compose’s listing', () => {
       expect(ids(christmas.unlocked)).toEqual(expect.arrayContaining(['jingle', 'merryxmas']))
       expect(christmas.locked.length).toBeGreaterThan(0)
       for (const order of ['closestToUnlocking', 'mostPopular', 'fewestNotes'] as const) {
-        const sorted = listing(ten, '', order, { kind: 'Christmas' })
+        const sorted = listing(ten, '', order, { kinds: ['Christmas'] })
         const whole = listing(ten, '', order)
         const isChristmas = (r: SongRow) => r.song.kind === 'Christmas'
         expect(ids(sorted.unlocked)).toEqual(ids(whole.unlocked.filter(isChristmas)))
@@ -707,12 +724,12 @@ describe('Compose’s listing', () => {
       expect(every(kinded('Songs', ten, { favorites })).map(r => r.song.id)).toEqual(['birthday'])
       // Happy Birthday is a Favorite Song, but not unlocked yet.
       expect(every(kinded('Songs', ten, { favorites, ready: true }))).toEqual([])
-      const littleKids = listing(ten, 'little', 'closestToUnlocking', { kind: 'Kids' })
+      const littleKids = listing(ten, 'little', 'closestToUnlocking', { kinds: ['Kids'] })
       expect(ids(littleKids.unlocked)).toEqual(['mary', 'twinkle'])
       // Little Peggy's Love has "little" in its title, but it's a fiddle tune.
       expect(song('little-peggys-love').kind).toBe('Fiddle tunes')
       expect(
-        ids(every(listing(ten, 'little', 'closestToUnlocking', { kind: 'Well known' })))
+        ids(every(listing(ten, 'little', 'closestToUnlocking', { kinds: ['Well known'] })))
       ).toEqual(expect.arrayContaining(['mary', 'twinkle']))
     })
   })

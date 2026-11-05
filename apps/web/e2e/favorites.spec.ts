@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
 import { newEmail, signInByApi } from './account'
+import { dropdown, pick } from './compose-filters'
 import {
   fakeMicrophone,
   fartAndRecord,
@@ -114,22 +115,20 @@ test('favorites Songs, filters by them and Ready, and keeps both over a reload',
   ).toBeVisible()
 
   // No favorites yet: the filter says how to add one.
-  const filter = page.getByRole('button', { name: 'Favorites', exact: true })
-  await expectTappable(filter)
-  await filter.click()
-  await expect(filter).toHaveAttribute('aria-pressed', 'true')
+  const show = dropdown(page, 'Show')
+  await expectTappable(show)
+  await pick(page, 'Show', 'Favorites')
+  await expect(show).toHaveAccessibleName('Show: Favorites')
   await expect(page.getByTestId('no-songs')).toContainText(
     'Tap the heart on a Song to add it to your Favorites.'
   )
   await expect(page.getByRole('button', { name: 'Show all Songs' })).toHaveCount(0)
   await expect(page.getByTestId('song-row')).toHaveCount(0)
   // With Ready on too it still says how to add one, and Show all Songs turns both off.
-  const ready = page.getByRole('button', { name: 'Ready', exact: true })
-  await ready.click()
+  await pick(page, 'Show', 'Ready')
   await expect(page.getByTestId('no-songs')).toContainText('No Favorites yet')
   await page.getByRole('button', { name: 'Show all Songs' }).click()
-  await expect(filter).toHaveAttribute('aria-pressed', 'false')
-  await expect(ready).toHaveAttribute('aria-pressed', 'false')
+  await expect(show).toHaveAccessibleName('Show')
   await expect(page.getByTestId('no-songs')).toHaveCount(0)
 
   // The Unlocked Song's heart, on its row.
@@ -149,7 +148,7 @@ test('favorites Songs, filters by them and Ready, and keeps both over a reload',
   await expect(heart(page, TWINKLE)).toHaveAttribute('aria-pressed', 'true')
 
   // The filter keeps both groups, and search works inside it.
-  await filter.click()
+  await pick(page, 'Show', 'Favorites')
   await expect(page.getByTestId('song-row')).toHaveCount(2)
   await expect(page.getByRole('heading', { name: 'Unlocked · 1', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Locked · 1', exact: true })).toBeVisible()
@@ -162,14 +161,14 @@ test('favorites Songs, filters by them and Ready, and keeps both over a reload',
   await search.fill('jingle')
   await expect(page.getByText('No Favorite Songs match “jingle”')).toBeVisible()
   await page.getByRole('button', { name: 'Search all Songs' }).click()
-  await expect(filter).toHaveAttribute('aria-pressed', 'false')
+  await expect(show).toHaveAccessibleName('Show')
   await expect(search).toHaveValue('jingle')
   await expect(page.locator('[data-song="jingle"]')).toBeVisible()
   await page.getByRole('button', { name: 'Clear search' }).click()
 
   // Ready and Favorites together: the Ready Favorite Songs, only Mary.
-  await ready.click()
-  await filter.click()
+  await pick(page, 'Show', 'Ready', 'Favorites')
+  await expect(show).toHaveText('Show · 2')
   await expect(page.getByTestId('song-row')).toHaveCount(1)
   await expect(page.getByTestId('song-row')).toHaveAttribute('data-song', 'mary')
   await page.getByRole('button', { name: 'Sort: Closest to unlocking' }).click()
@@ -179,17 +178,16 @@ test('favorites Songs, filters by them and Ready, and keeps both over a reload',
   // Both are on the account, and the order and filters are kept over a reload.
   await expect.poll(() => accountFavorites(page)).toEqual(['mary', 'twinkle'])
   await page.reload()
-  await expect(filter).toHaveAttribute('aria-pressed', 'true')
-  await expect(ready).toHaveAttribute('aria-pressed', 'true')
+  await expect(show).toHaveAccessibleName('Show: Ready, Favorites')
   await expect(page.getByTestId('song-row')).toHaveCount(1)
-  await ready.click()
+  await pick(page, 'Show', 'Ready')
   await expect(page.getByTestId('song-row')).toHaveCount(2)
   await expect(heart(page, MARY)).toHaveAttribute('aria-pressed', 'true')
   await expect(heart(page, TWINKLE)).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: 'Sort: Fewest notes' }).click()
   await expect(page.getByRole('menuitemradio', { name: 'Fewest notes' })).toBeChecked()
   await page.keyboard.press('Escape')
-  await filter.click()
+  await pick(page, 'Show', 'Favorites')
 
   // Song Creator's heart takes Mary off.
   await page
@@ -202,22 +200,21 @@ test('favorites Songs, filters by them and Ready, and keeps both over a reload',
   await heart(page, MARY).click()
   await expect(heart(page, MARY)).toHaveAttribute('aria-pressed', 'false')
   await page.getByRole('link', { name: 'Back to Compose' }).click()
-  await filter.click()
+  await pick(page, 'Show', 'Favorites')
   await expect(page.getByTestId('song-row')).toHaveCount(1)
   await expect(page.getByRole('heading', { name: /^Unlocked/ })).toHaveCount(0)
   await expect.poll(() => accountFavorites(page)).toEqual(['twinkle'])
 
   // Twinkle, the one Favorite left, is locked: Ready leaves nothing, and Show all Songs turns both
   // filters off.
-  await ready.click()
+  await pick(page, 'Show', 'Ready')
   await expect(page.getByTestId('song-row')).toHaveCount(0)
   await expect(page.getByTestId('no-songs')).toContainText('No Ready Favorites')
   await expect(page.getByTestId('no-songs')).toContainText(
     'None of your Favorites is unlocked yet.'
   )
   await page.getByRole('button', { name: 'Show all Songs' }).click()
-  await expect(filter).toHaveAttribute('aria-pressed', 'false')
-  await expect(ready).toHaveAttribute('aria-pressed', 'false')
+  await expect(show).toHaveAccessibleName('Show')
   await expect(
     page.getByRole('heading', { name: `Unlocked · ${unlocked}`, exact: true })
   ).toBeVisible()
