@@ -294,6 +294,39 @@ it('sorts from a menu that closes on a pick, and never fills', async () => {
   expect(localStorage.getItem('pedos.composeOrder')).toBe('fewestNotes')
 })
 
+it('goes back to the first Song on a choice that changes the list, and on no other tap', async () => {
+  const toTop = vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+  // A filter this browser kept moves nothing as it lands, or Back from Song Creator would lose
+  // your place.
+  localStorage.setItem('pedos.composeKind', 'Hymns')
+  await show()
+  expect(face('Kind')).toBe('Hymns')
+  expect(toTop).not.toHaveBeenCalled()
+
+  await tap(button('Clear Kind'))
+  expect(toTop).toHaveBeenCalledTimes(1)
+
+  // Nothing is on, so the top row, ticked already, changes nothing.
+  await tap(dropdown('Kind'))
+  await tap(item('All kinds'))
+  expect(ticked()).toEqual(['All kinds'])
+  expect(toTop).toHaveBeenCalledTimes(1)
+  await tap(item('Kids'))
+  expect(toTop).toHaveBeenCalledTimes(2)
+  await tap(item('All kinds'))
+  expect(toTop).toHaveBeenCalledTimes(3)
+  await tap(dropdown('Kind'))
+
+  await tap(dropdown('Sort'))
+  await tap(item('Closest to unlocking'))
+  expect(toTop).toHaveBeenCalledTimes(3)
+  await tap(dropdown('Sort'))
+  await tap(item('Fewest notes'))
+  expect(toTop).toHaveBeenCalledTimes(4)
+  expect(toTop).toHaveBeenLastCalledWith(0, 0)
+  toTop.mockRestore()
+})
+
 it("shows only Sort's icon where its label doesn't fit, keeping its name", async () => {
   // The whole face needs more than the row leaves it. happy-dom lays nothing out.
   vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(150)

@@ -128,7 +128,12 @@ export function ComposeScreen() {
             </Button>
           )}
         </div>
-        <div className="flex h-11 items-center gap-2" data-testid="song-filters">
+        {/* One row, unless the device's font is too wide for it: then Sort takes a line of its own
+            rather than a filter's name being cut. */}
+        <div
+          className="flex min-h-11 flex-wrap items-center gap-x-1.5 gap-y-2.5"
+          data-testid="song-filters"
+        >
           <FilterMenu
             name="Kind"
             all="All kinds"
@@ -219,7 +224,8 @@ export function ComposeScreen() {
 }
 
 // One control of the row: a 34 px pill around buttons a thumb can hit, 44 px high and at least as
-// wide. It greys while its menu is open, unless a filter fills it.
+// wide, which reach into the gaps and the page's margin without covering each other. It greys while
+// its menu is open, unless a filter fills it.
 const pill =
   'flex h-[34px] min-w-0 items-center rounded-full border text-sm whitespace-nowrap transition-colors has-focus-visible:ring-3 has-focus-visible:ring-ring/50'
 const pillUnfilled = 'border-border hover:bg-muted has-aria-expanded:bg-muted'
@@ -264,7 +270,7 @@ function FilterMenu<Choice extends string>({
       >
         <DropdownMenuTrigger
           ref={trigger}
-          className={cn(pillButton, on ? 'pr-1.5 pl-3' : 'px-3')}
+          className={cn(pillButton, on ? 'pr-1.5 pl-2.5' : 'px-3')}
           aria-label={on ? `${name}: ${chosen.join(', ')}` : name}
         >
           <span className="truncate">
@@ -273,10 +279,11 @@ function FilterMenu<Choice extends string>({
           {!on && <ChevronDown className="size-4 shrink-0" aria-hidden />}
         </DropdownMenuTrigger>
         {on && (
-          // 44 px wide, over the label's padding and the gap beside it, to keep the row narrow.
+          // 44 px wide, to the next pill on its right. To keep the row narrow it also covers the
+          // label's padding and the label's last 5 px, which a thumb needs more than the label does.
           <button
             type="button"
-            className="relative -mr-1 -ml-[11px] flex size-11 shrink-0 items-center justify-center outline-none"
+            className="relative -mr-[7px] -ml-[11px] flex size-11 shrink-0 items-center justify-center outline-none"
             aria-label={`Clear ${name}`}
             onClick={() => {
               choose([])
@@ -293,7 +300,9 @@ function FilterMenu<Choice extends string>({
           <DropdownMenuCheckboxItem
             className={menuItem}
             checked={!on}
-            onCheckedChange={() => choose([])}
+            onCheckedChange={() => {
+              if (on) choose([])
+            }}
           >
             {all}
           </DropdownMenuCheckboxItem>
@@ -351,7 +360,11 @@ function SortMenu({ order, onChoose }: { order: SongOrder; onChoose: (order: Son
       <DropdownMenu>
         <div className={cn(pill, pillUnfilled, !fits && 'w-[34px]')}>
           <DropdownMenuTrigger
-            className={cn(pillButton, fits ? 'px-3' : '-mx-1.5 w-11 shrink-0 justify-center')}
+            // Without its words, its 44 px reach right, into the page's margin, clear of Show's ×.
+            className={cn(
+              pillButton,
+              fits ? 'px-3' : '-mr-[11px] -ml-px w-11 shrink-0 justify-center pr-2.5'
+            )}
             aria-label={`Sort: ${label}`}
             data-testid="sort-songs"
           >
@@ -364,6 +377,7 @@ function SortMenu({ order, onChoose }: { order: SongOrder; onChoose: (order: Son
             <DropdownMenuRadioGroup
               value={order}
               onValueChange={next => {
+                if (next === order) return
                 onChoose(next)
                 toTop()
               }}

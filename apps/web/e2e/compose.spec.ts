@@ -249,6 +249,55 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(page.getByTestId('recording-row')).toHaveCount(4)
   await tab(page, 'Compose').click()
 
+  // A choice that changes the list goes back to the first Song, which a list scrolled far down
+  // would otherwise hide. Coming back from Song Creator keeps your place, with the choice still on.
+  const scrolled = () => page.evaluate(() => window.scrollY)
+  const scrollDown = () => page.evaluate(() => window.scrollTo(0, 600))
+  await expect(locked(songs.length - unlockedSongs)).toBeVisible()
+  await scrollDown()
+  expect(await scrolled()).toBe(600)
+  await pick(page, 'Kind', 'Well known')
+  await expect.poll(scrolled).toBe(0)
+  const lastUnlocked = page.getByTestId('unlocked-songs').getByRole('link').last()
+  await lastUnlocked.evaluate(row =>
+    window.scrollTo(0, row.getBoundingClientRect().top + window.scrollY - 200)
+  )
+  const place = await scrolled()
+  expect(place).toBeGreaterThan(0)
+  await lastUnlocked.click()
+  await expect(page).not.toHaveURL(/\/compose\/$/)
+  await expect(page.getByRole('link', { name: 'Back to Compose' })).toBeVisible()
+  await page.getByRole('link', { name: 'Back to Compose' }).click()
+  await expect(page).toHaveURL(/\/compose\/$/)
+  await expect(lastUnlocked).toBeVisible()
+  await expect.poll(scrolled).toBe(place)
+  expect(await dropdown(page, 'Kind').textContent()).toBe('Well known')
+  await page.getByRole('button', { name: 'Clear Kind' }).click()
+  await expect.poll(scrolled).toBe(0)
+
+  // Sort's order does too, but a tap that changes nothing leaves your place alone.
+  // A thumb's tap on the row: Playwright's click would first scroll the page to it.
+  const tapRow = async (row: Locator) => {
+    await expect(row).toBeVisible()
+    const box = await row.boundingBox()
+    await page.touchscreen.tap((box?.x ?? 0) + 40, (box?.y ?? 0) + 22)
+  }
+  await scrollDown()
+  await page.getByRole('button', { name: 'Sort: Closest to unlocking' }).click()
+  await tapRow(page.getByRole('menuitemradio', { name: 'Closest to unlocking' }))
+  await expect(page.getByRole('menu')).toHaveCount(0)
+  await dropdown(page, 'Kind').click()
+  await tapRow(menuRow(page, 'All kinds'))
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('menu')).toHaveCount(0)
+  expect(await scrolled()).toBe(600)
+  await page.getByRole('button', { name: 'Sort: Closest to unlocking' }).click()
+  await page.getByRole('menuitemradio', { name: 'A–Z' }).click()
+  await expect.poll(scrolled).toBe(0)
+  await page.getByRole('button', { name: 'Sort: A–Z' }).click()
+  await page.getByRole('menuitemradio', { name: 'Closest to unlocking' }).click()
+  await expect(page.getByRole('menu')).toHaveCount(0)
+
   // Search, by title or composer, with its clear button.
   const search = page.getByRole('searchbox', { name: 'Search Songs or composers' })
   await expectTappable(search)
@@ -447,6 +496,15 @@ test('the filter row fits a phone, and its menus stay on the screen', async ({ p
   const menu = page.getByRole('menu')
   await expect(menu).toHaveCount(0)
   const sort = page.getByRole('button', { name: 'Sort: Fewest notes' })
+  /** Neither filter's name is cut short. */
+  const expectWholeNames = async () => {
+    for (const name of ['Kind', 'Show'] as const) {
+      const cut = await dropdown(page, name)
+        .locator('span')
+        .evaluate(label => label.scrollWidth > label.clientWidth)
+      expect(cut).toBe(false)
+    }
+  }
 
   for (const width of [320, 360, 390]) {
     await page.setViewportSize({ width, height: 844 })
@@ -470,13 +528,7 @@ test('the filter row fits a phone, and its menus stay on the screen', async ({ p
       await expectTappable(page.getByRole('button', { name }))
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width)
-    // Neither filter's name is cut short.
-    for (const name of ['Kind', 'Show'] as const) {
-      const cut = await dropdown(page, name)
-        .locator('span')
-        .evaluate(label => label.scrollWidth > label.clientWidth)
-      expect(cut).toBe(false)
-    }
+    await expectWholeNames()
   }
 
   // Each menu stays on a small phone's screen, and scrolls if it must.
@@ -496,6 +548,26 @@ test('the filter row fits a phone, and its menus stay on the screen', async ({ p
     await page.keyboard.press('Escape')
     await expect(menu).toHaveCount(0)
   }
+
+  // With a system font too wide for one row, whatever this machine's is, Sort takes its own line.
+  await page.addStyleTag({ content: '[data-testid="song-filters"] { letter-spacing: 0.1em }' })
+  await expect
+    .poll(async () => {
+      const [show, sorted] = await Promise.all([
+        dropdown(page, 'Show').boundingBox(),
+        sort.boundingBox()
+      ])
+      return (sorted?.y ?? 0) > (show?.y ?? 0)
+    })
+    .toBe(true)
+  await expectWholeNames()
+  const right = await page
+    .getByTestId('song-filters')
+    .locator('button[aria-haspopup]')
+    .evaluateAll(buttons =>
+      Math.max(...buttons.map(b => b.parentElement?.getBoundingClientRect().right ?? 999))
+    )
+  expect(right).toBeLessThanOrEqual(320 - 16)
 })
 
 // The browser fetches the Song Catalog as data (#322). With no service worker to answer for it, a

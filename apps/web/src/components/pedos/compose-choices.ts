@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { type KindChoice, kindChoices } from '@/lib/catalog/song'
 import type { SongOrder } from '@/lib/pitch-coverage'
 
@@ -61,8 +61,9 @@ export function useComposeChoices(): ComposeChoices {
   const [kinds, setKinds] = useState<readonly KindChoice[]>([])
   const [show, setShow] = useState<readonly ShowChoice[]>([])
 
-  // Read after the first render, which the server rendered without them.
-  useEffect(() => {
+  // Read after the first render, which the server rendered without them, and before the browser
+  // puts the page back where it was: a list that narrowed after that would lose your place.
+  useLayoutEffect(() => {
     const kept = readChoice(orderKey)
     const known = songOrders.find(o => o.value === kept)
     if (known) setOrder(known.value)
