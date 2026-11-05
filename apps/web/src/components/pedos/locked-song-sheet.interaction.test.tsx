@@ -3,6 +3,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Song } from '@/lib/catalog/song'
 import { songs } from '@/lib/catalog/songs.generated'
+import type { FartChoices } from '@/lib/engine/fart-choices'
 import { type Coverage, coverageOf } from '@/lib/pitch-coverage'
 import type { GoldenRecording } from '@/test-support/golden'
 import { goldenAnalysisRecording } from '@/test-support/golden-analysis'
@@ -25,7 +26,10 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
 const mary = songs.find(s => s.id === 'mary') as Song
 
-const page: { coverage: Coverage } = { coverage: coverageOf(mary, []) }
+const page: { coverage: Coverage; fartChoices: ReadonlyMap<string, FartChoices> } = {
+  coverage: coverageOf(mary, []),
+  fartChoices: new Map()
+}
 const playPiano = vi.fn<(notes: readonly PianoNote[]) => void>()
 
 vi.mock('./pedos-provider', () => ({
@@ -37,6 +41,12 @@ vi.mock('./pedos-provider', () => ({
   })
 }))
 vi.mock('./use-song-notes', () => ({ useSongNotes: () => ({ song: mary }) }))
+vi.mock('./use-fart-choices', () => ({ useFartChoices: () => page.fartChoices }))
+vi.mock('next/link', () => ({
+  default: ({ href, children }: { href: string; children: unknown }) => (
+    <a href={href}>{children as never}</a>
+  )
+}))
 vi.mock('./favorite-button', () => ({ FavoriteButton: () => null }))
 vi.mock('./piano-preview', async importOriginal => ({
   ...(await importOriginal<typeof import('./piano-preview')>()),
@@ -53,6 +63,7 @@ beforeEach(() => {
   document.body.appendChild(container)
   root = createRoot(container)
   playPiano.mockClear()
+  page.fartChoices = new Map()
 })
 
 afterEach(() => {
@@ -75,6 +86,29 @@ async function openAndPlay(coverage: Coverage): Promise<number[]> {
   expect(playPiano).toHaveBeenCalledTimes(1)
   return playPiano.mock.calls[0][0].map(note => note.midi)
 }
+
+describe('a locked Song the user changed (#372)', () => {
+  const changeFarts = () =>
+    [...document.querySelectorAll('a')].find(a => a.textContent === 'Change farts')
+  const show = () =>
+    act(async () =>
+      root?.render(
+        <LockedSongSheet song={mary} onClose={() => {}} onRecord={() => {}} onReport={() => {}} />
+      )
+    )
+
+  it('offers its farts from Song Creator, the only way to bring back one left out', async () => {
+    page.fartChoices = new Map([[mary.id, { transposition: 0, preferred: {}, excluded: ['a'] }]])
+    await show()
+    expect(changeFarts()?.getAttribute('href')).toBe(`/compose/${mary.id}/`)
+  })
+
+  it('offers nothing new for a Song with no Fart Choices', async () => {
+    page.fartChoices = new Map([['twinkle', { transposition: 0, preferred: {}, excluded: ['a'] }]])
+    await show()
+    expect(changeFarts()).toBeUndefined()
+  })
+})
 
 // The golden analysis as JSON: this test runs in a DOM, where the golden helpers can't read files.
 const fixtures = (goldens: readonly GoldenRecording[]) =>

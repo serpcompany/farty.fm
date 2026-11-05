@@ -3,7 +3,6 @@ import type { KindChoice, Song, SongSummary } from '@/lib/catalog/song'
 import {
   type Arrangement,
   type AutoMapRecording,
-  arrangePitches,
   autoMapRecording,
   coveredCount,
   type MissingNote,
@@ -30,7 +29,8 @@ import {
  * How much of a Song the user's Melodic Recordings cover: each distinct pitch gets its own Melodic
  * Recording within 3 semitones, or an octave away with an Octave Move (ADR 0004, ADR 0006), and at
  * least as long as the pitch's longest note (ADR 0011). What Compose sorts and splits every Song
- * by, and the Result screen shows (#323).
+ * by, and the Result screen shows (#323). A Song's Fart Choices count (#372): leaving out the only
+ * fart that covers a pitch locks the Song here as in Song Creator.
  */
 export type CoverageCount = {
   covered: number
@@ -125,13 +125,17 @@ export function arrangementOf(
 }
 
 /**
- * Auto-map of `song` with the Melodic ones among `recordings`, from the Song Catalog's index: the
- * same Arrangement `arrangementOf` chooses from the Song's notes (`arrangePitches`). Ties break on
- * Recording ids.
+ * Auto-map of `song` with the Melodic ones among `recordings` and the Song's Fart Choices, from the
+ * Song Catalog's index: the same Arrangement `arrangementOf` chooses from the Song's notes
+ * (`arrangeChoices`). Ties break on Recording ids.
  */
-export function coverageOf(song: SongSummary, recordings: readonly Recording[]): Coverage {
+export function coverageOf(
+  song: SongSummary,
+  recordings: readonly Recording[],
+  choices: FartChoices | null = null
+): Coverage {
   const melodic = autoMapRecordings(recordings)
-  const result = arrangePitches(song, melodic)
+  const result = arrangeChoices(song, melodic, choices)
   const recordingForPitch = new Map<number, string>()
   for (const choice of result.pitches) {
     if (choice.recordingId !== null) recordingForPitch.set(choice.songPitch, choice.recordingId)
@@ -184,10 +188,10 @@ export function collectedPitchClasses(recordings: readonly Recording[]): Set<num
 }
 
 /**
- * What Pitch Coverage reads from `recordings`, as a string: equal strings give equal coverage of
- * every Song, so the catalog is matched once per change to the Melodic and Placed Recordings (the
- * iPhone app's `CoverageCache`). Searching, sorting and unplaced Noise-like Recordings never
- * change it.
+ * What Pitch Coverage reads from `recordings`, as a string: with the same Fart Choices, equal
+ * strings give equal coverage of every Song, so the catalog is matched once per change to the
+ * Melodic and Placed Recordings (the iPhone app's `CoverageCache`). Searching, sorting and unplaced
+ * Noise-like Recordings never change it.
  */
 export function coverageKey(recordings: readonly Recording[]): string {
   return JSON.stringify(
@@ -204,18 +208,29 @@ export function coverageKey(recordings: readonly Recording[]): string {
 /** A Song with its Pitch Coverage. */
 export type SongRow = { song: SongSummary; coverage: CoverageCount }
 
+/** Every changed Song's Fart Choices, by Song id. */
+export type AllFartChoices = ReadonlyMap<string, FartChoices>
+
+const noFartChoices: AllFartChoices = new Map()
+
 /**
  * Every Song with its Pitch Coverage, in catalog order: counted, not arranged (`coveredCount`), so
- * a 1,000-Song catalog is counted in a moment on a phone (#323). Equal to `coverageOf`'s counts.
+ * a 1,000-Song catalog is counted in a moment on a phone (#323). Only the few Songs with Fart
+ * Choices are arranged, since those hold their own transposition (#372). Equal to `coverageOf`'s
+ * counts.
  */
 export function songRows(
   songs: readonly SongSummary[],
-  recordings: readonly Recording[]
+  recordings: readonly Recording[],
+  allChoices: AllFartChoices = noFartChoices
 ): SongRow[] {
   const melodic = autoMapRecordings(recordings)
   const hasMelodicRecordings = melodic.length > 0
   return songs.map(song => {
-    const covered = coveredCount(song, melodic)
+    const choices = allChoices.get(song.id)
+    const covered = choices
+      ? arrangeChoices(song, melodic, choices).covered
+      : coveredCount(song, melodic)
     const total = song.pitches.length
     return { song, coverage: { covered, total, hasMelodicRecordings, unlocked: covered === total } }
   })
@@ -343,10 +358,11 @@ export type CoverageChanges = {
 export function coverageChanges(
   songs: readonly SongSummary[],
   before: readonly Recording[],
-  after: readonly Recording[]
+  after: readonly Recording[],
+  allChoices: AllFartChoices = noFartChoices
 ): CoverageChanges {
-  const old = songRows(songs, before)
-  const now = songRows(songs, after)
+  const old = songRows(songs, before, allChoices)
+  const now = songRows(songs, after, allChoices)
   const closestFirst = (a: SongRow, b: SongRow) =>
     coverageFraction(b.coverage) - coverageFraction(a.coverage)
   const locked = now.filter(r => !r.coverage.unlocked)

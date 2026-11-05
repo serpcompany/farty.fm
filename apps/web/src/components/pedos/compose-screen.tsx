@@ -45,6 +45,7 @@ import { LockedSongSheet } from './locked-song-sheet'
 import { usePedos } from './pedos-provider'
 import { ReportSongSheet } from './report-song-sheet'
 import { LockedSongRow, songList, UnlockedSongRow } from './song-row'
+import { useFartChoices } from './use-fart-choices'
 
 const noFavorites: ReadonlySet<string> = new Set()
 
@@ -66,6 +67,8 @@ export function ComposeScreen() {
   /** The Song a locked sheet's Report a problem opened the report sheet for (#358). */
   const [reportedSong, setReportedSong] = useState<SongSummary | null>(null)
   const favorites = useFavorites()
+  // `pedos.songRows` counts a Song's Fart Choices, so no Song shows unlocked until they're read.
+  const fartChoices = useFartChoices()
 
   // The page comes back on the Record tab, so the sheet doesn't stay open.
   useEffect(() => {
@@ -159,7 +162,10 @@ export function ComposeScreen() {
             Try again
           </Button>
         </div>
-      ) : pedos.recordings === null || pedos.songs === null || favorites === null ? (
+      ) : pedos.recordings === null ||
+        pedos.songs === null ||
+        favorites === null ||
+        fartChoices === null ? (
         <div className="flex flex-1 items-center justify-center">
           <Spinner />
         </div>

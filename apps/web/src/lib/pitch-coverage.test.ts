@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  choiceCases,
   coverageSubsets,
+  type GoldenChoices,
   goldenArrangement,
   goldenRecording,
   libraries,
@@ -11,6 +13,7 @@ import { goldenAnalysisRecording } from '../test-support/golden-analysis'
 import { searchKey } from './catalog/search-key'
 import { type KindChoice, type Song, type SongSummary, songKinds } from './catalog/song'
 import { songs } from './catalog/songs.generated'
+import type { FartChoices } from './engine/fart-choices'
 import { fixtureRecordingId } from './fixture-library'
 import {
   collectedPitchClasses,
@@ -186,6 +189,99 @@ describe('Pitch Coverage against the reference engine', () => {
     expect(coverageSummary(mary)).toBe('1 of 4 notes covered')
     expect(mary.transposition).toBe(-36)
     expect(missingNotes(mary)).toBe('C2 (1.5 s), D2 (0.7 s), and E2 (0.7 s)')
+  })
+})
+
+describe('Pitch Coverage with Fart Choices (#372)', () => {
+  /** The golden Fart Choices, which name fixtures, as they name this library's Recordings. */
+  const asRecordings = (choices: GoldenChoices): FartChoices => ({
+    transposition: choices.transposition,
+    preferred: Object.fromEntries(
+      Object.entries(choices.preferred).map(([pitch, id]) => [pitch, fixtureRecordingId(id)])
+    ),
+    excluded: choices.excluded.map(fixtureRecordingId)
+  })
+
+  it('reads every state of choices.json as the reference does, in Compose’s rows too', () => {
+    let checked = 0
+    let locks = 0
+    for (const library of ['full', 'small'] as const) {
+      const recordings = fixtures(libraries[library])
+      for (const c of choiceCases.filter(c => c.library === library)) {
+        const catalogSong = songs.find(s => s.id === c.song)
+        if (!catalogSong) continue
+        c.states.forEach((want, i) => {
+          if (want.choices === null) return
+          const label = `${c.case} ${library}/${c.song} state ${i}`
+          const choices = asRecordings(want.choices)
+          const coverage = coverageOf(catalogSong, recordings, choices)
+          expect(coverage.unlocked, label).toBe(want.unlocked)
+          expect([coverage.covered, coverage.total], label).toEqual([
+            want.pitch_coverage.covered,
+            want.pitch_coverage.total
+          ])
+          expect(coverage.transposition, label).toBe(want.transpose)
+          expect(coverage.missing, label).toEqual(
+            want.missing.map(m => ({ midi: m.target_midi, seconds: m.seconds }))
+          )
+          const [row] = songRows([catalogSong], recordings, new Map([[c.song, choices]]))
+          expect(row.coverage, label).toEqual({
+            covered: coverage.covered,
+            total: coverage.total,
+            hasMelodicRecordings: true,
+            unlocked: coverage.unlocked
+          })
+          checked++
+          if (!want.unlocked) locks++
+        })
+      }
+    }
+    expect(checked).toBeGreaterThan(1000)
+    expect(locks).toBeGreaterThan(100)
+  })
+
+  // The reference's golden case: Mary's only fart near E3 left out of the whole Fixture Library.
+  const leftOut = choiceCases.find(
+    c => c.case === 'leave_out_every' && c.library === 'full' && c.song === 'mary'
+  )?.states[0]
+  if (!leftOut?.choices) throw new Error('choices.json leaves a fart out of Mary')
+  const maryLeftOut = new Map([['mary', asRecordings(leftOut.choices)]])
+
+  it('moves the Song a leave-out locks to Compose’s locked Songs, naming the note it needs', () => {
+    const inCompose = (allChoices?: ReadonlyMap<string, FartChoices>) => {
+      const { unlocked, locked } = songListing(songRows(songs, all, allChoices), 'mary')
+      return {
+        unlocked: unlocked.some(r => r.song.id === 'mary'),
+        locked: locked.some(r => r.song.id === 'mary')
+      }
+    }
+    expect(inCompose()).toEqual({ unlocked: true, locked: false })
+    expect(inCompose(maryLeftOut)).toEqual({ unlocked: false, locked: true })
+    const coverage = coverageOf(song('mary'), all, maryLeftOut.get('mary'))
+    expect(missingNotes(coverage)).toBe('E3 (1.5 s)')
+  })
+
+  it('changes no other Song', () => {
+    const before = songRows(songs, all)
+    const after = songRows(songs, all, maryLeftOut)
+    expect(
+      after.flatMap((row, i) =>
+        row.coverage.unlocked === before[i].coverage.unlocked ? [] : [row.song.id]
+      )
+    ).toEqual(['mary'])
+  })
+
+  it('shows no unlock on the Result for a Song the leave-out still locks', () => {
+    // Saving 002, the only fart long enough for Amazing Grace, which the user left out of it.
+    const grace = song('amazing')
+    const { transposition } = coverageOf(grace, all)
+    const graceLeftOut = new Map([
+      [grace.id, { transposition, preferred: {}, excluded: [fixtureRecordingId('002')] }]
+    ])
+    const unlockedIds = (allChoices?: ReadonlyMap<string, FartChoices>) =>
+      coverageChanges(songs, without002, all, allChoices).unlocked.map(u => u.song.id)
+    expect(unlockedIds()).toContain(grace.id)
+    expect(unlockedIds(graceLeftOut)).not.toContain(grace.id)
   })
 })
 
