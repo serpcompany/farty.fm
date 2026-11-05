@@ -48,7 +48,7 @@ HAND = HERE / "tag-hand.json"
 REPORT = HERE / "tags.report.md"
 TOOL = "tools/catalog/tag.py"
 
-# The seven kinds, one per Song. Compose shows them as chips, in this order (#381).
+# The seven kinds, one per Song. Compose lists them in its Kind menu, in this order (#381, #397).
 KINDS = ("Christmas", "Kids", "Hymns", "Anthems", "Classical", "Songs", "Fiddle tunes")
 TAG_FIELDS = ("kind", "origin", "fame", "well_known")
 # Who may set a tag by hand in tag-hand.json, and why: each record says which review found it.

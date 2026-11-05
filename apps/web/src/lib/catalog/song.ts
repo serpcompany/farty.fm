@@ -1,6 +1,6 @@
 /**
  * What kind of Song it is (#383, `tools/catalog/tag.py`'s `KINDS`): each Song has one, and Compose
- * has a chip for each, in this order, after Well known (#384).
+ * lists each in its Kind menu, in this order, after Well known (#397).
  */
 export const songKinds = [
   'Christmas',
@@ -14,10 +14,10 @@ export const songKinds = [
 
 export type SongKind = (typeof songKinds)[number]
 
-/** What one of Compose's Kind chips shows (#384): the Well known Songs of every kind, or a kind. */
+/** One row of Compose's Kind menu (#397): the Well known Songs of every kind, or a kind. */
 export type KindChoice = 'Well known' | SongKind
 
-/** Compose's Kind chips, in their order (#384). */
+/** The rows of Compose's Kind menu, in their order (#397). */
 export const kindChoices: readonly KindChoice[] = ['Well known', ...songKinds]
 
 /**
@@ -40,7 +40,7 @@ export type SongSummary = {
   aliases?: readonly string[]
   /** The source and license line, for example "Public domain score · PDMX". */
   source: string
-  /** What kind of Song it is (#383): Compose's chips filter by it, and search finds it by it. */
+  /** What kind of Song it is (#383): Compose's Kind menu filters by it, and search finds it by it. */
   kind: SongKind
   /** Where the tune is from, "Irish" or "African American", when a source says (#383). */
   origin?: string
@@ -49,7 +49,7 @@ export type SongSummary = {
    * log scale, added. Most popular's order (#384).
    */
   fame: number
-  /** Set on the Well known Songs (#383), which Compose's first chip shows. */
+  /** Set on the Well known Songs (#383), which the Kind menu's first Kind shows. */
   wellKnown?: true
   /** How many times the score was viewed on MuseScore (PDMX's `n_views`): Most popular's ties. */
   views: number

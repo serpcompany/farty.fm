@@ -8,9 +8,9 @@
  *   which Compose sorts by (#356);
  * - its composer when one is known (`tools/catalog/composers.py`, #357), which Compose shows and
  *   searches by (#356);
- * - its kind, origin, fame and Well known (`tools/catalog/tag.py`, #383): Compose's chips filter by
- *   kind and Well known, its search finds kind and origin words, and Most popular sorts by fame
- *   (#384);
+ * - its kind, origin, fame and Well known (`tools/catalog/tag.py`, #383): Compose's Kind menu
+ *   filters by kind and Well known, its search finds kind and origin words, and Most popular sorts
+ *   by fame (#384, #397);
  * - the other names its titles file lists (`tools/catalog/titles-*.txt`), which Compose's search
  *   finds it by too;
  * - every Song in the catalog but `notShipped`, the iPhone app's 12 first (`shippedIds`).

@@ -281,16 +281,16 @@ export type SongListing = { unlocked: SongRow[]; locked: SongRow[] }
 
 /**
  * Compose's filters, all on at once when all are given: `ready`, only the Unlocked Songs,
- * `favorites`, only the Songs whose ids it holds, and `kind`, only the Songs a Kind chip shows
- * (#384).
+ * `favorites`, only the Songs whose ids it holds, and `kinds`, only the Songs in any of these Kinds
+ * (#384, #397), or every Song when there are none.
  */
 export type SongFilters = {
   ready?: boolean
   favorites?: ReadonlySet<string> | null
-  kind?: KindChoice | null
+  kinds?: readonly KindChoice[]
 }
 
-/** Whether a Kind chip's choice shows `song`: Well known shows the Well known Songs of every kind. */
+/** Whether a Kind shows `song`: Well known shows the Well known Songs of every kind. */
 function isOfKind(song: SongSummary, kind: KindChoice): boolean {
   return kind === 'Well known' ? song.wellKnown === true : song.kind === kind
 }
@@ -304,14 +304,14 @@ function isOfKind(song: SongSummary, kind: KindChoice): boolean {
 export function songListing(
   sorted: readonly SongRow[],
   query: string,
-  { ready = false, favorites = null, kind = null }: SongFilters = {}
+  { ready = false, favorites = null, kinds = [] }: SongFilters = {}
 ): SongListing {
   const q = searchKey(query)
   const rows = sorted.filter(
     r =>
       (!ready || r.coverage.unlocked) &&
       (favorites === null || favorites.has(r.song.id)) &&
-      (kind === null || isOfKind(r.song, kind)) &&
+      (kinds.length === 0 || kinds.some(kind => isOfKind(r.song, kind))) &&
       (q === '' || namesOf(r.song).some(name => name.includes(q)))
   )
   return {
