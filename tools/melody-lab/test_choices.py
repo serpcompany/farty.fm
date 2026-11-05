@@ -108,7 +108,7 @@ class FartChoices_(unittest.TestCase):
                     first += 1
                 n += 1
         self.assertGreater(n, 400)
-        self.assertGreater(first, 250)
+        self.assertGreater(first, 298)
 
     def test_leaving_out_every_fart_of_a_pitch_locks_the_song_until_it_is_reset(self):
         n = 0
