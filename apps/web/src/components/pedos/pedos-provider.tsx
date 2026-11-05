@@ -61,11 +61,12 @@ import { reportError } from '@/lib/telemetry/errors'
 import { reachStep } from '@/lib/telemetry/steps'
 import {
   noteSeconds,
-  PAD_TOOT_TITLE,
   type PadTootDraft,
   type SongTootDraft,
+  savedToot,
   type Toot,
-  type TootDraft
+  type TootDraft,
+  tootScore
 } from '@/lib/toot'
 import { makePadToot as renderPadToot, makeToot as renderToot } from '@/lib/toot-renderer'
 import * as tootStore from '@/lib/toot-store'
@@ -316,7 +317,8 @@ type Pedos = {
    * Plays or stops the whole Toot, or just its `note`th note as rendered: a made Toot from its
    * draft's audio, a saved one from the store. A saved Toot whose audio is gone is marked
    * `isAudioMissing`; one whose audio couldn't be read this time is `tootPlayFailed`. A saved
-   * Toot's note is found in its audio by its Song's notes (`loadSong`), which its screen gives.
+   * Toot's note is found in its audio by its own score, or for one saved before #254 by its Song's
+   * notes (`loadSong`), which its screen gives.
    * The whole Toot plays from `from` seconds when given: Song Creator carrying on from the piano
    * where it was (#359).
    */
@@ -960,22 +962,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     async (draft: TootDraft) => {
       if (toots?.some(t => t.id === draft.id) || savingToots.current.has(draft.id)) return
       savingToots.current.add(draft.id)
-      const saved = { id: draft.id, createdAt: Date.now(), seconds: draft.seconds }
-      const toot: Toot =
-        draft.song === null
-          ? {
-              ...saved,
-              title: PAD_TOOT_TITLE,
-              songId: null,
-              arrangement: null,
-              performance: draft.performance
-            }
-          : {
-              ...saved,
-              title: draft.song.title,
-              songId: draft.song.id,
-              arrangement: draft.arrangement
-            }
+      const toot = savedToot(draft, Date.now())
       try {
         await tootStore.saveToot(toot, draft.wav)
         setToots(list => [toot, ...(list ?? [])])
@@ -998,7 +985,8 @@ export function PedosProvider({ children }: { children: ReactNode }) {
         stopPlayback()
         return
       }
-      const song = 'song' in toot ? toot.song : toot.songId === notes?.id ? notes : undefined
+      // A saved Toot's notes are where its score says, not where the catalog's say now (#254).
+      const song = 'song' in toot ? toot.song : tootScore(toot, notes)
       // A note needs its Song, to find it in the audio.
       if (note !== undefined && !song) return
       const written = note === undefined || !song ? null : noteSeconds(song, song.notes[note])

@@ -3,10 +3,10 @@
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { PAD_TOOT_TITLE, type Toot } from '@/lib/toot'
+import { PAD_TOOT_TITLE, songAsMade, type Toot } from '@/lib/toot'
 import { cn } from '@/lib/utils'
 import { PadTootLayout } from './pad-take'
 import { usePedos } from './pedos-provider'
@@ -35,9 +35,15 @@ export function TootScreen() {
   const current = pedos.toot(id)
   const toot = current ?? (lastSeen?.id === id ? lastSeen : undefined)
   const summary = toot?.songId ? pedos.song(toot.songId) : undefined
-  // Its Song's notes, which the Song Catalog's index leaves out (#323). Only the note view needs
-  // them: Play plays the Toot's own audio, so it shows while they load, or if they don't.
-  const notes = useSongNotes(summary)
+  // The notes it was rendered with, whatever the Song's are now (#254).
+  const asMade = useMemo(
+    () => (toot && summary ? songAsMade(toot, summary) : null),
+    [toot, summary]
+  )
+  // One saved before that has only its Song's notes, which the Song Catalog's index leaves out
+  // (#323). Only the note view needs them: Play plays the Toot's own audio, so it shows while they
+  // load, or if they don't.
+  const notes = useSongNotes(asMade ? undefined : summary)
   const isShared = useShares()?.tootLinks.has(id) ?? false
   /** Under the title: its Song, or Sound Pad, and Shared while it's shared, as the prototype's. */
   const subtitle = [
@@ -143,7 +149,7 @@ export function TootScreen() {
       ) : (
         <TootLayout
           toot={toot}
-          song={notes.song ?? summary}
+          song={asMade ?? notes.song ?? summary}
           isAudioMissing={toot.isAudioMissing}
           notesFallback={
             notes.failed ? (

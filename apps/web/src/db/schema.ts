@@ -13,7 +13,7 @@ import type { FartChoices } from '../lib/engine/fart-choices'
 import type { Performance } from '../lib/performance'
 import type { Analysis } from '../lib/recordings'
 import { SONG_REPORT_REASON_IDS } from '../lib/song-report'
-import type { TootArrangement } from '../lib/toot'
+import type { TootArrangement, TootScore } from '../lib/toot'
 
 // The D1 schema (SERP's data-and-storage standard): Drizzle owns every table, Better Auth's too, so
 // each change is a reviewed migration in `drizzle/` (`pnpm db:generate`). Columns are snake_case.
@@ -199,6 +199,11 @@ export const toots = sqliteTable(
     arrangement: text('arrangement', { mode: 'json' }).$type<TootArrangement>(),
     /** What a Sound Pad Toot played: which Recording each tap played, and when. */
     performance: text('performance', { mode: 'json' }).$type<Performance>(),
+    /**
+     * The tempo, bar lines and notes a Song's Toot was rendered from (#254). Null for a Sound Pad
+     * Toot, and one saved before, which reads its Song's notes in the catalog as they are now.
+     */
+    score: text('score', { mode: 'json' }).$type<TootScore>(),
     /** The WAV's size in R2. */
     audioBytes: integer('audio_bytes').notNull(),
     updatedAt: timestamp('updated_at').notNull(),

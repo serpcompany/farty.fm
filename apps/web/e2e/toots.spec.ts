@@ -454,6 +454,58 @@ test("Toots that fail to load, and a Toot that isn't there, say so", async ({ pa
   await expect(fresh.getByText('Nothing yet')).toBeVisible()
 })
 
+test("a Toot keeps the notes it was rendered with when its Song's end moves (#254)", async ({
+  page,
+  context
+}, testInfo) => {
+  test.setTimeout(180_000)
+  await listenToThePage(context)
+  await page.goto('/profile/')
+  await signInByApi(page, newEmail(testInfo, 'score'))
+  await page.reload()
+  await loadTheFixtureLibrary(page)
+  await makeAToot(page, mary.id)
+
+  // The catalog moves the Song's end after the Toot is saved, as PR 410 did: its last notes go.
+  const after = mary.notes.slice(0, -3)
+  const last = after[after.length - 1]
+  await page.route('**/catalog/notes/**', route =>
+    route.fulfill({
+      json: { bar_lines: mary.bar_lines, length_beats: last.start + last.dur, notes: after }
+    })
+  )
+  await tab(page, 'Toots').click()
+  await page.getByRole('link', { name: new RegExp(`^${literally(mary.title)}`) }).click()
+  await expect(page).toHaveURL(/\/toots\/toot\/\?id=[\w-]+$/)
+  await page.reload()
+
+  const notes = page.locator('[data-testid^="note "]')
+  /** Taps a drawn note, and says where in the Toot's audio it played from, and for how long. */
+  const playNote = async (index: number) => {
+    await page.evaluate(() => (window.__starts = []))
+    await page.getByTestId(`note ${index + 1}`).dispatchEvent('click')
+    const [, offset, length] = (await lastStart(page)).args
+    return { offset, length }
+  }
+  const beat = 60 / mary.bpm
+
+  await expect(notes).toHaveCount(mary.notes.length)
+  await page.screenshot({ path: testInfo.outputPath('toot-keeps-its-notes.png') })
+  const final = mary.notes.length - 1
+  const played = await playNote(final)
+  expect(played.offset).toBeCloseTo(mary.notes[final].start * beat, 3)
+  expect(played.length).toBeCloseTo(mary.notes[final].dur * beat, 3)
+
+  // A Toot saved before this keeps today's behaviour: it reads the Song's notes as they are now.
+  await forgetTootScore(page, mary.id)
+  await page.reload()
+  await expect(notes).toHaveCount(after.length)
+  await page.screenshot({ path: testInfo.outputPath('old-toot-reads-the-catalog.png') })
+  const oldPlayed = await playNote(after.length - 1)
+  expect(oldPlayed.offset).toBeCloseTo(last.start * beat, 3)
+  expect(oldPlayed.length).toBeCloseTo(last.dur * beat, 3)
+})
+
 test.describe('installed', () => {
   test.use({ serviceWorkers: 'allow' })
 
@@ -485,6 +537,8 @@ test.describe('installed', () => {
     // A reload, offline, opens the same Toot.
     await page.reload()
     await expect(page.getByRole('heading', { level: 1, name: mary.title })).toBeVisible()
+    // And draws its notes, which it keeps itself (#254).
+    await expect(page.locator('[data-testid^="note "]')).toHaveCount(mary.notes.length)
     await context.setOffline(false)
   })
 })
@@ -641,6 +695,30 @@ async function deleteTootAudio(page: Page, songId: string): Promise<void> {
     })
     db.close()
   }, id)
+}
+
+/** Makes a Toot of the Song one saved before #254, which keeps no score. */
+async function forgetTootScore(page: Page, songId: string): Promise<void> {
+  await page.evaluate(async songId => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const r = indexedDB.open('pedos')
+      r.onsuccess = () => resolve(r.result)
+      r.onerror = () => reject(r.error)
+    })
+    const store = db.transaction('toots', 'readwrite').objectStore('toots')
+    await new Promise<void>((resolve, reject) => {
+      const all = store.getAll()
+      all.onerror = () => reject(all.error)
+      all.onsuccess = () => {
+        const toot = all.result.find(t => t.songId === songId)
+        delete toot.score
+        const put = store.put(toot)
+        put.onsuccess = () => resolve()
+        put.onerror = () => reject(put.error)
+      }
+    })
+    db.close()
+  }, songId)
 }
 
 /**

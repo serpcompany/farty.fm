@@ -199,6 +199,26 @@ describe('on a local run, with the dev checkout', () => {
     expect(await paid(T1, a)).toBe(false)
   })
 
+  it('keeps the score a paid Toot was rendered from (#254)', async () => {
+    const a = await signUp('A')
+    await checkout(T1, a)
+    await payDev(T1, a)
+    const score = {
+      bpm: 90,
+      bar_lines: [0],
+      length_beats: 4,
+      notes: [{ start: 0, dur: 4, pitch: 60 }]
+    }
+    const saved = await api.put('toots', T1, uploadBody(tootMetadata(T1, { score }), wav()), a, {
+      headers: { host: HOST }
+    })
+    expect(saved.status).toBe(201)
+    const row = await env.DB.prepare('select score from toots where user_id = ?1')
+      .bind(a.id)
+      .first<{ score: string }>()
+    expect(JSON.parse(row?.score ?? 'null')).toEqual(score)
+  })
+
   it('saves a Sound Pad Toot once it is paid for, back to the Sound Pad (ADR 0017)', async () => {
     const a = await signUp('A')
     expect(await (await savePad(T1, a)).json()).toEqual({ error: 'payment_required' })
