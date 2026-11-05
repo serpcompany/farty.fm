@@ -52,10 +52,11 @@ jobs:
       # A PR's run tests its merge commit, whose first parent is the base branch, so this diff is
       # what the PR changes. A push always checks, and an error in the diff checks too. The Song
       # Catalog's generator reads the titles files for each Song's other names (#323), and the
-      # catalog tests read the composer lookups' batch files and their copyright limits (#357).
+      # catalog tests read the composer lookups' batch files and their copyright limits (#357),
+      # and import melody-lab's code (#393).
       - id: paths
         run: |
-          if [ "$GITHUB_EVENT_NAME" != pull_request ] || ! git diff --quiet HEAD^1 HEAD -- catalog tools/catalog; then
+          if [ "$GITHUB_EVENT_NAME" != pull_request ] || ! git diff --quiet HEAD^1 HEAD -- catalog tools/catalog tools/melody-lab .github/workflows/web.yml; then
             echo "catalog=true" >> "$GITHUB_OUTPUT"
           fi
           if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
@@ -86,8 +87,12 @@ jobs:
           fi
           echo "run=true" >> "$GITHUB_OUTPUT"
 
+  # A required check, so `catalog`'s result gates it (#393): `needs` alone would skip this job when
+  # `catalog` fails, and GitHub counts a skipped required job as passing. `always()` runs it, and
+  # the first step fails it unless `changes` and `catalog` passed.
   check:
-    needs: changes
+    needs: [changes, catalog]
+    if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -96,6 +101,16 @@ jobs:
       run:
         working-directory: apps/web
     steps:
+      - name: Check the catalog's checks passed
+        working-directory: . # nothing is checked out yet, so apps/web doesn't exist
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          CATALOG_RESULT: ${{ needs.catalog.result }}
+        run: |
+          if [ "$CHANGES" != success ] || [ "$CATALOG_RESULT" != success ]; then
+            echo "::error::changes: $CHANGES, catalog: $CATALOG_RESULT. Both must pass."
+            exit 1
+          fi
       - if: env.WEB == 'true'
         uses: actions/checkout@v7
       - if: env.WEB == 'true'
@@ -145,9 +160,11 @@ jobs:
         run: pnpm build:production
 
   # The catalog tools' own checks: each composer name's one spelling, the copyright rule, a removal's
-  # reason, every batch's place in the catalog (#357), every Song's tags (#383), and their unit tests.
-  # Standard library only, so no setup; it takes seconds. It skips its steps when nothing under
-  # catalog/ or tools/catalog/ changed.
+  # reason, every batch's place in the catalog (#357), every Song's tags (#383), and every
+  # tools/catalog/test_*.py (#393), the catalog-wide Song checks in test_pdmx.py among them. The
+  # tests import tools/melody-lab's code, so it installs that folder's requirements (Python 3.12,
+  # as its README). It skips its steps when nothing under catalog/, tools/catalog/ or
+  # tools/melody-lab/ changed. `check`, a required check, fails when this job does.
   catalog:
     needs: changes
     runs-on: ubuntu-latest
@@ -157,20 +174,28 @@ jobs:
     steps:
       - if: env.CATALOG == 'true'
         uses: actions/checkout@v7
+      - if: env.CATALOG == 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: tools/melody-lab/requirements.txt
+      - name: Install melody-lab's requirements
+        if: env.CATALOG == 'true'
+        run: python -m pip install -r tools/melody-lab/requirements.txt
       - name: Check every composer batch
         if: env.CATALOG == 'true'
         run: python3 -I tools/catalog/composers.py check
-      - name: Test the composer lookups
-        if: env.CATALOG == 'true'
-        run: python3 -I tools/catalog/test_composers.py
       # Every Song's kind, origin and fame (#383): each Song has a kind of the seven, and its tags
       # are tag.py apply's from tag-signals.json, the batches and tag-hand.json.
       - name: Check every Song's tags
         if: env.CATALOG == 'true'
         run: python3 -I tools/catalog/tag.py check
-      - name: Test the tags
+      # Every test file there, found by discovery so a new one runs without an edit here. -v lists
+      # each test, so the log shows which ran and which skipped.
+      - name: Test the catalog tools
         if: env.CATALOG == 'true'
-        run: python3 -I tools/catalog/test_tag.py
+        run: python -I -m unittest discover -v -s tools/catalog -t tools/catalog
 
   # The journeys, split by Playwright's --shard into parallel jobs, each on its own runner with its
   # own build, local database and preview. Locally, `pnpm test:e2e` still runs them all. A shard
