@@ -13,10 +13,11 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { type ReactNode, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuLabel,
@@ -36,9 +37,9 @@ import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { startAudioInTap } from '@/lib/audio/context'
 import { type KindChoice, kindChoices, type SongSummary } from '@/lib/catalog/song'
-import { songListing, sortRows } from '@/lib/pitch-coverage'
+import { type SongOrder, songListing, sortRows } from '@/lib/pitch-coverage'
 import { cn } from '@/lib/utils'
-import { songOrders, useComposeChoices } from './compose-choices'
+import { showChoices, songOrders, useComposeChoices } from './compose-choices'
 import { useFavorites } from './favorite-button'
 import { LockedSongSheet } from './locked-song-sheet'
 import { usePedos } from './pedos-provider'
@@ -49,28 +50,18 @@ const noFavorites: ReadonlySet<string> = new Set()
 
 /**
  * Compose: the Song Catalog with each Song's Pitch Coverage. Search it by title, composer, kind or
- * origin, sort it, show only the Ready or Favorite Songs (#356), and show one kind of Song, or the
- * Well known ones, with a Kind chip (#384). Open an Unlocked Song in Song Creator, or a locked Song
- * to see which notes it still needs. It began as a port of the iPhone app's
- * `ComposeTab`, which still lists Favorites first and has no composer, Ready filter, Most popular or
- * Fewest notes: the web screen is the newer one, so port from here to the iPhone, not back.
+ * origin, narrow it with the Kind and Show dropdowns, and sort it, all in one row under the search
+ * box (#397). Open an Unlocked Song in Song Creator, or a locked Song to see which notes it still
+ * needs. It began as a port of the iPhone app's `ComposeTab`, which still lists Favorites first and
+ * has no composer, Ready filter, Most popular or Fewest notes: the web screen is the newer one, so
+ * port from here to the iPhone, not back.
  */
 export function ComposeScreen() {
   const pedos = usePedos()
   const router = useRouter()
   const [query, setQuery] = useState('')
   const searchBox = useRef<HTMLInputElement>(null)
-  const {
-    order,
-    chooseOrder,
-    onlyFavorites,
-    chooseOnlyFavorites,
-    onlyReady,
-    chooseOnlyReady,
-    kind,
-    chooseKind
-  } = useComposeChoices()
-  const kindRow = useRef<HTMLDivElement>(null)
+  const { order, chooseOrder, kinds, chooseKinds, show, chooseShow } = useComposeChoices()
   const [lockedSong, setLockedSong] = useState<SongSummary | null>(null)
   /** The Song a locked sheet's Report a problem opened the report sheet for (#358). */
   const [reportedSong, setReportedSong] = useState<SongSummary | null>(null)
@@ -85,36 +76,28 @@ export function ComposeScreen() {
     return () => document.removeEventListener('visibilitychange', visibilityChanged)
   }, [])
 
-  // The chosen Kind chip scrolls into sight, as when a remembered one is past the screen's edge.
-  useEffect(() => {
-    if (kind === null) return
-    kindRow.current
-      ?.querySelector('[aria-pressed="true"]')
-      ?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
-  }, [kind])
-
   const sorted = useMemo(() => sortRows(pedos.songRows, order), [pedos.songRows, order])
+  const onlyReady = show.includes('Ready')
+  const onlyFavorites = show.includes('Favorites')
   // A heart tap filters again only while the Favorites filter is on.
   const only = onlyFavorites ? (favorites ?? noFavorites) : null
   const listing = useMemo(
-    () => songListing(sorted, query, { ready: onlyReady, favorites: only, kind }),
-    [sorted, query, onlyReady, only, kind]
+    () => songListing(sorted, query, { ready: onlyReady, favorites: only, kinds }),
+    [sorted, query, onlyReady, only, kinds]
   )
   const listed = listing.unlocked.length + listing.locked.length
   // The whole catalog, or the search within it: the Sound Pad and the first steps show with it.
-  const showsAll = query === '' && !onlyFavorites && !onlyReady && kind === null
-  const orderLabel = (songOrders.find(o => o.value === order) ?? songOrders[0]).label
+  const showsAll = query === '' && show.length === 0 && kinds.length === 0
   const showAll = () => {
-    chooseOnlyReady(false)
-    chooseOnlyFavorites(false)
-    chooseKind(null)
+    chooseShow([])
+    chooseKinds([])
   }
 
   return (
     <div className="flex flex-1 flex-col px-4 pb-6">
       <h1 className="pt-4 pb-1 text-3xl font-bold tracking-tight">Compose</h1>
 
-      {/* Search and the chips stay in reach while the list scrolls. */}
+      {/* Search and the dropdowns stay in reach while the list scrolls. */}
       <div className="sticky top-[env(safe-area-inset-top)] z-10 -mx-4 flex flex-col gap-1 bg-background/95 px-4 pt-1.5 pb-1 backdrop-blur md:top-[calc(4rem+1px)]">
         <div className="relative">
           <Search
@@ -145,85 +128,23 @@ export function ComposeScreen() {
             </Button>
           )}
         </div>
-        <div className="flex gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <button
-                  type="button"
-                  className={cn(chip, 'shrink')}
-                  aria-label={`Sort: ${orderLabel}`}
-                />
-              }
-              data-testid="sort-songs"
-            >
-              <span className={chipFace}>
-                <ArrowUpDown className="size-4 shrink-0" aria-hidden />
-                <span className="truncate">{orderLabel}</span>
-                <ChevronDown className="size-4 shrink-0" aria-hidden />
-              </span>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-auto">
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-                <DropdownMenuRadioGroup value={order} onValueChange={chooseOrder}>
-                  {songOrders.map(({ value, label }) => (
-                    <DropdownMenuRadioItem
-                      key={value}
-                      value={value}
-                      closeOnClick
-                      className="py-2 text-base"
-                    >
-                      {label}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <button
-            type="button"
-            className={chip}
-            aria-pressed={onlyReady}
-            data-testid="ready-filter"
-            onClick={() => chooseOnlyReady(!onlyReady)}
-          >
-            <span className={chipFace}>Ready</span>
-          </button>
-          <button
-            type="button"
-            className={cn(chip, 'w-11')}
-            aria-label="Favorites"
-            aria-pressed={onlyFavorites}
-            data-testid="favorites-filter"
-            onClick={() => chooseOnlyFavorites(!onlyFavorites)}
-          >
-            <span className={cn(chipFace, 'w-11 justify-center px-0')}>
-              <Heart className={cn('size-4', onlyFavorites && 'fill-current')} aria-hidden />
-            </span>
-          </button>
+        <div className="flex h-11 items-center gap-2" data-testid="song-filters">
+          <FilterMenu
+            name="Kind"
+            all="All kinds"
+            choices={kindChoices}
+            chosen={kinds}
+            onChoose={chooseKinds}
+          />
+          <FilterMenu
+            name="Show"
+            all="All Songs"
+            choices={showChoices}
+            chosen={show}
+            onChoose={chooseShow}
+          />
+          <SortMenu order={order} onChoose={chooseOrder} />
         </div>
-        {/* One kind at a time, or none: tapping the chosen chip again shows every Song (#384). The
-            fieldset only names the chips; the row inside scrolls sideways, to the screen's edges. */}
-        <fieldset className="-mx-4 min-w-0" data-testid="kind-chips">
-          <legend className="sr-only">Kinds</legend>
-          <div
-            ref={kindRow}
-            className="flex scroll-px-4 gap-2 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {kindChoices.map(choice => (
-              <button
-                key={choice}
-                type="button"
-                className={chip}
-                aria-pressed={kind === choice}
-                onClick={() => chooseKind(kind === choice ? null : choice)}
-              >
-                <span className={chipFace}>{choice}</span>
-              </button>
-            ))}
-          </div>
-        </fieldset>
       </div>
 
       {pedos.songsFailed ? (
@@ -239,11 +160,6 @@ export function ComposeScreen() {
         </div>
       ) : (
         <div className="flex flex-col gap-6 pt-1.5">
-          {kind !== null && listed > 0 && (
-            <p className="-mb-3 px-4 text-sm text-muted-foreground" data-testid="kind-count">
-              {kind} · {listed}
-            </p>
-          )}
           {showsAll && <SoundPadRow />}
           {pedos.melodicRecordings.length === 0 && showsAll && (
             <Empty className="rounded-xl bg-muted/60 p-6">
@@ -277,7 +193,7 @@ export function ComposeScreen() {
               query={query.trim()}
               onlyReady={onlyReady}
               onlyFavorites={onlyFavorites}
-              kind={kind}
+              kinds={kinds}
               hasFavorites={(favorites?.size ?? 0) > 0}
               onShowAll={showAll}
             />
@@ -302,37 +218,195 @@ export function ComposeScreen() {
   )
 }
 
-// A chip: a 34 px pill in a 44 px-high tap area. It fills while it's on (`aria-pressed`), and
-// greys while its menu is open.
-const chip = 'group flex h-11 min-w-0 shrink-0 items-center outline-none'
-const chipFace =
-  'flex h-[34px] min-w-0 items-center gap-1.5 rounded-full border border-border px-3 text-sm whitespace-nowrap transition-colors group-hover:bg-muted group-focus-visible:ring-3 group-focus-visible:ring-ring/50 group-aria-expanded:bg-muted group-aria-pressed:border-primary group-aria-pressed:bg-primary group-aria-pressed:text-primary-foreground'
+// One control of the row: a 34 px pill around buttons a thumb can hit, 44 px high and at least as
+// wide. It greys while its menu is open, unless a filter fills it.
+const pill =
+  'flex h-[34px] min-w-0 items-center rounded-full border text-sm whitespace-nowrap transition-colors has-focus-visible:ring-3 has-focus-visible:ring-ring/50'
+const pillUnfilled = 'border-border hover:bg-muted has-aria-expanded:bg-muted'
+const pillButton = 'flex h-11 min-w-0 items-center gap-1.5 outline-none'
+const menuItem = 'min-h-11 text-base'
+
+/** Back to the first Song, which a choice in a list scrolled far down would otherwise hide. */
+const toTop = () => window.scrollTo(0, 0)
+
+/**
+ * One filter's dropdown (#397), Kind or Show: a checkbox menu that stays open while you pick, whose
+ * top row turns them all off. With a filter on, it fills and names the choice, or counts several,
+ * and its × clears it. A remembered filter shows the same way.
+ */
+function FilterMenu<Choice extends string>({
+  name,
+  all,
+  choices,
+  chosen,
+  onChoose
+}: {
+  name: string
+  /** The menu's top row, on while nothing is chosen. */
+  all: string
+  choices: readonly Choice[]
+  chosen: readonly Choice[]
+  onChoose: (chosen: readonly Choice[]) => void
+}) {
+  const trigger = useRef<HTMLButtonElement>(null)
+  const on = chosen.length > 0
+  const choose = (next: readonly Choice[]) => {
+    onChoose(next)
+    toTop()
+  }
+  return (
+    <DropdownMenu>
+      <div
+        className={cn(
+          pill,
+          on ? 'border-primary bg-primary text-primary-foreground' : pillUnfilled
+        )}
+      >
+        <DropdownMenuTrigger
+          ref={trigger}
+          className={cn(pillButton, on ? 'pr-1.5 pl-3' : 'px-3')}
+          aria-label={on ? `${name}: ${chosen.join(', ')}` : name}
+        >
+          <span className="truncate">
+            {chosen.length > 1 ? `${name} · ${chosen.length}` : (chosen[0] ?? name)}
+          </span>
+          {!on && <ChevronDown className="size-4 shrink-0" aria-hidden />}
+        </DropdownMenuTrigger>
+        {on && (
+          // 44 px wide, over the label's padding and the gap beside it, to keep the row narrow.
+          <button
+            type="button"
+            className="relative -mr-1 -ml-[11px] flex size-11 shrink-0 items-center justify-center outline-none"
+            aria-label={`Clear ${name}`}
+            onClick={() => {
+              choose([])
+              trigger.current?.focus()
+            }}
+          >
+            <X className="size-4" aria-hidden />
+          </button>
+        )}
+      </div>
+      <DropdownMenuContent className="w-auto">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>{name}</DropdownMenuLabel>
+          <DropdownMenuCheckboxItem
+            className={menuItem}
+            checked={!on}
+            onCheckedChange={() => choose([])}
+          >
+            {all}
+          </DropdownMenuCheckboxItem>
+          {choices.map(choice => (
+            <DropdownMenuCheckboxItem
+              key={choice}
+              className={menuItem}
+              checked={chosen.includes(choice)}
+              onCheckedChange={checked =>
+                choose(choices.filter(c => (c === choice ? checked : chosen.includes(c))))
+              }
+            >
+              {choice}
+            </DropdownMenuCheckboxItem>
+          ))}
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+/**
+ * The sort, at the right of the row: "Sort", or the order chosen if it isn't the first. It never
+ * fills, because it hides nothing. Where the filters leave too little room for its whole face, it
+ * shows only its icon, so a word is never cut short. Widths follow the device's system font, so the
+ * room is measured, against the whole face drawn unseen.
+ */
+function SortMenu({ order, onChoose }: { order: SongOrder; onChoose: (order: SongOrder) => void }) {
+  const room = useRef<HTMLDivElement>(null)
+  const whole = useRef<HTMLSpanElement>(null)
+  const [fits, setFits] = useState(true)
+  useLayoutEffect(() => {
+    const [left, needed] = [room.current, whole.current]
+    if (!left || !needed) return
+    const measure = () => setFits(needed.offsetWidth <= left.clientWidth)
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(left)
+    observer.observe(needed)
+    return () => observer.disconnect()
+  }, [])
+  const { label } = songOrders.find(o => o.value === order) ?? songOrders[0]
+  const face = (
+    <>
+      <ArrowUpDown className="size-4 shrink-0" aria-hidden />
+      <span>{order === songOrders[0].value ? 'Sort' : label}</span>
+      <ChevronDown className="size-4 shrink-0" aria-hidden />
+    </>
+  )
+  return (
+    <div ref={room} className="relative flex min-w-[34px] flex-1 justify-end">
+      <span ref={whole} className={cn(pill, 'invisible absolute right-0 gap-1.5 px-3')} aria-hidden>
+        {face}
+      </span>
+      <DropdownMenu>
+        <div className={cn(pill, pillUnfilled, !fits && 'w-[34px]')}>
+          <DropdownMenuTrigger
+            className={cn(pillButton, fits ? 'px-3' : '-mx-1.5 w-11 shrink-0 justify-center')}
+            aria-label={`Sort: ${label}`}
+            data-testid="sort-songs"
+          >
+            {fits ? face : <ArrowUpDown className="size-4" aria-hidden />}
+          </DropdownMenuTrigger>
+        </div>
+        <DropdownMenuContent align="end" className="w-auto">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              value={order}
+              onValueChange={next => {
+                onChoose(next)
+                toTop()
+              }}
+            >
+              {songOrders.map(({ value, label }) => (
+                <DropdownMenuRadioItem key={value} value={value} closeOnClick className={menuItem}>
+                  {label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  )
+}
 
 /**
  * What Compose says when it lists no Song: why, and a way to show the Songs a filter hides, when
- * there are any. Every kind has Songs, so a Kind chip empties the list only with another filter or
- * a search (#384).
+ * there are any. Every kind has Songs, so the Kind filter empties the list only with another filter
+ * or a search (#384).
  */
 function NoSongs({
   query,
   onlyReady,
   onlyFavorites,
-  kind,
+  kinds,
   hasFavorites,
   onShowAll
 }: {
   query: string
   onlyReady: boolean
   onlyFavorites: boolean
-  kind: KindChoice | null
+  kinds: readonly KindChoice[]
   hasFavorites: boolean
   onShowAll: () => void
 }) {
   const filters = [onlyReady && 'Ready', onlyFavorites && 'Favorite'].filter(Boolean)
-  const inKind = kind === null ? '' : ` in ${kind}`
+  const anyKind = kinds.length > 0
+  const inKind = anyKind ? ` in ${kinds.join(', ')}` : ''
   const [icon, title, description, action]: [ReactNode, string, string, string?] =
     query !== ''
-      ? filters.length === 0 && kind === null
+      ? filters.length === 0 && !anyKind
         ? [
             <Search key="icon" />,
             `No Results for “${query}”`,
@@ -344,12 +418,12 @@ function NoSongs({
             'The filters are on. Search every Song instead.',
             'Search all Songs'
           ]
-      : onlyFavorites && (!hasFavorites || (!onlyReady && kind === null))
+      : onlyFavorites && (!hasFavorites || (!onlyReady && !anyKind))
         ? [
             <Heart key="icon" />,
             'No Favorites yet',
             'Tap the heart on a Song to add it to your Favorites.',
-            onlyReady || kind !== null ? 'Show all Songs' : undefined
+            onlyReady || anyKind ? 'Show all Songs' : undefined
           ]
         : onlyFavorites && onlyReady
           ? [

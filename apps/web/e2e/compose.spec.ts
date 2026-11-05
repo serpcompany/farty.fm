@@ -3,6 +3,7 @@ import { searchKey } from '../src/lib/catalog/search-key'
 import { kindChoices, type SongKind } from '../src/lib/catalog/song'
 import { songs } from '../src/lib/catalog/songs.generated'
 import { type SongOrder, songRows, sortRows } from '../src/lib/pitch-coverage'
+import { dropdown, menuRow, pick } from './compose-filters'
 import {
   fakeMicrophone,
   fartAndRecord,
@@ -95,14 +96,14 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(page.getByRole('heading', { name: /^Unlocked/ })).toHaveCount(0)
 
   // Ready shows only the Unlocked Songs: none yet.
-  const ready = page.getByRole('button', { name: 'Ready', exact: true })
-  await expectTappable(ready)
-  await ready.click()
-  await expect(ready).toHaveAttribute('aria-pressed', 'true')
+  const show = dropdown(page, 'Show')
+  await expectTappable(show)
+  await pick(page, 'Show', 'Ready')
+  await expect(show).toHaveAccessibleName('Show: Ready')
   await expect(page.getByText('No Ready Songs yet')).toBeVisible()
   await expect(page.getByTestId('song-row')).toHaveCount(0)
   await page.getByRole('button', { name: 'Show all Songs' }).click()
-  await expect(ready).toHaveAttribute('aria-pressed', 'false')
+  await expect(show).toHaveAccessibleName('Show')
   await expect(locked(songs.length)).toBeVisible()
 
   // A locked Song's sheet: no Melodic Recordings yet.
@@ -279,22 +280,22 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(locked(songs.length - unlockedSongs)).toBeVisible()
 
   // Ready: only the Unlocked Songs. A search the filter hides offers every Song.
-  await ready.click()
+  await pick(page, 'Show', 'Ready')
   await expect(page.getByTestId('song-row')).toHaveCount(unlockedSongs)
   await expect(page.getByRole('heading', { name: /^Locked/ })).toHaveCount(0)
   await expect(page.getByText('Sound Pad')).toHaveCount(0)
   await search.fill('zzz')
   await expect(page.getByText('No Ready Songs match “zzz”')).toBeVisible()
   await page.getByRole('button', { name: 'Search all Songs' }).click()
-  await expect(ready).toHaveAttribute('aria-pressed', 'false')
+  await expect(show).toHaveAccessibleName('Show')
   await expect(search).toHaveValue('zzz')
   await expect(page.getByText('No Results for “zzz”')).toBeVisible()
   await search.fill('')
 
-  // Sort: the chip names the order. Most popular puts the best-known Song first (#356, #384).
+  // Sort names the order. Most popular puts the best-known Song first (#356, #384).
   const sort = (label: string) => page.getByRole('button', { name: `Sort: ${label}` })
   await expectTappable(sort('Closest to unlocking'))
-  await expectTappable(page.getByRole('button', { name: 'Favorites', exact: true }))
+  await expectTappable(dropdown(page, 'Kind'))
   const rows = songRows(songs, fixtureRecordings(journey))
   /** The first Song of each section in `order`, by the app's own sort. */
   const firsts = (order: SongOrder) => {
@@ -328,42 +329,66 @@ test('saving farts unlocks Songs on Compose, and the Result says so', async ({ p
   await expect(firstLocked).toHaveAttribute('data-song', firsts('alphabetical')[1])
 })
 
-// The Kind chips (#384): one kind at a time, or the Well known Songs of every kind, with search
-// and the Ready filter. A second tap shows every Song, and Compose keeps the choice.
-test('a Kind chip shows one kind of Song, with search and Ready, and stays chosen', async ({
+// The Kind dropdown (#397): several kinds at once, or the Well known Songs of every kind, with
+// search and the Show dropdown. Its top row and its × show every Song, and Compose keeps the choice.
+test('the Kind dropdown picks several kinds, with search and Show, and stays chosen', async ({
   page
 }) => {
   await page.goto('/compose/')
-  const row = page.getByTestId('kind-chips')
-  const chip = (name: string) => row.getByRole('button', { name, exact: true })
+  const kind = dropdown(page, 'Kind')
+  const clear = page.getByRole('button', { name: 'Clear Kind' })
+  const row = (name: string) => menuRow(page, name)
   const rows = page.getByTestId('song-row')
-  const kindCount = page.getByTestId('kind-count')
   const ofKind = (kind: SongKind) => songs.filter(s => s.kind === kind)
   await expect(page.getByRole('heading', { name: `Locked · ${songs.length}` })).toBeVisible()
-  await expect(row.getByRole('button')).toHaveText([...kindChoices])
-  for (const choice of kindChoices) await expectTappable(chip(choice))
-  await expect(row.getByRole('button', { pressed: true })).toHaveCount(0)
-  await expect(kindCount).toHaveCount(0)
+  await expect(kind).toHaveText('Kind')
+  await expect(clear).toHaveCount(0)
 
-  // Well known holds Songs of every kind.
+  await kind.click()
+  const items = page.getByRole('menuitemcheckbox')
+  await expect(items).toHaveText(['All kinds', ...kindChoices])
+  for (const item of await items.all()) await expectTappable(item)
+  await expect(page.getByRole('menuitemcheckbox', { checked: true })).toHaveText(['All kinds'])
+
+  // Well known holds Songs of every kind. The menu stays open, and the list changes behind it.
   const wellKnown = songs.filter(s => s.wellKnown)
   expect(new Set(wellKnown.map(s => s.kind)).size).toBeGreaterThan(4)
-  await chip('Well known').click()
-  await expect(chip('Well known')).toHaveAttribute('aria-pressed', 'true')
-  await expect(kindCount).toHaveText(`Well known · ${wellKnown.length}`)
+  await row('Well known').click()
   await expect(rows).toHaveCount(wellKnown.length)
+  await expect(row('Well known')).toBeChecked()
+  await expect(row('All kinds')).not.toBeChecked()
   await expect(page.getByText('Sound Pad')).toHaveCount(0)
 
-  // One kind at a time: Christmas takes Well known's place, and a second tap shows every Song.
-  await chip('Christmas').click()
-  await expect(row.getByRole('button', { pressed: true })).toHaveText(['Christmas'])
-  await expect(kindCount).toHaveText(`Christmas · ${ofKind('Christmas').length}`)
-  await expect(rows).toHaveCount(ofKind('Christmas').length)
-  await chip('Christmas').click()
-  await expect(row.getByRole('button', { pressed: true })).toHaveCount(0)
-  await expect(kindCount).toHaveCount(0)
+  // Several: a Song in any of them shows, once.
+  await row('Christmas').click()
+  await row('Anthems').click()
+  await expect(rows).toHaveCount(
+    songs.filter(s => s.wellKnown || s.kind === 'Christmas' || s.kind === 'Anthems').length
+  )
+  await row('Well known').click()
+  await expect(rows).toHaveCount(ofKind('Christmas').length + ofKind('Anthems').length)
+
+  // A tap outside closes the menu and opens nothing behind it. It names how many, or the one left.
+  await tapOutside(page)
+  await expect(page.getByRole('menu')).toHaveCount(0)
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(kind).toHaveText('Kind · 2')
+  await expect(kind).toHaveAccessibleName('Kind: Christmas, Anthems')
+  await expectTappable(clear)
+  await pick(page, 'Kind', 'Anthems')
+  await expect(kind).toHaveText('Christmas')
+
+  // The top row turns them all off, and so does the ×.
+  await pick(page, 'Kind', 'All kinds')
+  await expect(kind).toHaveText('Kind')
+  await expect(clear).toHaveCount(0)
   await expect(page.getByRole('heading', { name: `Locked · ${songs.length}` })).toBeVisible()
   await expect(page.getByText('Sound Pad')).toBeVisible()
+  await pick(page, 'Kind', 'Hymns', 'Kids')
+  await clear.click()
+  await expect(kind).toHaveText('Kind')
+  await expect(kind).toBeFocused()
+  await expect(rows).toHaveCount(songs.length)
 
   // Search finds a Song by where it's from, and by its kind's name.
   const search = page.getByRole('searchbox', { name: 'Search Songs or composers' })
@@ -380,28 +405,97 @@ test('a Kind chip shows one kind of Song, with search and Ready, and stays chose
   await search.fill('christmas')
   await expect(rows).toHaveCount(searchFinds('christmas').length)
 
-  // The chip and search together, then Ready too: no Song is Unlocked yet.
+  // Kind and search together, then Ready too: no Song is Unlocked yet.
   await search.fill('Irish')
-  await chip('Fiddle tunes').click()
+  await pick(page, 'Kind', 'Fiddle tunes')
   const irishTunes = ofKind('Fiddle tunes').filter(s => irish.includes(s.id))
-  await expect(kindCount).toHaveText(`Fiddle tunes · ${irishTunes.length}`)
+  await expect(kind).toHaveText('Fiddle tunes')
   await expect(rows).toHaveCount(irishTunes.length)
-  await page.getByRole('button', { name: 'Ready', exact: true }).click()
+  await pick(page, 'Show', 'Ready')
   await expect(page.getByText('No Ready Songs in Fiddle tunes match “Irish”')).toBeVisible()
-  await expect(kindCount).toHaveCount(0)
   await page.getByRole('button', { name: 'Search all Songs' }).click()
-  await expect(row.getByRole('button', { pressed: true })).toHaveCount(0)
+  await expect(kind).toHaveText('Kind')
+  await expect(dropdown(page, 'Show')).toHaveText('Show')
   await expect(search).toHaveValue('Irish')
   await expect(rows).toHaveCount(irish.length)
 
-  // The choice stays across a reload, and the chip scrolls into sight.
+  // The choices stay across a reload, filled.
   await search.fill('')
-  await chip('Fiddle tunes').click()
+  await pick(page, 'Kind', 'Fiddle tunes', 'Hymns')
   await page.reload()
-  await expect(chip('Fiddle tunes')).toHaveAttribute('aria-pressed', 'true')
-  await expect(chip('Fiddle tunes')).toBeInViewport()
-  await expect(kindCount).toHaveText(`Fiddle tunes · ${ofKind('Fiddle tunes').length}`)
+  await expect(kind).toHaveText('Kind · 2')
+  await expect(clear).toBeVisible()
+  await expect(rows).toHaveCount(ofKind('Fiddle tunes').length + ofKind('Hymns').length)
+
+  // So does the one Kind a browser kept before several could be chosen.
+  await page.evaluate(() => localStorage.setItem('pedos.composeKind', 'Fiddle tunes'))
+  await page.reload()
+  await expect(kind).toHaveText('Fiddle tunes')
+  await expect(clear).toBeVisible()
   await expect(rows).toHaveCount(ofKind('Fiddle tunes').length)
+})
+
+// The row at the narrowest phones (#397), with its longest names on: a Kind's, a filter's and the
+// order's. Nothing runs off the screen, and Sort shows its whole label, or only its icon, never a
+// piece of a word. The app clips sideways overflow, so the row's right edge is what's measured.
+test('the filter row fits a phone, and its menus stay on the screen', async ({ page }) => {
+  await page.goto('/compose/')
+  await pick(page, 'Kind', 'Fiddle tunes')
+  await pick(page, 'Show', 'Favorites')
+  await page.getByRole('button', { name: 'Sort: Closest to unlocking' }).click()
+  await page.getByRole('menuitemradio', { name: 'Fewest notes' }).click()
+  const menu = page.getByRole('menu')
+  await expect(menu).toHaveCount(0)
+  const sort = page.getByRole('button', { name: 'Sort: Fewest notes' })
+
+  for (const width of [320, 360, 390]) {
+    await page.setViewportSize({ width, height: 844 })
+    await expect(dropdown(page, 'Kind')).toHaveText('Fiddle tunes')
+    await expect(dropdown(page, 'Show')).toHaveText('Favorites')
+    await expect(async () => {
+      expect(['', 'Fewest notes']).toContain(await sort.textContent())
+      // The three pills side by side, inside the page's margin. Only tap areas reach past them.
+      const pills = await page
+        .getByTestId('song-filters')
+        .locator('button[aria-haspopup]')
+        .evaluateAll(buttons => buttons.map(b => b.parentElement?.getBoundingClientRect()))
+      expect(pills).toHaveLength(3)
+      const [kind, show, sorted] = pills
+      expect(kind?.right ?? 999).toBeLessThanOrEqual(show?.left ?? 0)
+      expect(show?.right ?? 999).toBeLessThanOrEqual(sorted?.left ?? 0)
+      expect(sorted?.right ?? 999).toBeLessThanOrEqual(width - 16)
+    }).toPass()
+    await expectTappable(sort)
+    for (const name of ['Clear Kind', 'Clear Show']) {
+      await expectTappable(page.getByRole('button', { name }))
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width)
+    // Neither filter's name is cut short.
+    for (const name of ['Kind', 'Show'] as const) {
+      const cut = await dropdown(page, name)
+        .locator('span')
+        .evaluate(label => label.scrollWidth > label.clientWidth)
+      expect(cut).toBe(false)
+    }
+  }
+
+  // Each menu stays on a small phone's screen, and scrolls if it must.
+  await page.setViewportSize({ width: 320, height: 568 })
+  for (const open of [dropdown(page, 'Kind'), dropdown(page, 'Show'), sort]) {
+    await open.click()
+    await expect(menu).toBeVisible()
+    // Measured at its full size, once it has grown in.
+    await menu.evaluate(el =>
+      Promise.allSettled(el.getAnimations().map(a => a.finished)).then(() => null)
+    )
+    const box = await menu.boundingBox()
+    expect(box?.x ?? -1).toBeGreaterThanOrEqual(0)
+    expect(box?.y ?? -1).toBeGreaterThanOrEqual(0)
+    expect((box?.x ?? 0) + (box?.width ?? 999)).toBeLessThanOrEqual(320)
+    expect((box?.y ?? 0) + (box?.height ?? 999)).toBeLessThanOrEqual(568)
+    await page.keyboard.press('Escape')
+    await expect(menu).toHaveCount(0)
+  }
 })
 
 // The browser fetches the Song Catalog as data (#322). With no service worker to answer for it, a
@@ -448,6 +542,12 @@ test.describe('a Song Catalog that does not load', () => {
  * A control a thumb can hit: at least 44 by 44 CSS pixels, as the iPhone's controls, less 0.01 px
  * of the layout's float rounding.
  */
+/** Taps low on the screen, beside the open menu, over the Songs. */
+async function tapOutside(page: Page) {
+  const height = page.viewportSize()?.height ?? 0
+  await page.touchscreen.tap(8, height - 60)
+}
+
 async function expectTappable(control: Locator) {
   const box = await control.boundingBox()
   expect(box?.width ?? 0).toBeGreaterThanOrEqual(43.99)

@@ -15,11 +15,18 @@ export const songOrders: { value: SongOrder; label: string }[] = [
   { value: 'alphabetical', label: 'A–Z' }
 ]
 
-// The order and the filters this browser chose last (#313, #356, #384).
+/** Compose's Show menu, in its order (#397). */
+export const showChoices = ['Ready', 'Favorites'] as const
+export type ShowChoice = (typeof showChoices)[number]
+
+// The order and the filters this browser chose last (#313, #356, #384). The Kinds are kept
+// comma-joined, so the one Kind a browser kept before several could be chosen (#397) reads as is.
 const orderKey = 'pedos.composeOrder'
-const onlyFavoritesKey = 'pedos.composeFavorites'
-const onlyReadyKey = 'pedos.composeReady'
-const kindKey = 'pedos.composeKind'
+const showKeys: Record<ShowChoice, string> = {
+  Ready: 'pedos.composeReady',
+  Favorites: 'pedos.composeFavorites'
+}
+const kindsKey = 'pedos.composeKind'
 
 function readChoice(key: string): string | null {
   try {
@@ -40,31 +47,29 @@ function keepChoice(key: string, value: string) {
 export type ComposeChoices = {
   order: SongOrder
   chooseOrder: (order: SongOrder) => void
-  onlyFavorites: boolean
-  chooseOnlyFavorites: (only: boolean) => void
-  onlyReady: boolean
-  chooseOnlyReady: (only: boolean) => void
-  /** The Kind chip chosen, or null for every Song. */
-  kind: KindChoice | null
-  chooseKind: (kind: KindChoice | null) => void
+  /** The Kinds chosen, in the menu's order: a Song in any of them shows. None shows every Song. */
+  kinds: readonly KindChoice[]
+  chooseKinds: (kinds: readonly KindChoice[]) => void
+  /** Ready, Favorites or both, in the menu's order: a Song must be all of them. */
+  show: readonly ShowChoice[]
+  chooseShow: (show: readonly ShowChoice[]) => void
 }
 
-/** Compose's sort and its Ready, Favorites and Kind filters, as this browser chose them last. */
+/** Compose's sort and its Kind and Show filters, as this browser chose them last. */
 export function useComposeChoices(): ComposeChoices {
   const [order, setOrder] = useState<SongOrder>('closestToUnlocking')
-  const [onlyFavorites, setOnlyFavorites] = useState(false)
-  const [onlyReady, setOnlyReady] = useState(false)
-  const [kind, setKind] = useState<KindChoice | null>(null)
+  const [kinds, setKinds] = useState<readonly KindChoice[]>([])
+  const [show, setShow] = useState<readonly ShowChoice[]>([])
 
   // Read after the first render, which the server rendered without them.
   useEffect(() => {
     const kept = readChoice(orderKey)
     const known = songOrders.find(o => o.value === kept)
     if (known) setOrder(known.value)
-    setOnlyFavorites(readChoice(onlyFavoritesKey) === 'true')
-    setOnlyReady(readChoice(onlyReadyKey) === 'true')
-    // A kind this browser kept that isn't a chip now reads as none.
-    setKind(kindChoices.find(k => k === readChoice(kindKey)) ?? null)
+    setShow(showChoices.filter(choice => readChoice(showKeys[choice]) === 'true'))
+    // A kind this browser kept that isn't in the menu now reads as none.
+    const keptKinds = readChoice(kindsKey)?.split(',') ?? []
+    setKinds(kindChoices.filter(kind => keptKinds.includes(kind)))
   }, [])
 
   return {
@@ -73,20 +78,15 @@ export function useComposeChoices(): ComposeChoices {
       setOrder(next)
       keepChoice(orderKey, next)
     },
-    onlyFavorites,
-    chooseOnlyFavorites: only => {
-      setOnlyFavorites(only)
-      keepChoice(onlyFavoritesKey, String(only))
+    kinds,
+    chooseKinds: next => {
+      setKinds(next)
+      keepChoice(kindsKey, next.join(','))
     },
-    onlyReady,
-    chooseOnlyReady: only => {
-      setOnlyReady(only)
-      keepChoice(onlyReadyKey, String(only))
-    },
-    kind,
-    chooseKind: next => {
-      setKind(next)
-      keepChoice(kindKey, next ?? '')
+    show,
+    chooseShow: next => {
+      setShow(next)
+      for (const choice of showChoices) keepChoice(showKeys[choice], String(next.includes(choice)))
     }
   }
 }
