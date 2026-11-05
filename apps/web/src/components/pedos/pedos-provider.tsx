@@ -25,6 +25,7 @@ import { catalogPath } from '@/lib/catalog/catalog-path.generated'
 import { loadSongs } from '@/lib/catalog/load-songs'
 import type { Song, SongSummary } from '@/lib/catalog/song'
 import type { FartChoices } from '@/lib/engine/fart-choices'
+import { loadFartChoices } from '@/lib/fart-choice-store'
 import { loadFavorites } from '@/lib/favorite-store'
 import { isHandlePage } from '@/lib/handle'
 import { onLibraryChanged, recordingsAfter } from '@/lib/library-sync'
@@ -71,6 +72,7 @@ import { openVisit } from '@/lib/visit'
 import { decodeWav, encodeWav, type PcmAudio } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
 import { welcomedKey } from '@/lib/welcomed'
+import { useFartChoices } from './use-fart-choices'
 
 /** A just-recorded take that hasn't been saved or discarded yet. */
 export type Draft = { audio: PcmAudio; seconds: number; waveform: number[] }
@@ -203,7 +205,10 @@ type Pedos = {
   collectedNotes: Set<number>
   /** The pitch classes (0 = C … 11 = B) of every Melodic Recording, for the `PitchStrip`. */
   collectedPitchClasses: Set<number>
-  /** Every Song with its Pitch Coverage, in catalog order: counted, not arranged (#323). */
+  /**
+   * Every Song with its Pitch Coverage, in catalog order: counted, not arranged (#323), except
+   * the few with Fart Choices, which only arranging gets right (#372).
+   */
   songRows: SongRow[]
   /**
    * A Song's Pitch Coverage with the notes it still needs, from Auto-map's Arrangement: worked out
@@ -473,12 +478,14 @@ export function PedosProvider({ children }: { children: ReactNode }) {
    * Result doesn't move a row and Try it opens the first (#363).
    */
   const resultOf = useCallback(async (analyzed: Recording, trimFailed = false): Promise<Flow> => {
-    const [catalog, favorites] = await Promise.all([
+    const [catalog, favorites, allChoices] = await Promise.all([
       loadSongs().catch(() => []),
-      loadFavorites().catch(() => [])
+      loadFavorites().catch(() => []),
+      // A Song a leave-out locks unlocks only as Compose and Song Creator read it (#372).
+      loadFartChoices().catch(() => undefined)
     ])
     const others = (latest.current ?? []).filter(r => r.id !== analyzed.id)
-    const changes = coverageChanges(catalog, others, [...others, analyzed])
+    const changes = coverageChanges(catalog, others, [...others, analyzed], allChoices)
     return {
       kind: 'result',
       id: analyzed.id,
@@ -1068,9 +1075,15 @@ export function PedosProvider({ children }: { children: ReactNode }) {
   // The catalog is matched again only when the Melodic Recordings change, as the iPhone app's
   // `CoverageCache`: `key` holds everything Pitch Coverage reads from `recordings`.
   const key = coverageKey(recordings ?? [])
+  // A Song's Fart Choices count too, so Compose and Song Creator agree on its lock (#372). Compose
+  // waits for them; anywhere else, every Song is automatic until they're read.
+  const allChoices = useFartChoices() ?? undefined
   // biome-ignore lint/correctness/useExhaustiveDependencies: `key` stands for `recordings`.
-  const rows = useMemo(() => songRows(songs ?? [], recordings ?? []), [key, songs])
-  // Each Song's Arrangement, once asked for, while the Recordings stay as they are.
+  const rows = useMemo(
+    () => songRows(songs ?? [], recordings ?? [], allChoices),
+    [key, songs, allChoices]
+  )
+  // Each Song's Arrangement, once asked for, while the Recordings and Fart Choices stay as they are.
   // biome-ignore lint/correctness/useExhaustiveDependencies: `key` stands for `recordings`.
   const coverage = useMemo(() => {
     const arranged = new Map<SongSummary, Coverage>()
@@ -1078,12 +1091,12 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     return (song: SongSummary) => {
       let found = arranged.get(song)
       if (!found) {
-        found = coverageOf(song, current)
+        found = coverageOf(song, current, allChoices?.get(song.id) ?? null)
         arranged.set(song, found)
       }
       return found
     }
-  }, [key])
+  }, [key, allChoices])
 
   const profileStats: ProfileStats | null =
     recordings === null || toots === null || songs === null

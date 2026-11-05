@@ -284,12 +284,43 @@ test('swaps a note’s fart, plays it, saves it, and the saved Toot plays that f
     await expect(state).toHaveText('Locked')
     await expect(play).toBeDisabled()
 
+    // Compose agrees: Mary is locked there too, and its sheet needs the same fart (#372).
+    const needs = await lock.getByText(/^Needs a fart near /).textContent()
+    await page.getByRole('link', { name: 'Back to Compose' }).click()
+    const search = page.getByRole('searchbox', { name: 'Search Songs or composers' })
+    await search.fill('Mary Had a Little Lamb')
+    const lockedMary = page.getByTestId('locked-songs').locator('[data-song="mary"]')
+    await expect(lockedMary).toBeVisible({ timeout: 60_000 })
+    await expect(page.getByTestId('unlocked-songs').locator('[data-song="mary"]')).toHaveCount(0)
+    await lockedMary.getByRole('button', { name: 'Mary Had a Little Lamb', exact: true }).click()
+    const lockedSheet = page.getByRole('dialog', { name: 'Mary Had a Little Lamb' })
+    await expect(lockedSheet.getByTestId('locked-song-needs')).toHaveText(needs ?? '')
+    const changeFarts = lockedSheet.getByRole('link', { name: 'Change farts' })
+    await expectTappable(changeFarts)
+    if (out) {
+      await lockedSheet.evaluate(el =>
+        Promise.allSettled(el.getAnimations().map(a => a.finished)).then(() => null)
+      )
+      await page.screenshot({ path: join(out, 'gap-compose-sheet.png') })
+    }
+    // The sheet leads back to the left-out fart, or it could never be brought back.
+    await changeFarts.click()
+    await expect(page).toHaveURL(/\/compose\/mary\/$/)
+    await expect(lock).toBeVisible({ timeout: 60_000 })
+
     await reset.click()
     await expect(changed).toHaveText("Every note is back to Farty's pick.")
     await expect(state).toHaveText('Ready', { timeout: 60_000 })
     await expect(lock).toHaveCount(0)
     await expect(page.locator('[data-gap]')).toHaveCount(0)
     await expect(page.getByRole('button', { name: /^Save to Toots/ })).toBeVisible()
+
+    // And Compose has it back among the unlocked Songs.
+    await page.getByRole('link', { name: 'Back to Compose' }).click()
+    await search.fill('Mary Had a Little Lamb')
+    await expect(page.getByTestId('unlocked-songs').locator('[data-song="mary"]')).toBeVisible()
+    await expect(page.getByTestId('locked-songs').locator('[data-song="mary"]')).toHaveCount(0)
+    if (out) await page.screenshot({ path: join(out, 'gap-compose-unlocked.png') })
   })
 })
 

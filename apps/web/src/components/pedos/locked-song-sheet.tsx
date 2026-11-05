@@ -1,10 +1,12 @@
 'use client'
 
 import { Lock, Play, Square, XIcon } from 'lucide-react'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { startAudioInTap } from '@/lib/audio/context'
 import type { SongSummary } from '@/lib/catalog/song'
 import { pitchClass } from '@/lib/pitch'
 import {
@@ -13,11 +15,13 @@ import {
   coverageSummary,
   missingNotes
 } from '@/lib/pitch-coverage'
+import { cn } from '@/lib/utils'
 import { FavoriteButton } from './favorite-button'
 import { usePedos } from './pedos-provider'
 import { pianoSchedule } from './piano-preview'
 import { PitchStrip } from './pitch-strip'
 import { ReportSongButton } from './report-song-sheet'
+import { useFartChoices } from './use-fart-choices'
 import { type PianoPlaying, usePianoPreview } from './use-piano-preview'
 import { useSongNotes } from './use-song-notes'
 
@@ -48,6 +52,8 @@ export function LockedSongSheet({
   if (song !== null && song !== shown) setShown(song)
   // Read live, so a Recording analyzed while the sheet is open shows at once.
   const coverage = shown ? pedos.coverage(shown) : undefined
+  // A Song the user's Fart Choices lock is unlocked from Song Creator, where they're changed (#372).
+  const changed = useFartChoices()?.has(shown?.id ?? '') ?? false
   const { song: melody } = useSongNotes(shown ?? undefined)
   const piano = usePianoPreview()
   const stopPiano = piano.stop
@@ -73,6 +79,7 @@ export function LockedSongSheet({
         {coverage && (
           <Body
             coverage={coverage}
+            changeFarts={changed && shown ? `/compose/${shown.id}/` : null}
             onRecord={onRecord}
             onReport={onReport}
             pianoPlaying={piano.playing}
@@ -103,12 +110,15 @@ export function LockedSongSheet({
 
 function Body({
   coverage,
+  changeFarts,
   onRecord,
   onReport,
   pianoPlaying,
   onPiano
 }: {
   coverage: Coverage
+  /** Song Creator's address, when the user changed this Song's farts: they may be why it's locked. */
+  changeFarts: string | null
   onRecord: () => void
   onReport: () => void
   pianoPlaying: PianoPlaying | null
@@ -152,6 +162,18 @@ function Body({
             </>
           )}
         </Button>
+        {changeFarts && (
+          <Link
+            href={changeFarts}
+            onClick={startAudioInTap}
+            className={cn(
+              buttonVariants({ variant: 'outline', size: 'lg' }),
+              'h-12 w-full text-base'
+            )}
+          >
+            Change farts
+          </Link>
+        )}
         <Button size="lg" className="h-12 w-full text-base" onClick={onRecord}>
           Record
         </Button>
@@ -164,17 +186,15 @@ function Body({
 /** "Needs a fart near D3 (0.5 s) and F3 (1.2 s).", or how to start without Melodic Recordings. */
 function needs(coverage: Coverage): string {
   const missing = missingNotes(coverage)
-  if (!coverage.hasMelodicRecordings || missing === null) {
-    return 'Record a fart with a clear note to start.'
-  }
+  if (missing === null) return 'Record a fart with a clear note to start.'
   return `Needs a fart near ${missing}.`
 }
 
 /**
  * The key "Play on piano" plays a locked Song in: the one Auto-map would play it in with your
- * farts, or as written while you have none, since every key then ties and Auto-map takes the
- * lowest it tries, three octaves down.
+ * farts or its Fart Choices hold, or as written while you have neither, since every key then ties
+ * and Auto-map takes the lowest it tries, three octaves down.
  */
 function pianoKey(coverage: Coverage): number {
-  return coverage.hasMelodicRecordings ? coverage.transposition : 0
+  return coverage.hasMelodicRecordings || coverage.missing.length > 0 ? coverage.transposition : 0
 }

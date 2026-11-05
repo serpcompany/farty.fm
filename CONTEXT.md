@@ -65,7 +65,7 @@ How many of a Song's distinct pitches are covered, shown as "3 of 4 notes covere
 _Avoid_: Progress, completion
 
 **Unlocked Song**:
-A Song whose Pitch Coverage is complete: every distinct pitch has its own Melodic Recording, near enough in pitch and long enough for its longest note.
+A Song whose Pitch Coverage is complete: every distinct pitch has its own Melodic Recording, near enough in pitch and long enough for its longest note. A fart left out of the Song by its Fart Choices doesn't count (#372).
 _Avoid_: Available song, playable song
 
 **Favorite Song**:
