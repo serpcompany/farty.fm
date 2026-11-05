@@ -186,17 +186,15 @@ function Body({
 /** "Needs a fart near D3 (0.5 s) and F3 (1.2 s).", or how to start without Melodic Recordings. */
 function needs(coverage: Coverage): string {
   const missing = missingNotes(coverage)
-  if (!coverage.hasMelodicRecordings || missing === null) {
-    return 'Record a fart with a clear note to start.'
-  }
+  if (missing === null) return 'Record a fart with a clear note to start.'
   return `Needs a fart near ${missing}.`
 }
 
 /**
  * The key "Play on piano" plays a locked Song in: the one Auto-map would play it in with your
- * farts, or as written while you have none, since every key then ties and Auto-map takes the
- * lowest it tries, three octaves down.
+ * farts or its Fart Choices hold, or as written while you have neither, since every key then ties
+ * and Auto-map takes the lowest it tries, three octaves down.
  */
 function pianoKey(coverage: Coverage): number {
-  return coverage.hasMelodicRecordings ? coverage.transposition : 0
+  return coverage.hasMelodicRecordings || coverage.missing.length > 0 ? coverage.transposition : 0
 }

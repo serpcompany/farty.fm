@@ -16,6 +16,7 @@ import { songs } from './catalog/songs.generated'
 import type { FartChoices } from './engine/fart-choices'
 import { fixtureRecordingId } from './fixture-library'
 import {
+  arrangementOf,
   collectedPitchClasses,
   coverageChanges,
   coverageFraction,
@@ -259,6 +260,17 @@ describe('Pitch Coverage with Fart Choices (#372)', () => {
     expect(inCompose(maryLeftOut)).toEqual({ unlocked: false, locked: true })
     const coverage = coverageOf(song('mary'), all, maryLeftOut.get('mary'))
     expect(missingNotes(coverage)).toBe('E3 (1.5 s)')
+  })
+
+  it('names the notes Song Creator names, with no Melodic Recordings left', () => {
+    const mary = song('mary')
+    const choices = { transposition: -5, preferred: {}, excluded: [] }
+    const coverage = coverageOf(mary, [], choices)
+    expect(coverage.hasMelodicRecordings).toBe(false)
+    expect(coverage.transposition).toBe(-5)
+    expect(coverage.missing).toHaveLength(coverage.total)
+    expect(coverage.missing).toEqual(arrangementOf(mary, [], choices).missingNotes)
+    expect(coverageOf(mary, []).missing).toEqual([])
   })
 
   it('changes no other Song', () => {

@@ -46,7 +46,7 @@ export type CoverageCount = {
  * needs. As the iPhone app's `CoverageResult`.
  */
 export type Coverage = CoverageCount & {
-  /** The transposition, in semitones, Auto-map chose. */
+  /** The transposition, in semitones, Auto-map chose, or the one the Song's Fart Choices hold. */
   transposition: number
   /**
    * The transposed pitches still needed, lowest first: each as a MIDI note number, with the
@@ -144,8 +144,9 @@ export function coverageOf(
     covered: result.covered,
     total: result.total,
     transposition: result.transposition,
-    // Without a Melodic Recording, no transposition is better than another.
-    missing: melodic.length === 0 ? [] : result.missingNotes,
+    // Without a Melodic Recording, no transposition is better than another, unless Fart Choices
+    // hold one, and Song Creator then names these notes.
+    missing: melodic.length === 0 && choices === null ? [] : result.missingNotes,
     recordingForPitch,
     hasMelodicRecordings: melodic.length > 0,
     unlocked: result.unlocked

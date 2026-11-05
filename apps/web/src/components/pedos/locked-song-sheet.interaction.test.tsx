@@ -103,6 +103,17 @@ describe('a locked Song the user changed (#372)', () => {
     expect(changeFarts()?.getAttribute('href')).toBe(`/compose/${mary.id}/`)
   })
 
+  it('names what Song Creator names, in its key, with no Melodic Recordings left', async () => {
+    const choices = { transposition: -5, preferred: {}, excluded: ['a'] }
+    page.fartChoices = new Map([[mary.id, choices]])
+    page.coverage = coverageOf(mary, [], choices)
+    await show()
+    expect(document.querySelector('[data-testid="locked-song-needs"]')?.textContent).toMatch(
+      /^Needs a fart near /
+    )
+    expect(await openAndPlay(page.coverage)).toEqual(mary.notes.map(note => note.pitch - 5))
+  })
+
   it('offers nothing new for a Song with no Fart Choices', async () => {
     page.fartChoices = new Map([['twinkle', { transposition: 0, preferred: {}, excluded: ['a'] }]])
     await show()
