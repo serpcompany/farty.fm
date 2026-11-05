@@ -2,6 +2,7 @@ import { and, desc, eq, isNotNull, isNull, ne, sql } from 'drizzle-orm'
 
 import type { Database } from './database'
 import { tootPayments } from './schema'
+import { countStep } from './step-counts'
 
 // A user's Toot payments in D1 (ADR 0010). As in `library.ts`, every query takes the user's id and
 // filters on it.
@@ -99,7 +100,8 @@ export async function paidUnsavedToot(
 
 /**
  * Marks the Toot paid by `checkoutSessionId`, once. Only a Toot whose payment was started here
- * (`startTootPayment`) can be: a user deleted since has no row. True when it is paid now.
+ * (`startTootPayment`) can be: a user deleted since has no row. True when it is paid now. Counts
+ * the funnel's `paid` step the once it becomes paid (#405).
  */
 export async function markTootPaid(
   db: Database,
@@ -107,9 +109,11 @@ export async function markTootPaid(
   tootId: string,
   checkoutSessionId: string
 ): Promise<boolean> {
-  await db
+  const marked = await db
     .update(tootPayments)
     .set({ checkoutSessionId, paidAt: sql`${d1Now}` })
     .where(and(whereToot(userId, tootId), isNull(tootPayments.paidAt)))
+    .returning({ tootId: tootPayments.tootId })
+  if (marked.length > 0) await countStep(db, 'paid')
   return isTootPaid(db, userId, tootId)
 }

@@ -2,8 +2,11 @@
 
 import { Lock, Mic, Music } from 'lucide-react'
 import Image from 'next/image'
+import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { askForMicrophone } from '@/lib/audio/recorder'
+import { wide } from '@/lib/desktop'
+import { reachStep } from '@/lib/telemetry/steps'
 import { usePedos } from './pedos-provider'
 
 /**
@@ -14,11 +17,17 @@ import { usePedos } from './pedos-provider'
 export function Welcome() {
   const pedos = usePedos()
 
+  // Welcome shows only on a phone: wider, this stays mounted behind the lander.
+  useEffect(() => {
+    if (!window.matchMedia(wide).matches) reachStep('open')
+  }, [])
+
   async function allowMicrophone() {
     try {
       // Ask now, so the first Record tap records instead of prompting. Over Record, the
       // microphone stays open, so that first tap captures at once.
       await askForMicrophone()
+      reachStep('mic-allowed')
     } catch {
       // Saying no is an answer, not an error: Record explains it if they tap it later.
     }

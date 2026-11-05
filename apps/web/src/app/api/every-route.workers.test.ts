@@ -7,7 +7,8 @@ import { ORIGIN } from '@/test-support/library-api'
 // tests are in `telemetry/route.test.ts`), Stripe's webhook (`api/stripe/webhook/`, checked by
 // Stripe's signature instead; its tests are in `payments.workers.test.ts`) and a Song's Report
 // (`api/songs/[id]/report/`, which guests send too, #358; its tests are in
-// `song-reports.workers.test.ts`): each method a route exports must answer 401 to a request with
+// `song-reports.workers.test.ts`) and the funnel's steps (`api/steps/`, which new visitors send
+// too, #405; its tests are in `steps/steps.workers.test.ts`): each method a route exports must answer 401 to a request with
 // no session, before reading its body or params. A new route that skips `requireUser()`
 // (`userRoute`) fails here.
 
@@ -16,7 +17,8 @@ const routeModules = import.meta.glob([
   '!./auth/**',
   '!./telemetry/route.ts',
   '!./stripe/webhook/route.ts',
-  '!./songs/*/report/route.ts'
+  '!./songs/*/report/route.ts',
+  '!./steps/route.ts'
 ]) as Record<string, () => Promise<Record<string, unknown>>>
 const METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
 const ID = '00000000-0000-4000-8000-000000000001'

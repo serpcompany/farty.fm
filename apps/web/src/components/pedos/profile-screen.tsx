@@ -203,9 +203,9 @@ const row =
   'flex min-h-11 w-full items-center justify-between gap-4 px-4 py-2.5 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset disabled:opacity-50'
 
 /**
- * Share anonymous error reports (#126): on by default, kept in this browser, and off means no
- * report is sent (`src/lib/telemetry/`). Global Privacy Control turns it off, so the switch
- * shows off and can't be turned on.
+ * Share anonymous usage and error reports (#126, #405): on by default, kept in this browser, and
+ * off means no report or step is sent (`src/lib/telemetry/`). Global Privacy Control turns it off,
+ * so the switch shows off and can't be turned on.
  */
 function SharingSection() {
   const sharing = useSharing()
@@ -215,7 +215,7 @@ function SharingSection() {
         <li>
           {/* The whole row toggles the switch, so it's a full-size target. */}
           <label htmlFor="share-telemetry" className={row}>
-            Share anonymous error reports
+            Share anonymous usage and error reports
             <Switch
               id="share-telemetry"
               checked={sharing === 'on' || sharing === null}

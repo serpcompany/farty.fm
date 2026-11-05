@@ -6,7 +6,7 @@ export default function PrivacyPage() {
   return (
     <article className="flex flex-col gap-3 px-4 pt-4 pb-6 text-sm leading-relaxed [&_a]:underline [&_h2]:pt-3 [&_h2]:text-lg [&_h2]:font-semibold [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5">
       <h1 className="text-3xl font-bold tracking-tight">Privacy</h1>
-      <p className="text-muted-foreground">Last updated: November 4, 2026</p>
+      <p className="text-muted-foreground">Last updated: November 6, 2026</p>
       <p>
         Farty records your farts, finds the note of each one, and plays songs with them. This policy
         explains what happens to your data. The short version:{' '}
@@ -111,9 +111,25 @@ export default function PrivacyPage() {
         reports in Farty&apos;s logs for up to 7 days.
       </p>
       <p>
-        To stop error reports, turn off Share anonymous error reports on Profile. It&apos;s kept in
-        this browser, so turn it off in each browser you use. Farty also sends none when your
-        browser sends Global Privacy Control.
+        To stop error reports, turn off Share anonymous usage and error reports on Profile.
+        It&apos;s kept in this browser, so turn it off in each browser you use. Farty also sends
+        none when your browser sends Global Privacy Control.
+      </p>
+
+      <h2>Usage counts</h2>
+      <p>
+        To see where new visitors stop, Farty counts how many browsers reach a few steps for the
+        first time: opening Farty, allowing the microphone, saving a first Recording, signing in,
+        playing a Song and tapping Save. Your browser keeps a note of which steps it has counted, so
+        it counts each one once, and sends only the step&apos;s name, without cookies. Farty adds
+        one to that step&apos;s count for the day. The count holds nothing else: no account, IP
+        address or ID that could tell one person from another. It keeps those totals with no end
+        date. Like every request, the send itself is in Cloudflare&apos;s request log, below.
+      </p>
+      <p>
+        The same switch and Global Privacy Control stop these counts from your browser. Farty&apos;s
+        server also adds one to a daily total when a payment starts and when one is finished, with
+        nothing about who paid.
       </p>
 
       <h2>Page views</h2>
@@ -122,7 +138,7 @@ export default function PrivacyPage() {
         came from, your browser and device type, your country and how fast the page loaded. It uses
         no cookies and doesn&apos;t include your account, name or email. Cloudflare keeps the full
         records for 7 days and a sampled summary for 6 months. The switch and Global Privacy Control
-        don&apos;t stop it: they stop error reports.
+        don&apos;t stop it: they stop error reports and usage counts.
       </p>
 
       <h2>What Farty doesn&apos;t do</h2>
@@ -131,10 +147,11 @@ export default function PrivacyPage() {
         <li>It doesn&apos;t sell your data.</li>
       </ul>
       <p>
-        Farty runs on Cloudflare. Like any website, it logs every request, error reports included:
-        Cloudflare&apos;s request log keeps your IP address, browser and rough location, with the
-        time and the page, for up to 7 days. Farty reads it only to run the site and fix problems,
-        and briefly uses your IP address to limit how many error reports one device can send.
+        Farty runs on Cloudflare. Like any website, it logs every request, error reports and usage
+        counts included: Cloudflare&apos;s request log keeps your IP address, browser and rough
+        location, with the time and the page, for up to 7 days. Farty reads it only to run the site
+        and fix problems, and briefly uses your IP address to limit how many error reports and usage
+        counts one device can send.
       </p>
 
       <h2>Deleting your data</h2>
