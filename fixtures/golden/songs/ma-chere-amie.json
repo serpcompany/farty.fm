@@ -23,13 +23,13 @@
   "id": "ma-chere-amie",
   "import_args": {
     "bpm": 96,
-    "max_beats": 32
+    "max_beats": 31
   },
   "import_report": {
     "catalog_id": "ma-chere-amie",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 60,
+    "note_count": 56,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-ma-chere-amie.mid",
     "tempo_changes_ignored": 0,
@@ -38,7 +38,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 31.0,
   "notes": [
     {
       "dur": 1.0,
@@ -319,26 +319,6 @@
       "dur": 1.0,
       "pitch": 78,
       "start": 30.0
-    },
-    {
-      "dur": 0.10416666666666667,
-      "pitch": 76,
-      "start": 31.0
-    },
-    {
-      "dur": 0.10416666666666667,
-      "pitch": 79,
-      "start": 31.104166666666668
-    },
-    {
-      "dur": 0.10416666666666667,
-      "pitch": 78,
-      "start": 31.208333333333332
-    },
-    {
-      "dur": 0.6875,
-      "pitch": 76,
-      "start": 31.3125
     }
   ],
   "pitches": [

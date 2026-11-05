@@ -3,8 +3,7 @@
     0.0,
     6.0,
     12.0,
-    18.0,
-    24.0
+    18.0
   ],
   "beats_per_bar": 6,
   "bpm": 120,
@@ -13,14 +12,14 @@
   "import_args": {
     "beats_per_bar": 6,
     "bpm": 120,
-    "max_beats": 30,
+    "max_beats": 24,
     "start_beat": 6
   },
   "import_report": {
     "catalog_id": "merry-conclusion",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 35,
+    "note_count": 28,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-merry-conclusion.mid",
     "tempo_changes_ignored": 0,
@@ -29,7 +28,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 1.0,
@@ -170,41 +169,6 @@
       "dur": 1.0,
       "pitch": 69,
       "start": 23.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 69,
-      "start": 24.0
-    },
-    {
-      "dur": 2.0,
-      "pitch": 76,
-      "start": 25.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 69,
-      "start": 27.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 76,
-      "start": 28.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 72,
-      "start": 28.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 29.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 69,
-      "start": 29.5
     }
   ],
   "pitches": [

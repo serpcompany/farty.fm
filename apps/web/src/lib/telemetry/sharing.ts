@@ -2,9 +2,9 @@ import { useSyncExternalStore } from 'react'
 import { clearQueue } from './queue'
 
 /**
- * Whether this browser shares error reports (#126): Profile's "Share anonymous error reports", on
- * by default and kept on the device. Off, no error report is sent. Global Privacy Control turns it
- * off too, whatever the switch says. (The key predates the switch's new label; it stays, so people
+ * Whether this browser shares error reports (#126) and the funnel's steps (#405): Profile's "Share
+ * anonymous usage and error reports", on by default and kept on the device. Off, neither is sent.
+ * Global Privacy Control turns it off too, whatever the switch says. (The key predates the switch's new label; it stays, so people
  * who turned it off stay off.)
  *
  * - `on`: sending.

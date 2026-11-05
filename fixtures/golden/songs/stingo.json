@@ -9,7 +9,9 @@
     18.0,
     21.0,
     24.0,
-    27.0
+    27.0,
+    30.0,
+    33.0
   ],
   "beats_per_bar": 3,
   "bpm": 72,
@@ -18,13 +20,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 72,
-    "max_beats": 30
+    "max_beats": 36
   },
   "import_report": {
     "catalog_id": "stingo",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 39,
+    "note_count": 46,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-stingo.mid",
     "tempo_changes_ignored": 0,
@@ -33,7 +35,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 36.0,
   "notes": [
     {
       "dur": 1.0,
@@ -229,6 +231,41 @@
       "dur": 0.5,
       "pitch": 75,
       "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 30.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 72,
+      "start": 30.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 70,
+      "start": 31.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 31.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 32.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 33.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 70,
+      "start": 34.5
     }
   ],
   "pitches": [

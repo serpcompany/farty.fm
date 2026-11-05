@@ -7,7 +7,14 @@
     16.0,
     20.0,
     24.0,
-    28.0
+    28.0,
+    32.0,
+    36.0,
+    40.0,
+    44.0,
+    48.0,
+    52.0,
+    56.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,13 +22,13 @@
   "id": "sakura",
   "import_args": {
     "bpm": 120,
-    "max_beats": 32
+    "max_beats": 59.708333
   },
   "import_report": {
     "catalog_id": "sakura",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 30,
+    "note_count": 52,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-sakura.mid",
     "tempo_changes_ignored": 0,
@@ -30,7 +37,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 59.708333333333336,
   "notes": [
     {
       "dur": 1.0,
@@ -181,11 +188,122 @@
       "dur": 2.0,
       "pitch": 65,
       "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 32.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 33.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 35.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 36.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 37.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 37.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 59,
+      "start": 38.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 40.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 41.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 42.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 44.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 45.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 46.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 48.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 49.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 50.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 51.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 52.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 52.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 53.0
+    },
+    {
+      "dur": 5.708333333333333,
+      "pitch": 64,
+      "start": 54.0
     }
   ],
   "pitches": [
     59,
     60,
+    62,
     64,
     65,
     69,

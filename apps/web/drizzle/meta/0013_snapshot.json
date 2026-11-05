@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "1810ac16-c47e-4cc7-be58-9645e65ab5c7",
+  "id": "7e8981ea-7580-4ce2-a6ec-6d8f2b39c18d",
   "prevId": "ffb67f18-007d-4df6-970d-63b3b55eee16",
   "tables": {
     "account": {
@@ -1082,6 +1082,45 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "step_counts": {
+      "name": "step_counts",
+      "columns": {
+        "day": {
+          "name": "day",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "step": {
+          "name": "step",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "count": {
+          "name": "count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "step_counts_day_step_pk": {
+          "columns": [
+            "day",
+            "step"
+          ],
+          "name": "step_counts_day_step_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "toot_payments": {
       "name": "toot_payments",
       "columns": {
@@ -1231,13 +1270,6 @@
         },
         "performance": {
           "name": "performance",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "score": {
-          "name": "score",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

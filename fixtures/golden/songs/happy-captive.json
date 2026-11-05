@@ -1,7 +1,8 @@
 {
   "bar_lines": [
     0.5,
-    12.5
+    12.5,
+    24.5
   ],
   "beats_per_bar": 12,
   "bpm": 120,
@@ -10,13 +11,13 @@
   "import_args": {
     "beats_per_bar": 12,
     "bpm": 120,
-    "max_beats": 24.5
+    "max_beats": 36
   },
   "import_report": {
     "catalog_id": "happy-captive",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 35,
+    "note_count": 53,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-happy-captive.mid",
     "tempo_changes_ignored": 0,
@@ -25,7 +26,7 @@
       0
     ]
   },
-  "length_beats": 24.5,
+  "length_beats": 36.0,
   "notes": [
     {
       "dur": 0.5,
@@ -201,6 +202,96 @@
       "dur": 0.5,
       "pitch": 69,
       "start": 24.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 24.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 73,
+      "start": 25.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 25.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 76,
+      "start": 26.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 78,
+      "start": 26.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 27.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 27.5
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 28.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 28.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 30.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 31.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 69,
+      "start": 32.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 67,
+      "start": 32.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 33.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 33.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 35.0
     }
   ],
   "pitches": [
@@ -213,7 +304,8 @@
     73,
     74,
     76,
-    78
+    78,
+    79
   ],
   "sha256": "b3272893fe3785172705d21ae4937d6852275933dac0eb22aab1c2948fc8e457",
   "title": "The Happy Captive"

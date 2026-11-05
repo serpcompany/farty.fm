@@ -6,7 +6,8 @@
     13.5,
     18.0,
     22.5,
-    27.0
+    27.0,
+    31.5
   ],
   "beats_per_bar": 9,
   "bpm": 120,
@@ -14,13 +15,13 @@
   "id": "rocky-road-to-dublin",
   "import_args": {
     "bpm": 120,
-    "max_beats": 31.5
+    "max_beats": 34
   },
   "import_report": {
     "catalog_id": "rocky-road-to-dublin",
     "chord_tones_dropped": 1,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 41,
+    "note_count": 44,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-rocky-road-to-dublin.mid",
     "tempo_changes_ignored": 1,
@@ -29,7 +30,7 @@
       0
     ]
   },
-  "length_beats": 31.5,
+  "length_beats": 34.0,
   "notes": [
     {
       "dur": 1.0,
@@ -235,6 +236,21 @@
       "dur": 0.5,
       "pitch": 65,
       "start": 31.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 31.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 60,
+      "start": 32.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 33.0
     }
   ],
   "pitches": [

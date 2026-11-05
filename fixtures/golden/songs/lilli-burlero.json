@@ -7,9 +7,7 @@
     12.0,
     15.0,
     18.0,
-    21.0,
-    24.0,
-    27.0
+    21.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 24
   },
   "import_report": {
     "catalog_id": "lilli-burlero",
     "chord_tones_dropped": 2,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 44,
+    "note_count": 36,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-lilli-burlero.mid",
     "tempo_changes_ignored": 1,
@@ -33,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 0.75,
@@ -214,46 +212,6 @@
       "dur": 1.5,
       "pitch": 60,
       "start": 22.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 72,
-      "start": 24.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 25.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 72,
-      "start": 25.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 26.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 70,
-      "start": 27.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 70,
-      "start": 28.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 69,
-      "start": 28.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 29.5
     }
   ],
   "pitches": [
@@ -262,11 +220,7 @@
     62,
     64,
     65,
-    67,
-    69,
-    70,
-    71,
-    72
+    67
   ],
   "sha256": "4a80b253c324c5eec877432a0d522e6aeeca3fcf0c9754ef05c8fe4e57a78df4",
   "title": "Lilli Burlero"

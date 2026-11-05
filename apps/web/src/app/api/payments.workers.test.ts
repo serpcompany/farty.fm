@@ -6,6 +6,7 @@ import * as webhookRoute from '@/app/api/stripe/webhook/route'
 import * as checkoutRoute from '@/app/api/toots/[id]/checkout/route'
 import * as paymentRoute from '@/app/api/toots/[id]/payment/route'
 import { startTootPayment, tootPayment } from '@/db/payments'
+import { stepCounts } from '@/db/schema'
 import { TOOT_PRICE } from '@/lib/pricing'
 import type { CheckoutSession, Payments } from '@/server/stripe'
 import {
@@ -55,6 +56,12 @@ beforeEach(() => {
 afterEach(() => {
   vi.restoreAllMocks()
 })
+
+/** The funnel's count of `step` (#405), over every day. */
+async function counted(step: string): Promise<number> {
+  const rows = await testDb().select().from(stepCounts)
+  return rows.filter(row => row.step === step).reduce((sum, row) => sum + row.count, 0)
+}
 
 type As = { cookie?: string; library?: string; host?: string }
 
@@ -135,6 +142,8 @@ describe('on a local run, with the dev checkout', () => {
     expect(await started.json()).toEqual({
       url: `${ORIGIN}/dev/checkout/?toot=${T1}&song=twinkle`
     })
+    expect(await counted('checkout-started')).toBe(1)
+    expect(await counted('paid')).toBe(0)
     expect(await paid(T1, a)).toBe(false)
     expect((await save(T1, a)).status).toBe(402)
 
@@ -144,8 +153,10 @@ describe('on a local run, with the dev checkout', () => {
       `${ORIGIN}/compose/twinkle/?toot=${T1}&checkout=done`
     )
     expect(await paid(T1, a)).toBe(true)
+    expect(await counted('paid')).toBe(1)
     expect((await save(T1, a)).status).toBe(201)
     expect(await (await checkout(T1, a)).json()).toEqual({ paid: true })
+    expect(await counted('checkout-started')).toBe(1)
   })
 
   it('pays for one Toot at a time', async () => {
@@ -480,6 +491,7 @@ describe('with Stripe Checkout in test mode', () => {
     expect(await (await checkout(T1, a)).json()).toEqual({
       url: 'https://checkout.stripe.com/c/pay/cs_test_first'
     })
+    expect(await counted('checkout-started')).toBe(1)
     const [url, init] = stripe.mock.calls[0]
     expect(url).toBe('https://api.stripe.com/v1/checkout/sessions')
     // Two requests that cross, or a retry, get this session from Stripe, not a second one.
@@ -751,6 +763,7 @@ describe('with Stripe Checkout in test mode', () => {
     // Stripe sends an event again until it's answered: a second delivery changes nothing.
     expect((await deliver(event)).status).toBe(200)
     expect(stripe).not.toHaveBeenCalled()
+    expect(await counted('paid')).toBe(1)
   })
 
   it('takes a slower payment method’s success too', async () => {

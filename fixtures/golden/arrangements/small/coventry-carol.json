@@ -4,63 +4,74 @@
   "metrics": null,
   "missing": [
     {
+      "seconds": 1.5,
+      "target_midi": 39
+    },
+    {
       "seconds": 2.0,
-      "target_midi": 38
+      "target_midi": 40
     }
   ],
   "notes": null,
-  "octave_moves": 3,
+  "octave_moves": 2,
   "per_pitch": [
     {
-      "octave_move": true,
-      "recording": "002",
-      "shift_semitones": -9.42592059366018,
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
       "song_pitch": 68,
-      "target_midi": 37
+      "target_midi": 39
     },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
       "song_pitch": 69,
-      "target_midi": 38
+      "target_midi": 40
     },
     {
       "octave_move": false,
       "recording": "022",
-      "shift_semitones": -0.3259205936601859,
+      "shift_semitones": 1.6740794063398141,
       "song_pitch": 71,
-      "target_midi": 40
+      "target_midi": 42
     },
     {
       "octave_move": true,
       "recording": "090",
-      "shift_semitones": -14.225920593660177,
+      "shift_semitones": -12.225920593660177,
       "song_pitch": 72,
-      "target_midi": 41
+      "target_midi": 43
     },
     {
       "octave_move": false,
-      "recording": "069",
-      "shift_semitones": -1.425920593660173,
-      "song_pitch": 74,
-      "target_midi": 43
+      "recording": "002",
+      "shift_semitones": -2.42592059366018,
+      "song_pitch": 73,
+      "target_midi": 44
     },
     {
       "octave_move": true,
       "recording": "009",
       "shift_semitones": 14.474079406339825,
-      "song_pitch": 76,
+      "song_pitch": 74,
       "target_midi": 45
+    },
+    {
+      "octave_move": false,
+      "recording": "069",
+      "shift_semitones": 2.574079406339827,
+      "song_pitch": 76,
+      "target_midi": 47
     }
   ],
   "pitch_coverage": {
     "covered": 5,
-    "total": 6
+    "total": 7
   },
-  "plan_cost": 131.73606883265865,
+  "plan_cost": 172.7251391400225,
   "render_settings": null,
   "song": "coventry-carol",
-  "transpose": -31,
+  "transpose": -29,
   "unlocked": false
 }

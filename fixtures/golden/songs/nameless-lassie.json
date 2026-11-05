@@ -10,7 +10,12 @@
     22.0,
     25.0,
     29.0,
-    32.0
+    32.0,
+    35.0,
+    38.0,
+    41.0,
+    44.0,
+    47.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -19,13 +24,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 34
+    "max_beats": 49
   },
   "import_report": {
     "catalog_id": "nameless-lassie",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 21,
+    "note_count": 30,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-nameless-lassie.mid",
     "tempo_changes_ignored": 0,
@@ -34,7 +39,7 @@
       0
     ]
   },
-  "length_beats": 34.0,
+  "length_beats": 49.0,
   "notes": [
     {
       "dur": 1.0,
@@ -140,6 +145,51 @@
       "dur": 2.0,
       "pitch": 64,
       "start": 32.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 34.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 35.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 37.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 37.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 38.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 40.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 41.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 43.0
+    },
+    {
+      "dur": 5.0,
+      "pitch": 67,
+      "start": 44.0
     }
   ],
   "pitches": [
@@ -149,7 +199,8 @@
     67,
     69,
     71,
-    72
+    72,
+    74
   ],
   "sha256": "551c4bd6745eccc6d9c2749b2d6a4e731fae816fb93ffa9637bccbfa3a88ab33",
   "title": "The Nameless Lassie"

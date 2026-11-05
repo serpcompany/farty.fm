@@ -23,13 +23,13 @@
   "id": "buckeye-battle-cry",
   "import_args": {
     "bpm": 144,
-    "max_beats": 32
+    "max_beats": 31
   },
   "import_report": {
     "catalog_id": "buckeye-battle-cry",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 29,
+    "note_count": 28,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-buckeye-battle-cry.mid",
     "tempo_changes_ignored": 0,
@@ -38,7 +38,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 31.0,
   "notes": [
     {
       "dur": 1.0,
@@ -179,11 +179,6 @@
       "dur": 3.0,
       "pitch": 34,
       "start": 28.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 34,
-      "start": 31.0
     }
   ],
   "pitches": [

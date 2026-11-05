@@ -7,7 +7,15 @@
     17.0,
     21.0,
     25.0,
-    29.0
+    29.0,
+    33.0,
+    37.0,
+    41.0,
+    45.0,
+    49.0,
+    53.0,
+    57.0,
+    61.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,14 +23,14 @@
   "id": "o-sacred-head-now-wounded",
   "import_args": {
     "bpm": 120,
-    "max_beats": 32,
+    "max_beats": 64,
     "start_beat": 3
   },
   "import_report": {
     "catalog_id": "o-sacred-head-now-wounded",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 26,
+    "note_count": 52,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-o-sacred-head-now-wounded.mid",
     "tempo_changes_ignored": 2,
@@ -32,7 +40,7 @@
       1
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 64.0,
   "notes": [
     {
       "dur": 1.0,
@@ -163,6 +171,136 @@
       "dur": 3.0,
       "pitch": 69,
       "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 32.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 33.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 35.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 36.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 72,
+      "start": 37.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 39.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 40.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 41.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 42.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 43.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 44.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 64,
+      "start": 45.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 48.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 49.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 50.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 51.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 52.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 53.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 55.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 56.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 57.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 58.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 59.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 60.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 64,
+      "start": 61.0
     }
   ],
   "pitches": [
@@ -172,7 +310,8 @@
     67,
     69,
     71,
-    72
+    72,
+    74
   ],
   "sha256": "3fc4686a76e90cf25f1d06b7e32223424aa97142e65eb520a1aca6ebf3718b92",
   "title": "O Sacred Head Now Wounded"

@@ -11,7 +11,12 @@
     22.5,
     23.0,
     26.0,
-    28.5
+    28.5,
+    31.5,
+    34.0,
+    37.0,
+    40.0,
+    43.0
   ],
   "beats_per_bar": 3,
   "bpm": 100,
@@ -20,13 +25,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 100,
-    "max_beats": 31.5
+    "max_beats": 45
   },
   "import_report": {
     "catalog_id": "aux-marches-du-palais",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 42,
+    "note_count": 60,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-aux-marches-du-palais.mid",
     "tempo_changes_ignored": 1,
@@ -35,7 +40,7 @@
       0
     ]
   },
-  "length_beats": 31.5,
+  "length_beats": 45.0,
   "notes": [
     {
       "dur": 0.5,
@@ -246,6 +251,96 @@
       "dur": 0.5,
       "pitch": 69,
       "start": 31.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 31.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 33.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 33.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 34.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 35.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 35.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 36.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 37.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 37.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 38.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 38.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 39.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 40.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 41.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 41.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 42.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 43.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 44.5
     }
   ],
   "pitches": [

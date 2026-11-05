@@ -42,7 +42,7 @@ function environment(): Environment {
  * browser still sends Origin on a POST, which the route checks. Elsewhere, the Staging gate's
  * password, which `fetch` counts as a credential too, or the gate refuses the report (401).
  */
-function credentials(): RequestCredentials {
+export function telemetryCredentials(): RequestCredentials {
   return environment() === 'production' ? 'omit' : 'same-origin'
 }
 
@@ -111,7 +111,7 @@ async function send({ report, at }: Queued): Promise<'sent' | 'refused' | 'faile
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
-      credentials: credentials(),
+      credentials: telemetryCredentials(),
       keepalive: true
     })
     if (response.ok) return 'sent'

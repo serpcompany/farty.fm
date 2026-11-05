@@ -9,7 +9,13 @@
     18.0,
     21.0,
     23.5,
-    26.5
+    26.5,
+    29.5,
+    32.5,
+    35.5,
+    38.5,
+    41.5,
+    44.5
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +24,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 29.5
+    "max_beats": 47
   },
   "import_report": {
     "catalog_id": "oh-dear-what-can-the-matter-be",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 40,
+    "note_count": 64,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-oh-dear-what-can-the-matter-be.mid",
     "tempo_changes_ignored": 3,
@@ -33,7 +39,7 @@
       0
     ]
   },
-  "length_beats": 29.5,
+  "length_beats": 47.0,
   "notes": [
     {
       "dur": 1.5,
@@ -234,6 +240,126 @@
       "dur": 0.5,
       "pitch": 67,
       "start": 29.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 29.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 32.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 33.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 33.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 34.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 34.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 35.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 35.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 37.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 38.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 39.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 39.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 40.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 40.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 41.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 41.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 42.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 42.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 43.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 43.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 44.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 44.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 46.0
     }
   ],
   "pitches": [

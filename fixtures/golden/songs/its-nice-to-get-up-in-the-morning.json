@@ -7,9 +7,7 @@
     11.5,
     14.5,
     17.5,
-    20.5,
-    23.5,
-    26.5
+    20.5
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 29.5
+    "max_beats": 23
   },
   "import_report": {
     "catalog_id": "its-nice-to-get-up-in-the-morning",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 45,
+    "note_count": 35,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-its-nice-to-get-up-in-the-morning.mid",
     "tempo_changes_ignored": 0,
@@ -33,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 29.5,
+  "length_beats": 23.0,
   "notes": [
     {
       "dur": 0.75,
@@ -209,56 +207,6 @@
       "dur": 1.0,
       "pitch": 69,
       "start": 22.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 23.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 72,
-      "start": 23.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 24.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 76,
-      "start": 25.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 26.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 74,
-      "start": 26.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 27.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 28.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 69,
-      "start": 28.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 29.0
     }
   ],
   "pitches": [

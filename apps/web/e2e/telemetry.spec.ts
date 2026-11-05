@@ -10,7 +10,7 @@ import { expect, type Page, type Request, test } from '@playwright/test'
 
 const production = process.env.E2E_SITE_ENV === 'production'
 const SECRET = 'test@example.com'
-const SWITCH = 'Share anonymous error reports'
+const SWITCH = 'Share anonymous usage and error reports'
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('pedos.welcomed', '1'))

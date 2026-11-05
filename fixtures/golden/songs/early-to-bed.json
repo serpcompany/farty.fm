@@ -10,7 +10,8 @@
     21.0,
     24.0,
     27.0,
-    30.0
+    30.0,
+    33.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +19,13 @@
   "id": "early-to-bed",
   "import_args": {
     "bpm": 120,
-    "max_beats": 33
+    "max_beats": 36
   },
   "import_report": {
     "catalog_id": "early-to-bed",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 24,
+    "note_count": 25,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-early-to-bed.mid",
     "tempo_changes_ignored": 0,
@@ -33,7 +34,7 @@
       0
     ]
   },
-  "length_beats": 33.0,
+  "length_beats": 36.0,
   "notes": [
     {
       "dur": 1.5,
@@ -154,6 +155,11 @@
       "dur": 3.0,
       "pitch": 60,
       "start": 30.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 65,
+      "start": 33.0
     }
   ],
   "pitches": [

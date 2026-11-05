@@ -40,6 +40,7 @@ import * as store from '@/lib/recording-store'
 import { playedPart, type Recording, recordingName, songPitch } from '@/lib/recordings'
 import { holdReload } from '@/lib/stale-build'
 import { reportError } from '@/lib/telemetry/errors'
+import { reachStep } from '@/lib/telemetry/steps'
 import {
   noteCaption,
   type SongToot,
@@ -144,7 +145,10 @@ export function SongCreator({ id, heading }: { id: string; heading?: SongHeading
   })
   const playOnce = useEffectEvent((draft: TootDraft) => {
     // A page opened from a link or a reload can't start sound before a tap.
-    if (navigator.userActivation?.hasBeenActive ?? true) pedos.toggleTootPlayback(draft)
+    if (navigator.userActivation?.hasBeenActive ?? true) {
+      reachStep('song-heard')
+      pedos.toggleTootPlayback(draft)
+    }
   })
   /** The first Toot made here has played once; one made again after a change waits for a tap. */
   const playedOnce = useRef(false)
@@ -513,6 +517,7 @@ export function SaveToToots({
   const keepAfterSignIn = useEffectEvent(keep)
 
   const tapSave = () => {
+    reachStep('save-tapped')
     if (accountId) keep(accountId)
     else if (account.status === 'signedOut' || account.status === 'expired') {
       setSavesAfterSignIn(true)
@@ -728,7 +733,10 @@ export function TootLayout(
     } else if (next === 'farts' && isPianoPlaying) {
       const from = piano.position() ?? 0
       piano.stop()
-      if (canPlay) pedos.toggleTootPlayback(toot, undefined, undefined, from)
+      if (canPlay) {
+        reachStep('song-heard')
+        pedos.toggleTootPlayback(toot, undefined, undefined, from)
+      }
     }
   }
   const selectedNote = melody && focus && 'note' in focus ? focus.note : null
@@ -777,7 +785,10 @@ export function TootLayout(
             onClick={() => {
               setFocus(null)
               if (!onPiano) {
-                if (toot !== null) pedos.toggleTootPlayback(toot)
+                if (toot !== null) {
+                  reachStep('song-heard')
+                  pedos.toggleTootPlayback(toot)
+                }
               } else if (isPianoPlaying) piano.stop()
               else if (pianoNotes) piano.play('song', pianoNotes)
             }}

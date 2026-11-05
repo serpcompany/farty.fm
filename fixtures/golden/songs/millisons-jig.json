@@ -3,9 +3,7 @@
     1.0,
     7.0,
     13.0,
-    19.0,
-    25.0,
-    31.0
+    19.0
   ],
   "beats_per_bar": 6,
   "bpm": 120,
@@ -14,13 +12,13 @@
   "import_args": {
     "beats_per_bar": 6,
     "bpm": 120,
-    "max_beats": 33
+    "max_beats": 24
   },
   "import_report": {
     "catalog_id": "millisons-jig",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 24,
+    "note_count": 17,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-millisons-jig.mid",
     "tempo_changes_ignored": 1,
@@ -29,7 +27,7 @@
       0
     ]
   },
-  "length_beats": 33.0,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 1.0,
@@ -115,41 +113,6 @@
       "dur": 2.0,
       "pitch": 74,
       "start": 22.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 81,
-      "start": 24.0
-    },
-    {
-      "dur": 1.5,
-      "pitch": 81,
-      "start": 25.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 79,
-      "start": 26.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 78,
-      "start": 27.0
-    },
-    {
-      "dur": 2.0,
-      "pitch": 76,
-      "start": 28.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 74,
-      "start": 30.0
-    },
-    {
-      "dur": 2.0,
-      "pitch": 72,
-      "start": 31.0
     }
   ],
   "pitches": [

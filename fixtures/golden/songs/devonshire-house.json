@@ -3,8 +3,7 @@
     1.0,
     7.0,
     13.0,
-    19.0,
-    25.0
+    19.0
   ],
   "beats_per_bar": 6,
   "bpm": 120,
@@ -13,13 +12,13 @@
   "import_args": {
     "beats_per_bar": 6,
     "bpm": 120,
-    "max_beats": 31
+    "max_beats": 24
   },
   "import_report": {
     "catalog_id": "devonshire-house",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 28,
+    "note_count": 21,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-devonshire-house.mid",
     "tempo_changes_ignored": 1,
@@ -28,7 +27,7 @@
       0
     ]
   },
-  "length_beats": 31.0,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 0.5,
@@ -134,41 +133,6 @@
       "dur": 2.0,
       "pitch": 77,
       "start": 22.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 24.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 72,
-      "start": 24.5
-    },
-    {
-      "dur": 2.0,
-      "pitch": 70,
-      "start": 25.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 77,
-      "start": 27.0
-    },
-    {
-      "dur": 1.5,
-      "pitch": 74,
-      "start": 28.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 72,
-      "start": 29.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 70,
-      "start": 30.0
     }
   ],
   "pitches": [

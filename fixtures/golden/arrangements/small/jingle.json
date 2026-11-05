@@ -4,17 +4,17 @@
   "metrics": null,
   "missing": [
     {
-      "seconds": 2.0,
-      "target_midi": 44
+      "seconds": 1.9,
+      "target_midi": 40
     }
   ],
   "notes": null,
   "octave_moves": 1,
   "per_pitch": [
     {
-      "octave_move": true,
-      "recording": "009",
-      "shift_semitones": 9.474079406339825,
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
       "song_pitch": 60,
       "target_midi": 40
     },
@@ -26,16 +26,16 @@
       "target_midi": 42
     },
     {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
+      "octave_move": false,
+      "recording": "002",
+      "shift_semitones": -2.42592059366018,
       "song_pitch": 64,
       "target_midi": 44
     },
     {
-      "octave_move": false,
-      "recording": "002",
-      "shift_semitones": -1.4259205936601802,
+      "octave_move": true,
+      "recording": "009",
+      "shift_semitones": 14.474079406339825,
       "song_pitch": 65,
       "target_midi": 45
     },
@@ -51,7 +51,7 @@
     "covered": 4,
     "total": 5
   },
-  "plan_cost": 85.91665421755822,
+  "plan_cost": 620.4920304024621,
   "render_settings": null,
   "song": "jingle",
   "transpose": -20,

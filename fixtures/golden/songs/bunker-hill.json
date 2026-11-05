@@ -8,7 +8,14 @@
     20.0,
     24.0,
     28.0,
-    32.0
+    32.0,
+    36.0,
+    40.0,
+    44.0,
+    48.0,
+    52.0,
+    56.0,
+    60.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -16,13 +23,13 @@
   "id": "bunker-hill",
   "import_args": {
     "bpm": 120,
-    "max_beats": 34
+    "max_beats": 64
   },
   "import_report": {
     "catalog_id": "bunker-hill",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 23,
+    "note_count": 44,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-bunker-hill.mid",
     "tempo_changes_ignored": 0,
@@ -31,7 +38,7 @@
       0
     ]
   },
-  "length_beats": 34.0,
+  "length_beats": 64.0,
   "notes": [
     {
       "dur": 2.0,
@@ -147,6 +154,111 @@
       "dur": 2.0,
       "pitch": 72,
       "start": 32.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 35.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 36.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 38.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 40.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 42.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 43.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 44.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 46.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 48.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 49.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 50.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 51.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 52.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 77,
+      "start": 54.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 56.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 57.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 58.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 59.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 60.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 62.0
     }
   ],
   "pitches": [
@@ -156,7 +268,8 @@
     71,
     72,
     74,
-    76
+    76,
+    77
   ],
   "sha256": "ed4686356605e5365f9a2019edbe576d1d1a2f96aca301267608328e24e46a19",
   "title": "Bunker Hill"

@@ -6,7 +6,8 @@
     13.5,
     17.5,
     21.5,
-    25.5
+    25.5,
+    29.5
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -14,14 +15,14 @@
   "id": "el-choclo",
   "import_args": {
     "bpm": 120,
-    "max_beats": 29.5,
+    "max_beats": 32,
     "start_beat": 2.5
   },
   "import_report": {
     "catalog_id": "el-choclo",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 50,
+    "note_count": 52,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-el-choclo.mid",
     "tempo_changes_ignored": 1,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 29.5,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 0.5,
@@ -281,6 +282,16 @@
       "dur": 0.5,
       "pitch": 70,
       "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 29.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 30.5
     }
   ],
   "pitches": [

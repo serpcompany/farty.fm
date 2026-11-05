@@ -4,7 +4,10 @@
     6.0,
     12.0,
     18.0,
-    24.0
+    24.0,
+    30.0,
+    36.0,
+    42.0
   ],
   "beats_per_bar": 6,
   "bpm": 120,
@@ -12,13 +15,13 @@
   "id": "behold-the-great-creator-makes",
   "import_args": {
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 46
   },
   "import_report": {
     "catalog_id": "behold-the-great-creator-makes",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 23,
+    "note_count": 33,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-behold-the-great-creator-makes.mid",
     "tempo_changes_ignored": 0,
@@ -27,7 +30,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 46.0,
   "notes": [
     {
       "dur": 1.0,
@@ -143,10 +146,61 @@
       "dur": 2.0,
       "pitch": 70,
       "start": 28.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 30.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 68,
+      "start": 31.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 33.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 36.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 37.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 39.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 40.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 41.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 63,
+      "start": 43.0
     }
   ],
   "pitches": [
     63,
+    65,
     67,
     68,
     70,

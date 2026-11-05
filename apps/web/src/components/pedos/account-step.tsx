@@ -17,6 +17,7 @@ import {
 import { leaveGetFarty, offerFriend, signedInAtAccountStep, useGetFarty } from '@/lib/get-farty'
 import { isHandlePage } from '@/lib/handle'
 import { unsavedBeforeSignIn } from '@/lib/library-sync'
+import { reachStep } from '@/lib/telemetry/steps'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { Turnstile } from './turnstile'
@@ -185,6 +186,7 @@ function Step({ underTopBar }: { underTopBar: boolean }) {
     if (result.ok) {
       // Signed in here: Get Farty's friend request, if it's ticked.
       signedInAtAccountStep()
+      reachStep('account')
       finishSignIn(result.value)
       return
     }

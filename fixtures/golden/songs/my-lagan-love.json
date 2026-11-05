@@ -7,9 +7,7 @@
     13.5,
     16.5,
     19.5,
-    22.5,
-    25.0,
-    28.0
+    22.5
   ],
   "beats_per_bar": 3,
   "bpm": 72,
@@ -17,13 +15,13 @@
   "id": "my-lagan-love",
   "import_args": {
     "bpm": 72,
-    "max_beats": 31
+    "max_beats": 24
   },
   "import_report": {
     "catalog_id": "my-lagan-love",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 57,
+    "note_count": 44,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-my-lagan-love.mid",
     "tempo_changes_ignored": 0,
@@ -32,7 +30,7 @@
       0
     ]
   },
-  "length_beats": 31.0,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 0.5,
@@ -253,71 +251,6 @@
       "dur": 1.5,
       "pitch": 67,
       "start": 22.5
-    },
-    {
-      "dur": 0.25,
-      "pitch": 67,
-      "start": 24.0
-    },
-    {
-      "dur": 0.25,
-      "pitch": 69,
-      "start": 24.25
-    },
-    {
-      "dur": 0.25,
-      "pitch": 71,
-      "start": 24.5
-    },
-    {
-      "dur": 0.25,
-      "pitch": 72,
-      "start": 24.75
-    },
-    {
-      "dur": 1.5,
-      "pitch": 76,
-      "start": 25.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 26.5
-    },
-    {
-      "dur": 0.3333333333333333,
-      "pitch": 74,
-      "start": 27.0
-    },
-    {
-      "dur": 0.3333333333333333,
-      "pitch": 72,
-      "start": 27.333333333333332
-    },
-    {
-      "dur": 0.3333333333333333,
-      "pitch": 71,
-      "start": 27.666666666666668
-    },
-    {
-      "dur": 2.0,
-      "pitch": 72,
-      "start": 28.0
-    },
-    {
-      "dur": 0.3333333333333333,
-      "pitch": 76,
-      "start": 30.0
-    },
-    {
-      "dur": 0.3333333333333333,
-      "pitch": 74,
-      "start": 30.333333333333332
-    },
-    {
-      "dur": 0.3333333333333333,
-      "pitch": 77,
-      "start": 30.666666666666668
     }
   ],
   "pitches": [

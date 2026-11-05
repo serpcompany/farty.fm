@@ -7,9 +7,7 @@
     12.0,
     15.0,
     18.0,
-    21.0,
-    24.0,
-    27.0
+    21.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -17,13 +15,13 @@
   "id": "let-me-call-you-sweetheart",
   "import_args": {
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 24
   },
   "import_report": {
     "catalog_id": "let-me-call-you-sweetheart",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 15,
+    "note_count": 11,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-let-me-call-you-sweetheart.mid",
     "tempo_changes_ignored": 0,
@@ -32,7 +30,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 2.0,
@@ -88,26 +86,6 @@
       "dur": 6.0,
       "pitch": 71,
       "start": 18.0
-    },
-    {
-      "dur": 2.0,
-      "pitch": 73,
-      "start": 24.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 72,
-      "start": 26.0
-    },
-    {
-      "dur": 2.0,
-      "pitch": 73,
-      "start": 27.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 74,
-      "start": 29.0
     }
   ],
   "pitches": [
@@ -115,8 +93,6 @@
     68,
     69,
     71,
-    72,
-    73,
     74,
     76,
     78

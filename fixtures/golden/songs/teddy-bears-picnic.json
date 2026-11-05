@@ -9,7 +9,13 @@
     19.5,
     22.5,
     25.5,
-    28.5
+    28.5,
+    31.5,
+    34.5,
+    37.5,
+    40.5,
+    43.5,
+    46.5
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -17,13 +23,13 @@
   "id": "teddy-bears-picnic",
   "import_args": {
     "bpm": 120,
-    "max_beats": 31.5
+    "max_beats": 48
   },
   "import_report": {
     "catalog_id": "teddy-bears-picnic",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 42,
+    "note_count": 62,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-teddy-bears-picnic.mid",
     "tempo_changes_ignored": 1,
@@ -32,7 +38,7 @@
       0
     ]
   },
-  "length_beats": 31.5,
+  "length_beats": 48.0,
   "notes": [
     {
       "dur": 1.5,
@@ -243,6 +249,106 @@
       "dur": 0.5,
       "pitch": 74,
       "start": 31.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 31.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 32.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 33.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 34.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 34.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 35.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 35.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 36.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 37.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 37.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 38.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 39.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 40.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 40.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 41.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 41.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 42.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 43.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 74,
+      "start": 43.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 46.5
     }
   ],
   "pitches": [

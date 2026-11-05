@@ -7,9 +7,7 @@
     12.0,
     15.0,
     18.0,
-    21.0,
-    24.0,
-    27.0
+    21.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -17,13 +15,13 @@
   "id": "a-la-nanita-nana",
   "import_args": {
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 24
   },
   "import_report": {
     "catalog_id": "a-la-nanita-nana",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 47,
+    "note_count": 37,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-a-la-nanita-nana.mid",
     "tempo_changes_ignored": 1,
@@ -32,7 +30,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 1.0,
@@ -218,56 +216,6 @@
       "dur": 2.0,
       "pitch": 62,
       "start": 22.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 62,
-      "start": 24.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 62,
-      "start": 25.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 64,
-      "start": 25.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 65,
-      "start": 26.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 26.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 69,
-      "start": 27.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 69,
-      "start": 28.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 69,
-      "start": 28.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 70,
-      "start": 29.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 67,
-      "start": 29.5
     }
   ],
   "pitches": [

@@ -4,92 +4,92 @@
   "metrics": null,
   "missing": [
     {
-      "seconds": 0.5,
+      "seconds": 1.3,
       "target_midi": 48
     },
     {
-      "seconds": 0.5,
+      "seconds": 1.5,
       "target_midi": 50
     },
     {
-      "seconds": 0.3,
-      "target_midi": 53
+      "seconds": 0.5,
+      "target_midi": 52
     }
   ],
   "notes": null,
-  "octave_moves": 1,
+  "octave_moves": 2,
   "per_pitch": [
-    {
-      "octave_move": false,
-      "recording": "022",
-      "shift_semitones": -2.325920593660186,
-      "song_pitch": 64,
-      "target_midi": 38
-    },
-    {
-      "octave_move": false,
-      "recording": "016",
-      "shift_semitones": 0.6740794063398141,
-      "song_pitch": 67,
-      "target_midi": 41
-    },
     {
       "octave_move": true,
       "recording": "009",
-      "shift_semitones": 12.474079406339825,
-      "song_pitch": 69,
+      "shift_semitones": 9.474079406339825,
+      "song_pitch": 64,
+      "target_midi": 40
+    },
+    {
+      "octave_move": false,
+      "recording": "022",
+      "shift_semitones": 2.674079406339814,
+      "song_pitch": 67,
       "target_midi": 43
     },
     {
       "octave_move": false,
-      "recording": "069",
-      "shift_semitones": 0.5740794063398269,
-      "song_pitch": 71,
+      "recording": "002",
+      "shift_semitones": -1.4259205936601802,
+      "song_pitch": 69,
       "target_midi": 45
     },
     {
       "octave_move": false,
-      "recording": "002",
-      "shift_semitones": -0.4259205936601802,
+      "recording": "069",
+      "shift_semitones": 2.574079406339827,
+      "song_pitch": 71,
+      "target_midi": 47
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
       "song_pitch": 72,
-      "target_midi": 46
+      "target_midi": 48
     },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
       "song_pitch": 74,
-      "target_midi": 48
-    },
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
-      "song_pitch": 76,
       "target_midi": 50
     },
     {
       "octave_move": null,
       "recording": null,
       "shift_semitones": null,
+      "song_pitch": 76,
+      "target_midi": 52
+    },
+    {
+      "octave_move": true,
+      "recording": "016",
+      "shift_semitones": 14.674079406339814,
       "song_pitch": 79,
-      "target_midi": 53
+      "target_midi": 55
     },
     {
       "octave_move": false,
       "recording": "090",
-      "shift_semitones": -0.22592059366017736,
+      "shift_semitones": 1.7740794063398226,
       "song_pitch": 81,
-      "target_midi": 55
+      "target_midi": 57
     }
   ],
   "pitch_coverage": {
     "covered": 6,
     "total": 9
   },
-  "plan_cost": 444.7132046256564,
+  "plan_cost": 475.6764616174759,
   "render_settings": null,
   "song": "teddy-bears-picnic",
-  "transpose": -26,
+  "transpose": -24,
   "unlocked": false
 }
