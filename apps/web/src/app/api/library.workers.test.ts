@@ -1034,6 +1034,96 @@ describe('the rows a route keeps', () => {
   })
 })
 
+describe("a Song's Toot keeps the score it was rendered from (#254)", () => {
+  const score = {
+    bpm: 90,
+    bar_lines: [0, 4],
+    length_beats: 8,
+    notes: [
+      { start: 0, dur: 1.5, pitch: 60 },
+      { start: 1.5, dur: 6.5, pitch: 64 }
+    ]
+  }
+  const put = (metadata: unknown, cookie: string) =>
+    api.put('toots', T1, uploadBody(metadata, wav()), { cookie })
+  const tootOf = async (id: string) =>
+    (await testDb().select().from(toots).where(eq(toots.userId, id)))[0]
+
+  it('and gives it back, as the browser sent it', async () => {
+    const a = await signUp('A')
+    expect((await put(tootMetadata(T1, { score }), a.cookie)).status).toBe(201)
+    const row = await tootOf(a.id)
+    expect(row.score).toEqual(score)
+    expect((await library(a.cookie)).toots).toEqual([
+      { ...tootMetadata(T1, { score }), audioBytes: row.audioBytes }
+    ])
+  })
+
+  it('and keeps it through a rename', async () => {
+    const a = await signUp('A')
+    expect((await put(tootMetadata(T1, { score }), a.cookie)).status).toBe(201)
+    const renamed = await api.rename(T1, 'Mine', { cookie: a.cookie })
+    expect(renamed.status).toBe(200)
+    expect((await library(a.cookie)).toots[0]).toMatchObject({ title: 'Mine', score })
+  })
+
+  it('and one saved before has none, from a browser on an older release too', async () => {
+    const a = await signUp('A')
+    expect((await put(tootMetadata(T1), a.cookie)).status).toBe(201)
+    expect((await tootOf(a.id)).score).toBeNull()
+    expect((await library(a.cookie)).toots[0]).not.toHaveProperty('score')
+  })
+
+  it('keeps only its own fields, and of each note', async () => {
+    const a = await signUp('A')
+    const more = {
+      ...score,
+      more: 'x'.repeat(1000),
+      notes: [{ ...score.notes[0], more: 'x' }]
+    }
+    expect((await put(tootMetadata(T1, { score: more }), a.cookie)).status).toBe(201)
+    expect((await tootOf(a.id)).score).toEqual({ ...score, notes: [score.notes[0]] })
+  })
+
+  it('keeps 500 notes and 500 bar lines, far more than the longest Song’s', async () => {
+    const a = await signUp('A')
+    const many = {
+      ...score,
+      bar_lines: Array.from({ length: 500 }, (_, i) => i),
+      notes: Array.from({ length: 500 }, (_, i) => ({ start: i, dur: 1, pitch: 60 }))
+    }
+    expect((await put(tootMetadata(T1, { score: many }), a.cookie)).status).toBe(201)
+  })
+
+  it('refuses a score this app can’t draw, or that would store too much (400)', async () => {
+    const a = await signUp('A')
+    const note = score.notes[0]
+    const refused = [
+      'a score',
+      [],
+      { ...score, bpm: 0 },
+      { ...score, bpm: '90' },
+      { ...score, length_beats: -1 },
+      { ...score, bar_lines: 'none' },
+      { ...score, bar_lines: [-1] },
+      { ...score, bar_lines: Array.from({ length: 501 }, (_, i) => i) },
+      { ...score, notes: [] },
+      { ...score, notes: 'none' },
+      { ...score, notes: ['a note'] },
+      { ...score, notes: [{ ...note, start: -1 }] },
+      { ...score, notes: [{ ...note, dur: '1' }] },
+      { ...score, notes: [{ ...note, pitch: 60.5 }] },
+      { ...score, notes: [{ ...note, pitch: 128 }] },
+      { ...score, notes: Array.from({ length: 501 }, () => note) }
+    ]
+    for (const bad of refused) {
+      const answer = await put(tootMetadata(T1, { score: bad }), a.cookie)
+      expect(answer.status, JSON.stringify(bad).slice(0, 80)).toBe(400)
+    }
+    expect(await rowsOf('toots')).toEqual([])
+  })
+})
+
 describe('Sound Pad Toots (ADR 0017)', () => {
   const pad = padTootMetadata(T1)
   const { performance } = pad

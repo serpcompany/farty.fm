@@ -7,7 +7,7 @@ import {
   type RecordingTrim,
   type Trim
 } from '@/lib/recordings'
-import type { TootArrangement } from '@/lib/toot'
+import { parseTootScore, type TootArrangement } from '@/lib/toot'
 
 import { apiError } from './require-user'
 
@@ -315,8 +315,9 @@ function parseArrangement(value: unknown): TootArrangement | null {
 
 /**
  * The Toot as the browser keeps it (`Toot` in `src/lib/toot.ts`), or null: of a Song, with its
- * Arrangement, or from the Sound Pad, with `songId: null`, no Arrangement and its Performance
- * (ADR 0017). A browser on a release before #278 sends no `performance`.
+ * Arrangement and the score it was rendered from, or from the Sound Pad, with `songId: null`, no
+ * Arrangement and its Performance (ADR 0017). A browser on a release before #278 sends no
+ * `performance`, and one before #254 no `score`.
  */
 export function parseToot(value: unknown, id: string): TootFields | null {
   if (!isObject(value) || value.id !== id) return null
@@ -330,13 +331,16 @@ export function parseToot(value: unknown, id: string): TootFields | null {
     if (!valid) return null
     // Only its own fields: a Performance's are checked, anything else beside them isn't kept.
     const kept = { recordings: performance.recordings, taps: performance.taps }
-    return { ...toot, songId, arrangement: null, performance: kept }
+    return { ...toot, songId, arrangement: null, performance: kept, score: null }
   }
   const arrangement = parseArrangement(value.arrangement)
+  const hasScore = value.score !== null && value.score !== undefined
+  const score = hasScore ? parseTootScore(value.score) : null
   const valid =
     typeof songId === 'string' &&
     /^[A-Za-z0-9_.-]{1,100}$/.test(songId) &&
     arrangement !== null &&
+    (!hasScore || score !== null) &&
     (value.performance === null || value.performance === undefined)
-  return valid ? { ...toot, songId, arrangement, performance: null } : null
+  return valid ? { ...toot, songId, arrangement, performance: null, score } : null
 }

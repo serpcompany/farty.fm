@@ -89,7 +89,7 @@ The Arrangement the app chooses on its own, giving each distinct pitch its own M
 _Avoid_: Smart choose, AI pick, best fit
 
 **Toot**:
-A saved result, of one of two kinds: a Song played with the user's Recordings, made in Song Creator, which keeps which Recording played each pitch; or a Sound Pad Performance, which keeps which Pad's Recording was tapped and when (ADR 0017). It is not a conventional song or a music release.
+A saved result, of one of two kinds: a Song played with the user's Recordings, made in Song Creator, which keeps which Recording played each pitch and the Song's notes as it was rendered from them, so it still draws what its audio plays after the Song Catalog changes (#254); or a Sound Pad Performance, which keeps which Pad's Recording was tapped and when (ADR 0017). It is not a conventional song or a music release.
 _Avoid_: Created Melody, Melody, Created Song, generated song, track, output
 
 ## Creation areas

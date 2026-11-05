@@ -142,7 +142,12 @@ function toToot(row: TootRow): LibraryToot {
       performance: row.performance as Performance
     }
   }
-  return { ...saved, songId: row.songId, arrangement: row.arrangement as TootArrangement }
+  return {
+    ...saved,
+    songId: row.songId,
+    arrangement: row.arrangement as TootArrangement,
+    ...(row.score ? { score: row.score } : {})
+  }
 }
 
 const notFound = () => apiError(404, 'not_found')

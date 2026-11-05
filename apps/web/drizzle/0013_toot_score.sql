@@ -1,0 +1,1 @@
+ALTER TABLE `toots` ADD `score` text;

@@ -2,7 +2,7 @@ import { and, count, eq, gte, isNotNull, isNull, lt, sql } from 'drizzle-orm'
 import type { FartChoices } from '../lib/engine/fart-choices'
 import type { Performance } from '../lib/performance'
 import type { Analysis, RecordingTrim } from '../lib/recordings'
-import type { TootArrangement } from '../lib/toot'
+import type { TootArrangement, TootScore } from '../lib/toot'
 import type { Database } from './database'
 import { fartChoices, favoriteSongs, recordings, toots, user, verification } from './schema'
 
@@ -56,8 +56,8 @@ export type TootFields = {
   createdAt: number
   seconds: number
 } & (
-  | { songId: string; arrangement: TootArrangement; performance: null }
-  | { songId: null; arrangement: null; performance: Performance }
+  | { songId: string; arrangement: TootArrangement; performance: null; score: TootScore | null }
+  | { songId: null; arrangement: null; performance: Performance; score: null }
 )
 
 const json = (value: object | null) => (value === null ? null : JSON.stringify(value))
@@ -141,9 +141,9 @@ function tootInsert(db: Database, userId: string, t: NewToot, limit: number, pai
     : sql``
   return db.all(sql`
     insert into toots (user_id, id, title, song_id, created_at, seconds, arrangement,
-      performance, audio_bytes, updated_at)
+      performance, score, audio_bytes, updated_at)
     select ${userId}, ${t.id}, ${t.title}, ${t.songId}, ${t.createdAt}, ${t.seconds},
-      ${json(t.arrangement)}, ${json(t.performance)}, ${t.audioBytes}, ${d1Now}
+      ${json(t.arrangement)}, ${json(t.performance)}, ${json(t.score)}, ${t.audioBytes}, ${d1Now}
     where (select count(*) from toots where user_id = ${userId} and deleted_at is null)
       < ${limit} ${payment}
     on conflict do nothing

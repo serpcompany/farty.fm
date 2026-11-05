@@ -28,6 +28,27 @@ const saved: SongToot = {
   arrangement: { transposition: 0, recordingForPitch: {} }
 }
 
+/**
+ * A saved Toot of the first Song that keeps the score it was rendered from, which isn't the
+ * catalog's any more (#254).
+ */
+const asMade: SongToot = {
+  ...saved,
+  score: {
+    bpm: 90,
+    bar_lines: [0, 4],
+    length_beats: 8,
+    notes: [
+      { start: 0, dur: 1, pitch: 60 },
+      { start: 1, dur: 1, pitch: 64 },
+      { start: 2, dur: 6, pitch: 60 }
+    ]
+  }
+}
+
+/** The Toot on the screen. */
+let shown = saved
+
 const page = vi.hoisted(() => ({
   loadSong: vi.fn<(song: unknown) => Promise<unknown>>(),
   makeToot: vi.fn<(song: Song) => Promise<never>>(),
@@ -47,8 +68,8 @@ vi.mock('./pedos-provider', () => ({
     recordings: [],
     recording: () => undefined,
     makeToot: page.makeToot,
-    toots: [saved],
-    toot: (id: string) => (id === saved.id ? saved : undefined),
+    toots: [shown],
+    toot: (id: string) => (id === shown.id ? shown : undefined),
     tootsFailed: false,
     nowPlaying: null,
     playbackStartedAt: null,
@@ -94,6 +115,7 @@ afterEach(() => {
   act(() => root?.unmount())
   root = null
   document.body.replaceChildren()
+  shown = saved
   vi.clearAllMocks()
 })
 
@@ -158,5 +180,29 @@ describe("a saved Toot's screen", () => {
     expect(page.loadSong).toHaveBeenCalledTimes(2)
     expect(container.querySelector('[data-testid="toot-notes-failed"]')).toBeNull()
     expect(play()?.disabled).toBe(false)
+  })
+
+  const drawn = () => container.querySelectorAll('[data-testid^="note "]')
+
+  it('draws and plays the notes it was rendered with, and loads none of the catalog’s (#254)', async () => {
+    shown = asMade
+    await openToot()
+    expect(page.loadSong).not.toHaveBeenCalled()
+    expect(drawn()).toHaveLength(3)
+    // One row per pitch it played: two, however many the Song has now.
+    expect(container.textContent).toContain('2 of your Recordings')
+    await act(async () => drawn()[1].dispatchEvent(new MouseEvent('click', { bubbles: true })))
+    expect(page.toggleTootPlayback).toHaveBeenCalledWith(
+      asMade,
+      1,
+      expect.objectContaining({ id: summary.id, bpm: 90, notes: asMade.score?.notes })
+    )
+  })
+
+  it("draws a Toot saved before #254 from its Song's notes as they are now", async () => {
+    page.loadSong.mockResolvedValue(full)
+    await openToot()
+    expect(page.loadSong).toHaveBeenCalledWith(summary)
+    expect(drawn()).toHaveLength(full.notes.length)
   })
 })

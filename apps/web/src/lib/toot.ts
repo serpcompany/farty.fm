@@ -1,4 +1,4 @@
-import type { Song, SongNote } from '@/lib/catalog/song'
+import type { Song, SongNote, SongNotes, SongSummary } from '@/lib/catalog/song'
 import type { Performance } from '@/lib/performance'
 import { noteName } from '@/lib/pitch'
 import { formattedLength, type Recording, recordingName, songPitch } from '@/lib/recordings'
@@ -16,6 +16,48 @@ export type TootArrangement = {
   transposition: number
   /** The Recording id that plays each of the Song's distinct pitches (MIDI, in the score's key). */
   recordingForPitch: Record<number, string>
+}
+
+/**
+ * A Song as a Toot was rendered from it: its tempo, bar lines and notes. A saved Toot keeps its own
+ * copy, because the Song Catalog's can change, by a re-import or a Song's end moving, while the
+ * Toot's audio stays as it was made (#254).
+ */
+export type TootScore = Pick<Song, 'bpm'> & SongNotes
+
+/** Room for longer Songs than the catalog's longest, of 64 notes and 26 bars over 64 beats. */
+const MAX_SCORE_NOTES = 500
+const MAX_SCORE_BEATS = 10_000
+const MAX_SCORE_BPM = 1000
+
+const isIn = (value: unknown, min: number, max: number): value is number =>
+  typeof value === 'number' && value >= min && value <= max
+const isBeat = (value: unknown) => isIn(value, 0, MAX_SCORE_BEATS)
+const isListOfAtMost = (value: unknown, max: number): value is unknown[] =>
+  Array.isArray(value) && value.length <= max
+
+/** The score in `value`, only its own fields, or null when it isn't one this app can draw. */
+export function parseTootScore(value: unknown): TootScore | null {
+  if (typeof value !== 'object' || value === null) return null
+  const { bpm, bar_lines, length_beats, notes } = value as Record<string, unknown>
+  const valid =
+    isIn(bpm, 1, MAX_SCORE_BPM) &&
+    isBeat(length_beats) &&
+    isListOfAtMost(bar_lines, MAX_SCORE_NOTES) &&
+    bar_lines.every(isBeat) &&
+    isListOfAtMost(notes, MAX_SCORE_NOTES) &&
+    notes.length > 0 &&
+    notes.every(note => {
+      const { start, dur, pitch } = (note ?? {}) as Record<string, unknown>
+      return isBeat(start) && isBeat(dur) && Number.isInteger(pitch) && isIn(pitch, 0, 127)
+    })
+  if (!valid) return null
+  return {
+    bpm,
+    bar_lines: bar_lines as number[],
+    length_beats: length_beats as number,
+    notes: (notes as SongNote[]).map(({ start, dur, pitch }) => ({ start, dur, pitch }))
+  }
 }
 
 /**
@@ -64,9 +106,63 @@ type SavedToot = {
   isAudioMissing?: boolean
 }
 
-export type SongToot = SavedToot & { songId: string; arrangement: TootArrangement }
+export type SongToot = SavedToot & {
+  songId: string
+  arrangement: TootArrangement
+  /**
+   * What it was rendered from, to draw it and find its notes in its audio. A Toot saved before
+   * #254 has none, and reads its Song's notes in the catalog as they are now.
+   */
+  score?: TootScore
+}
 
 export type PadToot = SavedToot & { songId: null; arrangement: null; performance: Performance }
+
+/** A made Toot as it's saved. A Song's keeps the score its audio was rendered from (#254). */
+export function savedToot(draft: TootDraft, createdAt: number): Toot {
+  const saved = { id: draft.id, createdAt, seconds: draft.seconds }
+  if (draft.song === null) {
+    const { performance } = draft
+    return { ...saved, title: PAD_TOOT_TITLE, songId: null, arrangement: null, performance }
+  }
+  const { id, title, bpm, bar_lines, length_beats, notes } = draft.song
+  return {
+    ...saved,
+    title,
+    songId: id,
+    arrangement: draft.arrangement,
+    score: { bpm, bar_lines, length_beats, notes }
+  }
+}
+
+/**
+ * A saved Toot's Song as it was rendered, to draw: `summary`, the Song in the catalog now, with the
+ * Toot's own score. Null for a Toot that keeps none, which draws its Song's notes as they are now.
+ */
+export function songAsMade(toot: Toot, summary: SongSummary): Song | null {
+  if (toot.songId === null || !toot.score) return null
+  const { bpm, bar_lines, length_beats, notes } = toot.score
+  const pitches = [...new Set(notes.map(note => note.pitch))].sort((a, b) => a - b)
+  return {
+    ...summary,
+    bpm,
+    bar_lines,
+    length_beats,
+    notes,
+    lengthBeats: length_beats,
+    pitches,
+    durations: pitches.map(pitch => notes.filter(n => n.pitch === pitch).map(n => n.dur))
+  }
+}
+
+/**
+ * What finds a saved Toot's notes in its audio: the score it keeps, or for one saved before #254,
+ * `song`, its Song's notes as they are now. Undefined while it has neither, and for a Sound Pad's.
+ */
+export function tootScore(toot: Toot, song?: Song | null): TootScore | undefined {
+  if (toot.songId === null) return undefined
+  return toot.score ?? (song?.id === toot.songId ? song : undefined)
+}
 
 /** A Toot's length as its row shows it: "0:17". As `formattedTootLength`. */
 export function formattedTootLength(seconds: number): string {
