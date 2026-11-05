@@ -103,12 +103,7 @@ describe('Auto-map matches the golden Arrangements', () => {
     expect(locked('full', before229)).toEqual([])
     expect(before229.filter(id => locked('small', [id]).length === 0)).toEqual(['mary', 'saints'])
     // Each of these needs a fart longer than any fixture near one of its notes (ADR 0011).
-    expect(locked('full')).toEqual([
-      'silent-night',
-      'joy-to-the-world',
-      'away-in-a-manger',
-      'taps'
-    ])
+    expect(locked('full')).toEqual(['silent-night', 'joy-to-the-world', 'away-in-a-manger', 'taps'])
   })
 })
 
