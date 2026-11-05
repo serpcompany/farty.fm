@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { installGuideFor, installRouteFor, usesSafariMicrophoneSetting } from './install'
+import { installGuideFor, installRouteFor, safariAllowRouteFor } from './install'
 
 const userAgents = {
   iPhoneSafari:
@@ -155,26 +155,31 @@ describe('installGuideFor', () => {
   })
 })
 
-describe('usesSafariMicrophoneSetting', () => {
-  const uses = (userAgent: string, standalone = false) =>
-    usesSafariMicrophoneSetting({ userAgent, standalone })
+describe('safariAllowRouteFor', () => {
+  const route = (userAgent: string, standalone = false) =>
+    safariAllowRouteFor({ userAgent, standalone })
 
-  it('is true in Safari on an iPhone, and in Farty on its Home Screen', () => {
-    expect(uses(userAgents.iPhoneSafari)).toBe(true)
-    expect(uses(userAgents.iPhoneSafari, true)).toBe(true)
+  it('is the Page Menu in Safari on an iPhone', () => {
+    expect(route(userAgents.iPhoneSafari)).toBe('page-menu')
+  })
+
+  it('is Settings on an iPhone’s Home Screen, whatever the user agent says', () => {
+    expect(route(userAgents.iPhoneSafari, true)).toBe('settings')
     // A Home Screen app's user agent leaves out "Safari/".
-    expect(uses(userAgents.iPhoneSafari.replace(/ Safari\/\S+/, ''), true)).toBe(true)
+    expect(route(userAgents.iPhoneSafari.replace(/ Safari\/\S+/, ''), true)).toBe('settings')
   })
 
-  it('is false in other iPhone browsers, which have settings of their own', () => {
-    expect(uses(userAgents.iPhoneChrome)).toBe(false)
-    expect(uses(userAgents.iPhoneInstagram)).toBe(false)
-    expect(uses(userAgents.iPhoneGoogleApp)).toBe(false)
+  it('is null in other iPhone browsers, which have settings of their own', () => {
+    expect(route(userAgents.iPhoneChrome)).toBeNull()
+    expect(route(userAgents.iPhoneInstagram)).toBeNull()
+    expect(route(userAgents.iPhoneGoogleApp)).toBeNull()
+    expect(route(userAgents.iPhoneSafari.replace('Mobile/', 'OPT/6.0 Mobile/'))).toBeNull()
+    expect(route(userAgents.iPhoneSafari.replace('Safari/', 'Ddg/18.6 Safari/'))).toBeNull()
   })
 
-  it('is false away from an iPhone', () => {
-    expect(uses(userAgents.iPadSafari)).toBe(false)
-    expect(uses(userAgents.androidChrome)).toBe(false)
-    expect(uses(userAgents.androidChrome, true)).toBe(false)
+  it('is null away from an iPhone', () => {
+    expect(route(userAgents.iPadSafari)).toBeNull()
+    expect(route(userAgents.androidChrome)).toBeNull()
+    expect(route(userAgents.androidChrome, true)).toBeNull()
   })
 })

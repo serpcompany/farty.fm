@@ -118,33 +118,37 @@ function runsFromHomeScreen(): boolean {
 }
 
 /**
- * Safari's Microphone setting decides what this browser remembers: it's Safari on an iPhone, or
- * Farty on an iPhone's Home Screen (#374). Other iPhone browsers have settings of their own, and
+ * Where to set the microphone to Allow so an iPhone remembers it (#374):
+ * - `page-menu`: Safari's own setting for the site, from its Page Menu.
+ * - `settings`: on the Home Screen, Settings' setting for all of Safari, since the site's own
+ *   doesn't carry over to a Home Screen app.
+ */
+export type SafariAllowRoute = 'page-menu' | 'settings'
+
+/**
+ * The route on an iPhone, or null elsewhere. Other iPhone browsers have settings of their own, and
  * in-app browsers built on SFSafariViewController can't be told apart from Safari.
  */
-export function usesSafariMicrophoneSetting({
+export function safariAllowRouteFor({
   userAgent,
   standalone
 }: {
   userAgent: string
   standalone: boolean
-}): boolean {
-  if (!/iPhone/.test(userAgent)) return false
-  if (standalone) return true
-  return (
+}): SafariAllowRoute | null {
+  if (!/iPhone/.test(userAgent)) return null
+  if (standalone) return 'settings'
+  const safari =
     /Safari\//.test(userAgent) &&
-    !/CriOS|FxiOS|EdgiOS/.test(userAgent) &&
+    !/CriOS|FxiOS|EdgiOS|OPT\/|OPiOS|Ddg\//.test(userAgent) &&
     !inAppBrowser.test(userAgent)
-  )
+  return safari ? 'page-menu' : null
 }
 
-/** `usesSafariMicrophoneSetting` for this browser, and false on the server. */
-export function currentlyUsesSafariMicrophoneSetting(): boolean {
-  if (typeof window === 'undefined') return false
-  return usesSafariMicrophoneSetting({
-    userAgent: navigator.userAgent,
-    standalone: runsFromHomeScreen()
-  })
+/** `safariAllowRouteFor` this browser, or null on the server. */
+export function currentSafariAllowRoute(): SafariAllowRoute | null {
+  if (typeof window === 'undefined') return null
+  return safariAllowRouteFor({ userAgent: navigator.userAgent, standalone: runsFromHomeScreen() })
 }
 
 /** How this browser can install Farty now, or null when it's installed or can't be. */

@@ -48,6 +48,20 @@ async function microphoneSetting(page: Page) {
   })
 }
 
+/** Waits for the note's slide, for a screenshot. */
+async function settle(page: Page) {
+  await note(page).evaluate(el =>
+    Promise.allSettled(el.getAnimations().map(animation => animation.finished)).then(() => null)
+  )
+}
+
+/** The note counted itself as told, or as never needed: its check has run. */
+async function expectChecked(page: Page) {
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem('pedos.safariAllowTold')))
+    .toBe('1')
+}
+
 /** Records and saves a take, and finishes its Result. */
 async function recordATake(page: Page) {
   await recordAndSave(page, 1.5)
@@ -75,11 +89,9 @@ test.describe('on Ask', () => {
     await tab(page, 'Compose').click()
     await expect(note(page)).toBeVisible()
     await expect(note(page)).toContainText('louder sound and no microphone question')
-    await expect(note(page)).toContainText('Apps → Safari → Microphone → Allow')
-    await expect(note(page)).toContainText('every website')
-    await note(page).evaluate(el =>
-      Promise.allSettled(el.getAnimations().map(animation => animation.finished)).then(() => null)
-    )
+    await expect(note(page)).toContainText('Website Settings → Microphone → Allow')
+    await expect(note(page)).not.toContainText('every website')
+    await settle(page)
     if (out) await page.screenshot({ path: join(out, 'safari-allow-note.png') })
 
     await page.getByRole('button', { name: 'Got it' }).click()
@@ -102,6 +114,18 @@ test.describe('on Ask', () => {
     await page.getByRole('button', { name: 'Allow Microphone' }).click()
     await expect(note(page)).toBeVisible()
   })
+
+  test('on the Home Screen, tells Settings’ steps', async ({ page }, testInfo) => {
+    const out = evidence && join(evidence, testInfo.project.name)
+    if (out) mkdirSync(out, { recursive: true })
+    await page.addInitScript(() => Object.defineProperty(navigator, 'standalone', { value: true }))
+    await page.goto('/compose/')
+    await page.getByRole('button', { name: 'Allow Microphone' }).click()
+    await expect(note(page)).toContainText('Apps → Safari → Microphone → Allow')
+    await expect(note(page)).toContainText('every website')
+    await settle(page)
+    if (out) await page.screenshot({ path: join(out, 'safari-allow-note-home-screen.png') })
+  })
 })
 
 test.describe('on Allow', () => {
@@ -114,6 +138,7 @@ test.describe('on Allow', () => {
 
     await tab(page, 'Compose').click()
     await expect(page.getByRole('heading', { name: 'Compose' })).toBeVisible()
+    await expectChecked(page)
     await expect(note(page)).toHaveCount(0)
   })
 
@@ -122,6 +147,7 @@ test.describe('on Allow', () => {
     await page.getByRole('button', { name: 'Allow Microphone' }).click()
     await expect(page.getByRole('button', { name: 'Allow Microphone' })).toHaveCount(0)
     await expect(page.getByRole('heading', { name: 'Compose' })).toBeVisible()
+    await expectChecked(page)
     await expect(note(page)).toHaveCount(0)
   })
 })

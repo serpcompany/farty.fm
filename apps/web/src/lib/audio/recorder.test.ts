@@ -495,6 +495,14 @@ describe('the microphone off Record (#369)', () => {
 })
 
 describe('whether the browser remembers the grant (#374)', () => {
+  /** The next `getUserMedia` opens `ms` after the tap, as on an iPhone. */
+  function slowMicrophone(ms: number) {
+    vi.mocked(navigator.mediaDevices.getUserMedia).mockImplementationOnce(async () => {
+      await new Promise(resolve => setTimeout(resolve, ms))
+      return new FakeStream() as unknown as MediaStream
+    })
+  }
+
   it('knows nothing until the microphone opens', async () => {
     const { microphoneGrantMemory } = await recorder()
     expect(microphoneGrantMemory()).toBe('unknown')
@@ -532,10 +540,26 @@ describe('whether the browser remembers the grant (#374)', () => {
 
   it('finds it remembered when Welcome asked and the browser already said granted', async () => {
     allowSite()
+    slowMicrophone(200)
     const { askForMicrophone, microphoneGrantMemory } = await recorder()
-    await askForMicrophone()
-    await vi.advanceTimersByTimeAsync(0)
+    const asked = askForMicrophone()
+    await vi.advanceTimersByTimeAsync(200)
+    await asked
     expect(microphoneGrantMemory()).toBe('remembered')
+  })
+
+  it('doesn’t count an answer that comes after Welcome’s grant', async () => {
+    const permissions = navigator.permissions as unknown as {
+      query: () => Promise<{ state: string }>
+    }
+    permissions.query = () =>
+      new Promise(resolve => setTimeout(() => resolve({ state: 'granted' }), 300))
+    slowMicrophone(200)
+    const { askForMicrophone, microphoneGrantMemory } = await recorder()
+    const asked = askForMicrophone()
+    await vi.advanceTimersByTimeAsync(300)
+    await asked
+    expect(microphoneGrantMemory()).toBe('forgotten')
   })
 
   it('doesn’t call a reload’s granted answer forgotten or remembered', async () => {

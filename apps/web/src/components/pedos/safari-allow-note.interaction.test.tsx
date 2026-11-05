@@ -13,7 +13,7 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
 const state = {
   memory: 'forgotten' as 'remembered' | 'forgotten' | 'unknown',
-  iPhoneSafari: true,
+  route: 'page-menu' as 'page-menu' | 'settings' | null,
   flow: null as string | null,
   capture: { kind: 'idle' },
   reviewOpen: false,
@@ -31,9 +31,7 @@ vi.mock('./pedos-provider', () => ({
 }))
 vi.mock('./account-provider', () => ({ useAccount: () => ({ stepOpen: state.stepOpen }) }))
 vi.mock('@/lib/audio/recorder', () => ({ microphoneGrantMemory: () => state.memory }))
-vi.mock('@/lib/install', () => ({
-  currentlyUsesSafariMicrophoneSetting: () => state.iPhoneSafari
-}))
+vi.mock('@/lib/install', () => ({ currentSafariAllowRoute: () => state.route }))
 
 let container: HTMLDivElement
 let root: Root
@@ -54,7 +52,7 @@ async function comeBack() {
 beforeEach(() => {
   Object.assign(state, {
     memory: 'forgotten',
-    iPhoneSafari: true,
+    route: 'page-menu',
     flow: null,
     capture: { kind: 'idle' },
     reviewOpen: false,
@@ -73,13 +71,27 @@ afterEach(async () => {
 })
 
 describe('SafariAllowNote', () => {
-  it('says what it gets and how, and closes on Got it, never to show again', async () => {
+  it('in Safari, says what it gets and the site’s own steps', async () => {
     await show()
-    expect(note()).toBe(true)
+    const text = document.body.textContent
+    expect(text).toContain('louder sound and no microphone question')
+    expect(text).toContain('Page Menu')
+    expect(text).toContain('Website Settings → Microphone → Allow')
+    expect(text).not.toContain('every website')
+  })
+
+  it('on the Home Screen, says Settings’ steps and that they reach every website', async () => {
+    state.route = 'settings'
+    await show()
     const text = document.body.textContent
     expect(text).toContain('louder sound and no microphone question')
     expect(text).toContain('Apps → Safari → Microphone → Allow')
     expect(text).toContain('every website')
+  })
+
+  it('closes on Got it, never to show again', async () => {
+    await show()
+    expect(note()).toBe(true)
 
     const gotIt = [...document.querySelectorAll('button')].find(b => b.textContent === 'Got it')
     await act(async () => gotIt?.click())
@@ -108,7 +120,7 @@ describe('SafariAllowNote', () => {
   })
 
   it('never shows in another browser', async () => {
-    state.iPhoneSafari = false
+    state.route = null
     await show()
     expect(note()).toBe(false)
   })

@@ -766,8 +766,9 @@ export async function askForMicrophone(): Promise<void> {
     return
   }
   // The browser's answer from before this page's grant, so its own grant, such as Safari's
-  // Microphone at Allow, isn't taken for the page's. `getUserMedia` still starts in the tap.
-  const heard = mayOpenWithoutTap()
+  // Microphone at Allow, isn't taken for the page's. It doesn't hold up the tap's `getUserMedia`,
+  // and an answer later than the grant doesn't count, so the microphone never lets go on a guess.
+  void mayOpenWithoutTap()
   let stream: MediaStream
   try {
     stream = await navigator.mediaDevices.getUserMedia(microphoneConstraints)
@@ -778,7 +779,6 @@ export async function askForMicrophone(): Promise<void> {
     throw error
   }
   for (const track of stream.getTracks()) track.stop()
-  await heard
   pageGranted()
   captureStoppedAt = Date.now()
 }
