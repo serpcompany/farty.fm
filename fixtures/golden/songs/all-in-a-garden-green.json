@@ -5,7 +5,9 @@
     13.0,
     19.0,
     25.0,
-    31.0
+    31.0,
+    37.0,
+    43.0
   ],
   "beats_per_bar": 6,
   "bpm": 120,
@@ -14,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 6,
     "bpm": 120,
-    "max_beats": 33
+    "max_beats": 49
   },
   "import_report": {
     "catalog_id": "all-in-a-garden-green",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 27,
+    "note_count": 42,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-all-in-a-garden-green.mid",
     "tempo_changes_ignored": 0,
@@ -29,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 33.0,
+  "length_beats": 49.0,
   "notes": [
     {
       "dur": 1.0,
@@ -165,6 +167,81 @@
       "dur": 2.0,
       "pitch": 60,
       "start": 31.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 33.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 34.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 36.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 36.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 74,
+      "start": 37.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 39.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 40.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 41.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 42.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 66,
+      "start": 43.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 44.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 45.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 45.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 46.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 47.0
     }
   ],
   "pitches": [
@@ -174,6 +251,7 @@
     62,
     64,
     65,
+    66,
     67,
     69,
     71,

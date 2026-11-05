@@ -9,7 +9,13 @@
     18.0,
     21.0,
     23.5,
-    26.5
+    26.5,
+    29.5,
+    32.5,
+    35.5,
+    38.5,
+    41.5,
+    44.5
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +24,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 29.5
+    "max_beats": 46
   },
   "import_report": {
     "catalog_id": "life-let-us-cherish",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 34,
+    "note_count": 54,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-life-let-us-cherish.mid",
     "tempo_changes_ignored": 1,
@@ -33,7 +39,7 @@
       0
     ]
   },
-  "length_beats": 29.5,
+  "length_beats": 46.0,
   "notes": [
     {
       "dur": 1.5,
@@ -204,6 +210,106 @@
       "dur": 1.0,
       "pitch": 84,
       "start": 28.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 29.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 31.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 32.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 32.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 33.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 33.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 74,
+      "start": 34.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 35.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 37.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 37.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 38.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 38.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 84,
+      "start": 39.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 84,
+      "start": 40.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 41.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 43.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 43.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 44.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 44.5
     }
   ],
   "pitches": [

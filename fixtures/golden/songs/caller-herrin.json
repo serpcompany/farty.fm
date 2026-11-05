@@ -10,7 +10,12 @@
     22.0,
     25.0,
     28.0,
-    31.0
+    31.0,
+    34.0,
+    37.0,
+    40.0,
+    43.0,
+    46.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +23,13 @@
   "id": "caller-herrin",
   "import_args": {
     "bpm": 120,
-    "max_beats": 34
+    "max_beats": 48
   },
   "import_report": {
     "catalog_id": "caller-herrin",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 19,
+    "note_count": 26,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-caller-herrin.mid",
     "tempo_changes_ignored": 0,
@@ -33,7 +38,7 @@
       0
     ]
   },
-  "length_beats": 34.0,
+  "length_beats": 48.0,
   "notes": [
     {
       "dur": 3.0,
@@ -129,6 +134,41 @@
       "dur": 3.0,
       "pitch": 64,
       "start": 31.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 36.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 37.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 70,
+      "start": 38.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 40.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 42.0
+    },
+    {
+      "dur": 5.0,
+      "pitch": 65,
+      "start": 43.0
     }
   ],
   "pitches": [
@@ -137,7 +177,8 @@
     64,
     65,
     67,
-    69
+    69,
+    70
   ],
   "sha256": "33c3ea2c694691949b48d763033ca8fd12c17c6bc6180d568858c272f8523df3",
   "title": "Caller Herrin'"

@@ -9,7 +9,11 @@
     18.0,
     21.0,
     24.0,
-    27.0
+    27.0,
+    30.0,
+    33.0,
+    36.0,
+    39.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -17,13 +21,13 @@
   "id": "my-country-tis",
   "import_args": {
     "bpm": 120,
-    "max_beats": 30
+    "max_beats": 41.854166
   },
   "import_report": {
     "catalog_id": "my-country-tis",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 28,
+    "note_count": 41,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-my-country-tis.mid",
     "tempo_changes_ignored": 0,
@@ -32,7 +36,7 @@
       0
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 41.854166666666664,
   "notes": [
     {
       "dur": 1.0,
@@ -173,6 +177,71 @@
       "dur": 1.0,
       "pitch": 69,
       "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 31.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 32.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 32.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 71,
+      "start": 33.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 34.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 35.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 36.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 36.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 37.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 38.0
+    },
+    {
+      "dur": 2.8541666666666665,
+      "pitch": 67,
+      "start": 39.0
     }
   ],
   "pitches": [
@@ -181,7 +250,8 @@
     69,
     71,
     72,
-    74
+    74,
+    76
   ],
   "sha256": "cb338d2155854903e1043cf9903e904b4bc21f600c8910435325159b121747f3",
   "title": "My Country, 'Tis of Thee"

@@ -4,7 +4,10 @@
     7.0,
     13.0,
     19.0,
-    25.0
+    25.0,
+    31.0,
+    37.0,
+    43.0
   ],
   "beats_per_bar": 6,
   "bpm": 120,
@@ -13,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 6,
     "bpm": 120,
-    "max_beats": 31
+    "max_beats": 48
   },
   "import_report": {
     "catalog_id": "happy-marriage",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 25,
+    "note_count": 39,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-happy-marriage.mid",
     "tempo_changes_ignored": 1,
@@ -28,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 31.0,
+  "length_beats": 48.0,
   "notes": [
     {
       "dur": 1.0,
@@ -154,9 +157,83 @@
       "dur": 1.0,
       "pitch": 77,
       "start": 30.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 76,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 77,
+      "start": 32.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 76,
+      "start": 33.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 33.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 73,
+      "start": 34.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 35.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 36.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 72,
+      "start": 37.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 38.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 39.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 69,
+      "start": 40.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 41.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 68,
+      "start": 42.0
+    },
+    {
+      "dur": 5.0,
+      "pitch": 69,
+      "start": 43.0
     }
   ],
   "pitches": [
+    68,
+    69,
+    70,
+    72,
     73,
     74,
     76,

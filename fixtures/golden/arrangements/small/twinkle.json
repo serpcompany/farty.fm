@@ -4,12 +4,12 @@
   "metrics": null,
   "missing": [
     {
-      "seconds": 0.6,
-      "target_midi": 37
+      "seconds": 1.1,
+      "target_midi": 48
     },
     {
       "seconds": 0.6,
-      "target_midi": 38
+      "target_midi": 50
     }
   ],
   "notes": null,
@@ -17,54 +17,54 @@
   "per_pitch": [
     {
       "octave_move": false,
-      "recording": "009",
-      "shift_semitones": 2.4740794063398255,
+      "recording": "022",
+      "shift_semitones": 0.6740794063398141,
       "song_pitch": 69,
-      "target_midi": 33
+      "target_midi": 41
     },
     {
       "octave_move": true,
-      "recording": "002",
-      "shift_semitones": -11.42592059366018,
+      "recording": "009",
+      "shift_semitones": 12.474079406339825,
       "song_pitch": 71,
-      "target_midi": 35
-    },
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
-      "song_pitch": 73,
-      "target_midi": 37
-    },
-    {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
-      "song_pitch": 74,
-      "target_midi": 38
-    },
-    {
-      "octave_move": false,
-      "recording": "022",
-      "shift_semitones": -0.3259205936601859,
-      "song_pitch": 76,
-      "target_midi": 40
+      "target_midi": 43
     },
     {
       "octave_move": false,
       "recording": "069",
-      "shift_semitones": -2.425920593660173,
+      "shift_semitones": 0.5740794063398269,
+      "song_pitch": 73,
+      "target_midi": 45
+    },
+    {
+      "octave_move": false,
+      "recording": "002",
+      "shift_semitones": -0.4259205936601802,
+      "song_pitch": 74,
+      "target_midi": 46
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
+      "song_pitch": 76,
+      "target_midi": 48
+    },
+    {
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
       "song_pitch": 78,
-      "target_midi": 42
+      "target_midi": 50
     }
   ],
   "pitch_coverage": {
     "covered": 4,
     "total": 6
   },
-  "plan_cost": 139.35994555009287,
+  "plan_cost": 238.50217619845236,
   "render_settings": null,
   "song": "twinkle",
-  "transpose": -36,
+  "transpose": -28,
   "unlocked": false
 }

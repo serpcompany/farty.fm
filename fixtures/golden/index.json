@@ -4,7 +4,7 @@
     "libsndfile": "1.2.2",
     "mido": "1.3.3",
     "numpy": "2.5.3",
-    "python": "3.12.10",
+    "python": "3.12.7",
     "scipy": "1.18.1",
     "soundfile": "0.14.0",
     "soxr": "1.1.0"
@@ -134,11 +134,11 @@
   "songs": [
     {
       "id": "twinkle",
-      "notes": 28,
+      "notes": 42,
       "title": "Twinkle, Twinkle, Little Star",
       "transpose": {
         "full": -17,
-        "small": -36
+        "small": -28
       },
       "unlocked": {
         "full": true,
@@ -160,7 +160,7 @@
     },
     {
       "id": "jingle",
-      "notes": 26,
+      "notes": 51,
       "title": "Jingle Bells",
       "transpose": {
         "full": -19,
@@ -225,11 +225,11 @@
     },
     {
       "id": "amazing",
-      "notes": 16,
+      "notes": 36,
       "title": "Amazing Grace",
       "transpose": {
-        "full": -28,
-        "small": -24
+        "full": -13,
+        "small": -23
       },
       "unlocked": {
         "full": true,
@@ -329,7 +329,7 @@
     },
     {
       "id": "itsy-bitsy",
-      "notes": 29,
+      "notes": 24,
       "title": "The Itsy Bitsy Spider",
       "transpose": {
         "full": -14,
@@ -342,7 +342,7 @@
     },
     {
       "id": "three-blind-mice",
-      "notes": 24,
+      "notes": 48,
       "title": "Three Blind Mice",
       "transpose": {
         "full": -16,
@@ -394,10 +394,10 @@
     },
     {
       "id": "aunt-rhody",
-      "notes": 38,
+      "notes": 58,
       "title": "Go Tell Aunt Rhody",
       "transpose": {
-        "full": -5,
+        "full": -4,
         "small": -17
       },
       "unlocked": {
@@ -407,10 +407,10 @@
     },
     {
       "id": "skip-to-my-lou",
-      "notes": 32,
+      "notes": 31,
       "title": "Skip to My Lou",
       "transpose": {
-        "full": -14,
+        "full": -5,
         "small": -14
       },
       "unlocked": {
@@ -485,10 +485,10 @@
     },
     {
       "id": "home-on-the-range",
-      "notes": 28,
+      "notes": 41,
       "title": "Home on the Range",
       "transpose": {
-        "full": -14,
+        "full": -13,
         "small": -24
       },
       "unlocked": {
@@ -537,11 +537,11 @@
     },
     {
       "id": "scarborough-fair",
-      "notes": 21,
+      "notes": 35,
       "title": "Scarborough Fair",
       "transpose": {
-        "full": -17,
-        "small": -28
+        "full": -16,
+        "small": -30
       },
       "unlocked": {
         "full": true,
@@ -563,10 +563,10 @@
     },
     {
       "id": "drunken-sailor",
-      "notes": 37,
+      "notes": 36,
       "title": "Drunken Sailor",
       "transpose": {
-        "full": -8,
+        "full": -9,
         "small": -22
       },
       "unlocked": {
@@ -576,10 +576,10 @@
     },
     {
       "id": "simple-gifts",
-      "notes": 41,
+      "notes": 44,
       "title": "Simple Gifts",
       "transpose": {
-        "full": -8,
+        "full": -21,
         "small": -24
       },
       "unlocked": {
@@ -615,7 +615,7 @@
     },
     {
       "id": "deck-the-halls",
-      "notes": 18,
+      "notes": 17,
       "title": "Deck the Halls",
       "transpose": {
         "full": -13,
@@ -628,11 +628,11 @@
     },
     {
       "id": "o-christmas-tree",
-      "notes": 39,
+      "notes": 30,
       "title": "O Christmas Tree",
       "transpose": {
-        "full": -13,
-        "small": -22
+        "full": -11,
+        "small": -24
       },
       "unlocked": {
         "full": true,
@@ -654,7 +654,7 @@
     },
     {
       "id": "jolly-old-st-nicholas",
-      "notes": 24,
+      "notes": 48,
       "title": "Jolly Old Saint Nicholas",
       "transpose": {
         "full": -23,
@@ -784,7 +784,7 @@
     },
     {
       "id": "did-you-ever-see-a-lassie",
-      "notes": 34,
+      "notes": 27,
       "title": "Did You Ever See a Lassie",
       "transpose": {
         "full": -15,
@@ -797,11 +797,11 @@
     },
     {
       "id": "teddy-bears-picnic",
-      "notes": 42,
+      "notes": 62,
       "title": "The Teddy Bears' Picnic",
       "transpose": {
-        "full": -20,
-        "small": -26
+        "full": -26,
+        "small": -24
       },
       "unlocked": {
         "full": true,
@@ -823,11 +823,11 @@
     },
     {
       "id": "chopsticks",
-      "notes": 56,
+      "notes": 46,
       "title": "Chopsticks",
       "transpose": {
-        "full": -36,
-        "small": -34
+        "full": -24,
+        "small": -31
       },
       "unlocked": {
         "full": true,
@@ -862,7 +862,7 @@
     },
     {
       "id": "old-smoky",
-      "notes": 16,
+      "notes": 11,
       "title": "On Top of Old Smoky",
       "transpose": {
         "full": -23,
@@ -875,7 +875,7 @@
     },
     {
       "id": "streets-of-laredo",
-      "notes": 30,
+      "notes": 45,
       "title": "The Streets of Laredo",
       "transpose": {
         "full": -13,
@@ -888,10 +888,10 @@
     },
     {
       "id": "yellow-rose-of-texas",
-      "notes": 28,
+      "notes": 56,
       "title": "The Yellow Rose of Texas",
       "transpose": {
-        "full": -28,
+        "full": -29,
         "small": -26
       },
       "unlocked": {
@@ -953,10 +953,10 @@
     },
     {
       "id": "oh-dear-what-can-the-matter-be",
-      "notes": 40,
+      "notes": 64,
       "title": "Oh Dear, What Can the Matter Be",
       "transpose": {
-        "full": -18,
+        "full": -17,
         "small": -26
       },
       "unlocked": {
@@ -966,11 +966,11 @@
     },
     {
       "id": "blow-the-man-down",
-      "notes": 23,
+      "notes": 40,
       "title": "Blow the Man Down",
       "transpose": {
-        "full": -20,
-        "small": -19
+        "full": -9,
+        "small": -18
       },
       "unlocked": {
         "full": true,
@@ -992,11 +992,11 @@
     },
     {
       "id": "wayfaring-stranger",
-      "notes": 41,
+      "notes": 34,
       "title": "Wayfaring Stranger",
       "transpose": {
-        "full": -21,
-        "small": -29
+        "full": -16,
+        "small": -21
       },
       "unlocked": {
         "full": true,
@@ -1005,10 +1005,10 @@
     },
     {
       "id": "water-is-wide",
-      "notes": 27,
+      "notes": 35,
       "title": "The Water Is Wide",
       "transpose": {
-        "full": -14,
+        "full": -16,
         "small": -22
       },
       "unlocked": {
@@ -1031,7 +1031,7 @@
     },
     {
       "id": "go-down-moses",
-      "notes": 29,
+      "notes": 30,
       "title": "Go Down, Moses",
       "transpose": {
         "full": -13,
@@ -1057,20 +1057,20 @@
     },
     {
       "id": "joshua",
-      "notes": 40,
+      "notes": 38,
       "title": "Joshua Fit the Battle of Jericho",
       "transpose": {
         "full": -15,
-        "small": -21
+        "small": -22
       },
       "unlocked": {
         "full": true,
-        "small": false
+        "small": true
       }
     },
     {
       "id": "loch-lomond",
-      "notes": 43,
+      "notes": 44,
       "title": "Loch Lomond",
       "transpose": {
         "full": -26,
@@ -1096,7 +1096,7 @@
     },
     {
       "id": "my-bonnie",
-      "notes": 21,
+      "notes": 17,
       "title": "My Bonnie Lies over the Ocean",
       "transpose": {
         "full": -30,
@@ -1122,7 +1122,7 @@
     },
     {
       "id": "irish-washerwoman",
-      "notes": 59,
+      "notes": 46,
       "title": "The Irish Washerwoman",
       "transpose": {
         "full": -7,
@@ -1174,7 +1174,7 @@
     },
     {
       "id": "funiculi",
-      "notes": 25,
+      "notes": 22,
       "title": "Funiculì, Funiculà",
       "transpose": {
         "full": -25,
@@ -1226,11 +1226,11 @@
     },
     {
       "id": "arirang",
-      "notes": 34,
+      "notes": 32,
       "title": "Arirang",
       "transpose": {
         "full": -21,
-        "small": -19
+        "small": -18
       },
       "unlocked": {
         "full": true,
@@ -1252,10 +1252,10 @@
     },
     {
       "id": "let-me-call-you-sweetheart",
-      "notes": 15,
+      "notes": 11,
       "title": "Let Me Call You Sweetheart",
       "transpose": {
-        "full": -22,
+        "full": -24,
         "small": -25
       },
       "unlocked": {
@@ -1278,11 +1278,11 @@
     },
     {
       "id": "my-wild-irish-rose",
-      "notes": 18,
+      "notes": 11,
       "title": "My Wild Irish Rose",
       "transpose": {
-        "full": -22,
-        "small": -23
+        "full": -24,
+        "small": -27
       },
       "unlocked": {
         "full": true,
@@ -1356,10 +1356,10 @@
     },
     {
       "id": "angels-we-have-heard",
-      "notes": 29,
+      "notes": 28,
       "title": "Angels We Have Heard on High",
       "transpose": {
-        "full": -18,
+        "full": -17,
         "small": -31
       },
       "unlocked": {
@@ -1395,11 +1395,11 @@
     },
     {
       "id": "coventry-carol",
-      "notes": 20,
+      "notes": 28,
       "title": "Coventry Carol",
       "transpose": {
-        "full": -21,
-        "small": -31
+        "full": -25,
+        "small": -29
       },
       "unlocked": {
         "full": true,
@@ -1408,7 +1408,7 @@
     },
     {
       "id": "o-holy-night",
-      "notes": 25,
+      "notes": 21,
       "title": "O Holy Night",
       "transpose": {
         "full": -18,
@@ -1421,10 +1421,10 @@
     },
     {
       "id": "twelve-days",
-      "notes": 39,
+      "notes": 44,
       "title": "The Twelve Days of Christmas",
       "transpose": {
-        "full": -17,
+        "full": -14,
         "small": -27
       },
       "unlocked": {
@@ -1434,7 +1434,7 @@
     },
     {
       "id": "i-saw-three-ships",
-      "notes": 41,
+      "notes": 32,
       "title": "I Saw Three Ships",
       "transpose": {
         "full": -11,
@@ -1512,10 +1512,10 @@
     },
     {
       "id": "eine-kleine",
-      "notes": 41,
+      "notes": 38,
       "title": "Eine kleine Nachtmusik",
       "transpose": {
-        "full": -29,
+        "full": -31,
         "small": -30
       },
       "unlocked": {
@@ -1590,15 +1590,15 @@
     },
     {
       "id": "blue-danube",
-      "notes": 24,
+      "notes": 18,
       "title": "The Blue Danube",
       "transpose": {
-        "full": -16,
-        "small": -23
+        "full": -15,
+        "small": -27
       },
       "unlocked": {
         "full": true,
-        "small": false
+        "small": true
       }
     },
     {
@@ -1616,7 +1616,7 @@
     },
     {
       "id": "trumpet-voluntary",
-      "notes": 60,
+      "notes": 59,
       "title": "Trumpet Voluntary",
       "transpose": {
         "full": -28,
@@ -1681,7 +1681,7 @@
     },
     {
       "id": "my-country-tis",
-      "notes": 28,
+      "notes": 41,
       "title": "My Country, 'Tis of Thee",
       "transpose": {
         "full": -17,
@@ -1707,7 +1707,7 @@
     },
     {
       "id": "johnny-comes-marching",
-      "notes": 38,
+      "notes": 57,
       "title": "When Johnny Comes Marching Home",
       "transpose": {
         "full": -35,
@@ -1772,10 +1772,10 @@
     },
     {
       "id": "merryxmas",
-      "notes": 36,
+      "notes": 30,
       "title": "We Wish You a Merry Christmas",
       "transpose": {
-        "full": -13,
+        "full": -11,
         "small": -18
       },
       "unlocked": {

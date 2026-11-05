@@ -6,7 +6,8 @@
     13.0,
     17.0,
     21.0,
-    25.0
+    25.0,
+    29.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 29
+    "max_beats": 32
   },
   "import_report": {
     "catalog_id": "king-of-the-faeries",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 45,
+    "note_count": 49,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-king-of-the-faeries.mid",
     "tempo_changes_ignored": 1,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 29.0,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 1.0,
@@ -256,6 +257,26 @@
       "dur": 0.5,
       "pitch": 62,
       "start": 28.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 30.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 31.0
     }
   ],
   "pitches": [

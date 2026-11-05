@@ -5,7 +5,9 @@
     10.75,
     14.75,
     18.75,
-    22.75
+    22.75,
+    26.75,
+    30.75
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -14,14 +16,14 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 26.75,
+    "max_beats": 32.75,
     "start_beat": 16.75
   },
   "import_report": {
     "catalog_id": "caro-mio-ben",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 24,
+    "note_count": 32,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-caro-mio-ben.mid",
     "tempo_changes_ignored": 0,
@@ -32,7 +34,7 @@
       2
     ]
   },
-  "length_beats": 26.75,
+  "length_beats": 32.75,
   "notes": [
     {
       "dur": 1.0,
@@ -153,6 +155,46 @@
       "dur": 0.5,
       "pitch": 64,
       "start": 26.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 26.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 27.25
+    },
+    {
+      "dur": 0.5,
+      "pitch": 62,
+      "start": 27.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 28.25
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 28.75
+    },
+    {
+      "dur": 0.75,
+      "pitch": 64,
+      "start": 29.75
+    },
+    {
+      "dur": 0.25,
+      "pitch": 62,
+      "start": 30.5
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 30.75
     }
   ],
   "pitches": [

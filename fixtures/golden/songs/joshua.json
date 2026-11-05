@@ -15,13 +15,13 @@
   "id": "joshua",
   "import_args": {
     "bpm": 120,
-    "max_beats": 32
+    "max_beats": 30
   },
   "import_report": {
     "catalog_id": "joshua",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 40,
+    "note_count": 38,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-joshua.mid",
     "tempo_changes_ignored": 0,
@@ -32,7 +32,7 @@
       2
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 30.0,
   "notes": [
     {
       "dur": 0.5,
@@ -223,16 +223,6 @@
       "dur": 2.0,
       "pitch": 62,
       "start": 28.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 31.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 74,
-      "start": 31.5
     }
   ],
   "pitches": [
@@ -241,8 +231,7 @@
     64,
     65,
     67,
-    69,
-    74
+    69
   ],
   "sha256": "38ed443bca6a34f97e350f5ecdf75c263eb662b6475abe768423e97b4fef41e4",
   "title": "Joshua Fit the Battle of Jericho"

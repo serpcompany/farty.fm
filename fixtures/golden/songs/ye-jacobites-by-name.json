@@ -6,7 +6,10 @@
     13.0,
     17.0,
     21.0,
-    25.0
+    25.0,
+    29.0,
+    33.0,
+    37.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,13 +18,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 29
+    "max_beats": 39.854166
   },
   "import_report": {
     "catalog_id": "ye-jacobites-by-name",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 40,
+    "note_count": 53,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-ye-jacobites-by-name.mid",
     "tempo_changes_ignored": 0,
@@ -30,7 +33,7 @@
       0
     ]
   },
-  "length_beats": 29.0,
+  "length_beats": 39.854166666666664,
   "notes": [
     {
       "dur": 1.0,
@@ -231,6 +234,71 @@
       "dur": 0.25,
       "pitch": 74,
       "start": 28.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 29.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 30.5
+    },
+    {
+      "dur": 1.5,
+      "pitch": 73,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 32.5
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 33.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 73,
+      "start": 33.75
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 34.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 34.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 35.0
+    },
+    {
+      "dur": 0.75,
+      "pitch": 71,
+      "start": 36.0
+    },
+    {
+      "dur": 0.25,
+      "pitch": 71,
+      "start": 36.75
+    },
+    {
+      "dur": 2.8541666666666665,
+      "pitch": 71,
+      "start": 37.0
     }
   ],
   "pitches": [

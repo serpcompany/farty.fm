@@ -6,7 +6,8 @@
     13.0,
     17.0,
     21.0,
-    25.0
+    25.0,
+    29.0
   ],
   "beats_per_bar": 4,
   "bpm": 116,
@@ -15,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 116,
-    "max_beats": 29
+    "max_beats": 31
   },
   "import_report": {
     "catalog_id": "last-post",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 28,
+    "note_count": 30,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-last-post.mid",
     "tempo_changes_ignored": 0,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 28.0,
+  "length_beats": 31.0,
   "notes": [
     {
       "dur": 1.0,
@@ -171,6 +172,16 @@
       "dur": 1.0,
       "pitch": 65,
       "start": 27.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 77,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 30.0
     }
   ],
   "pitches": [

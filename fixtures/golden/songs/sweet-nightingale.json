@@ -7,9 +7,7 @@
     13.0,
     16.0,
     19.0,
-    22.0,
-    25.0,
-    28.0
+    22.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,14 +16,14 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 30,
+    "max_beats": 24,
     "start_beat": 12
   },
   "import_report": {
     "catalog_id": "sweet-nightingale",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 27,
+    "note_count": 21,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-sweet-nightingale.mid",
     "tempo_changes_ignored": 0,
@@ -36,7 +34,7 @@
       2
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 24.0,
   "notes": [
     {
       "dur": 0.5,
@@ -142,36 +140,6 @@
       "dur": 5.0,
       "pitch": 67,
       "start": 19.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 71,
-      "start": 24.0
-    },
-    {
-      "dur": 0.5,
-      "pitch": 72,
-      "start": 24.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 74,
-      "start": 25.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 74,
-      "start": 26.0
-    },
-    {
-      "dur": 1.0,
-      "pitch": 71,
-      "start": 27.0
-    },
-    {
-      "dur": 2.0,
-      "pitch": 72,
-      "start": 28.0
     }
   ],
   "pitches": [

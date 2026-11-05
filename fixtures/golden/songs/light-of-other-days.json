@@ -6,7 +6,8 @@
     13.0,
     17.0,
     21.0,
-    25.0
+    25.0,
+    29.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 29
+    "max_beats": 30
   },
   "import_report": {
     "catalog_id": "light-of-other-days",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 36,
+    "note_count": 37,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-light-of-other-days.mid",
     "tempo_changes_ignored": 1,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 29.0,
+  "length_beats": 30.0,
   "notes": [
     {
       "dur": 0.5,
@@ -211,6 +212,11 @@
       "dur": 0.25,
       "pitch": 78,
       "start": 28.75
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 29.0
     }
   ],
   "pitches": [

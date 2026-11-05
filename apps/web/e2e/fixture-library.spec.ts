@@ -67,7 +67,7 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
     page.getByRole('heading', { name: `Locked · ${songs.length - unlocked}`, exact: true })
   ).toBeVisible()
 
-  // Without Recording 1, Amazing Grace's 2.98 s note on E3 outlasts every fixture near it, and it
+  // Without Recording 1, Amazing Grace's 2.98 s note on D♯3 outlasts every fixture near it, and it
   // is one of the Songs that lock (`pitch-coverage.test.ts`, 'locks ... more of the catalog's
   // Songs without 002').
   const lockedWithout002 =
@@ -97,5 +97,5 @@ test('loads the Fixture Library and unlocks every Song it is long enough for', a
     `Locked. ${song?.composer}. 5 of 6 notes covered, ${song?.bpm} BPM, ${seconds} seconds`
   )
   await amazing.click()
-  await expect(page.getByTestId('locked-song-needs')).toHaveText('Needs a fart near E3 (3.0 s).')
+  await expect(page.getByTestId('locked-song-needs')).toHaveText('Needs a fart near D♯3 (3.0 s).')
 })

@@ -8,8 +8,8 @@
       "target_midi": 36
     },
     {
-      "seconds": 0.8,
-      "target_midi": 48
+      "seconds": 2.5,
+      "target_midi": 46
     }
   ],
   "notes": null,
@@ -51,16 +51,16 @@
       "target_midi": 44
     },
     {
-      "octave_move": false,
-      "recording": "002",
-      "shift_semitones": -0.4259205936601802,
+      "octave_move": null,
+      "recording": null,
+      "shift_semitones": null,
       "song_pitch": 74,
       "target_midi": 46
     },
     {
-      "octave_move": null,
-      "recording": null,
-      "shift_semitones": null,
+      "octave_move": false,
+      "recording": "002",
+      "shift_semitones": 1.5740794063398198,
       "song_pitch": 76,
       "target_midi": 48
     }
@@ -69,7 +69,7 @@
     "covered": 5,
     "total": 7
   },
-  "plan_cost": 102.21653080893017,
+  "plan_cost": 88.78680112299581,
   "render_settings": null,
   "song": "my-bonnie",
   "transpose": -28,

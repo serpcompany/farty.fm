@@ -10,7 +10,12 @@
     22.0,
     25.0,
     28.0,
-    31.0
+    31.0,
+    34.0,
+    37.0,
+    40.0,
+    43.0,
+    46.0
   ],
   "beats_per_bar": 3,
   "bpm": 100,
@@ -19,13 +24,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 100,
-    "max_beats": 33
+    "max_beats": 48
   },
   "import_report": {
     "catalog_id": "si-bheag-si-mhor",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 31,
+    "note_count": 40,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-si-bheag-si-mhor.mid",
     "tempo_changes_ignored": 1,
@@ -34,7 +39,7 @@
       0
     ]
   },
-  "length_beats": 33.0,
+  "length_beats": 48.0,
   "notes": [
     {
       "dur": 0.5,
@@ -190,9 +195,56 @@
       "dur": 2.0,
       "pitch": 66,
       "start": 31.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 33.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 62,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 36.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 37.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 39.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 40.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 74,
+      "start": 42.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 42.5
+    },
+    {
+      "dur": 5.0,
+      "pitch": 74,
+      "start": 43.0
     }
   ],
   "pitches": [
+    62,
+    64,
     66,
     69,
     71,

@@ -7,7 +7,14 @@
     16.0,
     20.0,
     24.0,
-    28.0
+    28.0,
+    32.0,
+    36.0,
+    40.0,
+    44.0,
+    48.0,
+    52.0,
+    56.0
   ],
   "beats_per_bar": 4,
   "bpm": 96,
@@ -15,13 +22,13 @@
   "id": "la-cumparsita",
   "import_args": {
     "bpm": 96,
-    "max_beats": 32
+    "max_beats": 58.958333
   },
   "import_report": {
     "catalog_id": "la-cumparsita",
     "chord_tones_dropped": 2,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 36,
+    "note_count": 62,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-la-cumparsita.mid",
     "tempo_changes_ignored": 0,
@@ -31,7 +38,7 @@
       1
     ]
   },
-  "length_beats": 31.958333333333332,
+  "length_beats": 58.958333333333336,
   "notes": [
     {
       "dur": 1.0,
@@ -212,9 +219,140 @@
       "dur": 0.9583333333333334,
       "pitch": 62,
       "start": 31.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 33.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 34.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 35.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 36.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 37.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 37.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 38.0
+    },
+    {
+      "dur": 0.9583333333333334,
+      "pitch": 66,
+      "start": 39.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 41.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 42.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 43.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 44.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 67,
+      "start": 45.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 45.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 46.0
+    },
+    {
+      "dur": 0.9583333333333334,
+      "pitch": 66,
+      "start": 47.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 62,
+      "start": 49.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 60,
+      "start": 50.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 62,
+      "start": 51.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 72,
+      "start": 52.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 70,
+      "start": 53.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 53.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 54.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 55.0
+    },
+    {
+      "dur": 0.9583333333333334,
+      "pitch": 67,
+      "start": 56.0
+    },
+    {
+      "dur": 0.9583333333333334,
+      "pitch": 79,
+      "start": 58.0
     }
   ],
   "pitches": [
+    60,
     61,
     62,
     63,
@@ -223,7 +361,8 @@
     69,
     70,
     72,
-    74
+    74,
+    79
   ],
   "sha256": "c0e2305123bc0bda4bf69cef2f03cdc598d9fffea47e3b3331a2c5a766f2266c",
   "title": "La cumparsita"

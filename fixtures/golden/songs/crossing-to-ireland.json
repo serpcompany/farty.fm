@@ -9,7 +9,13 @@
     19.0,
     22.0,
     25.0,
-    28.0
+    28.0,
+    31.0,
+    34.0,
+    37.0,
+    40.0,
+    43.0,
+    46.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +24,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 31
+    "max_beats": 48
   },
   "import_report": {
     "catalog_id": "crossing-to-ireland",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 37,
+    "note_count": 54,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-crossing-to-ireland.mid",
     "tempo_changes_ignored": 1,
@@ -33,7 +39,7 @@
       0
     ]
   },
-  "length_beats": 31.0,
+  "length_beats": 48.0,
   "notes": [
     {
       "dur": 0.5,
@@ -219,6 +225,91 @@
       "dur": 0.5,
       "pitch": 66,
       "start": 30.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 64,
+      "start": 32.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 66,
+      "start": 32.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 33.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 71,
+      "start": 34.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 36.0
+    },
+    {
+      "dur": 1.5,
+      "pitch": 67,
+      "start": 37.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 69,
+      "start": 38.5
+    },
+    {
+      "dur": 0.5,
+      "pitch": 71,
+      "start": 39.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 73,
+      "start": 39.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 40.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 73,
+      "start": 41.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 71,
+      "start": 42.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 69,
+      "start": 43.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 67,
+      "start": 44.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 66,
+      "start": 45.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 64,
+      "start": 46.0
     }
   ],
   "pitches": [
@@ -229,7 +320,9 @@
     66,
     67,
     69,
-    71
+    71,
+    73,
+    74
   ],
   "sha256": "d25a7978342315f4606197f9a1767504fc5f79dc1ddd7639d7d277ed09c81d6c",
   "title": "Crossing to Ireland"

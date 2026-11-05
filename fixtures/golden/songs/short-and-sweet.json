@@ -4,7 +4,10 @@
     6.0,
     12.0,
     18.0,
-    24.0
+    24.0,
+    30.0,
+    36.0,
+    42.0
   ],
   "beats_per_bar": 6,
   "bpm": 144,
@@ -12,14 +15,14 @@
   "id": "short-and-sweet",
   "import_args": {
     "bpm": 144,
-    "max_beats": 30,
+    "max_beats": 48,
     "start_beat": 6
   },
   "import_report": {
     "catalog_id": "short-and-sweet",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 25,
+    "note_count": 41,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-short-and-sweet.mid",
     "tempo_changes_ignored": 1,
@@ -29,7 +32,7 @@
       1
     ]
   },
-  "length_beats": 30.0,
+  "length_beats": 48.0,
   "notes": [
     {
       "dur": 1.0,
@@ -155,6 +158,86 @@
       "dur": 1.0,
       "pitch": 79,
       "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 30.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 31.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 31.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 32.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 76,
+      "start": 33.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 81,
+      "start": 35.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 81,
+      "start": 36.0
+    },
+    {
+      "dur": 0.5,
+      "pitch": 79,
+      "start": 36.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 37.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 83,
+      "start": 38.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 81,
+      "start": 39.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 74,
+      "start": 40.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 79,
+      "start": 41.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 79,
+      "start": 42.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 78,
+      "start": 44.0
+    },
+    {
+      "dur": 3.0,
+      "pitch": 79,
+      "start": 45.0
     }
   ],
   "pitches": [

@@ -10,7 +10,12 @@
     21.0,
     24.0,
     27.0,
-    30.0
+    30.0,
+    33.0,
+    36.0,
+    39.0,
+    42.0,
+    45.0
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +23,13 @@
   "id": "friendly-beasts",
   "import_args": {
     "bpm": 120,
-    "max_beats": 32
+    "max_beats": 47
   },
   "import_report": {
     "catalog_id": "friendly-beasts",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 24,
+    "note_count": 34,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-friendly-beasts.mid",
     "tempo_changes_ignored": 0,
@@ -33,7 +38,7 @@
       0
     ]
   },
-  "length_beats": 32.0,
+  "length_beats": 47.0,
   "notes": [
     {
       "dur": 1.0,
@@ -154,6 +159,56 @@
       "dur": 2.0,
       "pitch": 67,
       "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 32.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 33.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 36.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 37.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 70,
+      "start": 38.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 69,
+      "start": 39.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 65,
+      "start": 41.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 67,
+      "start": 42.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 64,
+      "start": 44.0
+    },
+    {
+      "dur": 2.0,
+      "pitch": 65,
+      "start": 45.0
     }
   ],
   "pitches": [

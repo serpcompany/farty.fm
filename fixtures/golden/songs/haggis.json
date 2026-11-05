@@ -16,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 30.5
+    "max_beats": 30
   },
   "import_report": {
     "catalog_id": "haggis",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 63,
+    "note_count": 62,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-haggis.mid",
     "tempo_changes_ignored": 1,
@@ -31,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 30.5,
+  "length_beats": 30.0,
   "notes": [
     {
       "dur": 0.5,
@@ -342,11 +342,6 @@
       "dur": 1.5,
       "pitch": 65,
       "start": 28.5
-    },
-    {
-      "dur": 0.5,
-      "pitch": 79,
-      "start": 30.0
     }
   ],
   "pitches": [
@@ -357,8 +352,7 @@
     70,
     71,
     72,
-    76,
-    79
+    76
   ],
   "sha256": "2488c919630b42e84fadbdcc31b99d1f88291264ca952989db4707a39a2239cc",
   "title": "The Haggis"

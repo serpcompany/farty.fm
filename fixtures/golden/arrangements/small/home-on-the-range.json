@@ -4,7 +4,7 @@
   "metrics": null,
   "missing": [
     {
-      "seconds": 0.5,
+      "seconds": 1.8,
       "target_midi": 43
     },
     {
@@ -80,7 +80,7 @@
     "covered": 5,
     "total": 8
   },
-  "plan_cost": 199.56952996962838,
+  "plan_cost": 256.6284237535384,
   "render_settings": null,
   "song": "home-on-the-range",
   "transpose": -24,

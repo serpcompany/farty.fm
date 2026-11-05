@@ -26,6 +26,9 @@ The rules and thresholds are in pdmx.py. The gates, in order:
            own pitch), onTime >= 95%, no re-attacks. An excerpt that would take in the held note its
            phrase ends on (#389) stops on the bar line before it when taking it in locks the Song
 
+An excerpt ends at the end of a strain when the score shows one the gates pass (#402, pdmx.strain_cuts).
+tools/catalog/recut.py applies that rule to the Songs already in the catalog, keeping their scores.
+
 catalog/ is written only once every passing Song's entry imports to exactly the melody its gates
 judged. If one doesn't, the run stops with ReimportMismatch and leaves catalog/ as it was.
 
@@ -71,7 +74,8 @@ import soundfile as sf  # noqa: E402
 import pdmx  # noqa: E402
 from engine import SR, load_library, melody_fit, plan, render  # noqa: E402
 from evaluate import BAR, evaluate  # noqa: E402
-from melody import DRUM_CHANNEL, PERCUSSION_PROGRAMS, load_catalog, load_midi  # noqa: E402
+from build import SMALL_LIBRARY  # noqa: E402
+from melody import DRUM_CHANNEL, PERCUSSION_PROGRAMS, bar_lines, load_catalog, load_midi  # noqa: E402
 
 RECORD = "https://zenodo.org/api/records/15571083"
 DOI = "10.5281/zenodo.15571083"
@@ -181,6 +185,22 @@ def score_meta(path):
     return sorted(tempos.items()), [(at, *m) for at, m in sorted(meters.items())]
 
 
+def score_key(path, melody_track=None):
+    """A MIDI file's first key signature as mido names it ("Bb", "F#m"), or None when it sets none.
+    The melody's track (an index or several, as load_midi reports it) comes first, since a transposing
+    part writes another key at the same tick. Another track's counts only when it sets none."""
+    mid = mido.MidiFile(path)
+    own = [melody_track] if isinstance(melody_track, int) else melody_track or []
+    keys = []
+    for index, track in enumerate(mid.tracks):
+        tick = 0
+        for msg in track:
+            tick += msg.time
+            if msg.type == "key_signature":
+                keys.append((index not in own, tick, msg.key))
+    return min(keys)[2] if keys else None
+
+
 def score_notes(path):
     """Every track's notes in a MIDI file, as (start, end) quarter-note beats."""
     mid = mido.MidiFile(path)
@@ -261,6 +281,53 @@ def excerpt(midi, title, tempos, meters, library, track=None):
     return whole, options, melody
 
 
+def reference_render(melody, library):
+    """The reference render's transpose, assignments and evaluate.py's numbers on what it played."""
+    transpose, assignments = plan(melody, library)
+    audio, events = render(melody, library, assignments, bpm=melody.bpm)
+    metrics = evaluate(audio, melody, events, melody.bpm, library)
+    metrics.pop("per_note")
+    return transpose, assignments, metrics
+
+
+def strain_end_problems(midi, melody, track_notes, start_beat, library, small=None):
+    """Why an excerpt can't end where `melody` does: the gates that depend on where it ends. `small`
+    is the small library when the Song is unlocked with it today, so the end must keep it unlocked."""
+    report = melody.report
+    problems = pdmx.sanity_problems([n.pitch for n in melody.notes], report["chord_tones_dropped"],
+                                    report["inner_voice_onsets_dropped"], track_notes)
+    problems += tune_moves(midi, melody, start_beat)[0]
+    if problems:
+        return problems
+    if not melody_fit(melody, library).unlocked:
+        return ["locked with the full Fixture Library"]
+    if small is not None and not melody_fit(melody, small).unlocked:
+        return ["locked with the small library"]
+    return pdmx.render_problems(reference_render(melody, library)[2], BAR)
+
+
+def strain_options(midi, title, options, library):
+    """`options` with the excerpt moved to the end of a strain (pdmx.strain_cuts, #402): the first of
+    the rule's ends, up to pdmx.STRAIN_TRIES, that passes strain_end_problems, or `options` as they
+    are. Only `max_beats` changes, so the tune plays as it did up to where one of them stops."""
+    start = options.get("start_beat", 0)
+    whole = load_midi(midi, track=options.get("track"))
+    notes = [(n.start, n.dur, n.pitch) for n in whole.notes if n.start >= start - pdmx.EPS]
+    _, meters = score_meta(midi)
+    ends = pdmx.strain_cuts(notes, bar_lines(meters, notes[-1][0] + notes[-1][1] + 1), pdmx.score_marks(meters),
+                            score_key(midi, whole.report["track_used"]), start, options.get("max_beats", float("inf")))
+    if not ends:
+        return options
+    small = [s for s in library if s.id in SMALL_LIBRARY]
+    unlocked = melody_fit(load_midi(midi, title=title, **options), small).unlocked
+    for end in ends[:pdmx.STRAIN_TRIES]:
+        cut = {**options, "max_beats": pdmx.excerpt_beats(0, end.end)}
+        melody = load_midi(midi, title=title, **cut)
+        if not strain_end_problems(midi, melody, len(whole.notes), start, library, small if unlocked else None):
+            return cut
+    return options
+
+
 def gate(title, match, row, midi, member_sha256, archive, library):
     """Run every gate on one PDMX score, stopping at the first that fails. `midi` is the extracted
     file and `member_sha256` the archive file's sha256 (extract); the hash gate checks one against
@@ -302,6 +369,8 @@ def gate(title, match, row, midi, member_sha256, archive, library):
             whole, options, melody = excerpt(midi, title.title, tempos, meters, library, track=staves)
             result["moved_tune"] = moved
         padded = pdmx.padded_pickup_problems(meters, score_notes(midi), whole.notes[0].start)
+        options = strain_options(midi, title.title, options, library)
+        melody = load_midi(midi, title=title.title, **options)
     except Exception as e:  # a MIDI file the importer can't read fails sanity
         failed("sanity", [f"the MIDI file doesn't import: {type(e).__name__}: {e}"])
         return result
@@ -328,10 +397,7 @@ def gate(title, match, row, midi, member_sha256, archive, library):
         missing = " ".join(f"{librosa.midi_to_note(p)} ({s:.1f} s)" for p, s in fit.missing)
         failed("render", [f"locked with the full Fixture Library: {fit.covered} of {fit.total} notes covered, needs {missing}"])
         return result
-    transpose, assignments = plan(melody, library)
-    audio, events = render(melody, library, assignments, bpm=melody.bpm)
-    metrics = evaluate(audio, melody, events, melody.bpm, library)
-    metrics.pop("per_note")
+    transpose, assignments, metrics = reference_render(melody, library)
     metrics.update(
         transpose=transpose,
         octave_moves=fit.octave_moves,
@@ -668,6 +734,9 @@ def main():
                   f"or of the held note ({pdmx.HELD_NOTE_BEATS} beats or more) on that closing bar line, when it ends within "
                   f"{pdmx.EXCERPT_BEATS + pdmx.HELD_OVERRUN_BEATS} beats of the excerpt's start, no rest of {pdmx.HELD_NOTE_REST} beats or more "
                   "comes before it, and the full Fixture Library has a fart that lasts it, "
+                  f"then moved to the end of a strain when the score shows one that passes these gates and keeps the Song "
+                  f"unlocked with the small library: the tune's end, a repeat, or a phrase's close, from {pdmx.STRAIN_MIN_BEATS} "
+                  f"to {pdmx.STRAIN_WHOLE_BEATS} beats (pdmx.strain_cuts); "
                   f"and the score's tempo within {pdmx.MIN_BPM}-{pdmx.MAX_BPM} bpm"),
         "bar": BAR,
     }

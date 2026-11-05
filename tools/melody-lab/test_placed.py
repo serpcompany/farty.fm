@@ -55,12 +55,11 @@ class Placed(unittest.TestCase):
     def test_placed_it_covers_a_note_nothing_else_does(self):
         # The full golden library unlocks every golden Song, and no Noise-like fixture placed on
         # C2 to B4 unlocks one more Song without 002, its longest fart. The small library, all
-        # Melodic, leaves jingle and row locked. Recording 065 is Noise-like and 1.49 s long:
-        # placed on C2, it unlocks both, but not amazing, which still needs a 3 s fart.
+        # Melodic, leaves row locked. Recording 065 is Noise-like and 1.49 s long: placed on C2,
+        # it unlocks row, but not amazing, which still needs a 1.8 s fart.
         noise = recording("065")
         lib = [*SMALL, placed(noise, C2)]
         expected = {  # Song: (covered, total, Octave Moves, cost, the Song pitch 065 plays)
-            "jingle": (5, 5, 2, 260.0875, 67),
             "row": (6, 6, 2, 821.0865, 67),
         }
         for sid, (covered, total, octaves, cost, pitch) in expected.items():
@@ -70,7 +69,7 @@ class Placed(unittest.TestCase):
             self.assertEqual((f.covered, f.total, f.octave_moves), (covered, total, octaves), sid)
             self.assertAlmostEqual(f.cost, cost, places=3, msg=sid)
             self.assertEqual([p for p, r in f.recording_for_pitch.items() if r == "065"], [pitch], sid)
-        self.assertEqual(fit("amazing", lib).missing, [(50, 3.0)])
+        self.assertEqual(fit("amazing", lib).missing, [(37, 1.8)])
 
 
 if __name__ == "__main__":

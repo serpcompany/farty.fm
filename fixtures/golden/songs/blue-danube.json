@@ -7,9 +7,7 @@
     12.5,
     15.5,
     18.5,
-    21.5,
-    24.5,
-    27.5
+    21.5
   ],
   "beats_per_bar": 3,
   "bpm": 120,
@@ -18,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 3,
     "bpm": 120,
-    "max_beats": 30.5
+    "max_beats": 22.5
   },
   "import_report": {
     "catalog_id": "blue-danube",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 24,
+    "note_count": 18,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-blue-danube.mid",
     "tempo_changes_ignored": 0,
@@ -33,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 30.5,
+  "length_beats": 22.5,
   "notes": [
     {
       "dur": 0.5,
@@ -124,46 +122,13 @@
       "dur": 1.0,
       "pitch": 72,
       "start": 21.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 66,
-      "start": 23.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 66,
-      "start": 24.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 69,
-      "start": 25.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 72,
-      "start": 26.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 76,
-      "start": 27.5
-    },
-    {
-      "dur": 1.0,
-      "pitch": 76,
-      "start": 29.5
     }
   ],
   "pitches": [
-    66,
     67,
-    69,
     71,
     72,
-    74,
-    76
+    74
   ],
   "sha256": "02f26ecfb84482eeb99fb71ce79affae0b20169f984aeb525c6a29918482e484",
   "title": "The Blue Danube"

@@ -6,7 +6,8 @@
     13.0,
     17.0,
     21.0,
-    25.0
+    25.0,
+    29.0
   ],
   "beats_per_bar": 4,
   "bpm": 120,
@@ -15,13 +16,13 @@
   "import_args": {
     "beats_per_bar": 4,
     "bpm": 120,
-    "max_beats": 29
+    "max_beats": 32
   },
   "import_report": {
     "catalog_id": "horlepiep",
     "chord_tones_dropped": 0,
     "inner_voice_onsets_dropped": 0,
-    "note_count": 42,
+    "note_count": 45,
     "overlaps_clipped": 0,
     "source_file": "catalog/midi/pdmx-horlepiep.mid",
     "tempo_changes_ignored": 0,
@@ -30,7 +31,7 @@
       0
     ]
   },
-  "length_beats": 29.0,
+  "length_beats": 32.0,
   "notes": [
     {
       "dur": 0.3333333333333333,
@@ -241,6 +242,21 @@
       "dur": 0.5,
       "pitch": 77,
       "start": 28.5
+    },
+    {
+      "dur": 1.0,
+      "pitch": 76,
+      "start": 29.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 30.0
+    },
+    {
+      "dur": 1.0,
+      "pitch": 72,
+      "start": 31.0
     }
   ],
   "pitches": [

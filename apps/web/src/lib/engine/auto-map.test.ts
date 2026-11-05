@@ -520,13 +520,12 @@ describe('Placed Recordings (ADR 0015)', () => {
   })
 
   // The same Arrangements as `tools/melody-lab/test_placed.py`.
-  it('covers a note nothing else does: 065 on C2 unlocks 2 Songs the small library leaves locked', () => {
+  it('covers a note nothing else does: 065 on C2 unlocks row, which the small library leaves locked', () => {
     const placed = [
       ...inputs(libraries.small),
       placedAutoMapRecording('065', storedAnalysis('065'), C2)
     ]
     const expected = {
-      jingle: { covered: 5, total: 5, octaveMoves: 2, cost: 260.0875, plays: 67 },
       row: { covered: 6, total: 6, octaveMoves: 2, cost: 821.0865, plays: 67 }
     }
     for (const [id, e] of Object.entries(expected)) {
