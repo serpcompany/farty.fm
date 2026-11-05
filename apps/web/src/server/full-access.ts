@@ -150,11 +150,11 @@ export async function startCheckout(
   const song = songId === null ? null : catalogSong(songId)
   if (!isItemId(tootId) || (songId !== null && !song)) return apiError(400, 'invalid_request')
 
-  if (await hasFullAccess(db, user.id)) return active()
   const saved = await uploadState(db, 'toots', user.id, tootId)
   // Deleted, it can't be saved again: nothing to pay for here.
   if (saved.status === 'deleted') return apiError(410, 'deleted')
   if (saved.live >= LIMITS.toots.maxItems) return apiError(409, 'limit_reached')
+  if (await hasFullAccess(db, user.id)) return active()
   const slot = await spend(db, user, 'checkouts')
   if (!slot.allowed) {
     const limited = apiError(429, 'rate_limited')
@@ -197,6 +197,7 @@ export async function startCheckout(
     }
     const session = await createCheckoutSession(payments.secretKey, {
       userId: user.id,
+      email: user.email,
       tootId,
       successUrl: returnUrl(request, song?.id ?? null, tootId, true),
       cancelUrl: returnUrl(request, song?.id ?? null, tootId, false),

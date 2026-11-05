@@ -580,9 +580,10 @@ export function SaveToToots({
   // address keeps the return, so a reload makes the same Toot and checks again.
   const confirm = useEffectEvent(async (accountId: string) => {
     setBusy('confirming')
-    const active = await waitForFullAccess(accountId)
+    const access = await waitForFullAccess(accountId)
     setBusy(null)
-    if (!active) setProblem('notPaidYet')
+    if (access === null) setProblem('notPaidYet')
+    else if (access === 'limitReached') setProblem('limitReached')
     else if (await save()) clearCheckoutReturn()
   })
   // The account isn't read yet: the confirming waits for it. If it can't be read, Save reads it

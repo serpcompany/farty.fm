@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import {
   type CheckoutReturn,
+  canSaveFromStored,
   clearCheckoutReturn,
-  hasStoredFullAccess,
   readCheckoutReturn,
   saveAsksForPayment
 } from '@/lib/full-access'
@@ -77,7 +77,7 @@ export type PadTake = {
  * The Sound Pad's take: up to `MAX_PERFORMANCE_SECONDS` from its first tap, or `MAX_TAPS` taps,
  * then it stops by itself, as hiding the page does. Stopped, it's kept in this browser
  * (`pad-take.ts`) until it's saved, by its Toot id, and made: it plays once, unless the page is
- * hidden. Back from Checkout the same Toot is made again with the id it was paid for. Opened, the
+ * hidden. Back from Checkout the same Toot is made again with the same id. Opened, the
  * Pad shows the newest kept take again, ready to play. Where saving is paid, once the account has
  * Full Access, the newest take that started a Checkout whose return never loaded is made again and
  * saved. A take back from Checkout that can't be made again is said: signed in, only once the
@@ -268,17 +268,17 @@ export function usePadTake(): PadTake {
   }, [libraryRead])
 
   // Where saving is paid, a kept take that started a Checkout and whose return never loaded: with
-  // Full Access, as D1 has it, the newest is made again and saved, as back from Checkout, and any
-  // other waits for the next open. Without it, or not known, it stays kept: a purchase whose webhook
-  // hasn't landed yet reads as none, and the next open asks again.
+  // Full Access and room for it, as D1 has it, the newest is made again and saved, as back from
+  // Checkout, and any other waits for the next open. Otherwise, or not known, it stays kept: a
+  // purchase whose webhook hasn't landed yet reads as none, and the next open asks again.
   const recover = useEffectEvent(async (accountId: string) => {
     for (const take of keptTakes()) {
       if (pedos.toot(take.tootId)) forgetTake(take.tootId)
     }
     const take = keptTakes().find(kept => kept.checkout)
     if (!take || !replaceable()) return
-    const active = await hasStoredFullAccess(accountId)
-    if (active && replaceable()) makePaidNow(take, { tootId: take.tootId, done: true })
+    const canSave = await canSaveFromStored(accountId)
+    if (canSave && replaceable()) makePaidNow(take, { tootId: take.tootId, done: true })
   })
   const isChecked = useRef(false)
   useEffect(() => {

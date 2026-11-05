@@ -41,13 +41,12 @@ export async function giveFullAccess(userId: string): Promise<void> {
   await markFullAccessPaid(testDb(), userId, `cs_test_${userId}`, null)
 }
 
-export async function signUp(name: string): Promise<{ id: string; cookie: string }> {
+export async function signUp(name: string): Promise<{ id: string; email: string; cookie: string }> {
   const now = new Date()
   const id = `user${name}`
+  const email = `${name}@example.test`
   const token = `${name}-${crypto.randomUUID()}`
-  await testDb()
-    .insert(user)
-    .values({ id, name: '', email: `${name}@example.test`, createdAt: now, updatedAt: now })
+  await testDb().insert(user).values({ id, name: '', email, createdAt: now, updatedAt: now })
   await testDb()
     .insert(session)
     .values({
@@ -58,7 +57,7 @@ export async function signUp(name: string): Promise<{ id: string; cookie: string
       createdAt: now,
       updatedAt: now
     })
-  return { id, cookie: `${TEST_SESSION_COOKIE}=${token}` }
+  return { id, email, cookie: `${TEST_SESSION_COOKIE}=${token}` }
 }
 
 function headers(

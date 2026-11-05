@@ -25,6 +25,7 @@ import { hasFullAccess } from '@/db/payments'
 import { removeShare } from '@/db/sharing'
 import { parseFartChoices } from '@/lib/engine/fart-choices'
 import type { Performance } from '@/lib/performance'
+import { MAX_SAVED_TOOTS } from '@/lib/pricing'
 import type { Recording, RecordingTrim } from '@/lib/recordings'
 import type { Toot, TootArrangement } from '@/lib/toot'
 
@@ -61,7 +62,7 @@ export const LIMITS: Record<Kind, { maxAudioBytes: number; maxItems: number }> =
    * own rate: about 2.9 MB at 48 kHz, and 5,760,044 bytes at 96 kHz, which 6 MiB still keeps.
    */
   recordings: { maxAudioBytes: 6 * 1024 * 1024, maxItems: 300 },
-  toots: { maxAudioBytes: 16 * 1024 * 1024, maxItems: 300 }
+  toots: { maxAudioBytes: 16 * 1024 * 1024, maxItems: MAX_SAVED_TOOTS }
 }
 
 /**

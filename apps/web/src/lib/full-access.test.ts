@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
-  hasStoredFullAccess,
+  canSaveFromStored,
   readCheckoutReturn,
   saveCheck,
   startCheckout,
@@ -108,16 +108,17 @@ describe('saveCheck', () => {
   })
 })
 
-describe('hasStoredFullAccess', () => {
+describe('canSaveFromStored', () => {
   it('asks what D1 has, so the Sound Pad’s open never spends the Stripe checks a return waits on', async () => {
     const cases: [Response, boolean | null][] = [
       [Response.json({ active: true, limitReached: false }), true],
+      [Response.json({ active: true, limitReached: true }), false],
       [Response.json({ active: false, limitReached: false }), false],
       [Response.json({ error: 'signed_out' }, { status: 401 }), null]
     ]
     for (const [response, then] of cases) {
       const fetch = answering(response)
-      expect(await hasStoredFullAccess('userA')).toBe(then)
+      expect(await canSaveFromStored('userA')).toBe(then)
       expect(fetch.mock.calls[0][0]).toBe('/api/full-access/?check=stored')
       vi.restoreAllMocks()
     }
@@ -131,13 +132,18 @@ describe('waitForFullAccess', () => {
       const body = answers.shift()
       return Response.json(body, { status: body && 'error' in body ? 502 : 200 })
     })
-    expect(await waitForFullAccess('userA', { tries: 5, intervalMs: 1 })).toBe(true)
+    expect(await waitForFullAccess('userA', { tries: 5, intervalMs: 1 })).toBe('save')
     expect(fetch).toHaveBeenCalledTimes(3)
+  })
+
+  it('says when the account has Full Access but no room for the Toot', async () => {
+    answering(Response.json({ active: true, limitReached: true }))
+    expect(await waitForFullAccess('userA', { tries: 3, intervalMs: 1 })).toBe('limitReached')
   })
 
   it('gives up after its tries', async () => {
     const fetch = answering(Response.json({ active: false }))
-    expect(await waitForFullAccess('userA', { tries: 3, intervalMs: 1 })).toBe(false)
+    expect(await waitForFullAccess('userA', { tries: 3, intervalMs: 1 })).toBeNull()
     expect(fetch).toHaveBeenCalledTimes(3)
   })
 })

@@ -13,6 +13,9 @@ export const FULL_ACCESS_PRICE_LABEL = new Intl.NumberFormat('en-US', {
   currency: FULL_ACCESS_PRICE.currency
 }).format(FULL_ACCESS_PRICE.amount / 100)
 
+/** How many Toots an account can keep at once: what Full Access says, and what the server holds. */
+export const MAX_SAVED_TOOTS = 300
+
 /** How many days after paying someone can have their money back, by asking Support. */
 export const MONEY_BACK_DAYS = 14
 

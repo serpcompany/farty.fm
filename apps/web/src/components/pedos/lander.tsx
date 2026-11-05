@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dialog'
 import { wide } from '@/lib/desktop'
 import { saveAsksForPayment } from '@/lib/full-access'
-import { FULL_ACCESS_PRICE_LABEL, MONEY_BACK_DAYS } from '@/lib/pricing'
+import { FULL_ACCESS_PRICE_LABEL, MAX_SAVED_TOOTS, MONEY_BACK_DAYS } from '@/lib/pricing'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { usePedos } from './pedos-provider'
@@ -296,7 +296,7 @@ const faq = [
   {
     question: 'Is Farty free?',
     answer: saveAsksForPayment()
-      ? `Recording and making Toots is free, and so is an account. Full Access is ${FULL_ACCESS_PRICE_LABEL} once and saves every Toot you make, with your money back within ${MONEY_BACK_DAYS} days.`
+      ? `Recording and making Toots is free, and so is an account. Full Access is ${FULL_ACCESS_PRICE_LABEL} once and saves up to ${MAX_SAVED_TOOTS} Toots, with your money back within ${MONEY_BACK_DAYS} days.`
       : 'Yes. Farty is free, and so is an account.'
   },
   {

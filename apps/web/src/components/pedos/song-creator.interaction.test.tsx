@@ -63,7 +63,7 @@ vi.mock('@/lib/full-access', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/full-access')>()),
   // Saving is paid in this build unless a test says so, and the wait for a payment is cut short.
   saveAsksForPayment: () => page.paid,
-  waitForFullAccess: vi.fn(async () => false),
+  waitForFullAccess: vi.fn(async () => null),
   clearCheckoutReturn: vi.fn()
 }))
 
@@ -320,10 +320,20 @@ describe('Save to Toots, where saving is paid', () => {
 
   it('saves by itself back from Checkout once the account has Full Access', async () => {
     const { waitForFullAccess, clearCheckoutReturn } = await import('@/lib/full-access')
-    vi.mocked(waitForFullAccess).mockResolvedValueOnce(true)
+    vi.mocked(waitForFullAccess).mockResolvedValueOnce('save')
     await render({ tootId: TOOT, done: true })
     expect(page.saveToot).toHaveBeenCalledWith(draft)
     expect(clearCheckoutReturn).toHaveBeenCalled()
+  })
+
+  it('says the Toot limit back from Checkout, rather than saving what can’t upload', async () => {
+    const { waitForFullAccess } = await import('@/lib/full-access')
+    vi.mocked(waitForFullAccess).mockResolvedValueOnce('limitReached')
+    await render({ tootId: TOOT, done: true })
+    expect(page.saveToot).not.toHaveBeenCalled()
+    expect(container.textContent).toContain(
+      "You've kept as many Toots as an account can. Delete one to save this one."
+    )
   })
 
   it('offers a retry when the account can’t be read after a paid return', async () => {

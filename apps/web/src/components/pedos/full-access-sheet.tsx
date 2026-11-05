@@ -11,7 +11,7 @@ import {
   SheetTitle
 } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
-import { FULL_ACCESS_PRICE_LABEL, MONEY_BACK_DAYS } from '@/lib/pricing'
+import { FULL_ACCESS_PRICE_LABEL, MAX_SAVED_TOOTS, MONEY_BACK_DAYS } from '@/lib/pricing'
 
 /**
  * What Save asks of an account without Full Access (ADR 0022): the price, what it covers and the
@@ -39,7 +39,8 @@ export function FullAccessSheet({
         <SheetHeader className="px-5 pt-5 pb-2">
           <SheetTitle className="text-xl font-semibold">Full Access</SheetTitle>
           <SheetDescription className="text-base">
-            {FULL_ACCESS_PRICE_LABEL}, once. Save every Toot you make, from Songs and the Sound Pad.
+            {FULL_ACCESS_PRICE_LABEL}, once. Save up to {MAX_SAVED_TOOTS} Toots, from Songs and the
+            Sound Pad.
           </SheetDescription>
         </SheetHeader>
         <p className="px-5 pb-2 text-sm text-muted-foreground">

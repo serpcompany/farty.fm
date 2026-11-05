@@ -151,7 +151,7 @@ describe('DELETE /api/account/', () => {
     } as unknown as R2Bucket
 
     await expect(
-      deleteAccount({ db: testDb(), media: failing }, { id: a.id }, deleteRequest())
+      deleteAccount({ db: testDb(), media: failing }, a, deleteRequest())
     ).rejects.toThrow()
 
     expect((await rowsOf(a.id)).users).toHaveLength(1)
@@ -178,7 +178,7 @@ describe('DELETE /api/account/', () => {
       delete: (keys: string[]) => env.MEDIA.delete(keys)
     } as unknown as R2Bucket
 
-    await deleteAccount({ db: testDb(), media: racing }, { id: a.id }, deleteRequest())
+    await deleteAccount({ db: testDb(), media: racing }, a, deleteRequest())
 
     expect(written).toBe(true)
     expect(await bucketKeys()).toEqual([])

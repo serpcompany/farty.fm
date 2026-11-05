@@ -284,8 +284,10 @@ describe('on a local run, with the dev checkout', () => {
     const again = await save(T1, a)
     expect(again.status).toBe(410)
     expect(await again.json()).toEqual({ error: 'deleted' })
-    // Full Access answers first, and that Save is then refused on its own.
-    expect(await (await checkout(T1, a)).json()).toEqual({ active: true })
+    // Checkout refuses it too, with Full Access, as that Save would be refused.
+    const refusedWithIt = await checkout(T1, a)
+    expect(refusedWithIt.status).toBe(410)
+    expect(await refusedWithIt.json()).toEqual({ error: 'deleted' })
 
     // Without Full Access, Checkout refuses it before anything is paid.
     const b = await signUp('B')
@@ -350,6 +352,10 @@ describe('on a local run, with the dev checkout', () => {
     expect((await save(T1, a)).status).toBe(201)
     expect(await (await access(a)).json()).toEqual({ active: true, limitReached: true })
     expect((await save(T2, a)).status).toBe(409)
+    // Pay on a sheet shown before this: it says the limit, rather than saving what can't upload.
+    const started = await checkout(T2, a)
+    expect(started.status).toBe(409)
+    expect(await started.json()).toEqual({ error: 'limit_reached' })
   })
 })
 
@@ -525,6 +531,7 @@ describe('with Stripe Checkout in test mode', () => {
     expect(sent.get('metadata[purchase]')).toBe('full_access')
     expect(sent.get('metadata[user_id]')).toBe(a.id)
     expect(sent.get('metadata[toot_id]')).toBe(T1)
+    expect(sent.get('customer_email')).toBe(a.email)
     expect(sent.get('line_items[0][price_data][unit_amount]')).toBe('499')
     expect(sent.get('success_url')).toBe(`${ORIGIN}/compose/twinkle/?toot=${T1}&checkout=done`)
     expect(sent.get('cancel_url')).toBe(`${ORIGIN}/compose/twinkle/?toot=${T1}`)

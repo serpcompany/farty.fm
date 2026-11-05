@@ -144,6 +144,8 @@ export const FULL_ACCESS_PURCHASE = 'full_access'
 
 export type NewCheckout = {
   userId: string
+  /** The account's email: Checkout doesn't ask for it, and a refund finds the payment by it. */
+  email: string
   /** The Toot whose Save asked for it, to make again and save on the way back from Checkout. */
   tootId: string
   successUrl: string
@@ -173,6 +175,7 @@ export async function createCheckoutSession(
     'line_items[0][price_data][unit_amount]': String(FULL_ACCESS_PRICE.amount),
     'line_items[0][price_data][product_data][name]': 'Farty Full Access',
     client_reference_id: checkout.userId,
+    customer_email: checkout.email,
     'metadata[purchase]': FULL_ACCESS_PURCHASE,
     'metadata[user_id]': checkout.userId,
     'metadata[toot_id]': checkout.tootId,

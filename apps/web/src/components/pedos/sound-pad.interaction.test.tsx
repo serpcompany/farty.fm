@@ -26,7 +26,7 @@ const page = vi.hoisted(() => ({
   stopPlayback: vi.fn(),
   forgetToot: vi.fn(),
   saveToToots: vi.fn(),
-  hasStoredFullAccess: vi.fn(),
+  canSaveFromStored: vi.fn(),
   /** Whether this build's saving is paid. */
   paid: false,
   account: { status: 'signedOut' } as Account,
@@ -87,7 +87,7 @@ vi.mock('./account-provider', () => ({ useAccount: () => ({ account: page.accoun
 vi.mock('@/lib/full-access', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/full-access')>()),
   saveAsksForPayment: () => page.paid,
-  hasStoredFullAccess: page.hasStoredFullAccess
+  canSaveFromStored: page.canSaveFromStored
 }))
 // Save to Toots, as Song Creator's: its payment is tested there.
 vi.mock('./song-creator', () => ({
@@ -452,16 +452,16 @@ describe('a take on the Sound Pad', () => {
       expect(page.toggleTootPlayback).not.toHaveBeenCalled()
       expect(kept()).toEqual([takeOf(ID, one)])
       // Saving is free here: nothing asks the account.
-      expect(page.hasStoredFullAccess).not.toHaveBeenCalled()
+      expect(page.canSaveFromStored).not.toHaveBeenCalled()
     })
 
     it('saves the newest take that started a Checkout once the account has Full Access, and the others wait', async () => {
       signedInWherePaid()
       keepTakes(paying(ID, one), paying(PAID, one), paying(USED, one))
       page.saved.add(USED)
-      page.hasStoredFullAccess.mockResolvedValue(true)
+      page.canSaveFromStored.mockResolvedValue(true)
       await open(Promise.resolve({} as AudioBuffer))
-      expect(page.hasStoredFullAccess).toHaveBeenCalledExactlyOnceWith('userA')
+      expect(page.canSaveFromStored).toHaveBeenCalledExactlyOnceWith('userA')
       expect(page.makePadToot).toHaveBeenLastCalledWith(one, PAID)
       // Saved as back from its Checkout.
       expect(lastSave()).toMatchObject({
@@ -477,7 +477,7 @@ describe('a take on the Sound Pad', () => {
       signedInWherePaid()
       keepTakes(takeOf(ID, one, { account: 'userA' }))
       await open(Promise.resolve({} as AudioBuffer))
-      expect(page.hasStoredFullAccess).not.toHaveBeenCalled()
+      expect(page.canSaveFromStored).not.toHaveBeenCalled()
       expect(lastSave()).toMatchObject({ draft: draftOf(one, ID), back: null })
     })
 
@@ -487,9 +487,9 @@ describe('a take on the Sound Pad', () => {
     ])('keeps a take where Full Access is %s, and saves nothing', async (_, state) => {
       signedInWherePaid()
       keepTakes(paying(ID, one))
-      page.hasStoredFullAccess.mockResolvedValue(state)
+      page.canSaveFromStored.mockResolvedValue(state)
       await open(Promise.resolve({} as AudioBuffer))
-      expect(page.hasStoredFullAccess).toHaveBeenCalledWith('userA')
+      expect(page.canSaveFromStored).toHaveBeenCalledWith('userA')
       expect(lastSave()).toMatchObject({ draft: draftOf(one, ID), back: null })
       expect(kept()).toEqual([paying(ID, one)])
     })
@@ -500,9 +500,9 @@ describe('a take on the Sound Pad', () => {
     ])('keeps a take it can’t make where Full Access is %s: its webhook may not have landed', async (_, state) => {
       signedInWherePaid()
       keepTakes(paying(ID, ofDeleted))
-      page.hasStoredFullAccess.mockResolvedValue(state)
+      page.canSaveFromStored.mockResolvedValue(state)
       await open(Promise.resolve({} as AudioBuffer))
-      expect(page.hasStoredFullAccess).toHaveBeenCalledWith('userA')
+      expect(page.canSaveFromStored).toHaveBeenCalledWith('userA')
       expect(page.makePadToot).not.toHaveBeenCalled()
       expect(byTestId('pad-take-state')?.textContent).toBe('Record')
       expect(byTestId('pad-take-lost')).toBeNull()
@@ -512,7 +512,7 @@ describe('a take on the Sound Pad', () => {
     it('keeps a take it can’t make again where saving is paid, and offers to try again', async () => {
       signedInWherePaid()
       keepTakes(paying(PAID, one))
-      page.hasStoredFullAccess.mockReturnValue(new Promise(() => {}))
+      page.canSaveFromStored.mockReturnValue(new Promise(() => {}))
       const broken = new Error('Rendering failed')
       page.makePadToot.mockRejectedValueOnce(broken)
       await open(Promise.resolve({} as AudioBuffer))
@@ -545,7 +545,7 @@ describe('a take on the Sound Pad', () => {
       )
       await open(Promise.resolve({} as AudioBuffer))
       expect(page.makePadToot).not.toHaveBeenCalled()
-      expect(page.hasStoredFullAccess).not.toHaveBeenCalled()
+      expect(page.canSaveFromStored).not.toHaveBeenCalled()
       expect(byTestId('pad-take-state')?.textContent).toBe('Record')
       expect(kept()).toHaveLength(3)
     })
@@ -553,7 +553,7 @@ describe('a take on the Sound Pad', () => {
     it('says a take with Full Access whose Recording was deleted can’t be made again', async () => {
       signedInWherePaid()
       keepTakes(paying(PAID, ofDeleted))
-      page.hasStoredFullAccess.mockResolvedValue(true)
+      page.canSaveFromStored.mockResolvedValue(true)
       await open(Promise.resolve({} as AudioBuffer))
       expect(page.makePadToot).not.toHaveBeenCalled()
       expect(byTestId('pad-take-lost')?.textContent).toContain(lostSays)
@@ -571,7 +571,7 @@ describe('a take on the Sound Pad', () => {
         page.pulled = null
         recordings = []
         keepTakes(paying(PAID, one))
-        page.hasStoredFullAccess.mockResolvedValue(true)
+        page.canSaveFromStored.mockResolvedValue(true)
       })
       /** The account's changes are read, bringing `brought`. */
       async function pulled(brought: Recording[]) {
@@ -584,7 +584,7 @@ describe('a take on the Sound Pad', () => {
 
       it('keeps a paid take whose Recordings aren’t here yet, and saves it once they are', async () => {
         await open(Promise.resolve({} as AudioBuffer))
-        expect(page.hasStoredFullAccess).toHaveBeenCalledWith('userA')
+        expect(page.canSaveFromStored).toHaveBeenCalledWith('userA')
         expect(page.makePadToot).not.toHaveBeenCalled()
         expect(byTestId('pad-take-lost')).toBeNull()
         expect(page.reportError).not.toHaveBeenCalled()
@@ -602,7 +602,7 @@ describe('a take on the Sound Pad', () => {
 
       it('saves it when they arrive before the account says it has Full Access', async () => {
         const answer = later<boolean>()
-        page.hasStoredFullAccess.mockReturnValue(answer.promise)
+        page.canSaveFromStored.mockReturnValue(answer.promise)
         await open(Promise.resolve({} as AudioBuffer))
         await pulled([recording])
         await act(async () => answer.resolve(true))
@@ -621,7 +621,7 @@ describe('a take on the Sound Pad', () => {
       })
 
       it('waits for them back from Checkout too', async () => {
-        page.hasStoredFullAccess.mockReturnValue(new Promise(() => {}))
+        page.canSaveFromStored.mockReturnValue(new Promise(() => {}))
         window.history.replaceState(null, '', `/compose/pad/?toot=${PAID}&checkout=done`)
         await open(Promise.resolve({} as AudioBuffer))
         expect(page.makePadToot).not.toHaveBeenCalled()
@@ -648,7 +648,7 @@ describe('a take on the Sound Pad', () => {
     it('never takes the place of a take being recorded', async () => {
       signedInWherePaid()
       const answer = later<boolean>()
-      page.hasStoredFullAccess.mockReturnValue(answer.promise)
+      page.canSaveFromStored.mockReturnValue(answer.promise)
       keepTakes(paying(PAID, one))
       await open(Promise.resolve({} as AudioBuffer))
       // The kept take is shown again; Record again starts a new one.

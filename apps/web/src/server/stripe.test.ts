@@ -254,6 +254,7 @@ describe('createCheckoutSession', () => {
       .mockResolvedValue(Response.json(session({ status: 'open', payment_status: 'unpaid' })))
     const created = await createCheckoutSession(TEST_KEY, {
       userId: 'userA',
+      email: 'a@example.test',
       tootId: TOOT,
       successUrl: `https://staging.farty.fm/compose/twinkle/?toot=${TOOT}&checkout=done`,
       cancelUrl: `https://staging.farty.fm/compose/twinkle/?toot=${TOOT}`,
@@ -275,6 +276,7 @@ describe('createCheckoutSession', () => {
       'line_items[0][price_data][unit_amount]': '499',
       'line_items[0][price_data][product_data][name]': 'Farty Full Access',
       client_reference_id: 'userA',
+      customer_email: 'a@example.test',
       'metadata[purchase]': 'full_access',
       'metadata[user_id]': 'userA',
       'metadata[toot_id]': TOOT,
@@ -294,6 +296,7 @@ describe('createCheckoutSession', () => {
     )
     const failed = await createCheckoutSession(TEST_KEY, {
       userId: 'userA',
+      email: 'a@example.test',
       tootId: TOOT,
       successUrl: 'https://staging.farty.fm/',
       cancelUrl: 'https://staging.farty.fm/',
@@ -310,6 +313,7 @@ describe('createCheckoutSession', () => {
       .mockImplementation(async () => Response.json(session({ status: 'open' })))
     const checkout = {
       userId: 'userA',
+      email: 'a@example.test',
       tootId: TOOT,
       successUrl: 'https://staging.farty.fm/',
       cancelUrl: 'https://staging.farty.fm/'

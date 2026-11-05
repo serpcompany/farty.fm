@@ -93,25 +93,32 @@ export async function saveCheck(
 }
 
 /**
- * Whether the account has Full Access, from what's stored, never asking Stripe (`?check=stored`), so
- * opening the Sound Pad never spends the checks a return from Checkout waits on. Null when Farty
- * couldn't say.
+ * Whether a Save on the account would just save, from what's stored: it has Full Access and room for
+ * the Toot. Never asks Stripe (`?check=stored`), so opening the Sound Pad never spends the checks a
+ * return from Checkout waits on. Null when Farty couldn't say.
  */
-export async function hasStoredFullAccess(accountId: string): Promise<boolean | null> {
+export async function canSaveFromStored(accountId: string): Promise<boolean | null> {
   const state = await askFullAccess('/api/full-access/?check=stored', accountId)
-  return state?.active ?? null
+  return state ? state.active && !state.limitReached : null
 }
 
 /** How long the return from Checkout waits for the payment: Stripe usually says in a second. */
 export const PAYMENT_WAIT = { tries: 15, intervalMs: 2000 }
 
-/** Asks until the account has Full Access, `PAYMENT_WAIT.tries` times at most. True once it has. */
-export async function waitForFullAccess(accountId: string, wait = PAYMENT_WAIT): Promise<boolean> {
+/**
+ * Asks until the account has Full Access, `PAYMENT_WAIT.tries` times at most. Then what Save does:
+ * `save`, or `limitReached` at the Toot limit. Null if it never came through.
+ */
+export async function waitForFullAccess(
+  accountId: string,
+  wait = PAYMENT_WAIT
+): Promise<'save' | 'limitReached' | null> {
   for (let attempt = 0; attempt < wait.tries; attempt++) {
     if (attempt > 0) await new Promise(resolve => setTimeout(resolve, wait.intervalMs))
-    if ((await askFullAccess('/api/full-access/', accountId))?.active) return true
+    const state = await askFullAccess('/api/full-access/', accountId)
+    if (state?.active) return state.limitReached ? 'limitReached' : 'save'
   }
-  return false
+  return null
 }
 
 /** Back from Checkout: the Toot it was for, and whether it says it's paid. */
