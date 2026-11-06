@@ -84,22 +84,25 @@ export async function startFullAccess(
 
 /**
  * Marks the account's purchase paid by `checkoutSessionId`, once. Only a purchase started here
- * (`startFullAccess`) can be: a user deleted since has no row. True when the account has Full Access
- * now. Counts the funnel's `paid` step the once it becomes paid (#405).
+ * (`startFullAccess`) can be: a user deleted since has no row. `active`: the account has Full Access
+ * now. `firstPaid`: this call is the one that made the purchase paid, as one UPDATE alone can, so
+ * however Stripe's webhook and the return from Checkout race or repeat, each purchase has one. A
+ * purchase started again after a refund has its own. Counts the funnel's `paid` step then (#405).
  */
 export async function markFullAccessPaid(
   db: Database,
   userId: string,
   checkoutSessionId: string,
   paymentIntent: string | null
-): Promise<boolean> {
+): Promise<{ active: boolean; firstPaid: boolean }> {
   const marked = await db
     .update(fullAccess)
     .set({ checkoutSessionId, paymentIntent, paidAt: sql`${d1Now}` })
     .where(and(eq(fullAccess.userId, userId), isNull(fullAccess.paidAt)))
     .returning({ userId: fullAccess.userId })
-  if (marked.length > 0) await countStep(db, 'paid')
-  return hasFullAccess(db, userId)
+  const firstPaid = marked.length > 0
+  if (firstPaid) await countStep(db, 'paid')
+  return { active: await hasFullAccess(db, userId), firstPaid }
 }
 
 /** Ends the Full Access that Stripe's payment `paymentIntent` bought: it's fully refunded. */
