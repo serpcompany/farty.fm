@@ -36,10 +36,12 @@ export type SharedFart = {
   name: string
   /** "1.1 s": its fart's length, as its row shows it. */
   length: string
-  /** The loudness bars of the part it plays, each 0…1. */
+  /** The loudness bars of the fart, each 0…1. */
   levels: number[]
   /** When it was recorded, in ms. */
   recordedAt: number
+  /** Analysis has found the fart, so it has audio to play. */
+  playable: boolean
 }
 
 /** A row of a shared Toot's "Recordings used". */

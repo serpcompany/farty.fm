@@ -49,7 +49,8 @@ const fart = (place: number, name: string): SharedFartRow['fart'] => ({
   name,
   length: '0:01',
   levels: [0.2, 0.8],
-  recordedAt: Date.UTC(2026, 10, 6, 15, 12)
+  recordedAt: Date.UTC(2026, 10, 6, 15, 12),
+  playable: true
 })
 
 const notes = [
@@ -168,6 +169,16 @@ describe("A shared Toot's farts", () => {
     expect(fartRows()[0].textContent).toContain('Recording deleted')
     expect(fartRows()[0].textContent).toContain('plays C4')
     expect(fartRows()[0].querySelector('button')).toBeNull()
+  })
+
+  it("has nothing to play on a fart analysis hasn't found", async () => {
+    const found = fart(0, 'New one')
+    const notFound = found && { ...found, length: '', levels: [], playable: false }
+    await render({ ...parts, rows: [{ ...rows[0], fart: notFound }] })
+
+    expect((fartButton(0) as HTMLButtonElement).disabled).toBe(true)
+    await click(fartButton(0))
+    expect(heard.plays).toEqual([])
   })
 
   it('leaves out the note on a Sound Pad fart, which played none', async () => {
