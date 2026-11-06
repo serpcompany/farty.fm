@@ -296,7 +296,7 @@ const faq = [
   {
     question: 'Is Farty free?',
     answer: saveAsksForPayment()
-      ? `Recording and making Toots is free, and so is an account. Full Access is ${FULL_ACCESS_PRICE_LABEL} once and saves up to ${MAX_SAVED_TOOTS} Toots, with your money back within ${MONEY_BACK_DAYS} days.`
+      ? `Recording and making Toots is free, and so is an account. Full Access is ${FULL_ACCESS_PRICE_LABEL} once. It saves up to ${MAX_SAVED_TOOTS} Toots and lets you download them, with your money back within ${MONEY_BACK_DAYS} days.`
       : 'Yes. Farty is free, and so is an account.'
   },
   {

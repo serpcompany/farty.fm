@@ -18,7 +18,7 @@ import { FULL_ACCESS_PRICE } from '@/lib/pricing'
 import { servedOrigin } from '@/lib/site'
 
 import { consumeSlot, type SlotRule } from './auth-config'
-import { LIMITS, type Stores, wrongLibrary } from './library'
+import { getItemAudio, LIMITS, type Stores, wrongLibrary } from './library'
 import { isItemId, readCapped, readJson } from './library-input'
 import { apiError, type SessionUser } from './require-user'
 import {
@@ -244,6 +244,27 @@ export async function getFullAccess(
   } catch (error) {
     return stripeFailed(error)
   }
+}
+
+/**
+ * `GET /api/toots/{id}/download/`: a saved Toot's WAV, the bytes saved and nothing done to them, on
+ * an account with Full Access (#408). The server decides, as it does for a Save: 402
+ * `payment_required` without it, as after a full refund, when the Toot stays and still plays through
+ * `/audio/`. 404 for a Toot that hasn't reached the account, or isn't there any more.
+ */
+export async function downloadToot(
+  stores: Stores,
+  payments: Payments,
+  user: SessionUser,
+  id: string,
+  request: Request
+): Promise<Response> {
+  const wrong = wrongLibrary(user, request)
+  if (wrong) return wrong
+  if (payments.kind !== 'free' && !(await hasFullAccess(stores.db, user.id))) {
+    return apiError(402, 'payment_required')
+  }
+  return getItemAudio('toots', stores, user, id, request)
 }
 
 /** The events that say a Checkout Session is paid: by card or wallet, or by a slower method. */

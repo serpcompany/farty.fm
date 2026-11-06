@@ -55,6 +55,7 @@ describe('every API route outside api/auth/', () => {
         './recordings/[id]/audio/route.ts',
         './recordings/[id]/route.ts',
         './toots/[id]/audio/route.ts',
+        './toots/[id]/download/route.ts',
         './toots/[id]/route.ts',
         './dev/checkout/route.ts'
       ])

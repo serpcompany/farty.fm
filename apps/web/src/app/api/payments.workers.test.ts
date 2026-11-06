@@ -5,11 +5,13 @@ import * as devCheckoutRoute from '@/app/api/dev/checkout/route'
 import * as checkoutRoute from '@/app/api/full-access/checkout/route'
 import * as accessRoute from '@/app/api/full-access/route'
 import * as webhookRoute from '@/app/api/stripe/webhook/route'
+import * as downloadRoute from '@/app/api/toots/[id]/download/route'
 import { fullAccessPurchase, startFullAccess, tootPayment } from '@/db/payments'
 import { stepCounts } from '@/db/schema'
 import { FULL_ACCESS_PRICE } from '@/lib/pricing'
 import {
   devCheckoutServes,
+  downloadToot,
   getFullAccess,
   PAYMENT_LIMITS,
   receiveStripeEvent,
@@ -18,6 +20,8 @@ import {
 import type { CheckoutSession, Payments } from '@/server/stripe'
 import {
   api,
+  giveFullAccess,
+  media,
   ORIGIN,
   padTootMetadata,
   signUp,
@@ -89,6 +93,12 @@ const accessRequest = (as: As, query = '') =>
   new Request(`${ORIGIN}/api/full-access/${query}`, { headers: headersFor('GET', as) })
 
 const access = (as: As, query = '') => accessRoute.GET(accessRequest(as, query), noParams)
+
+const downloadRequest = (id: string, as: As) =>
+  new Request(`${ORIGIN}/api/toots/${id}/download/`, { headers: headersFor('GET', as) })
+
+const download = (id: string, as: As) =>
+  downloadRoute.GET(downloadRequest(id, as), { params: Promise.resolve({ id }) })
 
 /** The dev checkout's Pay, for a Toot of `song`, or with no `song` for a Sound Pad Toot. */
 const payDev = (toot: string, as: As, song: string | null = 'twinkle') =>
@@ -376,6 +386,93 @@ describe('on a local run, with the dev checkout', () => {
     const started = await checkout(T2, a)
     expect(started.status).toBe(409)
     expect(await started.json()).toEqual({ error: 'limit_reached' })
+  })
+})
+
+describe('downloading a saved Toot (#408)', () => {
+  /** An account with Full Access and Toot `T1` saved. */
+  async function withSavedToot(name: string) {
+    const user = await signUp(name)
+    await giveFullAccess(user.id)
+    expect((await save(T1, user)).status).toBe(201)
+    return user
+  }
+
+  it('gives an account with Full Access the bytes saved, as a file', async () => {
+    const a = await withSavedToot('A')
+    const response = await download(T1, a)
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-type')).toBe('audio/wav')
+    expect(response.headers.get('cache-control')).toBe('private, no-store')
+    expect(new Uint8Array(await response.arrayBuffer())).toEqual(wav())
+  })
+
+  it('answers 402, without the file, to an account without Full Access', async () => {
+    const a = await signUp('A')
+    const response = await download(T1, a)
+    expect(response.status).toBe(402)
+    expect(await response.json()).toEqual({ error: 'payment_required' })
+  })
+
+  it('lets someone who paid for a Toot before Full Access download', async () => {
+    const a = await signUp('A')
+    await pastPayment(a.id, T1)
+    expect((await save(T1, a)).status).toBe(201)
+    expect((await download(T1, a)).status).toBe(200)
+  })
+
+  it('ends with a refund of that old payment too', async () => {
+    const a = await signUp('A')
+    await pastPayment(a.id, T1)
+    expect((await save(T1, a)).status).toBe(201)
+    await env.DB.prepare('update toot_payments set refunded_at = 1 where user_id = ?1')
+      .bind(a.id)
+      .run()
+    expect((await download(T1, a)).status).toBe(402)
+  })
+
+  it('answers 404 for a Toot that has not reached the account', async () => {
+    const a = await signUp('A')
+    await giveFullAccess(a.id)
+    const response = await download(T1, a)
+    expect(response.status).toBe(404)
+  })
+
+  it("answers 404 for someone else's Toot, even with Full Access", async () => {
+    await withSavedToot('A')
+    const b = await signUp('B')
+    await giveFullAccess(b.id)
+    expect((await download(T1, b)).status).toBe(404)
+  })
+
+  it('answers 404 for a Toot that has been deleted', async () => {
+    const a = await withSavedToot('A')
+    expect((await api.delete('toots', T1, a)).status).toBeLessThan(300)
+    expect((await download(T1, a)).status).toBe(404)
+  })
+
+  it("answers 409 when the browser holds another account's library", async () => {
+    const a = await withSavedToot('A')
+    const response = await download(T1, { ...a, library: 'userSomeoneElse' })
+    expect(response.status).toBe(409)
+    expect(await response.json()).toEqual({ error: 'wrong_account' })
+  })
+
+  it('needs a session', async () => {
+    expect((await download(T1, {})).status).toBe(401)
+  })
+
+  it('is free where saving is free', async () => {
+    const a = await withSavedToot('A')
+    const stores = { db: testDb(), media: media() }
+    const free = await downloadToot(stores, { kind: 'free' }, a, T1, downloadRequest(T1, a))
+    expect(free.status).toBe(200)
+    await env.DB.prepare('update full_access set refunded_at = 1 where user_id = ?1')
+      .bind(a.id)
+      .run()
+    expect((await download(T1, a)).status).toBe(402)
+    const stillFree = await downloadToot(stores, { kind: 'free' }, a, T1, downloadRequest(T1, a))
+    expect(stillFree.status).toBe(200)
   })
 })
 
@@ -924,6 +1021,11 @@ describe('with Stripe Checkout in test mode', () => {
       expect(await tootRows(a.id)).toEqual([{ id: T1, deleted_at: null }])
       // Its row stays, so a retried upload of what's saved still answers kept.
       expect((await save(T1, a)).status).toBe(200)
+      // Download ends with it (#408), while the Toot still plays.
+      const downloaded = await download(T1, a)
+      expect(downloaded.status).toBe(402)
+      expect(await downloaded.json()).toEqual({ error: 'payment_required' })
+      expect(new Uint8Array(await (await api.audio('toots', T1, a)).arrayBuffer())).toEqual(wav())
       // The next new Toot asks again.
       expect(await (await save(T2, a)).json()).toEqual({ error: 'payment_required' })
 

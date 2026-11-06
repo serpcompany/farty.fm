@@ -40,7 +40,7 @@ export function FullAccessSheet({
           <SheetTitle className="text-xl font-semibold">Full Access</SheetTitle>
           <SheetDescription className="text-base">
             {FULL_ACCESS_PRICE_LABEL}, once. Save up to {MAX_SAVED_TOOTS} Toots, from Songs and the
-            Sound Pad.
+            Sound Pad, and download them to your phone.
           </SheetDescription>
         </SheetHeader>
         <p className="px-5 pb-2 text-sm text-muted-foreground">

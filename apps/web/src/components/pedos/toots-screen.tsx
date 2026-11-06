@@ -1,6 +1,15 @@
 'use client'
 
-import { Ellipsis, ListMusic, Pencil, Play, Square, Trash2, TriangleAlert } from 'lucide-react'
+import {
+  Download,
+  Ellipsis,
+  ListMusic,
+  Pencil,
+  Play,
+  Square,
+  Trash2,
+  TriangleAlert
+} from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -27,6 +36,7 @@ import { PAD_TOOT_TITLE, type Toot, tootDetails } from '@/lib/toot'
 import { cn } from '@/lib/utils'
 import { tootPlayback, usePedos } from './pedos-provider'
 import { type ShareFlow, ShareMenuItems, useShare, useShares } from './share-recording'
+import { type TootDownloadFlow, useTootDownload } from './toot-download'
 
 /** Where a Toot's screen is: one page for every Toot, since a Toot's id is made on the device. */
 export function tootPage(id: string): string {
@@ -190,6 +200,7 @@ function TootRow({
     pedos.tootPlayFailed === toot.id ? `${songTitle} · Couldn't play` : tootDetails(toot, songTitle)
   const Icon = toot.isAudioMissing ? TriangleAlert : isPlaying ? Square : Play
   const share = useShare({ kind: 'toots', id: toot.id, name: toot.title })
+  const download = useTootDownload(toot)
 
   return (
     <li
@@ -225,10 +236,12 @@ function TootRow({
         // A Toot that can't play here has nothing to share, but once shared (from another
         // device, say) its link plays from the account, so Share link and Stop sharing stay.
         share={toot.isAudioMissing && !share.link ? undefined : share}
+        download={download}
         onRename={onRename}
         onDelete={onDelete}
       />
       {share.dialogs}
+      {download.dialogs}
     </li>
   )
 }
@@ -237,11 +250,13 @@ function TootRow({
 export function TootMenu({
   title,
   share,
+  download,
   onRename,
   onDelete
 }: {
   title: string
   share?: ShareFlow
+  download?: TootDownloadFlow
   onRename: () => void
   onDelete: () => void
 }) {
@@ -261,6 +276,16 @@ export function TootMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-auto">
         {share && <ShareMenuItems flow={share} />}
+        {download?.available && (
+          <DropdownMenuItem
+            className="min-h-11 px-3 text-base"
+            disabled={download.busy}
+            onClick={download.download}
+          >
+            <Download />
+            Download
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem className="min-h-11 px-3 text-base" onClick={onRename}>
           <Pencil />
           Rename

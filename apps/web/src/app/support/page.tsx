@@ -23,7 +23,7 @@ const questions = [
   },
   {
     q: 'Can I get my money back?',
-    a: `Yes, within ${MONEY_BACK_DAYS} days of paying for Full Access. Email devin@serp.co from your account’s email. The Toots you’ve saved stay, and saving another one asks for Full Access again.`
+    a: `Yes, within ${MONEY_BACK_DAYS} days of paying for Full Access. Email devin@serp.co from your account’s email. The Toots you’ve saved stay. Downloading them stops, and saving another one asks for Full Access again.`
   }
 ]
 

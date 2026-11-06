@@ -102,6 +102,15 @@ export async function canSaveFromStored(accountId: string): Promise<boolean | nu
   return state ? state.active && !state.limitReached : null
 }
 
+/**
+ * Whether the account has Full Access, from what's stored, which never asks Stripe (`?check=stored`).
+ * An account at the Toot limit still has it. Null when Farty couldn't say.
+ */
+export async function hasStoredFullAccess(accountId: string): Promise<boolean | null> {
+  const state = await askFullAccess('/api/full-access/?check=stored', accountId)
+  return state ? state.active : null
+}
+
 /** How long the return from Checkout waits for the payment: Stripe usually says in a second. */
 export const PAYMENT_WAIT = { tries: 15, intervalMs: 2000 }
 

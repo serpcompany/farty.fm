@@ -91,6 +91,9 @@ vi.mock('./toots-screen', () => ({
   RenameTootDialog: () => null,
   DeleteTootDialog: () => null
 }))
+vi.mock('./toot-download', () => ({
+  useTootDownload: () => ({ available: false, busy: false, download: () => {}, dialogs: null })
+}))
 vi.mock('next/navigation', () => ({
   useRouter: () => ({}),
   usePathname: () => '/compose/',

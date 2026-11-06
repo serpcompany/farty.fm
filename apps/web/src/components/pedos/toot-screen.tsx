@@ -13,6 +13,7 @@ import { usePedos } from './pedos-provider'
 import { previousPage } from './previous-page'
 import { ShareButton, useShares } from './share-recording'
 import { TootLayout } from './song-creator'
+import { useTootDownload } from './toot-download'
 import { DeleteTootDialog, RenameTootDialog, TootMenu } from './toots-screen'
 import { useSongNotes } from './use-song-notes'
 
@@ -45,6 +46,7 @@ export function TootScreen() {
   // load, or if they don't.
   const notes = useSongNotes(asMade ? undefined : summary)
   const isShared = useShares()?.tootLinks.has(id) ?? false
+  const download = useTootDownload(toot)
   /** Under the title: its Song, or Sound Pad, and Shared while it's shared, as the prototype's. */
   const subtitle = [
     summary ? summary.title : toot?.songId === null ? PAD_TOOT_TITLE : null,
@@ -113,6 +115,7 @@ export function TootScreen() {
               )}
               <TootMenu
                 title={toot.title}
+                download={download}
                 onRename={() => setIsRenaming(true)}
                 onDelete={() => setIsConfirmingDelete(true)}
               />
@@ -178,6 +181,7 @@ export function TootScreen() {
         </TootLayout>
       )}
 
+      {download.dialogs}
       <RenameTootDialog
         toot={isRenaming && toot ? toot : null}
         onClose={() => setIsRenaming(false)}

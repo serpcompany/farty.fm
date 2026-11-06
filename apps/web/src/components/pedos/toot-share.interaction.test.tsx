@@ -46,6 +46,10 @@ vi.mock('./pedos-provider', () => ({
 vi.mock('./account-provider', () => ({
   useAccount: () => ({ account: { status: 'signedIn', id: 'account-1' }, openStep: () => {} })
 }))
+vi.mock('@/lib/full-access', async importOriginal => ({
+  ...(await importOriginal<typeof import('@/lib/full-access')>()),
+  hasStoredFullAccess: async () => false
+}))
 vi.mock('@/lib/sharing', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/sharing')>()),
   readShares: async () => ({
