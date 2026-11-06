@@ -12,6 +12,8 @@ import { skipWelcome } from './record'
 
 const TITLE = 'Mary Had a Little Lamb'
 const FILE_NAME = `${TITLE}.wav`
+/** The session read that decides whether an account could be read at all. */
+const SESSION_READ = '**/api/auth/get-session*'
 
 test.use({ serviceWorkers: 'block' })
 
@@ -42,7 +44,7 @@ test('with Full Access, a saved Toot downloads from its row and its screen, byte
     const bytes = await readFile(path)
     expect(sha256(bytes)).toBe(saved)
     expectSavedWavFormat(bytes)
-    await expect(page.getByText('Look for it in your Downloads.')).toBeVisible()
+    await expect(page.getByText("Once it's downloaded, it's in your Downloads.")).toBeVisible()
   })
 
   await test.step('it matches the account’s copy too', async () => {
@@ -92,6 +94,21 @@ test('with Full Access, a saved Toot downloads from its row and its screen, byte
     await expect(page.getByTestId('full-access-sheet')).toBeHidden()
     await page.context().setOffline(false)
   })
+
+  await test.step('with the account unreadable when it opened, the tap reads it again and carries on', async () => {
+    const refused = page.waitForRequest(SESSION_READ)
+    await page.route(SESSION_READ, route => route.abort())
+    await page.goto('/toots/')
+    await refused
+    await expect(page.getByRole('button', { name: `More for ${TITLE}` })).toBeVisible()
+    await page.unroute(SESSION_READ)
+    await openMore(page)
+    const download = page.waitForEvent('download')
+    await page.getByRole('menuitem', { name: 'Download' }).click()
+    const path = testInfo.outputPath('after-reading-the-account-again.wav')
+    await (await download).saveAs(path)
+    expect(sha256(await readFile(path))).toBe(saved)
+  })
 })
 
 test('without Full Access, Download offers it, and paying comes back to a file on the Toot’s screen', async ({
@@ -133,31 +150,44 @@ test('without Full Access, Download offers it, and paying comes back to a file o
     expect(noFile).toEqual([])
   })
 
-  await test.step('paying comes back to the Toot’s screen, and one more tap gives the file', async () => {
+  await test.step('paying comes back to the Toot’s screen, and the file follows by itself', async () => {
     await openMore(page)
     await page.getByRole('menuitem', { name: 'Download' }).click()
     await payOnTheSheet(page)
+    const download = page.waitForEvent('download', { timeout: 60_000 })
     await page.getByRole('button', { name: 'Pay $4.99' }).click()
-    const ready = page.getByRole('alertdialog')
-    await expect(ready).toContainText('Your Toot is ready to download', { timeout: 60_000 })
-    await expect(ready).toContainText(FILE_NAME)
-    await expect(ready.getByRole('button', { name: 'Download' })).toBeFocused()
-    await expect(page).toHaveURL(new RegExp(`/toots/toot/\\?id=${id}$`))
-    expect(noFile).toEqual([])
-
-    const download = page.waitForEvent('download')
-    await ready.getByRole('button', { name: 'Download' }).click()
     const file = await download
     expect(file.suggestedFilename()).toBe(FILE_NAME)
     const path = testInfo.outputPath('after-paying.wav')
     await file.saveAs(path)
     expect(sha256(await readFile(path))).toBe(saved)
+    await expect(page.getByText("Once it's downloaded, it's in your Downloads.")).toBeVisible()
+    await expect(page.getByRole('alertdialog')).toBeHidden()
+    await expect(page).toHaveURL(new RegExp(`/toots/toot/\\?id=${id}$`))
   })
 
   await test.step('a reload is just the Toot’s screen', async () => {
+    const before = noFile.length
     await page.reload()
     await expect(page.getByRole('button', { name: `More for ${TITLE}` })).toBeVisible()
     await expect(page.getByRole('alertdialog')).toBeHidden()
+    expect(noFile).toHaveLength(before)
+  })
+
+  await test.step('back from paying with the account unreadable, the return waits for it', async () => {
+    await page.route(SESSION_READ, route => route.abort())
+    await page.goto(`/toots/toot/?id=${id}&checkout=done`)
+    await expect(page.getByText("Couldn't reach Farty.", { exact: false })).toBeVisible()
+    await expect(page).toHaveURL(/checkout=done/)
+    await page.unroute(SESSION_READ)
+
+    await openMore(page)
+    const download = page.waitForEvent('download')
+    await page.getByRole('menuitem', { name: 'Download' }).click()
+    const path = testInfo.outputPath('after-the-account-came-back.wav')
+    await (await download).saveAs(path)
+    expect(sha256(await readFile(path))).toBe(saved)
+    await expect(page).toHaveURL(new RegExp(`/toots/toot/\\?id=${id}$`))
   })
 })
 
@@ -204,6 +234,7 @@ test.describe('a Home Screen app on iPhone', () => {
 
     const ready = page.getByRole('alertdialog')
     await expect(ready).toContainText('Your Toot is ready to download')
+    await expect(ready.getByRole('button', { name: 'Download' })).toBeFocused()
     await ready.getByRole('button', { name: 'Download' }).click()
     await expect(ready).toBeHidden()
 

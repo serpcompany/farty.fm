@@ -147,21 +147,25 @@ describe('handOverFile', () => {
     })
     expect(await handOverFile(file)).toBe('needsTap')
     expect(browser.link.click).not.toHaveBeenCalled()
-    // Refused from a tap too: it never stops, so it tries the download.
-    expect(await handOverFile(file, true)).toBe('downloading')
-    expect(browser.link.click).toHaveBeenCalledOnce()
+    // Refused from a tap too: it never asks twice, and a Home Screen app has no downloads to try.
+    expect(await handOverFile(file, true)).toBe('failed')
+    expect(browser.link.click).not.toHaveBeenCalled()
   })
 
-  it('downloads when the share sheet can’t take the file, or fails', async () => {
+  it('tries the download when the share sheet can’t take the file', async () => {
     const cannot = aBrowser({ userAgent: IPHONE, homeScreen: true, canShare: false })
     expect(await handOverFile(file)).toBe('downloading')
     expect(cannot.shared).not.toHaveBeenCalled()
+    expect(cannot.link.click).toHaveBeenCalledOnce()
+  })
 
-    aBrowser({
+  it('says it failed when the share sheet fails, rather than pretending a download', async () => {
+    const browser = aBrowser({
       userAgent: IPHONE,
       homeScreen: true,
       share: () => Promise.reject(new DOMException('failed', 'DataError'))
     })
-    expect(await handOverFile(file)).toBe('downloading')
+    expect(await handOverFile(file)).toBe('failed')
+    expect(browser.link.click).not.toHaveBeenCalled()
   })
 })

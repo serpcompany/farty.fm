@@ -32,7 +32,8 @@ const page = vi.hoisted(() => ({
   account: { status: 'signedIn', id: 'account-1' } as { status: string; id?: string },
   afterStep: null as (() => void) | null,
   markAudioMissing: vi.fn(),
-  openStep: vi.fn()
+  openStep: vi.fn(),
+  retry: vi.fn()
 }))
 
 const calls = vi.hoisted(() => ({
@@ -61,7 +62,7 @@ vi.mock('./pedos-provider', () => ({
   })
 }))
 vi.mock('./account-provider', () => ({
-  useAccount: () => ({ account: page.account, openStep: page.openStep })
+  useAccount: () => ({ account: page.account, openStep: page.openStep, retry: page.retry })
 }))
 vi.mock('@/lib/sharing', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/sharing')>()),
@@ -107,6 +108,9 @@ beforeEach(() => {
   page.afterStep = null
   page.openStep.mockImplementation((then?: () => void) => {
     page.afterStep = then ?? null
+  })
+  page.retry.mockImplementation(() => {
+    page.account = { status: 'checking' }
   })
   calls.hasFullAccess.mockResolvedValue(true)
   calls.waitForFullAccess.mockResolvedValue('save')
@@ -219,7 +223,19 @@ describe('Download with Full Access', () => {
     expect(file.type).toBe('audio/wav')
     expect(new Uint8Array(await file.arrayBuffer())).toEqual(new Uint8Array(WAV))
     expect(sheet()).toBeNull()
-    expect(note()).toBe('Look for it in your Downloads.')
+    expect(note()).toBe("Once it's downloaded, it's in your Downloads.")
+  })
+
+  it('says the Files app on an iPhone', async () => {
+    const userAgent = vi
+      .spyOn(navigator, 'userAgent', 'get')
+      .mockReturnValue(
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15'
+      )
+    await showToots()
+    await tapDownload()
+    userAgent.mockRestore()
+    expect(note()).toBe("Once it's downloaded, it's in the Files app.")
   })
 
   it('works the same from the Toot’s screen', async () => {
@@ -261,6 +277,14 @@ describe('Download with Full Access', () => {
     await tapButton('Download')
     expect(calls.handOverFile).toHaveBeenCalledTimes(2)
     expect(calls.handOverFile.mock.calls[1]).toEqual([expect.any(File), true])
+    expect(dialog()).toBeNull()
+  })
+
+  it('says so when the share sheet failed', async () => {
+    calls.handOverFile.mockResolvedValueOnce('failed')
+    await showToots()
+    await tapDownload()
+    expect(note()).toBe("Couldn't download this Toot. Try again.")
     expect(dialog()).toBeNull()
   })
 
@@ -342,12 +366,49 @@ describe('Download without an account', () => {
     expect(note()).toBeUndefined()
   })
 
-  it('says so when the account can’t be read', async () => {
+  it('reads an account it couldn’t read again, and carries on once it can', async () => {
     page.account = { status: 'unreachable' }
     await showToots()
     await tapDownload()
+    expect(page.retry).toHaveBeenCalledOnce()
     expect(page.openStep).not.toHaveBeenCalled()
+    expect(note()).toBeUndefined()
+    expect(moreButton().disabled).toBe(true)
+
+    page.account = { status: 'signedIn', id: 'account-1' }
+    await showToots()
+    expect(handedFile().name).toBe(FILE_NAME)
+  })
+
+  it('says so only if the account still can’t be read, and each tap reads it again', async () => {
+    page.account = { status: 'unreachable' }
+    await showToots()
+    await tapDownload()
+    page.account = { status: 'unreachable' }
+    await showToots()
     expect(note()).toBe("Couldn't reach Farty. Check your connection and try again.")
+    expect(moreButton().disabled).toBe(false)
+    expect(calls.hasFullAccess).not.toHaveBeenCalled()
+
+    await tapDownload()
+    expect(page.retry).toHaveBeenCalledTimes(2)
+    page.account = { status: 'signedIn', id: 'account-1' }
+    await showToots()
+    expect(handedFile().name).toBe(FILE_NAME)
+  })
+
+  it('waits for an account still being read, then goes by what it finds', async () => {
+    page.account = { status: 'checking' }
+    await showToots()
+    await tapDownload()
+    expect(page.retry).not.toHaveBeenCalled()
+    expect(note()).toBeUndefined()
+    expect(moreButton().disabled).toBe(true)
+
+    page.account = { status: 'signedOut' }
+    await showToots()
+    expect(page.openStep).toHaveBeenCalledOnce()
+    expect(calls.hasFullAccess).not.toHaveBeenCalled()
   })
 })
 
@@ -413,20 +474,26 @@ describe('Back from Checkout for a Download', () => {
     window.history.replaceState(null, '', '/toots/toot/?id=toot-1&checkout=done')
   })
 
-  it('offers the file once the payment comes through, by a tap of its own', async () => {
+  it('hands over the file by itself once the payment comes through', async () => {
     await showToot()
     expect(calls.waitForFullAccess).toHaveBeenCalledWith('account-1')
+    expect(handedFile().name).toBe(FILE_NAME)
+    expect(dialog()).toBeNull()
+    expect(note()).toBe("Once it's downloaded, it's in your Downloads.")
+  })
+
+  it('asks for the tap only where the browser wants one', async () => {
+    calls.handOverFile.mockResolvedValueOnce('needsTap')
+    await showToot()
     expect(dialog()?.textContent).toContain('Your Toot is ready to download')
-    expect(dialog()?.textContent).toContain(FILE_NAME)
-    expect(calls.handOverFile).not.toHaveBeenCalled()
     await tapButton('Download')
-    expect(calls.handOverFile.mock.calls[0]).toEqual([expect.any(File), true])
+    expect(calls.handOverFile.mock.calls[1]).toEqual([expect.any(File), true])
   })
 
   it('counts at the Toot limit too, as it keeps no new Toot', async () => {
     calls.waitForFullAccess.mockResolvedValue('limitReached')
     await showToot()
-    expect(dialog()).not.toBeNull()
+    expect(handedFile().name).toBe(FILE_NAME)
   })
 
   it('takes the return off the address, so a reload doesn’t wait for a payment again', async () => {
@@ -434,36 +501,100 @@ describe('Back from Checkout for a Download', () => {
     expect(window.location.search).toBe('?id=toot-1')
   })
 
-  it('shows it’s waiting on the More button, and starts once', async () => {
+  it('says it’s confirming the payment while it waits, and starts once', async () => {
     let answer: (access: string | null) => void = () => {}
     calls.waitForFullAccess.mockReturnValue(new Promise(resolve => (answer = resolve)))
     await showToot()
     expect(moreButton().disabled).toBe(true)
+    expect(note()).toBe('Confirming payment…')
     await showToot()
     expect(calls.waitForFullAccess).toHaveBeenCalledOnce()
     await act(async () => answer('save'))
     await settle()
     expect(moreButton().disabled).toBe(false)
+    expect(note()).not.toBe('Confirming payment…')
   })
 
-  it('says so when the payment hasn’t come through, and Download checks again', async () => {
+  it('keeps saying so when the payment hasn’t come through, and Download checks again', async () => {
     calls.waitForFullAccess.mockResolvedValue(null)
     await showToot()
-    expect(note()).toBe("Your payment hasn't come through yet. Tap Download to check again.")
+    const notThrough = "Your payment hasn't come through yet. Tap Download to check again."
+    expect(note()).toBe(notThrough)
+    await act(async () => await new Promise(r => setTimeout(r, 5_100)))
+    expect(note()).toBe(notThrough)
     expect(dialog()).toBeNull()
+    // Only the file ends the return, so a reload would check again.
+    expect(window.location.search).toContain('checkout=done')
+
     await tapDownload()
+    expect(calls.waitForFullAccess).toHaveBeenCalledOnce()
     expect(calls.hasFullAccess).toHaveBeenCalledWith('account-1')
     expect(handedFile().name).toBe(FILE_NAME)
-  })
+    expect(window.location.search).toBe('?id=toot-1')
+  }, 10_000)
 
-  it('waits for the account to be read', async () => {
+  it('says it’s confirming while the account is read, then waits for the payment', async () => {
     page.account = { status: 'checking' }
     await showToot()
     expect(calls.waitForFullAccess).not.toHaveBeenCalled()
     expect(window.location.search).toContain('checkout=done')
+    expect(note()).toBe('Confirming payment…')
+    expect(moreButton().disabled).toBe(true)
     page.account = { status: 'signedIn', id: 'account-1' }
     await showToot()
     expect(calls.waitForFullAccess).toHaveBeenCalledOnce()
+    expect(handedFile().name).toBe(FILE_NAME)
+  })
+
+  it('keeps the return while the account can’t be read, and carries on when it can', async () => {
+    page.account = { status: 'unreachable' }
+    await showToot()
+    expect(calls.waitForFullAccess).not.toHaveBeenCalled()
+    expect(window.location.search).toContain('checkout=done')
+    const unreachable = "Couldn't reach Farty. Check your connection and try again."
+    expect(note()).toBe(unreachable)
+    await act(async () => await new Promise(r => setTimeout(r, 5_100)))
+    expect(note()).toBe(unreachable)
+
+    page.account = { status: 'signedIn', id: 'account-1' }
+    await showToot()
+    expect(calls.waitForFullAccess).toHaveBeenCalledOnce()
+    expect(handedFile().name).toBe(FILE_NAME)
+    expect(window.location.search).toBe('?id=toot-1')
+  }, 10_000)
+
+  it('reads the account again on a tap, and still waits for the payment', async () => {
+    page.account = { status: 'unreachable' }
+    await showToot()
+    await tapDownload()
+    expect(page.retry).toHaveBeenCalledOnce()
+    expect(note()).toBe('Confirming payment…')
+    page.account = { status: 'signedIn', id: 'account-1' }
+    await showToot()
+    expect(calls.waitForFullAccess).toHaveBeenCalledOnce()
+    expect(calls.hasFullAccess).not.toHaveBeenCalled()
+    expect(calls.handOverFile).toHaveBeenCalledOnce()
+  })
+
+  it('opens the account step once when signed out, and carries on after it', async () => {
+    page.account = { status: 'expired' }
+    await showToot()
+    await showToot()
+    expect(page.openStep).toHaveBeenCalledOnce()
+    expect(window.location.search).toContain('checkout=done')
+    page.account = { status: 'signedIn', id: 'account-1' }
+    await act(async () => page.afterStep?.())
+    await showToot()
+    expect(calls.waitForFullAccess).toHaveBeenCalledOnce()
+    expect(calls.handOverFile).toHaveBeenCalledOnce()
+  })
+
+  it('says the payment went through where the Toot isn’t here', async () => {
+    page.toots = []
+    await showToot()
+    expect(document.body.textContent).toContain("Couldn't find this Toot.")
+    expect(document.body.textContent).toContain('Your payment went through')
+    expect(calls.waitForFullAccess).not.toHaveBeenCalled()
   })
 
   it('never starts from a Toot’s row', async () => {
@@ -480,5 +611,13 @@ describe('Back from a cancelled Checkout', () => {
     expect(calls.waitForFullAccess).not.toHaveBeenCalled()
     expect(dialog()).toBeNull()
     expect(note()).toBeUndefined()
+  })
+
+  it('says nothing of a payment where the Toot isn’t here', async () => {
+    page.toots = []
+    page.search = { id: 'toot-1' }
+    await showToot()
+    expect(document.body.textContent).toContain("Couldn't find this Toot.")
+    expect(document.body.textContent).not.toContain('payment')
   })
 })

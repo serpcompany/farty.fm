@@ -27,7 +27,7 @@ The price is `FULL_ACCESS_PRICE` in `apps/web/src/lib/pricing.ts`, the one place
 
 Checkout still goes back to the Toot whose Save asked for it, with its id, and saves it. Stripe fixes a session's return address when it's made, so an open session for the same Toot is reused, and one for another Toot is ended first (`/expire`) so that one payment is ever open. Taps and tabs one after another can't pay twice. If ending it fails because it was just paid, the next tap finds that.
 
-Paying from a saved Toot's Download goes back to that Toot's screen instead (`returnTo: 'toot'`), which offers the file by a tap of its own, since a browser hands over a file only from a tap and the wait for the payment outlasts the one that started it. It keeps nothing new, so the 300 Toots don't stop it.
+Paying from a saved Toot's Download goes back to that Toot's screen instead (`returnTo: 'toot'`), and the file follows once the payment comes through. Safari asks before it keeps a file whether a tap started it or not. The share sheet in a Home Screen app does want a fresh tap, so there it asks for one. It keeps nothing new, so the 300 Toots don't stop it.
 
 The Sound Pad keeps a take across Checkout as before (ADR 0017). On its next open, a take that started a Checkout and never got back is made again and saved if the account has Full Access by then, newest first and one per open. A kept take that couldn't be made again costs nothing now, as the purchase isn't tied to it, so the Pad says to record it again instead of reporting a refund, and the `pad-paid-take-lost` report is gone.
 

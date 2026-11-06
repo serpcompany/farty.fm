@@ -28,12 +28,13 @@ import { NotePill } from './share-recording'
 // earlier answer, and an account without it gets the sheet Save offers.
 
 const UNREACHABLE = "Couldn't reach Farty. Check your connection and try again."
-/** A note lasts this long, unless only support can sort it out. */
+const NOT_PAID_YET = "Your payment hasn't come through yet. Tap Download to check again."
+/** A note lasts this long, unless there's something left to do about it. */
 const NOTE_MS = 5_000
 
 /** One Toot's Download, as `useTootDownload` gives it. */
 export type TootDownload = {
-  /** Download is checking, reading the file, or waiting for a payment to come through. */
+  /** Download is reading the account, checking it, reading the file, or waiting for a payment. */
   busy: boolean
   /** Download, from the top: an account, then Full Access, then the file. */
   start: () => void
@@ -44,12 +45,12 @@ export type TootDownload = {
 /**
  * Download for one saved Toot, behind its More menu. Render `dialogs` outside the menu, so they stay
  * open once it closes. `backFromCheckout` says this page is Checkout's return from paying for this
- * Toot's Download: the Toot's file is offered once the payment comes through, by a tap of its own,
- * since the wait outlasts the one that started it.
+ * Toot's Download: the Toot's file follows once the account is read and the payment comes through.
+ * Until the file is on its way, the address keeps the return, so a reload checks again.
  */
 export function useTootDownload(toot: Toot, backFromCheckout = false): TootDownload {
   const { markAudioMissing } = usePedos()
-  const { account, openStep } = useAccount()
+  const { account, openStep, retry } = useAccount()
   const accountId = account.status === 'signedIn' ? account.id : null
   const [busy, setBusy] = useState(false)
   const [offering, setOffering] = useState(false)
@@ -57,14 +58,17 @@ export function useTootDownload(toot: Toot, backFromCheckout = false): TootDownl
   /** A file the browser won't hand over without a fresh tap. */
   const [ready, setReady] = useState<File | null>(null)
   const [note, setNote] = useState<ReactNode>(null)
-  /** A guest's Download, which carries on once the account step closes signed in. */
-  const [resume, setResume] = useState(false)
+  /** A Download that carries on once the account is read, or once the account step closes. */
+  const [resume, setResume] = useState<'read' | 'step' | null>(null)
+  const [returnDone, setReturnDone] = useState(false)
+  /** Back from Checkout, with this page still to wait for the payment. */
+  const returning = backFromCheckout && !returnDone
   /** A second tap, before the first one's answer, starts nothing. */
   const running = useRef(false)
   const readyDownload = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
-    if (typeof note !== 'string') return
+    if (typeof note !== 'string' || note === NOT_PAID_YET) return
     const timer = setTimeout(() => setNote(null), NOTE_MS)
     return () => clearTimeout(timer)
   }, [note])
@@ -96,7 +100,7 @@ export function useTootDownload(toot: Toot, backFromCheckout = false): TootDownl
   const checkAccess = async (accountId: string, afterPaying: boolean): Promise<boolean> => {
     if (afterPaying) {
       if ((await waitForFullAccess(accountId)) !== null) return true
-      setNote("Your payment hasn't come through yet. Tap Download to check again.")
+      setNote(NOT_PAID_YET)
       return false
     }
     const active = await hasFullAccess(accountId)
@@ -127,34 +131,44 @@ export function useTootDownload(toot: Toot, backFromCheckout = false): TootDownl
   const handOver = async (file: File, tapped = false) => {
     const handed = await handOverFile(file, tapped)
     if (handed === 'needsTap') setReady(file)
+    if (handed === 'failed') setNote("Couldn't download this Toot. Try again.")
+    // The browser may still ask first, and be told no, so this can't say the file is there yet.
     if (handed === 'downloading') {
       setNote(
         runsOnIPhoneOrIPad()
-          ? 'Look for it in the Files app, under Downloads.'
-          : 'Look for it in your Downloads.'
+          ? "Once it's downloaded, it's in the Files app."
+          : "Once it's downloaded, it's in your Downloads."
       )
     }
   }
 
-  const start = async (afterPaying = false) => {
+  const start = async () => {
     if (running.current) return
     setNote(null)
     if (account.status === 'signedOut' || account.status === 'expired') {
-      openStep(() => setResume(true))
+      openStep(() => setResume('step'))
       return
     }
     if (!accountId) {
-      setNote(UNREACHABLE)
+      // As Save, an account that couldn't be read is read again. Either way, it carries on after.
+      if (account.status === 'unreachable') retry()
+      setResume('read')
       return
     }
     running.current = true
     setBusy(true)
-    const file = (await checkAccess(accountId, afterPaying)) ? await readFile() : null
+    const file = (await checkAccess(accountId, returning)) ? await readFile() : null
     running.current = false
     setBusy(false)
+    setReturnDone(true)
     if (!file) return
-    if (afterPaying) setReady(file)
-    else await handOver(file)
+    if (backFromCheckout) {
+      // A reload or a later visit doesn't wait for a payment again.
+      const address = new URL(window.location.href)
+      address.searchParams.delete('checkout')
+      window.history.replaceState(null, '', address)
+    }
+    await handOver(file)
   }
 
   const pay = async () => {
@@ -179,28 +193,31 @@ export function useTootDownload(toot: Toot, backFromCheckout = false): TootDownl
     else setNote(PAYMENT_PROBLEMS[checkout.problem])
   }
 
-  // Back from the account step: carry on if it signed in. The step closes either way.
+  // The account is read, or its step closed. Signed out after the step means Not now.
   const carryOn = useEffectEvent(() => void start())
   useEffect(() => {
     if (!resume || account.status === 'checking') return
-    setResume(false)
-    if (account.status === 'signedIn') carryOn()
+    setResume(null)
+    if (account.status === 'unreachable') setNote(UNREACHABLE)
+    else if (account.status === 'signedIn' || resume === 'read') carryOn()
   }, [resume, account.status])
 
-  // Back from Checkout, once the account is read. The address loses the return, so a reload or a
-  // later visit doesn't wait for a payment again.
-  const startAfterPaying = useEffectEvent(() => {
-    const address = new URL(window.location.href)
-    address.searchParams.delete('checkout')
-    window.history.replaceState(null, '', address)
-    void start(true)
-  })
-  const returned = useRef(false)
+  // Back from Checkout, as soon as the account is read, however long that takes. Signed out, its
+  // step opens, once. Unreachable, it waits, as an `online` event or a tap on Download reads it again.
+  const signedOut = account.status === 'signedOut' || account.status === 'expired'
   useEffect(() => {
-    if (!backFromCheckout || returned.current || account.status === 'checking') return
-    returned.current = true
-    startAfterPaying()
-  }, [backFromCheckout, account.status])
+    if (returning && (accountId || signedOut)) carryOn()
+  }, [returning, accountId, signedOut])
+
+  /** What a return says, which outlasts a note: someone who just paid is looking for a sign of it. */
+  const returnNote = !returning
+    ? null
+    : account.status === 'unreachable'
+      ? UNREACHABLE
+      : accountId || account.status === 'checking'
+        ? 'Confirming payment…'
+        : null
+  const shownNote = returnNote ?? note
 
   const dialogs = (
     <>
@@ -235,9 +252,13 @@ export function useTootDownload(toot: Toot, backFromCheckout = false): TootDownl
         </AlertDialogContent>
       </AlertDialog>
 
-      {note && <NotePill>{note}</NotePill>}
+      {shownNote && <NotePill>{shownNote}</NotePill>}
     </>
   )
 
-  return { busy, start: () => void start(), dialogs }
+  return {
+    busy: busy || resume === 'read' || (returning && account.status === 'checking'),
+    start: () => void start(),
+    dialogs
+  }
 }

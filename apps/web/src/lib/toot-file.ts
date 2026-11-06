@@ -37,15 +37,16 @@ function downloadThroughLink(file: File): void {
  * - `shared`: the share sheet took it, to Save to Files or anywhere else.
  * - `cancelled`: the share sheet was closed.
  * - `needsTap`: the browser wants a fresh tap for the share sheet.
+ * - `failed`: the share sheet couldn't take it, and that app has nowhere else to put it.
  */
-export type HandOver = 'downloading' | 'shared' | 'cancelled' | 'needsTap'
+export type HandOver = 'downloading' | 'shared' | 'cancelled' | 'needsTap' | 'failed'
 
 /**
  * Hands `file` to the phone. A Home Screen app on iPhone has no downloads of its own, so it goes
  * through the share sheet and its Save to Files. Everywhere else it's an ordinary download.
  *
- * `tapped` says this call comes straight from a tap, so a share sheet the browser still refuses
- * becomes a download rather than asking for another tap.
+ * `tapped` says this call comes straight from a tap, so a share sheet the browser still refuses has
+ * failed, rather than asking for another tap.
  */
 export async function handOverFile(file: File, tapped = false): Promise<HandOver> {
   if (runsOnIPhoneOrIPad() && runsFromHomeScreen() && navigator.canShare?.({ files: [file] })) {
@@ -57,6 +58,7 @@ export async function handOverFile(file: File, tapped = false): Promise<HandOver
       const name = error instanceof DOMException ? error.name : null
       if (name === 'AbortError') return 'cancelled'
       if (name === 'NotAllowedError' && !tapped) return 'needsTap'
+      return 'failed'
     }
   }
   downloadThroughLink(file)

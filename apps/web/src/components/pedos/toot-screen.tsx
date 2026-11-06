@@ -24,7 +24,8 @@ import { useSongNotes } from './use-song-notes'
  * iPhone app's `TootDetailView`. The Toot is `?id=`, so one page serves every Toot, offline too.
  */
 export function TootScreen() {
-  const id = useSearchParams().get('id') ?? ''
+  const search = useSearchParams()
+  const id = search.get('id') ?? ''
   const pedos = usePedos()
   const router = useRouter()
   const [isRenaming, setIsRenaming] = useState(false)
@@ -129,6 +130,8 @@ export function TootScreen() {
       ) : !toot ? (
         <p className="flex flex-1 items-center justify-center px-6 text-center text-muted-foreground">
           {pedos.tootsFailed ? "Couldn't load your Toots." : "Couldn't find this Toot."}
+          {search.get('checkout') === 'done' &&
+            ' Your payment went through: Full Access is on your account, wherever you sign in.'}
         </p>
       ) : toot.songId === null ? (
         <div className="px-4">
