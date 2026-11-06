@@ -182,7 +182,11 @@ test('the offer names the buyer and fits one screen with the Toot above it, on a
 }, testInfo) => {
   test.setTimeout(180_000)
   await needsTheFixtureLibrary(request)
-  const email = newEmail(testInfo, 'offer')
+  // A long address, the most lines the sheet gets.
+  const email = newEmail(testInfo, 'a-really-rather-long-address').replace(
+    '@example.com',
+    '@a-long-mail-domain.example.test'
+  )
   await page.addInitScript(skipWelcome)
   await page.goto('/profile/')
   await signInByApi(page, email)
@@ -204,9 +208,17 @@ test('the offer names the buyer and fits one screen with the Toot above it, on a
     await page.setViewportSize(screen)
     await expect(async () => {
       const box = await offer.boundingBox()
-      // The Toot's title and Play show above it.
-      const play = await page.getByTestId('song-creator-state').boundingBox()
-      expect(box?.y ?? 0).toBeGreaterThan((play?.y ?? screen.height) + (play?.height ?? 0))
+      // The Toot's title, Play and state are on the screen, all of each above the sheet.
+      for (const shown of [
+        page.locator('#app h1'),
+        page.getByTestId('song-creator-play'),
+        page.getByTestId('song-creator-state')
+      ]) {
+        await expect(shown).toBeVisible()
+        const above = await shown.boundingBox()
+        expect(above?.y ?? -1).toBeGreaterThanOrEqual(0)
+        expect((above?.y ?? screen.height) + (above?.height ?? 0)).toBeLessThanOrEqual(box?.y ?? 0)
+      }
       // All of it is on the screen, with nothing to scroll to.
       expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(screen.height)
       const { scrollHeight, clientHeight } = await offer.evaluate(sheet => ({

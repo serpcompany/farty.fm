@@ -9,7 +9,7 @@ import {
   getUserMediaMs,
   waitForOpenMicrophone
 } from './fake-microphone'
-import { payOnTheSheet, payToSave, saveWithFullAccess } from './pay'
+import { payAtTheDevCheckout, payOnTheSheet, saveWithFullAccess } from './pay'
 import { skipWelcome } from './record'
 
 // The Sound Pad (#277), with two Recordings made through the fake microphone: 095 (F2) and 090
@@ -185,8 +185,9 @@ test('records a take on the Pads, plays it back, and saves it as a Toot, paying 
   if (out) mkdirSync(out, { recursive: true })
 
   // Saving a Toot needs an account.
+  const email = newEmail(testInfo, 'pad-take')
   await page.goto('/profile/')
-  await signInByApi(page, newEmail(testInfo, 'pad-take'))
+  await signInByApi(page, email)
   await page.goto('/')
   await recordAndSave(page, '095')
   await page.getByRole('button', { name: 'Record another' }).click()
@@ -232,8 +233,14 @@ test('records a take on the Pads, plays it back, and saves it as a Toot, paying 
   await expect(toot).toHaveText('Ready', { timeout: 15_000 })
 
   // Hearing it is free; saving it takes Full Access, through the checkout, back to the Sound Pad.
-  await expect(page.getByRole('button', { name: 'Save to Toots' })).toBeVisible()
-  await payToSave(page, 'pad')
+  await page.getByRole('button', { name: 'Save to Toots' }).click()
+  const offer = page.getByTestId('full-access-sheet')
+  await expect(offer).toContainText(`Buying for ${email}.`)
+  // The take's Play sits under the Pads, so the sheet covers it here. Its own controls are on screen.
+  await expect(offer.getByRole('button', { name: 'Pay $4.99' })).toBeInViewport({ ratio: 1 })
+  await expect(offer.getByRole('button', { name: 'Not now' })).toBeInViewport({ ratio: 1 })
+  await payOnTheSheet(page)
+  await payAtTheDevCheckout(page, 'pad')
   await expect(page.getByTestId('pad-toot-state')).toHaveText('Ready')
   if (out) await page.screenshot({ path: join(out, 'pad-saved.png') })
 

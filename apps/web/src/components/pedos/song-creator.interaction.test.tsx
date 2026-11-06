@@ -189,7 +189,7 @@ describe('Save to Toots, where saving is paid', () => {
       'Keep this Toot, and every one after it.',
       'Save up to 300 Toots, from Songs and the Sound Pad',
       'Send any saved Toot by link. Anyone can play it, no account needed',
-      "They're in your account, in any browser you sign in to",
+      "They're in your account, on any phone or tablet you sign in on",
       'Full Access',
       'Once, no subscription',
       '$4.99',
@@ -218,7 +218,7 @@ describe('Save to Toots, where saving is paid', () => {
     expect(asked(fetch, CHECKOUT_PATH)).toBe(1)
   })
 
-  it('leaves out the email line when the session ends with the sheet open, and Pay only closes it', async () => {
+  it('leaves out the email line with no account signed in, and Pay only closes the sheet', async () => {
     const fetch = server()
     await render()
     await tapSave()
@@ -228,7 +228,27 @@ describe('Save to Toots, where saving is paid', () => {
     await render()
     expect(sheet()?.textContent).not.toContain('Buying for')
     await tapOnSheet('Pay $4.99')
+    expect(sheet()).toBeNull()
     expect(asked(fetch, CHECKOUT_PATH)).toBe(0)
+    expect(page.saveToot).not.toHaveBeenCalled()
+  })
+
+  it('closes the sheet and says so when the session ended before Pay, with no charge started', async () => {
+    const fetch = server({ checkout: { error: 'unauthorized' }, checkoutStatus: 401 })
+    const assign = vi.fn()
+    vi.spyOn(window, 'location', 'get').mockReturnValue({
+      ...window.location,
+      origin: window.location.origin,
+      assign
+    } as Location)
+    await render()
+    await tapSave()
+    expect(sheet()?.textContent).toContain('Buying for a@example.test.')
+    await tapOnSheet('Pay $4.99')
+    expect(asked(fetch, CHECKOUT_PATH)).toBe(1)
+    expect(sheet()).toBeNull()
+    expect(container.textContent).toContain("Couldn't start the payment.")
+    expect(assign).not.toHaveBeenCalled()
     expect(page.saveToot).not.toHaveBeenCalled()
   })
 

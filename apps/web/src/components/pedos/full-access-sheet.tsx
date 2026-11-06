@@ -10,17 +10,17 @@ import { FULL_ACCESS_PRICE_LABEL, MAX_SAVED_TOOTS, MONEY_BACK_DAYS } from '@/lib
 const BENEFITS = [
   `Save up to ${MAX_SAVED_TOOTS} Toots, from Songs and the Sound Pad`,
   'Send any saved Toot by link. Anyone can play it, no account needed',
-  "They're in your account, in any browser you sign in to"
+  "They're in your account, on any phone or tablet you sign in on"
 ]
 
 /**
  * What Save asks of an account without Full Access (ADR 0022): what it gets, the price, the money
- * back and who's buying, with Pay and Not now, on one phone screen with the Toot still in view above
- * it. Pay stays busy while the page goes to Checkout.
+ * back and who's buying, with Pay and Not now, on one phone screen. Song Creator's Toot stays in view
+ * above it. The Sound Pad's take sits under the Pads, so there it's covered. Pay stays busy while the
+ * page goes to Checkout.
  *
  * `email` is the account's, which Checkout is given. A guest makes an account before this opens, so
- * it's theirs by then. Without one, as when the session ended while this was open, the line is left
- * out.
+ * it's theirs by then. With no email to show, the line is left out.
  */
 export function FullAccessSheet({
   open,
