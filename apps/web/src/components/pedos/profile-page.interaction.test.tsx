@@ -54,7 +54,7 @@ const toot: ProfileShare = {
   detail: 'Sound Pad',
   sharedAt: now,
   length: '0:18',
-  seconds: 18,
+  part: { startSeconds: 0, endSeconds: 18 },
   levels: [],
   farts: ['Recording 1', 'Recording 2']
 }
@@ -66,7 +66,7 @@ const recording: ProfileShare = {
   detail: 'E3',
   sharedAt: now,
   length: '1.1 s',
-  seconds: 1.1,
+  part: { startSeconds: 0, endSeconds: 1.1 },
   levels: [0.2, 1, 0.5],
   farts: []
 }
@@ -406,30 +406,47 @@ describe('A row (#346, #448)', () => {
     expect(rowText('profile-shared-time')).toEqual([null])
   })
 
-  it('a Recording’s time never passes the length printed beside it, even over lead-in silence', async () => {
+  it('a Recording’s plays, draws and times only its fart, never the lead-in silence its link serves', async () => {
     server()
-    // As the server gives it: 1.46 s served (a fart after lead-in silence), so "1.4 s".
-    const take: ProfileShare = { ...recording, length: '1.4 s', seconds: 1.46 }
+    // As the server gives it: 1.46 s served, its fart from 0.32 s after lead-in silence, so 1.14 s
+    // of fart and "1.1 s", the length its own page prints.
+    const take: ProfileShare = {
+      ...recording,
+      length: '1.1 s',
+      part: { startSeconds: 0.32, endSeconds: 1.46 }
+    }
     await render({ items: [take] })
     await act(async () => (tab('Recordings') as HTMLElement).click())
     const frame = () =>
       act(async () => {
         await new Promise(resolve => requestAnimationFrame(() => resolve(null)))
       })
+    const waveform = () => rows()[0].querySelector<HTMLElement>('[data-testid="replay-waveform"]')
+    // Its waveform spans only the fart.
+    expect(waveform()?.getAttribute('aria-valuemin')).toBe('0.32')
+    expect(waveform()?.getAttribute('aria-valuemax')).toBe('1.46')
 
-    heard.position = 0
+    heard.position = 0.32
     await act(async () => rows()[0].querySelector('button')?.click())
-    // The whole of what its link serves, the 1.46 s its waveform draws.
-    expect(heard.plays.at(-1)?.segment).toBeNull()
+    // From the fart's start to its end: a trim of its own audio.
+    expect(heard.plays.at(-1)?.segment).toEqual({ start: 0.32, end: 1.46 })
     const seen: string[] = []
-    for (const at of [0.7, 1.4, 1.46, 3]) {
+    for (const at of [0.32, 1.02, 1.46, 3]) {
       heard.position = at
       await frame()
       seen.push(rowText('profile-shared-time')[0] ?? '')
     }
-    // At its end, and past it, the time reads the same as the length at the bottom right.
-    expect(seen).toEqual(['0.7 s', '1.4 s', '1.4 s', '1.4 s'])
-    expect(rowText('profile-shared-length')).toEqual(['1.4 s'])
+    // Timed from the fart's start, it reads the length at the bottom right at its end, and past it.
+    expect(seen).toEqual(['0.0 s', '0.7 s', '1.1 s', '1.1 s'])
+    expect(rowText('profile-shared-length')).toEqual(['1.1 s'])
+
+    // From a spot, it still stops at the fart's end.
+    await act(async () => rows()[0].querySelector('button')?.click())
+    heard.position = null
+    await act(async () =>
+      waveform()?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+    )
+    expect(heard.plays.at(-1)?.segment).toEqual({ start: 0.32 + 1.14 / 12, end: 1.46 })
   })
 
   it('Copy link copies its own page’s link, and says so', async () => {

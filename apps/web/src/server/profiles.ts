@@ -3,8 +3,8 @@ import type { Kind } from '@/db/library'
 import { addProfileReport, type ProfileShareRow, profileShares, profileUser } from '@/db/profiles'
 import { liveRecordingsOf, sharedToot, tootRecordingIds } from '@/db/sharing'
 import { noteName } from '@/lib/pitch'
-import { formattedFartSeconds } from '@/lib/pitch-coverage'
-import { recordingName, songPitch } from '@/lib/recordings'
+import { formattedFartLength } from '@/lib/pitch-coverage'
+import { recordingName, songPitch, type Trim } from '@/lib/recordings'
 import { servedOrigin } from '@/lib/site'
 import { formattedTootLength, type TootRoll } from '@/lib/toot'
 
@@ -19,6 +19,7 @@ import {
   sharedPart,
   sharedTootRoll,
   sharePath,
+  tootFartPart,
   tootSongTitle
 } from './sharing'
 
@@ -42,16 +43,20 @@ export type ProfileItem = {
   /** When it was shared, in ms, for the page to say "Today" in the viewer's own time zone. */
   sharedAt: number
   /**
-   * How long `seconds` is: "1.4 s", the part a Recording's link serves, rounded down, or "0:18", a
-   * Toot. The time its row shows while it plays never passes it.
+   * "1.1 s", a Recording's fart's length, as its own page and the Recordings tab print it (ADR
+   * 0011, ADR 0019), or "0:18", a Toot's. The time its row shows while it plays never passes it.
    */
   length: string
-  /** How long the audio its link serves is, in seconds: what its row plays and draws, from 0. */
-  seconds: number
   /**
-   * A Recording's loudness bars, each 0…1, of the part its link serves, from its upload. Empty for
-   * a Toot, whose bars are drawn from its saved WAV: its row fetches them with its roll (`row/`),
-   * so the page never reads every Toot's audio.
+   * What its row plays, draws and times, in seconds of the audio its link serves: a Recording's
+   * fart, without the silence around it in what its link serves (a trim, ADR 0004), or a whole
+   * Toot. Where a fart lies in its own audio says nothing that audio doesn't.
+   */
+  part: Trim
+  /**
+   * A Recording's loudness bars, each 0…1, of its fart, from its upload. Empty for a Toot, whose
+   * bars are drawn from its saved WAV: its row fetches them with its roll (`row/`), so the page
+   * never reads every Toot's audio.
    */
   levels: number[]
   /** The names of the farts a Toot plays, as its page lists them, leaving out any deleted. */
@@ -97,24 +102,28 @@ function itemText(row: ProfileShareRow): { name: string; detail: string | null }
 function itemSound(
   row: ProfileShareRow,
   fartNames: Map<string, string>
-): Pick<ProfileItem, 'length' | 'seconds' | 'levels' | 'farts'> {
+): Pick<ProfileItem, 'length' | 'part' | 'levels' | 'farts'> {
   if (row.kind === 'toots') {
     return {
       length: formattedTootLength(row.toot.seconds),
-      seconds: row.toot.seconds,
+      part: { startSeconds: 0, endSeconds: row.toot.seconds },
       levels: [],
       farts: tootRecordingIds(row.toot).flatMap(id => fartNames.get(id) ?? [])
     }
   }
   const recording = toRecording(row.recording)
-  const part = sharedPart(recording)
-  // What its link serves and its own page plays: the waveform, Play and the time on it all cover
-  // this, so its length does too, and the time never runs past it.
-  const seconds = part.endSeconds - part.startSeconds
+  const served = sharedPart(recording)
+  // Its fart, as a shared Toot's row plays it, inside what its link serves: before analysis has
+  // found it, all of that. The waveform, Play and the time on it cover only this, so they agree
+  // with its length.
+  const fart = tootFartPart(recording) ?? served
   return {
-    length: formattedFartSeconds(seconds),
-    seconds,
-    levels: partBars(recording.waveform, recording.seconds, part),
+    length: formattedFartLength(recording),
+    part: {
+      startSeconds: fart.startSeconds - served.startSeconds,
+      endSeconds: fart.endSeconds - served.startSeconds
+    },
+    levels: partBars(recording.waveform, recording.seconds, fart),
     farts: []
   }
 }

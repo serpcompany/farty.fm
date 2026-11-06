@@ -330,8 +330,8 @@ export function sharedPart(recording: Recording): Trim {
 }
 
 /**
- * What a shared Toot's row plays and draws: only the fart. That's the fart between its Trim's
- * handles, or what analysis found. The rest of a take is whatever else the microphone heard, and
+ * What a shared Toot's row, and a shared Recording's profile page row (#448), plays and draws:
+ * only the fart. That's the fart between its Trim's handles, or what analysis found. The rest of a take is whatever else the microphone heard, and
  * sharing a Toot doesn't share that. Null before analysis has found it, when there's nothing to play.
  */
 export function tootFartPart({ trim, analysis }: Recording): Trim | null {

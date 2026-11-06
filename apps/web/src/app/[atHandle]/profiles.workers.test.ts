@@ -164,8 +164,8 @@ describe('A profile page', () => {
     'length',
     'levels',
     'name',
+    'part',
     'path',
-    'seconds',
     'sharedAt'
   ]
 
@@ -373,16 +373,20 @@ describe('A profile page', () => {
       (await findProfile(testDb(), 'alice'))?.items.find(item => item.name === name)
     expect(await row('Song')).toMatchObject({
       length: '0:18',
-      seconds: 18.4,
+      part: { startSeconds: 0, endSeconds: 18.4 },
       levels: [],
       farts: ['Recording 1', 'Recording 2']
     })
-    expect(await row('Pad')).toMatchObject({ length: '1:01', seconds: 61, farts: ['Recording 2'] })
-    // A Recording's length, bars and seconds are all what its link serves and its own page plays:
-    // the whole take, which has no Trim. So its length is its seconds, never its shorter fart's.
+    expect(await row('Pad')).toMatchObject({
+      length: '1:01',
+      part: { startSeconds: 0, endSeconds: 61 },
+      farts: ['Recording 2']
+    })
+    // A Recording's length is its fart's, as its own page prints it, and its row plays and draws
+    // only that fart, 0.01 s to 0.09 s of the 0.1 s take its link serves.
     expect(await row('Recording 1')).toMatchObject({
-      length: '0.1 s',
-      seconds: 0.1,
+      length: '0.0 s',
+      part: { startSeconds: 0.01, endSeconds: 0.09 },
       levels: [0, 0.5, 1],
       farts: []
     })

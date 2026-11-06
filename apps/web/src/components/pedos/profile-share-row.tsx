@@ -29,11 +29,11 @@ export type ProfileShare = {
   detail: string | null
   /** When it was shared, in ms. */
   sharedAt: number
-  /** "1.1 s", or "0:18". */
+  /** "1.1 s", a Recording's fart's length, as its own page prints it, or "0:18". */
   length: string
-  /** How long its audio is, in seconds. */
-  seconds: number
-  /** A Recording's loudness bars. Empty for a Toot, whose row fetches them. */
+  /** What its row plays, draws and times, in seconds of its audio: a Recording's fart, a Toot. */
+  part: Trim
+  /** A Recording's loudness bars, of its fart. Empty for a Toot, whose row fetches them. */
   levels: number[]
   /** The farts a Toot plays, by name. */
   farts: string[]
@@ -45,8 +45,8 @@ export type PlaySource = 'hero' | 'row'
 type Playing = { path: string; part: Trim; source: PlaySource }
 
 /**
- * The page's playing, one share at a time, from its start or a spot in it. Each plays its own
- * audio, `<path>audio/`, under the key its own page plays it by.
+ * The page's playing, one share at a time, from its start or a spot in it, to its `part`'s end.
+ * Each plays its own audio, `<path>audio/`, under the key its own page plays it by.
  */
 export function useProfilePlayer() {
   const [playing, setPlaying] = useState<Playing | null>(null)
@@ -57,11 +57,8 @@ export function useProfilePlayer() {
 
   const playFrom = useCallback((share: ProfileShare, from: number, source: PlaySource) => {
     const url = `${share.path}audio/`
-    const next = {
-      path: share.path,
-      part: { startSeconds: from, endSeconds: share.seconds },
-      source
-    }
+    const { endSeconds } = share.part
+    const next = { path: share.path, part: { startSeconds: from, endSeconds }, source }
     const failed = () => setUnplayable({ path: share.path, source })
     setPlaying(next)
     setUnplayable(null)
@@ -78,7 +75,8 @@ export function useProfilePlayer() {
         }
         return response.arrayBuffer()
       },
-      from > 0 ? { start: from, end: share.seconds } : null,
+      // A Toot plays to its audio's end. A Recording plays only its fart, a trim (ADR 0004).
+      share.kind === 'recordings' || from > 0 ? { start: from, end: endSeconds } : null,
       () => setPlaying(current => (current === next ? null : current))
     )
   }, [])
@@ -90,7 +88,7 @@ export function useProfilePlayer() {
 
   const toggle = (share: ProfileShare, source: PlaySource) => {
     if (playing?.path === share.path) stop()
-    else playFrom(share, 0, source)
+    else playFrom(share, share.part.startSeconds, source)
   }
 
   return { playing, unplayable, playFrom, stop, toggle }
@@ -252,8 +250,13 @@ function ShareRow({
   const date = inBrowser ? formattedTootDate(share.sharedAt) : null
   const byline =
     isToot && share.farts.length > 0 ? `Farts: ${share.farts.join(', ')}` : `@${handle}`
+  const { part } = share
+  // From the fart's start, and never past its end, so it reads the length at its end.
   const clock = (seconds: number) => {
-    const here = Math.min(Math.max(seconds, 0), share.seconds)
+    const here = Math.min(
+      Math.max(seconds - part.startSeconds, 0),
+      part.endSeconds - part.startSeconds
+    )
     return isToot ? formattedTootLength(Math.floor(here)) : formattedFartSeconds(here)
   }
 
@@ -307,13 +310,13 @@ function ShareRow({
       <div ref={wave} className="relative col-span-2 min-w-0 md:col-span-1 md:col-start-2">
         <ReplayWaveform
           levels={drawn}
-          view={{ startSeconds: 0, endSeconds: share.seconds }}
+          view={part}
           playing={playing}
           position={playbackPosition}
           label={`Play ${share.name} from a spot`}
           onScrubStart={player.stop}
           onPlayFrom={seconds => {
-            if (share.seconds - seconds >= 0.02) player.playFrom(share, seconds, 'row')
+            if (part.endSeconds - seconds >= 0.02) player.playFrom(share, seconds, 'row')
           }}
           playedClassName="bg-brand-strong dark:bg-brand"
           className="h-14 md:h-[72px]"

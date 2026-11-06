@@ -699,6 +699,13 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(rows.getByTestId('profile-shared-link')).toContainText('Recording ')
     await expect(rows.getByTestId('profile-shared-byline')).toHaveText(`@${handle}`)
     await expect(rows).not.toContainText('Testville')
+    // Its length is its fart's, the figure its own page prints, not the take's with its silence.
+    const rowLength = await rows.getByTestId('profile-shared-length').textContent()
+    expect(rowLength).toMatch(/^\d+\.\d s$/)
+    const own = await context.newPage()
+    await own.goto(recordingLink)
+    await expect(own.getByTestId('shared-length')).toHaveText(rowLength ?? '')
+    await own.close()
     await shot(other, 'toot-profile-recordings')
     await computerShot(other, 'toot-profile-recordings')
     await expectComputerRows(other)
