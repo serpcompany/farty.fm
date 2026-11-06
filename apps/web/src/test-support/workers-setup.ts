@@ -1,6 +1,7 @@
 /// <reference types="@cloudflare/vitest-plugin/types" />
 import { applyD1Migrations, type D1Migration, env, reset } from 'cloudflare:test'
 import { beforeEach, vi } from 'vitest'
+import { requestCf } from './workers-cf'
 
 // The `workers` project's setup: the routes run in workerd with the test Worker's own D1 and R2,
 // which every test starts empty, with `drizzle/` applied.
@@ -9,7 +10,8 @@ import { beforeEach, vi } from 'vitest'
 vi.mock('server-only', () => ({}))
 vi.mock('@opennextjs/cloudflare', async () => {
   const { env } = await import('cloudflare:test')
-  return { getCloudflareContext: () => ({ env }) }
+  const { requestCf } = await import('./workers-cf')
+  return { getCloudflareContext: () => ({ env, cf: requestCf.current }) }
 })
 // The library tests sign in through a real `session` row (`workers-session.ts`), so deleting a
 // user signs them out here as it does with sign-in's cookie. `signed-in.workers.test.ts` unmocks
@@ -17,6 +19,7 @@ vi.mock('@opennextjs/cloudflare', async () => {
 vi.mock('@/server/session-user', () => import('./workers-session'))
 
 beforeEach(async () => {
+  requestCf.current = undefined
   await reset()
   const { DB, TEST_MIGRATIONS } = env as unknown as {
     DB: D1Database

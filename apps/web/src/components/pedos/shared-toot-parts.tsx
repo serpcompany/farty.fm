@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { loadSong } from '@/lib/catalog/load-songs'
 import type { Song } from '@/lib/catalog/song'
-import { formattedRecordedAt } from '@/lib/recordings'
+import { recordedWhenAndWhere } from '@/lib/fart-place'
 import { noteSeconds, type SharedTootParts as Parts } from '@/lib/toot'
 import { useInBrowser } from '@/lib/use-in-browser'
 import { NoteView, pitchColor } from './note-view'
@@ -86,7 +86,7 @@ export function SharedTootParts({ parts, player }: { parts: Parts; player: Share
               )
             }
             const isPlaying = fartPlaying && sound.place === fart.place && tapped === pitch
-            const when = inBrowser ? formattedRecordedAt(fart.recordedAt) : null
+            const when = inBrowser ? recordedWhenAndWhere(fart.recordedAt, fart) : null
             return (
               <RecordingUsedRowView
                 key={pitch}

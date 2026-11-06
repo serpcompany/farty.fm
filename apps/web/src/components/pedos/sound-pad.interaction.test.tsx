@@ -289,7 +289,8 @@ describe('a take on the Sound Pad', () => {
       status: 'signedIn',
       id: 'userA',
       email: 'a@example.test',
-      marketingEmail: false
+      marketingEmail: false,
+      showFartPlaces: true
     }
   }
 

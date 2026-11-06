@@ -2,6 +2,8 @@ import 'server-only'
 
 import { cache } from 'react'
 import { getDb } from '@/db'
+import { showsFartPlaces } from '@/db/sharing'
+import { NOT_SAID, type RecordedIn, recordedInOf } from '@/lib/fart-place'
 import { noteName } from '@/lib/pitch'
 import { formattedFartLength } from '@/lib/pitch-coverage'
 import { recordingName, songPitch, type Trim } from '@/lib/recordings'
@@ -27,7 +29,7 @@ export type SharedView = {
   levels: number[]
   /** When it was recorded, in ms. */
   recordedAt: number
-}
+} & RecordedIn
 
 /**
  * The shared Recording at `/@<handle>/r/<id>/`, by its slug or its old random id, or null when that
@@ -35,9 +37,11 @@ export type SharedView = {
  * per request.
  */
 export const sharedView = cache(async (handle: string, id: string): Promise<SharedView | null> => {
-  const shared = await findSharedRecording(getDb(), handle, id)
+  const db = getDb()
+  const shared = await findSharedRecording(db, handle, id)
   if (!shared) return null
   const { recording } = shared
+  const { place } = shared.row.recording
   const pitch = songPitch(recording)
   const part = sharedPart(recording)
   return {
@@ -48,7 +52,10 @@ export const sharedView = cache(async (handle: string, id: string): Promise<Shar
     length: formattedFartLength(recording),
     part: { startSeconds: 0, endSeconds: part.endSeconds - part.startSeconds },
     levels: partBars(recording.waveform, recording.seconds, part),
-    recordedAt: recording.createdAt
+    recordedAt: recording.createdAt,
+    ...(place && (await showsFartPlaces(db, shared.row.share.userId))
+      ? recordedInOf(place)
+      : NOT_SAID)
   }
 })
 

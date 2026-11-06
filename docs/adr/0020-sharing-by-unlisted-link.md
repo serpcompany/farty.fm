@@ -22,7 +22,7 @@ Until #316 nothing a user made could leave their account. On 2026-11-03 the prod
    - A slug can be guessed, which an unlisted link's random id couldn't be, but a profile page already lists every share (ADR 0021), so this shows no one anything new. A Recording that isn't shared has no link by any name.
 4. **Unlisted: anyone with the link, and nothing else.**
    - The page, its image and its audio need no account. Nothing lists a link: there's no profile page until #319 (which lists a user's shares on it, ADR 0021), every shared page is `noindex, nofollow` with no canonical, and the sitemaps leave `/@<handle>/` out.
-   - It shows the Handle, the Recording's name, its note (a Placed Pitch counts), its length, when it was recorded (in the viewer's own time, #443) and the waveform of the part it plays, which is what its row plays: its Trim (ADR 0019), or else the whole take. Nothing else of the account: no email, no other Recordings.
+   - It shows the Handle, the Recording's name, its note (a Placed Pitch counts), its length, when it was recorded (#443) and where (#444), and the waveform of the part it plays, which is what its row plays: its Trim (ADR 0019), or else the whole take. Nothing else of the account: no email, no other Recordings.
    - Nothing is public until the user shares. A Recording that was never shared, or whose share stopped, answers the same 404 as one that never existed.
 5. **Each request checks D1.**
    - The page, its link image (`image/`) and `audio/` each look up the share, its owner's Handle and the live Recording (`sharedRecording()` in `src/db/sharing.ts`). A share stopped or taken down, a Recording deleted (its tombstone) and an account deleted (`on delete cascade`) all fail the lookup, at once and alike.
@@ -68,6 +68,17 @@ A saved Toot shares the same way, through the same Handle, `shares` rows (`kind`
 - Deleting a shared Toot says its link stops working too.
 - **A Toot that plays a taken-down Recording is down too.** Its page, image, audio and Report answer 404 while any Recording in its Arrangement or Sound Pad Performance is taken down, and sharing it answers 403 `taken_down`, so a Toot never makes that Recording's audio public again (`sharedToot`, `tootPlaysTakenDown` in `src/db/sharing.ts`).
 
+## Where a fart was made (#444)
+
+On 2026-11-07 the owner asked for "the date and time of the fart, and the geolocation, etc. and including that data bc its hilarious". #443 shows the date and time. This adds the place, as far as a public page can:
+
+- **A city, never closer.** These pages are public, and a street-level position would show where someone lives. So there's no browser prompt and no GPS. A Recording's `place` keeps the `city`, `country` and time zone of the request's Cloudflare properties, and the `region` in the US, where a page names the state (`recordedPlaceOf()`, `src/lib/fart-place.ts`), and never its IP address, coordinates, postal code or metro code. It comes from the connection, so a VPN gives the VPN's city. Tor, and a request naming no country, keep nothing.
+- **From the first upload, once.** Uploading again and editing never change it, and the library API never returns or takes it, so no browser holds it or can say it. A take more than an hour old when it uploads keeps none (`placeOfUpload()`): a take uploads once it's saved, so an older one waited for a connection, maybe until its owner got home, and it would name their home as where a fart made elsewhere was made. A take that waited less than an hour can still name the wrong city. Recordings from before #444 have none, so nothing already shared gains one. Deleting a Recording clears it from its tombstone.
+- **The pages say "Recorded Nov 6, 2026, 3:12 PM · Austin, Texas"**, on a shared Recording and each of a shared Toot's "Recordings used" rows: a city and state in the US, a city and country elsewhere, with the time in that place's time zone. With no place, the time is the viewer's own. Link previews never say it, since apps keep them.
+- **Profile's Show where I farted**, on by default (`user.show_fart_places`). Off, the pages' data leaves out the place and the time zone, at once, since each page reads D1, links already sent included. Off also forgets every place kept: they said not to show them, and keeping them would put old cities back on every link the day they turn it on for one new fart. New Recordings keep none while it's off, read in the same statement that adds one, so an upload as it goes off can't leave a place behind (`insertRecording`). On again, only new Recordings say where.
+- **It says so before anything's public:** Pick a handle, the owner's own profile page (for a Handle from before this, which never saw that step) and the Privacy page.
+- **What it risks:** a Handle's page lists every share, so its shared farts together give a rough timeline of where its owner has been, and a city can be a small town. It's on by default because the owner asked for it. A Handle from before this shares again with no dialog, so its owner may not know until they open their own page.
+
 ## Tables
 
 Migration `0008_sharing`, and `slug` from `0016_share_slugs`:
@@ -82,6 +93,8 @@ Migration `0008_sharing`, and `slug` from `0016_share_slugs`:
 - **A random id in the link.** What links had until #441. It kept a stopped link from ever working again, but it says nothing about the fart, and the owner asked for the Song's name.
 - **A public R2 bucket, or a signed R2 URL.** A bucket URL outlives Stop sharing and take-downs in every cache it reaches, and #315 rules it out. A signed URL would still play until it expired.
 - **Caching the page or image at the edge.** It would serve a stopped link until the cache expired. The D1 lookup is one indexed join.
+- **The browser's exact location.** Funnier, but a public page would show where someone lives, and it would need a permission prompt on the record screen. Refused.
+- **Keeping the place with the switch off, to show if it's turned on.** It would keep what the user said not to show, and bring it back on every link at once.
 - **Emailing Farty for each report.** Left for later: the log line and the table are enough while reports are rare, and Staging's email goes only to its allowlist.
 
 ## Consequences

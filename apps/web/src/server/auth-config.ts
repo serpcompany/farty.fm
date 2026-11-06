@@ -408,7 +408,9 @@ export function createAuth({ db, settings, email }: CreateAuthOptions) {
     user: {
       additionalFields: {
         // Farty news by email, on by default (#150). Nobody sets it at sign-in.
-        marketingEmail: { type: 'boolean', input: false, required: false, defaultValue: true }
+        marketingEmail: { type: 'boolean', input: false, required: false, defaultValue: true },
+        // Saying where each shared fart was made, on by default (#444). Nobody sets it at sign-in.
+        showFartPlaces: { type: 'boolean', input: false, required: false, defaultValue: true }
       }
     },
     session: {

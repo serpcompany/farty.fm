@@ -71,6 +71,8 @@ type AccountContext = {
    * account's now, changes nothing and reloads as that account.
    */
   setMarketingEmail(on: boolean): Promise<boolean>
+  /** Turns saying where each shared fart was made on or off, as `setMarketingEmail` (#444). */
+  setShowFartPlaces(on: boolean): Promise<boolean>
   /**
    * After a session ended: clears this browser's copy, for a device that's no longer the
    * account's. What reached the account stays there.
@@ -202,14 +204,14 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     return result !== 'failed'
   }, [accountId])
 
-  const setMarketingEmail = useCallback(
-    async (on: boolean) => {
+  const setSwitch = useCallback(
+    async (name: api.AccountSwitch, on: boolean) => {
       if (!accountId) return false
-      const result = await api.setMarketingEmail(on, accountId)
+      const result = await api.setAccountSwitch(name, on, accountId)
       if (result === 'otherAccount') reopenAsSignedIn()
       else if (result === 'done') {
         setAccount(current =>
-          current.status === 'signedIn' ? { ...current, marketingEmail: on } : current
+          current.status === 'signedIn' ? { ...current, [name]: on } : current
         )
       }
       return result !== 'failed'
@@ -228,7 +230,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     finishSignIn,
     signOut,
     deleteAccount,
-    setMarketingEmail,
+    setMarketingEmail: on => setSwitch('marketingEmail', on),
+    setShowFartPlaces: on => setSwitch('showFartPlaces', on),
     clearDevice: leave
   }
   return <Context value={value}>{children}</Context>

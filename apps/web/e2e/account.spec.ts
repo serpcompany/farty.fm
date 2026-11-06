@@ -406,8 +406,12 @@ test("Profile's account: the email, Farty news, and Sign out, which leaves nothi
   const news = page.getByRole('switch', { name: 'Farty news' })
   // On by default (#150).
   await expect(news).toBeChecked()
+  // So is this, which a shared page's city goes by (#444).
+  const places = page.getByRole('switch', { name: 'Show where I farted' })
+  await expect(places).toBeChecked()
   for (const control of [
     page.locator('label', { has: news }),
+    page.locator('label', { has: places }),
     page.getByRole('button', { name: 'Sign out' }),
     page.getByRole('button', { name: 'Delete account' })
   ]) {

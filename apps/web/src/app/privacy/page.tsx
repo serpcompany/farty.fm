@@ -22,8 +22,9 @@ export default function PrivacyPage() {
       <h2>With an account</h2>
       <ul>
         <li>
-          Your email, Recordings and Toots (audio included) are stored on Cloudflare, in your
-          account, so you can use them on any phone or tablet you sign in on.
+          Your email, Recordings and Toots (audio included), and the city each Recording was first
+          uploaded from, are stored on Cloudflare, in your account, so you can use them on any phone
+          or tablet you sign in on.
         </li>
         <li>
           Your email is used for sign-in codes and for Farty news, which is on by default. You can
@@ -36,11 +37,23 @@ export default function PrivacyPage() {
         <li>
           Nothing you record is public unless you share it. When you share a Recording or a saved
           Toot, anyone with its link can open it, signed in or not, and play it. The page shows your
-          handle and the Recording&apos;s name, note, length, waveform and when you recorded it. A
-          Toot&apos;s page shows its name, Song, length, waveform and notes, and the name, note,
-          length, waveform and recording time of each Recording it plays. Anyone on the page can
-          play each of those farts on its own, but not the rest of the recording around it. Nothing
-          else about you: never your email or your other Recordings and Toots.
+          handle and the Recording&apos;s name, note, length, waveform, when you recorded it and the
+          city you recorded it in. A Toot&apos;s page shows its name, Song, length, waveform and
+          notes, and the name, note, length, waveform, recording time and city of each Recording it
+          plays. Anyone on the page can play each of those farts on its own, but not the rest of the
+          recording around it. Nothing else about you: never your email or your other Recordings and
+          Toots.
+        </li>
+        <li>
+          When a Recording first uploads within an hour of recording it, Farty keeps the city,
+          country and time zone Cloudflare works out from your connection, and the state in the US.
+          It shows them only if you share that Recording or a Toot that plays it. It doesn&apos;t
+          ask your phone for its location, and never keeps your IP address or an exact position for
+          this, so a VPN shows the VPN&apos;s city, and a Recording that waited for a connection can
+          show where it uploaded rather than where you made it. Turning off Show where I farted on
+          Profile deletes every place Farty kept, so what you&apos;ve already shared stops showing
+          one at once, links already sent included, and new Recordings keep none. Turning it back on
+          only affects new Recordings. Deleting a Recording deletes its place.
         </li>
         <li>
           What you share is listed on your page, farty.fm/@yourhandle, which anyone can open. Search

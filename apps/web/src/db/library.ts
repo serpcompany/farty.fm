@@ -1,5 +1,7 @@
 import { and, count, eq, gte, isNotNull, isNull, lt, sql } from 'drizzle-orm'
+import type { AccountSwitch } from '../lib/account'
 import type { FartChoices } from '../lib/engine/fart-choices'
+import type { RecordedPlace } from '../lib/fart-place'
 import type { Performance } from '../lib/performance'
 import type { Analysis, RecordingTrim } from '../lib/recordings'
 import type { TootArrangement, TootScore } from '../lib/toot'
@@ -40,6 +42,8 @@ export type NewRecording = {
   trim: RecordingTrim | null
   /** The name the user gave it, or null for "Recording {number}" (#314). */
   name: string | null
+  /** Where it was made, from the upload's request, never the browser's word (#444). */
+  place?: RecordedPlace | null
   audioBytes: number
 }
 
@@ -118,7 +122,8 @@ export async function itemStatus(
 
 /**
  * Adds the Recording unless the user already has a row with its id or already has `limit` live
- * Recordings. One statement, so two uploads at once can't both pass the limit. True if added.
+ * Recordings. One statement, so two uploads at once can't both pass the limit, and one can't keep a
+ * place just as Show where I farted goes off. True if added.
  */
 export async function insertRecording(
   db: Database,
@@ -130,11 +135,13 @@ export async function insertRecording(
   const added = await db.all(sql`
     insert into recordings (user_id, id, number, created_at, seconds, sample_rate, waveform,
       analysis, placed_pitch, trim_start_seconds, trim_end_seconds, trim_fart_start_seconds,
-      trim_fart_end_seconds, name, audio_bytes, updated_at)
+      trim_fart_end_seconds, name, place, audio_bytes, updated_at)
     select ${userId}, ${r.id}, ${r.number}, ${r.createdAt}, ${r.seconds}, ${r.sampleRate},
       ${JSON.stringify(r.waveform)}, ${analysis}, ${r.placedPitch},
       ${r.trim?.startSeconds ?? null}, ${r.trim?.endSeconds ?? null},
       ${r.trim?.fart.startSeconds ?? null}, ${r.trim?.fart.endSeconds ?? null}, ${r.name},
+      case when (select show_fart_places from "user" where id = ${userId})
+        then ${json(r.place ?? null)} end,
       ${r.audioBytes}, ${d1Now}
     where (select count(*) from recordings where user_id = ${userId} and deleted_at is null)
       < ${limit}
@@ -185,7 +192,7 @@ export async function tombstone(
           .returning({ id: toots.id })
       : await db
           .update(recordings)
-          .set({ deletedAt: d1Now, updatedAt: d1Now })
+          .set({ place: null, deletedAt: d1Now, updatedAt: d1Now })
           .where(live)
           .returning({ id: recordings.id })
   return deleted.length === 1 ? 'live' : itemStatus(db, kind, userId, id)
@@ -470,17 +477,27 @@ export async function libraryChanges(
   }
 }
 
-/** Turns Farty news by email on or off. False if the user has no row. */
-export async function setMarketingEmail(
+/**
+ * Turns one of the account's switches on or off. False if the user has no row. Turning off Show
+ * where I farted forgets every place kept too: they said not to show them, and keeping them would
+ * put old cities back on every link the day they turn it on for one new fart.
+ */
+export async function setAccountSwitch(
   db: Database,
   userId: string,
-  marketingEmail: boolean
+  name: AccountSwitch,
+  on: boolean
 ): Promise<boolean> {
-  const updated = await db
+  const update = db
     .update(user)
-    .set({ marketingEmail, updatedAt: new Date() })
+    .set({ [name]: on, updatedAt: new Date() })
     .where(eq(user.id, userId))
     .returning({ id: user.id })
+  if (name !== 'showFartPlaces' || on) return (await update).length === 1
+  const [updated] = await db.batch([
+    update,
+    db.update(recordings).set({ place: null }).where(eq(recordings.userId, userId))
+  ])
   return updated.length === 1
 }
 

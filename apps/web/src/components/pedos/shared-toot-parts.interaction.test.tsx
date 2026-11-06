@@ -50,7 +50,9 @@ const fart = (place: number, name: string): SharedFartRow['fart'] => ({
   length: '0:01',
   levels: [0.2, 0.8],
   recordedAt: Date.UTC(2026, 10, 6, 15, 12),
-  playable: true
+  playable: true,
+  recordedIn: 'Austin, Texas',
+  timeZone: 'America/Chicago'
 })
 
 const notes = [
@@ -169,6 +171,25 @@ describe("A shared Toot's farts", () => {
     expect(fartRows()[0].textContent).toContain('Recording deleted')
     expect(fartRows()[0].textContent).toContain('plays C4')
     expect(fartRows()[0].querySelector('button')).toBeNull()
+  })
+
+  it('says where each fart was made, in the time there', async () => {
+    await render()
+    expect(fartRows()[0].textContent).toContain('Austin, Texas')
+    // 15:12 UTC, in Chicago that November.
+    expect(fartRows()[0].textContent).toMatch(/\b0?9:12/)
+  })
+
+  it('says nothing of where for a fart with no place', async () => {
+    await render({
+      ...parts,
+      rows: rows.map(row => ({
+        ...row,
+        fart: row.fart && { ...row.fart, recordedIn: null, timeZone: null }
+      }))
+    })
+    expect(fartRows()[0].textContent).toContain('2026')
+    expect(fartRows()[0].textContent).not.toContain('Austin')
   })
 
   it("has nothing to play on a fart analysis hasn't found", async () => {

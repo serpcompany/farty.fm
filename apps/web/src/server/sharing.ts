@@ -18,10 +18,12 @@ import {
   sharedToot,
   shareOf,
   sharesWithNoSlug,
+  showsFartPlaces,
   tootPlaysTakenDown,
   tootRecordingIds
 } from '@/db/sharing'
 import { songIndex } from '@/lib/catalog/song-index.generated'
+import { NOT_SAID, recordedInOf } from '@/lib/fart-place'
 import { handleProblem, normalizeHandle, profilePath, suggestHandle } from '@/lib/handle'
 import { noteName } from '@/lib/pitch'
 import { formattedFartSeconds } from '@/lib/pitch-coverage'
@@ -383,14 +385,16 @@ export async function sharedTootParts(
   { row: { share, toot } }: { row: SharedTootRow }
 ): Promise<SharedTootParts> {
   const ids = tootRecordingIds(toot)
-  const live = new Map(
-    (await liveRecordingsOf(db, share.userId, ids)).map(row => [row.id, toRecording(row)])
-  )
+  const found = await liveRecordingsOf(db, share.userId, ids)
+  const live = new Map(found.map(row => [row.id, toRecording(row)]))
+  const places = new Map(found.map(row => [row.id, row.place]))
+  const showPlaces = await showsFartPlaces(db, share.userId)
   const fartOf = (id: string): SharedFart | null => {
     const recording = live.get(id)
     if (!recording) return null
     const part = tootFartPart(recording)
     return {
+      ...(showPlaces ? recordedInOf(places.get(id) ?? null) : NOT_SAID),
       place: ids.indexOf(id),
       name: recordingName(recording),
       length: part ? formattedFartSeconds(part.endSeconds - part.startSeconds) : '',

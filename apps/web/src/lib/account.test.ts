@@ -13,8 +13,8 @@ import {
   readStepDraft,
   saveStepDraft,
   sendCode,
+  setAccountSwitch,
   setLibraryOwner,
-  setMarketingEmail,
   signIn,
   stopStepOffers,
   takeSignInAgain,
@@ -147,10 +147,16 @@ describe('readSession', () => {
       status: 'signedIn',
       id: 'user-a',
       email: 'a@example.com',
-      marketingEmail: true
+      marketingEmail: true,
+      showFartPlaces: true
     })
-    answer(Response.json({ session: {}, user: { email: 'a@example.com', marketingEmail: false } }))
-    expect(await readSession()).toMatchObject({ marketingEmail: false })
+    answer(
+      Response.json({
+        session: {},
+        user: { email: 'a@example.com', marketingEmail: false, showFartPlaces: false }
+      })
+    )
+    expect(await readSession()).toMatchObject({ marketingEmail: false, showFartPlaces: false })
   })
 
   // Only a definite "signed out" may clear a guest's farts (visit.ts), so a session that can't
@@ -242,12 +248,12 @@ describe('signIn', () => {
   })
 })
 
-describe('deleteAccount and setMarketingEmail', () => {
+describe('deleteAccount and setAccountSwitch', () => {
   // A page left open on one account, after another signed in in another tab: the server refuses
   // a change that names the account the page shows (`wrong_account`), so it deletes nothing.
   const changes = [
     ['deleteAccount', () => deleteAccount('user-a')],
-    ['setMarketingEmail', () => setMarketingEmail(false, 'user-a')]
+    ['setAccountSwitch', () => setAccountSwitch('showFartPlaces', false, 'user-a')]
   ] as const
 
   it.each(changes)('%s names the account the page shows', async (_, change) => {

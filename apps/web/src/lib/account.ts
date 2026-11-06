@@ -8,7 +8,13 @@ export type Account =
   /** Not known yet: the session is being read. */
   | { status: 'checking' }
   | { status: 'signedOut' }
-  | { status: 'signedIn'; id: string; email: string; marketingEmail: boolean }
+  | {
+      status: 'signedIn'
+      id: string
+      email: string
+      marketingEmail: boolean
+      showFartPlaces: boolean
+    }
   /**
    * Signed out, in a browser that was signed in: the session ended (it lasts 7 days without an
    * open) or its cookie went. This browser's copy is still the account's, so it stays.
@@ -17,7 +23,7 @@ export type Account =
   /** The session couldn't be read: offline, or sign-in isn't set up here. */
   | { status: 'unreachable' }
 
-type User = { id?: unknown; email?: unknown; marketingEmail?: unknown }
+type User = { id?: unknown; email?: unknown; marketingEmail?: unknown; showFartPlaces?: unknown }
 
 function signedIn(user: User): Account {
   return {
@@ -26,7 +32,9 @@ function signedIn(user: User): Account {
     id: typeof user.id === 'string' ? user.id : '',
     email: String(user.email ?? ''),
     // News is on unless the account says it's off (the server's default, #150).
-    marketingEmail: user.marketingEmail !== false
+    marketingEmail: user.marketingEmail !== false,
+    // Likewise saying where each shared fart was made (#444).
+    showFartPlaces: user.showFartPlaces !== false
   }
 }
 
@@ -278,12 +286,19 @@ export function deleteAccount(accountId: string): Promise<AccountChange> {
   return changeAccount(accountId, { method: 'DELETE' })
 }
 
-/** Turns Farty news by email on or off for `accountId`'s account. */
-export function setMarketingEmail(on: boolean, accountId: string): Promise<AccountChange> {
+/** Profile's switches: Farty news by email, and saying where each shared fart was made. */
+export type AccountSwitch = 'marketingEmail' | 'showFartPlaces'
+
+/** Turns one of Profile's switches on or off for `accountId`'s account. */
+export function setAccountSwitch(
+  name: AccountSwitch,
+  on: boolean,
+  accountId: string
+): Promise<AccountChange> {
   return changeAccount(accountId, {
     method: 'PATCH',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ marketingEmail: on })
+    body: JSON.stringify({ [name]: on })
   })
 }
 

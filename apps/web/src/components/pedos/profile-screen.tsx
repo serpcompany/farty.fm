@@ -239,8 +239,16 @@ function SharingSection() {
  * in: the email, Farty news, Sign out and Delete account. A session that ended: Sign in again.
  */
 function AccountSection() {
-  const { account, openStep, retry, signOut, deleteAccount, setMarketingEmail, clearDevice } =
-    useAccount()
+  const {
+    account,
+    openStep,
+    retry,
+    signOut,
+    deleteAccount,
+    setMarketingEmail,
+    setShowFartPlaces,
+    clearDevice
+  } = useAccount()
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
   const [confirmsDelete, setConfirmsDelete] = useState(false)
@@ -393,6 +401,20 @@ function AccountSection() {
               disabled={busy}
               onCheckedChange={on =>
                 void run(() => setMarketingEmail(on), "Couldn't change Farty news. Try again.")
+              }
+            />
+          </label>
+        </li>
+        <li>
+          {/* The city on what they share (#444). Off forgets every city kept. */}
+          <label htmlFor="pedos-fart-places" className={row}>
+            Show where I farted
+            <Switch
+              id="pedos-fart-places"
+              checked={account.showFartPlaces}
+              disabled={busy}
+              onCheckedChange={on =>
+                void run(() => setShowFartPlaces(on), "Couldn't change that. Try again.")
               }
             />
           </label>

@@ -519,6 +519,11 @@ export function HandleDialog({
                 {typeof window === 'undefined' ? 'farty.fm' : window.location.host}/@
                 {handle || '…'}
               </span>
+              {/* Before anything's public, since a page anyone can open says this (#444). */}
+              <span className="mt-2 block">
+                Pages you share show when and in which city each fart was recorded. You can turn the
+                city off in Profile.
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="grid gap-1.5">

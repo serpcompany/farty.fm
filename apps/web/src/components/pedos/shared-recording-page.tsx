@@ -15,8 +15,9 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { play, playbackPosition, type Segment, stopPlayback } from '@/lib/audio/player'
+import { type RecordedIn, recordedWhenAndWhere } from '@/lib/fart-place'
 import { profilePath } from '@/lib/handle'
-import { formattedRecordedAt, type Trim } from '@/lib/recordings'
+import type { Trim } from '@/lib/recordings'
 import type { SharedTootParts as Parts } from '@/lib/toot'
 import { useInBrowser } from '@/lib/use-in-browser'
 import { cn } from '@/lib/utils'
@@ -93,10 +94,10 @@ export type SharedRecordingProps = {
   levels: number[]
   /** When it was recorded, in ms. */
   recordedAt: number
-}
+} & RecordedIn
 
 /**
- * The shared Recording: who shared it, its name and note, when it was recorded, the waveform, Play,
+ * The shared Recording: who shared it, its name and note, when and where it was recorded, the waveform, Play,
  * Get Farty, Report.
  */
 export function SharedRecordingPage({
@@ -105,6 +106,8 @@ export function SharedRecordingPage({
   name,
   note,
   recordedAt,
+  recordedIn,
+  timeZone,
   ...player
 }: SharedRecordingProps) {
   const inBrowser = useInBrowser()
@@ -126,12 +129,12 @@ export function SharedRecordingPage({
           </span>
         </p>
       )}
-      {/* Held at its size until the browser can say it in the viewer's own time. */}
+      {/* Held at its size until the browser can say it in the viewer's own words. */}
       <p
         className="mt-2 min-h-5 text-sm text-muted-foreground tabular-nums"
         data-testid="shared-recorded-at"
       >
-        {inBrowser && `Recorded ${formattedRecordedAt(recordedAt)}`}
+        {inBrowser && `Recorded ${recordedWhenAndWhere(recordedAt, { recordedIn, timeZone })}`}
       </p>
     </SharedItemPage>
   )
