@@ -146,13 +146,20 @@ export type NewCheckout = {
   userId: string
   /** The account's email: Checkout doesn't ask for it, and a refund finds the payment by it. */
   email: string
-  /** The Toot whose Save asked for it, to make again and save on the way back from Checkout. */
-  tootId: string
   successUrl: string
   cancelUrl: string
   /** The account's last session, if any: it expired, or Stripe no longer has it. */
   replaces: string | null
-}
+} & (
+  | {
+      /** The Toot whose Save asked for it, to make again and save on the way back from Checkout. */
+      tootId: string
+    }
+  | {
+      /** The page an offer before Save comes back to (#407), which has no Toot. */
+      page: string
+    }
+)
 
 /**
  * Starts a Checkout Session that pays `FULL_ACCESS_PRICE` for the account. Its metadata names the
@@ -178,13 +185,16 @@ export async function createCheckoutSession(
     customer_email: checkout.email,
     'metadata[purchase]': FULL_ACCESS_PURCHASE,
     'metadata[user_id]': checkout.userId,
-    'metadata[toot_id]': checkout.tootId,
+    ...('tootId' in checkout
+      ? { 'metadata[toot_id]': checkout.tootId }
+      : { 'metadata[return_page]': checkout.page }),
     'payment_intent_data[metadata][purchase]': FULL_ACCESS_PURCHASE,
     'payment_intent_data[metadata][user_id]': checkout.userId,
     success_url: checkout.successUrl,
     cancel_url: checkout.cancelUrl
   })
-  const idempotencyKey = `full-access/${checkout.userId}/${checkout.tootId}/${checkout.replaces ?? 'first'}`
+  const comesBackFor = 'tootId' in checkout ? checkout.tootId : `page:${checkout.page}`
+  const idempotencyKey = `full-access/${checkout.userId}/${comesBackFor}/${checkout.replaces ?? 'first'}`
   return (await stripeRequest(secretKey, '/checkout/sessions', {
     body: params,
     idempotencyKey

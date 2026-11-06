@@ -6,7 +6,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { songIndex } from '@/lib/catalog/song-index.generated'
 import { FULL_ACCESS_PRICE_LABEL } from '@/lib/pricing'
 import { cn } from '@/lib/utils'
-import { devCheckoutServes } from '@/server/full-access'
+import { devCheckoutServes, offerPage } from '@/server/full-access'
 import { isItemId } from '@/server/library-input'
 
 export const metadata: Metadata = {
@@ -24,13 +24,17 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>
 // It answers 404 anywhere but a local run on a local host, so never on Staging or Production.
 export default async function DevCheckoutPage({ searchParams }: { searchParams: SearchParams }) {
   if (!devCheckoutServes((await headers()).get('host'))) notFound()
-  const { toot, song: songId, return: returnTo } = await searchParams
+  const { toot, song: songId, return: returnTo, path } = await searchParams
+  const page = returnTo === 'page' ? offerPage(path) : null
   const forDownload = returnTo === 'toot'
-  const song = forDownload || songId === undefined ? null : songIndex.find(s => s.id === songId)
-  if (!isItemId(toot) || song === undefined) notFound()
-  const cancel = forDownload
-    ? `/toots/toot/?id=${toot}`
-    : `${song ? `/compose/${song.id}/` : '/compose/pad/'}?toot=${toot}`
+  const song =
+    page || forDownload || songId === undefined ? null : songIndex.find(s => s.id === songId)
+  if ((!page && !isItemId(toot)) || song === undefined) notFound()
+  const cancel =
+    page ??
+    (forDownload
+      ? `/toots/toot/?id=${toot}`
+      : `${song ? `/compose/${song.id}/` : '/compose/pad/'}?toot=${toot}`)
   return (
     <article className="flex flex-col gap-4 px-4 pt-4 pb-6">
       <h1 className="text-3xl font-bold tracking-tight">Dev checkout</h1>
@@ -41,7 +45,14 @@ export default async function DevCheckoutPage({ searchParams }: { searchParams: 
         Farty Full Access: <span className="font-semibold">{FULL_ACCESS_PRICE_LABEL}</span>
       </p>
       <form method="post" action="/api/dev/checkout/" className="flex flex-col gap-3">
-        <input type="hidden" name="toot" value={toot} />
+        {page ? (
+          <>
+            <input type="hidden" name="return" value="page" />
+            <input type="hidden" name="path" value={page} />
+          </>
+        ) : (
+          <input type="hidden" name="toot" value={toot} />
+        )}
         {song && <input type="hidden" name="song" value={song.id} />}
         {forDownload && <input type="hidden" name="return" value="toot" />}
         <button type="submit" className={cn(buttonVariants(), 'h-12 w-full text-base')}>

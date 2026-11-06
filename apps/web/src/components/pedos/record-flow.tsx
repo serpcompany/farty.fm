@@ -19,7 +19,7 @@ import {
 } from '@/lib/pitch-coverage'
 import { type Recording, recordingName, songPitch } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
-import { useAccount } from './account-provider'
+import { useFirstResultOffer } from './full-access-offer'
 import { type Draft, usePedos } from './pedos-provider'
 import { PitchStrip } from './pitch-strip'
 import { useTake } from './recording-replay'
@@ -492,8 +492,9 @@ function AnalysisFailed({ id }: { id: string }) {
 
 /**
  * Result: the note you just made, and what it unlocked. Matches the iPhone app's `ResultView`. The
- * first time, each button opens the account step before it goes where it was tapped (#155). When
- * the review's Trim couldn't be saved, it says so, as the pencil's review does.
+ * first time, each button opens the account step (#155) and offers Full Access (#407) before it goes
+ * where it was tapped. When the review's Trim couldn't be saved, it says so, as the pencil's review
+ * does.
  */
 function Result({
   recording,
@@ -506,8 +507,7 @@ function Result({
 }) {
   const pedos = usePedos()
   const finish = useFinishFlow()
-  const { offerStep } = useAccount()
-  const go = (href: string) => offerStep(() => finish(href))
+  const { go, checking, dialogs } = useFirstResultOffer(finish)
   const pitch = songPitch(recording)
 
   return (
@@ -551,13 +551,14 @@ function Result({
       {changes.unlocked.length > 0 ? (
         <FlowButtons
           secondary={
-            <FlowButton variant="secondary" onClick={() => go('/recordings/')}>
+            <FlowButton variant="secondary" disabled={checking} onClick={() => go('/recordings/')}>
               Done
             </FlowButton>
           }
           primary={
             <FlowButton
               variant="primary"
+              disabled={checking}
               onClick={() => {
                 // Song Creator plays the Toot once it's made: the tap starts the sound it needs.
                 startAudioInTap()
@@ -571,17 +572,18 @@ function Result({
       ) : (
         <FlowButtons
           secondary={
-            <FlowButton variant="secondary" onClick={() => go('/')}>
+            <FlowButton variant="secondary" disabled={checking} onClick={() => go('/')}>
               Record another
             </FlowButton>
           }
           primary={
-            <FlowButton variant="primary" onClick={() => go('/recordings/')}>
+            <FlowButton variant="primary" disabled={checking} onClick={() => go('/recordings/')}>
               Done
             </FlowButton>
           }
         />
       )}
+      {dialogs}
     </>
   )
 }

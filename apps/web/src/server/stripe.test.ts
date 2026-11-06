@@ -307,6 +307,29 @@ describe('createCheckoutSession', () => {
     expect(String(failed)).not.toContain(TEST_KEY)
   })
 
+  it('names an offer’s page where a Save names its Toot, for the same price (#407)', async () => {
+    const fetch = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(Response.json(session({ status: 'open', payment_status: 'unpaid' })))
+    await createCheckoutSession(TEST_KEY, {
+      userId: 'userA',
+      email: 'a@example.test',
+      page: '/recordings/',
+      successUrl: 'https://staging.farty.fm/recordings/?offer=done',
+      cancelUrl: 'https://staging.farty.fm/recordings/',
+      replaces: null
+    })
+    const [, init] = fetch.mock.calls[0]
+    expect(new Headers(init?.headers).get('idempotency-key')).toBe(
+      'full-access/userA/page:/recordings//first'
+    )
+    const sent = Object.fromEntries(init?.body as URLSearchParams)
+    expect(sent['metadata[return_page]']).toBe('/recordings/')
+    expect(sent).not.toHaveProperty('metadata[toot_id]')
+    expect(sent['line_items[0][price_data][unit_amount]']).toBe('499')
+    expect(sent['metadata[purchase]']).toBe('full_access')
+  })
+
   it('names the session it replaces in its idempotency key, so only a retry gets the same one', async () => {
     const fetch = vi
       .spyOn(globalThis, 'fetch')

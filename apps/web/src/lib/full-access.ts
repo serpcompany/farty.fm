@@ -1,3 +1,4 @@
+import { clearPaymentPending } from './full-access-offers'
 import { answer, send } from './library-api'
 import { builtFor, savingIsPaid } from './pricing'
 
@@ -6,6 +7,7 @@ import { builtFor, savingIsPaid } from './pricing'
 // browser goes to pay (`/api/full-access/checkout/`), and Stripe sends it back to the screen it came
 // from with the Toot's id, which makes the same Toot again and saves it once the account has it.
 // A saved Toot's Download asks too (#408), and comes back to the Toot's screen to hand over its file.
+// The offers before Save (#407) have no Toot, and come back to a page, with `?offer=done`.
 
 /** Whether this build's Save to Toots asks for Full Access first: the environment it's built for. */
 export function saveAsksForPayment(): boolean {
@@ -50,8 +52,19 @@ export function startDownloadCheckout(tootId: string, accountId: string): Promis
   return askForCheckout({ tootId, returnTo: 'toot' }, accountId)
 }
 
+/**
+ * Starts paying for Full Access from an offer before Save (#407), coming back to `page` with
+ * `?offer=done`. The server takes only the app's own pages, and anything else comes back to Record.
+ */
+export function startOfferCheckout(page: string, accountId: string): Promise<Checkout> {
+  return askForCheckout({ returnTo: 'page', path: page }, accountId)
+}
+
 async function askForCheckout(
-  body: { tootId: string; songId: string | null } | { tootId: string; returnTo: 'toot' },
+  body:
+    | { tootId: string; songId: string | null }
+    | { tootId: string; returnTo: 'toot' }
+    | { returnTo: 'page'; path: string },
   accountId: string
 ): Promise<Checkout> {
   const response = await send('/api/full-access/checkout/', accountId, {
@@ -92,6 +105,7 @@ async function askFullAccess(
     limitReached?: unknown
   } | null
   if (typeof body?.active !== 'boolean') return null
+  if (body.active) clearPaymentPending()
   return { active: body.active, limitReached: body.limitReached === true }
 }
 

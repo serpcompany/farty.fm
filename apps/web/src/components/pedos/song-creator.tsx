@@ -35,6 +35,7 @@ import {
   startCheckout,
   waitForFullAccess
 } from '@/lib/full-access'
+import { paymentPending } from '@/lib/full-access-offers'
 import { noteName } from '@/lib/pitch'
 import {
   autoMapRecordings,
@@ -501,9 +502,23 @@ export function SaveToToots({
       if (await save()) clearCheckoutReturn()
     } else setProblem(checkout.problem)
   }
+  /** Saves the Toot once the account has Full Access, which Stripe usually says at once. */
+  const waitAndSave = async (accountId: string) => {
+    paying.current = true
+    setBusy('confirming')
+    setProblem(null)
+    const access = await waitForFullAccess(accountId)
+    paying.current = false
+    setBusy(null)
+    if (access === null) setProblem('notPaidYet')
+    else if (access === 'limitReached') setProblem('limitReached')
+    else if (await save()) clearCheckoutReturn()
+  }
   /** Saves the Toot if the account has Full Access, and offers it if not. */
   const saveOrOffer = async (accountId: string) => {
     if (paying.current) return
+    // Paid at an offer, and not through yet: another Checkout could charge twice.
+    if (paymentPending(accountId)) return waitAndSave(accountId)
     paying.current = true
     setBusy('paying')
     setProblem(null)
@@ -565,17 +580,9 @@ export function SaveToToots({
     return () => window.removeEventListener('pageshow', shown)
   }, [])
 
-  // Back from Checkout for this Toot: saved once the account has Full Access, which Stripe usually
-  // says at once. It's saved even if the screen has been left meanwhile. Until it's saved, the
-  // address keeps the return, so a reload makes the same Toot and checks again.
-  const confirm = useEffectEvent(async (accountId: string) => {
-    setBusy('confirming')
-    const access = await waitForFullAccess(accountId)
-    setBusy(null)
-    if (access === null) setProblem('notPaidYet')
-    else if (access === 'limitReached') setProblem('limitReached')
-    else if (await save()) clearCheckoutReturn()
-  })
+  // Back from Checkout for this Toot: it's saved even if the screen has been left meanwhile. Until
+  // it's saved, the address keeps the return, so a reload makes the same Toot and checks again.
+  const confirm = useEffectEvent(waitAndSave)
   // The account isn't read yet: the confirming waits for it. If it can't be read, Save reads it
   // again, rather than waiting for the browser to come online.
   const waitsForAccount =

@@ -37,7 +37,7 @@ vi.mock('next/navigation', () => ({
   usePathname: () => '/'
 }))
 vi.mock('./account-provider', () => ({
-  useAccount: () => ({ offerStep: (go: () => void) => go() })
+  useAccount: () => ({ account: { status: 'signedOut' }, offerStep: (go: () => void) => go() })
 }))
 vi.mock('./share-recording', () => ({ ShareRecordingButton: () => null }))
 vi.mock('./pedos-provider', () => ({

@@ -18,7 +18,15 @@ export const BROWSER_STEPS = [
   /** A Toot of a Song is first played. */
   'song-heard',
   /** Save is first tapped on a Song's or Sound Pad's Toot. */
-  'save-tapped'
+  'save-tapped',
+  /** The Full Access sheet first opens from Welcome's offer (#407). */
+  'offer-welcome-shown',
+  /** Pay is first tapped on Welcome's offer. */
+  'offer-welcome-tapped',
+  /** The Full Access sheet first opens at the first Result. */
+  'offer-result-shown',
+  /** Pay is first tapped at the first Result's offer. */
+  'offer-result-tapped'
 ] as const
 
 export type BrowserStep = (typeof BROWSER_STEPS)[number]

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Account } from '@/lib/account'
 import { songs } from '@/lib/catalog/songs.generated'
 import type { CheckoutReturn } from '@/lib/full-access'
+import { clearPaymentPending, notePaymentPending } from '@/lib/full-access-offers'
 import type { SongTootDraft } from '@/lib/toot'
 
 // Song Creator's Save where saving is paid (ADR 0022), in a DOM: an account with Full Access saves,
@@ -378,6 +379,36 @@ describe('Save to Toots, where saving is paid', () => {
     server({ access: { active: true } })
     await tapSave()
     expect(page.saveToot).toHaveBeenCalledWith(draft)
+  })
+
+  it('waits on a payment made at an offer, and never opens the sheet that starts another', async () => {
+    const { waitForFullAccess } = await import('@/lib/full-access')
+    notePaymentPending('userA')
+    server({ access: { active: false } })
+    await render()
+    await tapSave()
+    expect(waitForFullAccess).toHaveBeenCalledWith('userA')
+    expect(sheet()).toBeNull()
+    expect(page.saveToot).not.toHaveBeenCalled()
+    expect(container.textContent).toContain(
+      "Your payment hasn't come through yet. Tap Save to check again."
+    )
+
+    // It's through: the same tap saves.
+    vi.mocked(waitForFullAccess).mockResolvedValueOnce('save')
+    await tapSave()
+    expect(sheet()).toBeNull()
+    expect(page.saveToot).toHaveBeenCalledWith(draft)
+    clearPaymentPending()
+  })
+
+  it('still offers it to another account in this browser', async () => {
+    notePaymentPending('userB')
+    server({ access: { active: false } })
+    await render()
+    await tapSave()
+    expect(sheet()).not.toBeNull()
+    clearPaymentPending()
   })
 
   it('saves by itself back from Checkout once the account has Full Access', async () => {

@@ -17,6 +17,18 @@ export function newEmail(testInfo: TestInfo, name: string): string {
 }
 
 /**
+ * A long address, the most lines the offer sheet gets, for the journeys that check it fits. CI's
+ * Linux draws it in DejaVu Sans, wider than a phone's font, so the price card's line wraps there at
+ * 375 wide too.
+ */
+export function longEmail(testInfo: TestInfo): string {
+  return newEmail(testInfo, 'a-really-rather-long-address').replace(
+    '@example.com',
+    '@a-long-mail-domain.example.test'
+  )
+}
+
+/**
  * Gives the context a client address of its own. Locally every request comes from 127.0.0.1, so
  * the tests would share one client's limit on sign-in codes (10 in 10 minutes); Cloudflare sets
  * this header itself, so only a local run can. Only Farty's own requests carry it: on every

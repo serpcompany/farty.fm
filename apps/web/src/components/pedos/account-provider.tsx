@@ -29,13 +29,16 @@ import { openVisit } from '@/lib/visit'
  */
 export type SignOut = 'signedOut' | 'pending' | 'failed'
 
-export type StepReason = 'keep' | 'share'
+export type StepReason = 'keep' | 'share' | 'fullAccess'
 
 type AccountContext = {
   account: Account
   /** The account step is on screen, over everything. */
   stepOpen: boolean
-  /** Why the step is open: to keep farts, or to share one (ADR 0020), which needs an account. */
+  /**
+   * Why the step is open: to keep farts, or for what needs an account: to share one (ADR 0020), or
+   * to buy Full Access from Welcome (#407).
+   */
   stepReason: StepReason
   /**
    * At a Result's button: shows the account step first the first time, then `then`, which goes
@@ -43,8 +46,8 @@ type AccountContext = {
    */
   offerStep(then?: () => void): void
   /**
-   * Profile's Save to an account, Sign in again, or a guest's Save in Song Creator (#237), or a
-   * guest's Share. `then` runs once the step closes, signed in or not.
+   * Profile's Save to an account, Sign in again, or a guest's Save in Song Creator (#237), a guest's
+   * Share, or a guest's tap on Welcome's offer. `then` runs once the step closes, signed in or not.
    */
   openStep(then?: () => void, reason?: StepReason): void
   /** Reads the session again, as Profile's Retry. It never clears anything. */

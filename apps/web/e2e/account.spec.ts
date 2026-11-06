@@ -8,7 +8,15 @@ import {
   type Page,
   test
 } from '@playwright/test'
-import { codeFor, newEmail, onTheLocalDatabase, ownClient, session, signInByApi } from './account'
+import {
+  codeFor,
+  longEmail,
+  newEmail,
+  onTheLocalDatabase,
+  ownClient,
+  session,
+  signInByApi
+} from './account'
 import { payAtTheDevCheckout, payOnTheSheet, payToSave, saveWithFullAccess } from './pay'
 import { recordAndSave, skipWelcome, withFakeMicrophone } from './record'
 import { onPhone } from './screens'
@@ -182,12 +190,7 @@ test('the offer names the buyer and fits one screen with the Toot above it, on a
 }, testInfo) => {
   test.setTimeout(180_000)
   await needsTheFixtureLibrary(request)
-  // A long address, the most lines the sheet gets. CI's Linux draws it in DejaVu Sans, wider than
-  // a phone's font, so the price card's line wraps there at 375 wide too.
-  const email = newEmail(testInfo, 'a-really-rather-long-address').replace(
-    '@example.com',
-    '@a-long-mail-domain.example.test'
-  )
+  const email = longEmail(testInfo)
   await page.addInitScript(skipWelcome)
   await page.goto('/profile/')
   await signInByApi(page, email)
