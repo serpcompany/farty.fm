@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.1](https://github.com/serpcompany/farty.fm/compare/v1.13.0...v1.13.1) (2026-11-06)
+
+
+### Fixes
+
+* never offer Pay again after a slow payment at Save or Download ([#436](https://github.com/serpcompany/farty.fm/issues/436)) ([0ddce94](https://github.com/serpcompany/farty.fm/commit/0ddce94950ddc936dfd711fdb05b58a3af5840a7)), closes [#433](https://github.com/serpcompany/farty.fm/issues/433)
+
 ## [1.13.0](https://github.com/serpcompany/farty.fm/compare/v1.12.1...v1.13.0) (2026-11-06)
 
 
