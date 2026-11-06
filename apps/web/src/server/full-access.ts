@@ -18,6 +18,7 @@ import { FULL_ACCESS_PRICE } from '@/lib/pricing'
 import { servedOrigin } from '@/lib/site'
 
 import { consumeSlot, type SlotRule } from './auth-config'
+import { createEmailSender, saleEmailConfig } from './email'
 import { LIMITS, type Stores, wrongLibrary } from './library'
 import { isItemId, readCapped, readJson } from './library-input'
 import { apiError, type SessionUser } from './require-user'
@@ -101,6 +102,28 @@ function returnUrl(request: Request, songId: string | null, tootId: string, done
 }
 
 /**
+ * Records the account's purchase paid, and tells the owner if that's what made it paid: every way a
+ * purchase gets paid comes through here, and the payment is in D1 before the email starts. The email
+ * goes after the answer, so neither Stripe nor the buyer waits on it: `waitUntil` keeps the Worker
+ * going for it, and `sendSale` never throws. True when the account has Full Access now.
+ */
+async function recordFullAccessPaid(
+  { db }: Pick<Stores, 'db'>,
+  request: Request,
+  userId: string,
+  checkoutSessionId: string,
+  paymentIntent: string | null
+): Promise<boolean> {
+  const paid = await markFullAccessPaid(db, userId, checkoutSessionId, paymentIntent)
+  if (paid.firstPaid) {
+    const { env, ctx } = getCloudflareContext()
+    const config = saleEmailConfig(env, request.headers.get('host'))
+    ctx.waitUntil(createEmailSender(config).sendSale(paymentIntent))
+  }
+  return paid.active
+}
+
+/**
  * Asks Stripe about the account's latest Checkout Session (`purchase`, its row), and records it paid
  * if it paid the price the row recorded. Null when Stripe no longer has it (deleted test data, or
  * another Stripe account's key), so a new one starts.
@@ -109,7 +132,8 @@ async function paidAtStripe(
   { db }: Pick<Stores, 'db'>,
   secretKey: string,
   user: SessionUser,
-  purchase: FullAccessRow
+  purchase: FullAccessRow,
+  request: Request
 ): Promise<{ active: boolean; session: CheckoutSession } | null> {
   let session: CheckoutSession
   try {
@@ -120,7 +144,8 @@ async function paidAtStripe(
   }
   if (!paidForFullAccess(session, user.id, purchase)) return { active: false, session }
   const paymentIntent = session.payment_intent ?? null
-  return { active: await markFullAccessPaid(db, user.id, session.id, paymentIntent), session }
+  const active = await recordFullAccessPaid({ db }, request, user.id, session.id, paymentIntent)
+  return { active, session }
 }
 
 /**
@@ -180,7 +205,7 @@ export async function startCheckout(
       : null
   try {
     if (earlier) {
-      const atStripe = await paidAtStripe({ db }, payments.secretKey, user, earlier)
+      const atStripe = await paidAtStripe({ db }, payments.secretKey, user, earlier, request)
       if (atStripe?.active) return active()
       // Paid, but not what its row says it charged: never start a second payment.
       if (atStripe?.session.payment_status === 'paid') {
@@ -239,7 +264,7 @@ export async function getFullAccess(
     return none()
   if (!(await spend(db, user, 'stripeChecks')).allowed) return none()
   try {
-    const now = await paidAtStripe({ db }, payments.secretKey, user, purchase)
+    const now = await paidAtStripe({ db }, payments.secretKey, user, purchase, request)
     return now?.active ? yes() : none()
   } catch (error) {
     return stripeFailed(error)
@@ -261,13 +286,18 @@ const isUserId = (id: unknown): id is string => typeof id === 'string' && USER_I
  * A paid Checkout Session marks what it paid for: the account's Full Access, or a Toot, for a
  * session still open when Full Access came. Only one started here, at the price its row recorded.
  */
-async function recordPaid({ db }: Pick<Stores, 'db'>, session: CheckoutSession | undefined) {
+async function recordPaid(
+  { db }: Pick<Stores, 'db'>,
+  session: CheckoutSession | undefined,
+  request: Request
+) {
   const userId = session?.metadata?.user_id
   if (!session || !isUserId(userId)) return
   if (session.metadata?.purchase === FULL_ACCESS_PURCHASE) {
     const purchase = await fullAccessPurchase(db, userId)
     if (purchase && paidForFullAccess(session, userId, purchase)) {
-      await markFullAccessPaid(db, userId, session.id, session.payment_intent ?? null)
+      const paymentIntent = session.payment_intent ?? null
+      await recordFullAccessPaid({ db }, request, userId, session.id, paymentIntent)
     }
     return
   }
@@ -329,7 +359,9 @@ export async function receiveStripeEvent(
   // Live events on Production, test events everywhere else, as `paymentsConfig` takes the keys.
   if (typeof event.type === 'string' && event.livemode === payments.livemode) {
     const object = event.data?.object
-    if (PAID_EVENTS.has(event.type)) await recordPaid({ db }, object as CheckoutSession | undefined)
+    if (PAID_EVENTS.has(event.type)) {
+      await recordPaid({ db }, object as CheckoutSession | undefined, request)
+    }
     if (event.type === 'charge.refunded') {
       await recordRefund({ db }, object as RefundedCharge | undefined)
     }
@@ -359,7 +391,7 @@ export async function payDevCheckout(
   if (!isItemId(tootId) || (songId !== null && !song)) return apiError(400, 'invalid_request')
   const purchase = await fullAccessPurchase(db, user.id)
   if (!purchase?.checkoutSessionId.startsWith('dev_')) return notFound()
-  await markFullAccessPaid(db, user.id, purchase.checkoutSessionId, null)
+  await recordFullAccessPaid({ db }, request, user.id, purchase.checkoutSessionId, null)
   return new Response(null, {
     status: 303,
     headers: { Location: returnUrl(request, song?.id ?? null, tootId, true) }

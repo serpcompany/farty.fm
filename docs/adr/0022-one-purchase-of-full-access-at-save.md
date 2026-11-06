@@ -14,6 +14,7 @@ $4.99 is a starting price from what comparable apps charge, not a tested one. #4
 - **The money back lasts 14 days.** Someone asks Support from their account's email, and it's refunded by hand in Stripe's Dashboard, found by that email, which Checkout is given rather than asking for it. `MONEY_BACK_DAYS` in `apps/web/src/lib/pricing.ts` is what the app says; nothing enforces it.
 - **A full refund ends Full Access.** Stripe's `charge.refunded` event, whose charge says `refunded: true`, marks the row refunded. A partial refund changes nothing. Saved Toots stay, and Save offers Full Access again. If the event isn't turned on, everything else still works and a refunded account keeps Full Access until it is.
 - **The server decides.** `PUT /api/toots/{id}/` answers 402 `payment_required` for a new Toot on an account without Full Access. It no longer asks about that one Toot. A deleted Toot still can't be saved again while its tombstone lasts (410 `deleted`), and Checkout refuses it the same way, so nobody pays for a Save that would be refused.
+- **The owner hears about each sale (#422).** The first time a purchase is recorded as paid, Production emails the owner the product, the price and the payment's Stripe Dashboard link, and nothing about the buyer. It goes after the answer, so neither Stripe nor the buyer waits on it. Staging sends none, and a send that fails is logged and not tried again. A purchase after a refund is another sale.
 
 The price is `FULL_ACCESS_PRICE` in `apps/web/src/lib/pricing.ts`, the one place it is set.
 

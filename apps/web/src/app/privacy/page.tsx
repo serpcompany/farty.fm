@@ -160,8 +160,10 @@ export default function PrivacyPage() {
       <p>
         Delete account on Profile removes your email, Recordings, Toots, handle, shared links,
         friends and friend requests, and Farty&apos;s record of your payments. Stripe keeps its own
-        record of each payment. Without an account, delete a Recording on the Recordings tab, or
-        clear this site&apos;s data in your browser to remove everything.
+        record of each payment, and we keep the email telling us about each sale, which holds
+        Stripe&apos;s payment reference and nothing else about you. Without an account, delete a
+        Recording on the Recordings tab, or clear this site&apos;s data in your browser to remove
+        everything.
       </p>
 
       <h2>Children</h2>

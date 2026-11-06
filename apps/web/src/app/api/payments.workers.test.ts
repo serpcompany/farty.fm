@@ -5,9 +5,18 @@ import * as devCheckoutRoute from '@/app/api/dev/checkout/route'
 import * as checkoutRoute from '@/app/api/full-access/checkout/route'
 import * as accessRoute from '@/app/api/full-access/route'
 import * as webhookRoute from '@/app/api/stripe/webhook/route'
-import { fullAccessPurchase, startFullAccess, tootPayment } from '@/db/payments'
-import { stepCounts } from '@/db/schema'
-import { FULL_ACCESS_PRICE } from '@/lib/pricing'
+import {
+  fullAccessPurchase,
+  hasFullAccess,
+  markFullAccessPaid,
+  refundFullAccess,
+  startFullAccess,
+  tootPayment
+} from '@/db/payments'
+import { handles, stepCounts } from '@/db/schema'
+import { FULL_ACCESS_PRICE, FULL_ACCESS_PRICE_LABEL } from '@/lib/pricing'
+import { listCapturedEmails } from '@/server/dev-mailbox'
+import { SALE_EMAIL_LIMIT_MS } from '@/server/email'
 import {
   devCheckoutServes,
   getFullAccess,
@@ -33,10 +42,18 @@ import {
 
 /** What the Worker's env has on top of wrangler.jsonc's, as each test sets it. */
 const extraEnv = vi.hoisted(() => ({}) as Record<string, unknown>)
+/** What's running after the answer, as the Worker's `ctx.waitUntil` keeps it. */
+const afterAnswer = vi.hoisted(() => [] as Promise<unknown>[])
 vi.mock('@opennextjs/cloudflare', async () => {
   const { env } = await import('cloudflare:test')
-  return { getCloudflareContext: () => ({ env: { ...env, ...extraEnv } }) }
+  const ctx = { waitUntil: (work: Promise<unknown>) => void afterAnswer.push(work) }
+  return { getCloudflareContext: () => ({ env: { ...env, ...extraEnv }, ctx }) }
 })
+
+/** Lets everything running after the answer finish. */
+async function workAfterAnswer() {
+  while (afterAnswer.length > 0) await Promise.all(afterAnswer.splice(0))
+}
 
 // Made-up values in Stripe's formats, never real keys.
 const TEST_KEY = 'sk_test_madeUpForTheTests'
@@ -54,7 +71,8 @@ beforeEach(() => {
   for (const key of Object.keys(extraEnv)) delete extraEnv[key]
 })
 
-afterEach(() => {
+afterEach(async () => {
+  await workAfterAnswer()
   vi.restoreAllMocks()
 })
 
@@ -1235,5 +1253,383 @@ describe('on Production, where saving is paid too (#258)', () => {
     }
     expect((await save(T1, a)).status).toBe(402)
     expect(stripe).not.toHaveBeenCalled()
+  })
+})
+
+describe('the email to the owner about a sale', () => {
+  const SUBJECT = `Farty sale: Full Access, ${FULL_ACCESS_PRICE_LABEL}`
+  const message = (paymentIntent = 'pi_live_first') => ({
+    from: { name: 'Farty', email: 'support@farty.fm' },
+    to: 'devin@serp.co',
+    subject: SUBJECT,
+    text: [
+      'Product: Full Access',
+      `Price: ${FULL_ACCESS_PRICE_LABEL}`,
+      `Stripe: https://dashboard.stripe.com/payments/${paymentIntent}`
+    ].join('\n')
+  })
+
+  /** Email Sending's binding, answering as `send` does. */
+  function emailBinding(send: () => Promise<unknown> = async () => ({ messageId: 'x' })) {
+    const binding = vi.fn((_message: unknown) => send())
+    extraEnv.EMAIL = { send: binding }
+    return binding
+  }
+
+  /** Someone who started a Checkout for Full Access, and hasn't paid yet. */
+  async function buying(name: string, sessionId = 'cs_live_first') {
+    const user = await signUp(name)
+    await startFullAccess(testDb(), user.id, sessionId, FULL_ACCESS_PRICE)
+    return user
+  }
+
+  /** `userId`'s session, paid, in `livemode` (Production's), as Stripe has it. */
+  const paidSession = (userId: string, fields: Partial<CheckoutSession> = {}) =>
+    paidSessionFor(userId, T1, {
+      id: 'cs_live_first',
+      payment_intent: 'pi_live_first',
+      livemode: true,
+      ...fields
+    })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  describe('on Production', () => {
+    beforeEach(() => {
+      extraEnv.SITE_ENV = 'production'
+      extraEnv.EMAIL_FROM = 'Farty <support@farty.fm>'
+      extraEnv.STRIPE_SECRET_KEY = LIVE_KEY
+      extraEnv.STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRET
+    })
+
+    it('goes out once, when the webhook first records the payment', async () => {
+      const send = emailBinding()
+      const a = await buying('A')
+      const received = await deliver(completed(paidSession(a.id)))
+      expect(received.status).toBe(200)
+      expect(await received.json()).toEqual({ received: true })
+      expect(send.mock.calls).toEqual([[message()]])
+    })
+
+    it('goes out once when Stripe sends the event again', async () => {
+      const send = emailBinding()
+      const a = await buying('A')
+      for (let delivery = 0; delivery < 3; delivery++) {
+        expect((await deliver(completed(paidSession(a.id)))).status).toBe(200)
+      }
+      expect(send).toHaveBeenCalledOnce()
+    })
+
+    it('goes out once when the return from Checkout gets there before the webhook', async () => {
+      const send = emailBinding()
+      const a = await buying('A')
+      stubStripe(paidSession(a.id))
+      expect(await hasIt(a)).toBe(true)
+      expect(send.mock.calls).toEqual([[message()]])
+      expect((await deliver(completed(paidSession(a.id)))).status).toBe(200)
+      expect(await hasIt(a)).toBe(true)
+      expect(send).toHaveBeenCalledOnce()
+    })
+
+    it('goes out once when the webhook gets there before the return', async () => {
+      const send = emailBinding()
+      const a = await buying('A')
+      expect((await deliver(completed(paidSession(a.id)))).status).toBe(200)
+      expect(await hasIt(a)).toBe(true)
+      expect(send).toHaveBeenCalledOnce()
+    })
+
+    it('goes out once when the webhook lands while the return is asking Stripe', async () => {
+      const send = emailBinding()
+      const a = await buying('A')
+      let answer = (_response: Response) => {}
+      const stripe = vi.spyOn(globalThis, 'fetch').mockImplementation(
+        () =>
+          new Promise(resolve => {
+            answer = resolve
+          })
+      )
+      // Past its look at the row, which said unpaid, the return is about to mark it paid too.
+      const returning = hasIt(a)
+      await vi.waitFor(() => expect(stripe).toHaveBeenCalledOnce())
+      expect((await deliver(completed(paidSession(a.id)))).status).toBe(200)
+      expect(send).toHaveBeenCalledOnce()
+      answer(Response.json(paidSession(a.id)))
+      expect(await returning).toBe(true)
+      expect(send).toHaveBeenCalledOnce()
+      expect(await counted('paid')).toBe(1)
+    })
+
+    it('goes out once when two deliveries of the event cross', async () => {
+      const send = emailBinding()
+      const a = await buying('A')
+      const answers = await Promise.all([
+        deliver(completed(paidSession(a.id))),
+        deliver(completed(paidSession(a.id)))
+      ])
+      expect(answers.map(answer => answer.status)).toEqual([200, 200])
+      expect(send).toHaveBeenCalledOnce()
+    })
+
+    it('goes out when a Pay tap is what finds the payment', async () => {
+      const send = emailBinding()
+      const a = await buying('A')
+      stubStripe(paidSession(a.id))
+      expect(await (await checkout(T1, a)).json()).toEqual({ active: true })
+      expect(send.mock.calls).toEqual([[message()]])
+    })
+
+    it('leaves the Stripe line out when the session names no payment', async () => {
+      const send = emailBinding()
+      const a = await buying('A')
+      expect((await deliver(completed(paidSession(a.id, { payment_intent: null })))).status).toBe(
+        200
+      )
+      expect(send.mock.calls).toEqual([
+        [
+          {
+            ...message(),
+            text: ['Product: Full Access', `Price: ${FULL_ACCESS_PRICE_LABEL}`].join('\n')
+          }
+        ]
+      ])
+    })
+
+    it('says nothing about the buyer', async () => {
+      const send = emailBinding()
+      const a = await buying('A')
+      await testDb()
+        .insert(handles)
+        .values({ userId: a.id, handle: 'fartfan', createdAt: new Date() })
+      expect((await deliver(completed(paidSession(a.id)))).status).toBe(200)
+      const sent = JSON.stringify(send.mock.calls)
+      expect(sent).toContain('pi_live_first')
+      for (const detail of [a.id, a.email, 'fartfan', 'cs_live_first', T1]) {
+        expect(sent).not.toContain(detail)
+      }
+    })
+
+    it('goes out again for a new purchase after a full refund, and not for the refund', async () => {
+      const send = emailBinding()
+      const a = await buying('A')
+      expect((await deliver(completed(paidSession(a.id)))).status).toBe(200)
+      const refund = refundedCharge({ payment_intent: 'pi_live_first' }, true)
+      expect((await deliver(refund)).status).toBe(200)
+      expect(send).toHaveBeenCalledOnce()
+
+      await startFullAccess(testDb(), a.id, 'cs_live_second', FULL_ACCESS_PRICE)
+      const second = paidSession(a.id, { id: 'cs_live_second', payment_intent: 'pi_live_second' })
+      expect((await deliver(completed(second))).status).toBe(200)
+      expect((await deliver(completed(second))).status).toBe(200)
+      expect(send.mock.calls).toEqual([[message()], [message('pi_live_second')]])
+    })
+
+    it('leaves it paid and the webhook’s answer as it was when the send fails, and doesn’t retry', async () => {
+      const failed = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const send = emailBinding(async () => {
+        throw new Error(`devin@serp.co ${SUBJECT}`)
+      })
+      const a = await buying('A')
+      const received = await deliver(completed(paidSession(a.id)))
+      expect(received.status).toBe(200)
+      expect(await received.json()).toEqual({ received: true })
+      expect(await fullAccessPurchase(testDb(), a.id)).toMatchObject({
+        paidAt: expect.any(Date),
+        paymentIntent: 'pi_live_first'
+      })
+      expect(await counted('paid')).toBe(1)
+      expect(await hasIt(a)).toBe(true)
+      await workAfterAnswer()
+      expect(failed.mock.calls).toEqual([['email_failed {"kind":"sale","reason":"send_error"}']])
+
+      expect((await deliver(completed(paidSession(a.id)))).status).toBe(200)
+      expect(send).toHaveBeenCalledOnce()
+    })
+
+    it('leaves the return from Checkout answering yes when the send fails', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const send = emailBinding(async () => {
+        throw new Error('down')
+      })
+      const a = await buying('A')
+      stubStripe(paidSession(a.id))
+      expect(await hasIt(a)).toBe(true)
+      expect(send).toHaveBeenCalledOnce()
+      expect((await save(T1, a)).status).toBe(201)
+    })
+
+    it('leaves it paid when Email Sending isn’t bound', async () => {
+      const skipped = vi.spyOn(console, 'info').mockImplementation(() => {})
+      const a = await buying('A')
+      expect((await deliver(completed(paidSession(a.id)))).status).toBe(200)
+      expect(await hasIt(a)).toBe(true)
+      await workAfterAnswer()
+      expect(skipped.mock.calls).toEqual([
+        ['email_skipped {"kind":"sale","reason":"email_not_configured"}']
+      ])
+    })
+
+    it('sends nothing for a 99¢ session’s Toot', async () => {
+      const send = emailBinding()
+      const a = await signUp('A')
+      await pastPayment(a.id, T1, { paidAt: null })
+      const session = oldSessionFor(a.id, T1, { status: 'complete', payment_status: 'paid' })
+      expect((await deliver(completed({ ...session, livemode: true }))).status).toBe(200)
+      expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeInstanceOf(Date)
+      expect(await counted('paid')).toBe(1)
+      expect(afterAnswer).toEqual([])
+      expect(send).not.toHaveBeenCalled()
+    })
+
+    it('answers the webhook before a slow send finishes, with the payment recorded', async () => {
+      let finish = () => {}
+      const send = emailBinding(
+        () =>
+          new Promise<void>(resolve => {
+            finish = resolve
+          })
+      )
+      const a = await buying('A')
+      const answer = await deliver(completed(paidSession(a.id)))
+      expect(answer.status).toBe(200)
+      expect(await answer.json()).toEqual({ received: true })
+      expect(send).toHaveBeenCalledOnce()
+      expect((await fullAccessPurchase(testDb(), a.id))?.paidAt).toBeInstanceOf(Date)
+      expect(afterAnswer).toHaveLength(1)
+      finish()
+      await workAfterAnswer()
+      expect(send).toHaveBeenCalledOnce()
+    })
+
+    it('answers without waiting for a send that never finishes, and logs it after the limit', async () => {
+      const failed = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const send = emailBinding(() => new Promise(() => {}))
+      const a = await buying('A')
+      // No time passes before the answers: waiting on the send would never answer.
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const answer = await deliver(completed(paidSession(a.id)))
+      expect(answer.status).toBe(200)
+      expect(await answer.json()).toEqual({ received: true })
+      expect(send).toHaveBeenCalledOnce()
+      expect((await fullAccessPurchase(testDb(), a.id))?.paidAt).toBeInstanceOf(Date)
+      expect(failed).not.toHaveBeenCalled()
+
+      await vi.advanceTimersByTimeAsync(SALE_EMAIL_LIMIT_MS - 1)
+      expect(failed).not.toHaveBeenCalled()
+      await vi.advanceTimersByTimeAsync(1)
+      await workAfterAnswer()
+      expect(failed.mock.calls).toEqual([['email_failed {"kind":"sale","reason":"send_timeout"}']])
+    })
+
+    it('answers the return from Checkout without waiting for a send that never finishes', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      emailBinding(() => new Promise(() => {}))
+      const a = await buying('A')
+      stubStripe(paidSession(a.id))
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      expect(await hasIt(a)).toBe(true)
+      await vi.advanceTimersByTimeAsync(SALE_EMAIL_LIMIT_MS)
+    })
+
+    it('has the email go even if D1 can’t be read after the first UPDATE', async () => {
+      const a = await buying('A')
+      const db = testDb()
+      const read = vi.spyOn(db, 'select').mockImplementation(() => {
+        throw new Error('D1 is down')
+      })
+      expect(await markFullAccessPaid(db, a.id, 'cs_live_first', 'pi_live_first')).toEqual({
+        active: true,
+        firstPaid: true
+      })
+      expect(read).not.toHaveBeenCalled()
+      // A repeat still reads, and may fail: no email hangs on it, since it isn’t the first.
+      await expect(markFullAccessPaid(db, a.id, 'cs_live_first', 'pi_live_first')).rejects.toThrow(
+        'D1 is down'
+      )
+      expect(await counted('paid')).toBe(1)
+    })
+
+    it('never has a refund on an unpaid purchase, so its first payment gives Full Access', async () => {
+      const a = await buying('A')
+      const db = testDb()
+      await markFullAccessPaid(db, a.id, 'cs_live_first', 'pi_live_first')
+      await refundFullAccess(db, 'pi_live_first')
+      expect((await fullAccessPurchase(db, a.id))?.refundedAt).toBeInstanceOf(Date)
+
+      await startFullAccess(db, a.id, 'cs_live_second', FULL_ACCESS_PRICE)
+      const unpaid = { paidAt: null, refundedAt: null, paymentIntent: null }
+      expect(await fullAccessPurchase(db, a.id)).toMatchObject(unpaid)
+      // The old payment's refund, sent again, has nothing to match on the new purchase.
+      await refundFullAccess(db, 'pi_live_first')
+      expect(await fullAccessPurchase(db, a.id)).toMatchObject(unpaid)
+
+      expect(await markFullAccessPaid(db, a.id, 'cs_live_second', 'pi_live_second')).toEqual({
+        active: true,
+        firstPaid: true
+      })
+      expect(await hasFullAccess(db, a.id)).toBe(true)
+    })
+  })
+
+  describe('on Staging', () => {
+    beforeEach(() => {
+      extraEnv.SITE_ENV = 'staging'
+      extraEnv.EMAIL_FROM = 'Farty <support@farty.fm>'
+      extraEnv.STRIPE_SECRET_KEY = TEST_KEY
+      extraEnv.STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRET
+    })
+
+    it('never goes out, by the webhook or the return, and the payment still counts', async () => {
+      const skipped = vi.spyOn(console, 'info').mockImplementation(() => {})
+      const send = emailBinding()
+      const a = await buying('A', 'cs_test_first')
+      const session = paidSessionFor(a.id, T1)
+      expect((await deliver(completed(session))).status).toBe(200)
+      expect(await hasIt(a)).toBe(true)
+
+      const b = await buying('B', 'cs_test_second')
+      stubStripe(paidSessionFor(b.id, T1, { id: 'cs_test_second' }))
+      expect(await hasIt(b)).toBe(true)
+
+      await workAfterAnswer()
+      expect(send).not.toHaveBeenCalled()
+      expect(skipped.mock.calls).toEqual([
+        ['email_skipped {"kind":"sale","reason":"not_production"}'],
+        ['email_skipped {"kind":"sale","reason":"not_production"}']
+      ])
+    })
+  })
+
+  describe('on a local run, with the dev checkout', () => {
+    const mailbox = () => (env as unknown as { DEV_MAILBOX: KVNamespace }).DEV_MAILBOX
+
+    it('lands in the dev mailbox, once, with no Stripe line', async () => {
+      const a = await signUp('A')
+      await checkout(T1, a)
+      expect(await listCapturedEmails(mailbox())).toEqual([])
+      expect((await payDev(T1, a)).status).toBe(303)
+      expect((await payDev(T1, a)).status).toBe(303)
+      await workAfterAnswer()
+      expect(await listCapturedEmails(mailbox())).toEqual([
+        expect.objectContaining({
+          from: 'Farty <support@farty.fm>',
+          to: 'devin@serp.co',
+          subject: SUBJECT,
+          text: ['Product: Full Access', `Price: ${FULL_ACCESS_PRICE_LABEL}`].join('\n')
+        })
+      ])
+    })
+
+    it('never reaches Email Sending, even with its binding', async () => {
+      const send = emailBinding()
+      const a = await signUp('A')
+      await checkout(T1, a)
+      expect((await payDev(T1, a)).status).toBe(303)
+      await workAfterAnswer()
+      expect(send).not.toHaveBeenCalled()
+      expect(await listCapturedEmails(mailbox())).toHaveLength(1)
+    })
   })
 })
