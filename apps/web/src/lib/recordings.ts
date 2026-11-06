@@ -338,3 +338,8 @@ export function atFullLevel(samples: Float32Array): Float32Array {
   const gain = fullLevelPeak / peak
   return samples.map(sample => sample * gain)
 }
+
+/** When a Recording was recorded, in the viewer's own time: "Nov 6, 2026, 3:12 PM". */
+export function formattedRecordedAt(recordedAt: number): string {
+  return new Date(recordedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+}

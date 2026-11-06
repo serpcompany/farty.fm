@@ -160,6 +160,30 @@ export async function sharesWithNoSlug(db: Database, userId: string) {
 /** D1 binds at most 100 values a statement; one is the user id. */
 const IN_BATCH = 90
 
+/** The user's Recordings of `ids` that aren't deleted, in no order. */
+export async function liveRecordingsOf(
+  db: Database,
+  userId: string,
+  ids: string[]
+): Promise<RecordingRow[]> {
+  const rows: RecordingRow[] = []
+  for (let at = 0; at < ids.length; at += IN_BATCH) {
+    rows.push(
+      ...(await db
+        .select()
+        .from(recordings)
+        .where(
+          and(
+            eq(recordings.userId, userId),
+            inArray(recordings.id, ids.slice(at, at + IN_BATCH)),
+            isNull(recordings.deletedAt)
+          )
+        ))
+    )
+  }
+  return rows
+}
+
 /** The Recordings a Toot plays: its Arrangement's, or its Sound Pad Performance's. */
 export function tootRecordingIds(toot: Pick<TootRow, 'arrangement' | 'performance'>): string[] {
   return [

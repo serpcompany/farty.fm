@@ -25,6 +25,64 @@ export type TootArrangement = {
  */
 export type TootScore = Pick<Song, 'bpm'> & SongNotes
 
+/** What a note roll draws: a Song's, or a Sound Pad Toot's taps, one lane per fart. */
+export type RollSong = Pick<Song, 'bpm' | 'length_beats' | 'notes' | 'pitches'>
+
+/** One fart of a shared Toot, as anyone with the link sees it: never its Recording's id. */
+export type SharedFart = {
+  /** Its place in the Toot's list, which names its audio (`farts/<place>/audio/`). */
+  place: number
+  /** "Recording 8". */
+  name: string
+  /** "1.1 s": its fart's length, as its row shows it. */
+  length: string
+  /** The loudness bars of the fart, each 0…1. */
+  levels: number[]
+  /** When it was recorded, in ms. */
+  recordedAt: number
+  /** Analysis has found the fart, so it has audio to play. */
+  playable: boolean
+}
+
+/** A row of a shared Toot's "Recordings used". */
+export type SharedFartRow = {
+  /** The note it plays, "G2". Null on a Sound Pad, where it plays no note of a Song. */
+  plays: string | null
+  /** The pitch or lane of the roll its notes are on. */
+  pitch: number
+  /** Its place among the Song's pitches, lowest first, which its color is (`pitchColor`). */
+  colorIndex: number
+  /** Null once its Recording is deleted: the Toot's own audio still plays it. */
+  fart: SharedFart | null
+}
+
+/** What a shared Toot is made of, for its page: its roll, and each fart it plays. */
+export type SharedTootParts = {
+  /** The notes as it was rendered, or a Sound Pad Toot's taps. Null when it keeps none. */
+  song: RollSong | null
+  /**
+   * The Song in the catalog whose notes the page fetches, for a Toot saved before #254 that keeps
+   * none of its own. Null with no `song` means no roll: its Song isn't in Farty any more.
+   */
+  catalogSong: SongSummary | null
+  transposition: number
+  /** `song`'s pitches are lanes, one per fart: a Sound Pad Toot's. */
+  lanes: boolean
+  rows: SharedFartRow[]
+}
+
+/** The distinct pitches of `notes`, lowest first. */
+const pitchesOf = (notes: readonly SongNote[]) =>
+  [...new Set(notes.map(note => note.pitch))].sort((a, b) => a - b)
+
+/** A score as its note roll draws it. */
+export const rollOfScore = ({ bpm, length_beats, notes }: TootScore): RollSong => ({
+  bpm,
+  length_beats,
+  notes,
+  pitches: pitchesOf(notes)
+})
+
 /** Room for longer Songs than the catalog's longest, of 64 notes and 26 bars over 64 beats. */
 const MAX_SCORE_NOTES = 500
 const MAX_SCORE_BEATS = 10_000
@@ -142,7 +200,7 @@ export function savedToot(draft: TootDraft, createdAt: number): Toot {
 export function songAsMade(toot: Toot, summary: SongSummary): Song | null {
   if (toot.songId === null || !toot.score) return null
   const { bpm, bar_lines, length_beats, notes } = toot.score
-  const pitches = [...new Set(notes.map(note => note.pitch))].sort((a, b) => a - b)
+  const pitches = pitchesOf(notes)
   return {
     ...summary,
     bpm,

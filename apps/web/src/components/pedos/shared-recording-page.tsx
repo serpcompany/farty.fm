@@ -2,7 +2,7 @@
 
 import { Check, ChevronRight, Flag, Link2Off, Play, Square } from 'lucide-react'
 import Link from 'next/link'
-import { type ReactNode, useCallback, useEffect, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,12 +14,15 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { play, playbackPosition, stopPlayback } from '@/lib/audio/player'
+import { play, playbackPosition, type Segment, stopPlayback } from '@/lib/audio/player'
 import { profilePath } from '@/lib/handle'
-import type { Trim } from '@/lib/recordings'
+import { formattedRecordedAt, type Trim } from '@/lib/recordings'
+import type { SharedTootParts as Parts } from '@/lib/toot'
+import { useInBrowser } from '@/lib/use-in-browser'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { useStartGetFarty } from './get-farty'
+import { SharedTootParts } from './shared-toot-parts'
 import { SiteHeader } from './site-chrome'
 import { ReplayWaveform } from './waveform'
 
@@ -88,10 +91,23 @@ export type SharedRecordingProps = {
   length: string
   part: Trim
   levels: number[]
+  /** When it was recorded, in ms. */
+  recordedAt: number
 }
 
-/** The shared Recording: who shared it, its name and note, the waveform, Play, Get Farty, Report. */
-export function SharedRecordingPage({ handle, slug, name, note, ...player }: SharedRecordingProps) {
+/**
+ * The shared Recording: who shared it, its name and note, when it was recorded, the waveform, Play,
+ * Get Farty, Report.
+ */
+export function SharedRecordingPage({
+  handle,
+  slug,
+  name,
+  note,
+  recordedAt,
+  ...player
+}: SharedRecordingProps) {
+  const inBrowser = useInBrowser()
   return (
     <SharedItemPage
       what="Recording"
@@ -110,6 +126,13 @@ export function SharedRecordingPage({ handle, slug, name, note, ...player }: Sha
           </span>
         </p>
       )}
+      {/* Held at its size until the browser can say it in the viewer's own time. */}
+      <p
+        className="mt-2 min-h-5 text-sm text-muted-foreground tabular-nums"
+        data-testid="shared-recorded-at"
+      >
+        {inBrowser && `Recorded ${formattedRecordedAt(recordedAt)}`}
+      </p>
     </SharedItemPage>
   )
 }
@@ -124,9 +147,14 @@ export type SharedTootProps = {
   length: string
   seconds: number
   levels: number[]
+  /** What it's made of: its note roll, and each fart it plays. */
+  parts: Parts
 }
 
-/** The shared Toot: who shared it, its title and Song, the waveform, Play, Get Farty, Report. */
+/**
+ * The shared Toot: who shared it, its title and Song, the waveform, Play, its roll and each fart,
+ * Get Farty, Report.
+ */
 export function SharedTootPage({
   handle,
   slug,
@@ -134,7 +162,8 @@ export function SharedTootPage({
   song,
   length,
   seconds,
-  levels
+  levels,
+  parts
 }: SharedTootProps) {
   return (
     <SharedItemPage
@@ -145,6 +174,7 @@ export function SharedTootPage({
       length={length}
       part={{ startSeconds: 0, endSeconds: seconds }}
       levels={levels}
+      below={player => <SharedTootParts parts={parts} player={player} />}
     >
       {song && song !== title && (
         <p className="mt-1.5 text-[15px] text-muted-foreground" data-testid="shared-song">
@@ -155,10 +185,87 @@ export function SharedTootPage({
   )
 }
 
+/** What's playing on a shared page: the item's own audio, whole or one note, or one of its farts. */
+type Sound = { of: 'item'; segment: Trim; note: number | null } | { of: 'fart'; place: number }
+
+/**
+ * A shared page's playing, one sound at a time: its own audio from a spot or one note of it, or
+ * one fart of a Toot. `base` is the page's own path, which the audio is under.
+ */
+function useSharedPlayer(base: string, part: Trim) {
+  const [sound, setSound] = useState<Sound | null>(null)
+  const [started, setStarted] = useState<{ sound: Sound; at: number } | null>(null)
+  const [unplayable, setUnplayable] = useState<Sound['of'] | null>(null)
+  const latest = useRef<Sound | null>(null)
+
+  // Leaving the page stops it, as a tab change does in the app.
+  useEffect(() => stopPlayback, [])
+
+  const start = useCallback(
+    (next: Sound, path: string, segment: Segment | null, from: number) => {
+      latest.current = next
+      setSound(next)
+      setUnplayable(null)
+      const url = `${base}${path}`
+      void play(
+        `shared:${url}`,
+        async () => {
+          const response = await fetch(url)
+          if (!response.ok) {
+            setUnplayable(next.of)
+            throw new Error(`audio ${response.status}`)
+          }
+          return response.arrayBuffer()
+        },
+        segment,
+        () => setSound(current => (current === next ? null : current))
+      ).then(() => {
+        // The playhead's 0 is the item's start, before `from`.
+        if (latest.current === next)
+          setStarted({ sound: next, at: performance.now() - from * 1000 })
+      })
+    },
+    [base]
+  )
+
+  const playFrom = useCallback(
+    (from: number) =>
+      start(
+        { of: 'item', segment: { startSeconds: from, endSeconds: part.endSeconds }, note: null },
+        'audio/',
+        { start: from, end: part.endSeconds },
+        from
+      ),
+    [part.endSeconds, start]
+  )
+
+  return {
+    sound,
+    /** When the whole item started playing (`performance.now()`), for a roll's playhead. */
+    startedAt:
+      sound?.of === 'item' && sound.note === null && started?.sound === sound ? started.at : null,
+    unplayable,
+    playFrom,
+    /** Plays one note of the item's own audio, from `from` to `to` seconds. */
+    playNote: (note: number, from: number, to: number) =>
+      start(
+        { of: 'item', segment: { startSeconds: from, endSeconds: to }, note },
+        'audio/',
+        { start: from, end: to },
+        from
+      ),
+    /** Plays one of a Toot's farts, on its own. */
+    playFart: (place: number) => start({ of: 'fart', place }, `farts/${place}/audio/`, null, 0),
+    stop: stopPlayback
+  }
+}
+
+export type SharedPlayer = ReturnType<typeof useSharedPlayer>
+
 /**
  * A shared item's page: who shared it, its name and `children` (a Recording's note, a Toot's Song),
- * the waveform and Play, Get Farty, and Report. `base` is the page's own path, which its audio and
- * Report are under.
+ * the waveform and Play, `below` it what a Toot is made of, Get Farty, and Report. `base` is the
+ * page's own path, which its audio and Report are under.
  */
 function SharedItemPage({
   what,
@@ -168,6 +275,7 @@ function SharedItemPage({
   length,
   part,
   levels,
+  below,
   children
 }: {
   what: 'Recording' | 'Toot'
@@ -177,36 +285,13 @@ function SharedItemPage({
   length: string
   part: Trim
   levels: number[]
+  below?: (player: SharedPlayer) => ReactNode
   children?: ReactNode
 }) {
   const { account } = useAccount()
-  const [playing, setPlaying] = useState<Trim | null>(null)
-  const [unplayable, setUnplayable] = useState(false)
-
-  // Leaving the page stops it, as a tab change does in the app.
-  useEffect(() => stopPlayback, [])
-
-  const playFrom = useCallback(
-    (from: number) => {
-      const segment = { startSeconds: from, endSeconds: part.endSeconds }
-      setPlaying(segment)
-      setUnplayable(false)
-      void play(
-        `shared:${base}`,
-        async () => {
-          const response = await fetch(`${base}audio/`)
-          if (!response.ok) {
-            setUnplayable(true)
-            throw new Error(`audio ${response.status}`)
-          }
-          return response.arrayBuffer()
-        },
-        { start: from, end: part.endSeconds },
-        () => setPlaying(current => (current === segment ? null : current))
-      )
-    },
-    [base, part.endSeconds]
-  )
+  const player = useSharedPlayer(base, part)
+  const { playFrom } = player
+  const playing = player.sound?.of === 'item' ? player.sound.segment : null
 
   const toggle = () => {
     if (playing) stopPlayback()
@@ -258,12 +343,14 @@ function SharedItemPage({
               <span className="text-sm text-muted-foreground tabular-nums">{length}</span>
             </div>
           </div>
-          {unplayable && (
+          {player.unplayable === 'item' && (
             <p role="alert" className="text-sm text-destructive">
               Couldn't play it. Check your connection and try again.
             </p>
           )}
         </div>
+
+        {below?.(player)}
 
         {account.status !== 'signedIn' && (
           <div className="mt-5 grid gap-2 text-center">

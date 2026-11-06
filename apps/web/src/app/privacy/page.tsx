@@ -6,7 +6,7 @@ export default function PrivacyPage() {
   return (
     <article className="flex flex-col gap-3 px-4 pt-4 pb-6 text-sm leading-relaxed [&_a]:underline [&_h2]:pt-3 [&_h2]:text-lg [&_h2]:font-semibold [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5">
       <h1 className="text-3xl font-bold tracking-tight">Privacy</h1>
-      <p className="text-muted-foreground">Last updated: November 6, 2026</p>
+      <p className="text-muted-foreground">Last updated: November 7, 2026</p>
       <p>
         Farty records your farts, finds the note of each one, and plays songs with them. This policy
         explains what happens to your data. The short version:{' '}
@@ -36,9 +36,11 @@ export default function PrivacyPage() {
         <li>
           Nothing you record is public unless you share it. When you share a Recording or a saved
           Toot, anyone with its link can open it, signed in or not, and play it. The page shows your
-          handle, the Recording&apos;s name, note, length and waveform, or the Toot&apos;s name,
-          Song, length and waveform, and nothing else about you: never your email or your other
-          Recordings and Toots.
+          handle and the Recording&apos;s name, note, length, waveform and when you recorded it. A
+          Toot&apos;s page shows its name, Song, length, waveform and notes, and the name, note,
+          length, waveform and recording time of each Recording it plays. Anyone on the page can
+          play each of those farts on its own, but not the rest of the recording around it. Nothing
+          else about you: never your email or your other Recordings and Toots.
         </li>
         <li>
           What you share is listed on your page, farty.fm/@yourhandle, which anyone can open. Search
@@ -56,7 +58,8 @@ export default function PrivacyPage() {
         <li>
           Stop sharing, deleting the Recording or Toot, or deleting your account makes the link stop
           working for everyone. Apps that already showed a preview of the link may keep their copy
-          of it.
+          of it. Stopping a Recording&apos;s own link doesn&apos;t take it off a Toot you&apos;ve
+          shared that plays it: stop sharing the Toot too.
         </li>
         <li>
           Anyone can report a shared Recording or Toot, or a page. Farty keeps which link or page

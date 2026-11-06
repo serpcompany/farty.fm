@@ -5,7 +5,7 @@ import { getDb } from '@/db'
 import { noteName } from '@/lib/pitch'
 import { formattedFartLength } from '@/lib/pitch-coverage'
 import { recordingName, songPitch, type Trim } from '@/lib/recordings'
-import { findSharedRecording, sharedPart } from '@/server/sharing'
+import { findSharedRecording, partBars, sharedPart } from '@/server/sharing'
 
 /** What a shared Recording's page, and its link image, show of it: nothing private. */
 export type SharedView = {
@@ -25,6 +25,8 @@ export type SharedView = {
   part: Trim
   /** The loudness bars of `part`, from the upload, each 0…1. */
   levels: number[]
+  /** When it was recorded, in ms. */
+  recordedAt: number
 }
 
 /**
@@ -45,18 +47,10 @@ export const sharedView = cache(async (handle: string, id: string): Promise<Shar
     note: pitch === null ? null : noteName(pitch),
     length: formattedFartLength(recording),
     part: { startSeconds: 0, endSeconds: part.endSeconds - part.startSeconds },
-    levels: partBars(recording.waveform, recording.seconds, part)
+    levels: partBars(recording.waveform, recording.seconds, part),
+    recordedAt: recording.createdAt
   }
 })
-
-/** The bars of the whole take's `waveform` that fall in `part`. */
-function partBars(waveform: number[], seconds: number, part: Trim): number[] {
-  if (waveform.length === 0 || seconds <= 0) return waveform
-  const from = Math.floor((part.startSeconds / seconds) * waveform.length)
-  const to = Math.ceil((part.endSeconds / seconds) * waveform.length)
-  const bars = waveform.slice(Math.max(0, from), Math.max(from + 1, to))
-  return bars.length > 0 ? bars : waveform
-}
 
 /** "A fart", "An E3 fart": what the link's description and image call it. */
 export function fartPhrase(note: string | null): string {

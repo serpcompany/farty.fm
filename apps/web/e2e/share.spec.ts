@@ -214,6 +214,7 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
     await expect(other.getByText(`@${handle} shared a Recording`)).toBeVisible()
     await expect(other.getByRole('heading', { name: 'Recording 1' })).toBeVisible()
     await expect(other.getByTestId('shared-note')).toHaveText('G3')
+    await expect(other.getByTestId('shared-recorded-at')).toHaveText(/^Recorded .*\d{4}/)
     // Signed out, Get Farty starts Get Farty here (#318), so it's a button, not a link to `/`.
     await expect(other.getByRole('button', { name: 'Get Farty' }).first()).toBeVisible()
     await expect(other.getByRole('link', { name: 'Get Farty' })).toHaveCount(0)
@@ -449,6 +450,35 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     expect(sound.peak).toBeGreaterThan(0.05)
     await expect(other.getByRole('button', { name: `Stop ${title}` })).toBeVisible()
     await shot(other, 'toot-shared-playing')
+  })
+
+  await test.step('they see its notes and each fart, with when it was recorded, and play one alone (#443)', async () => {
+    const roll = other.getByTestId('note-view')
+    await expect(roll).toBeVisible()
+    await expect(roll.getByTestId('playhead')).toBeVisible()
+    await other.getByRole('button', { name: `Stop ${title}` }).click()
+
+    const farts = other.getByTestId('recording-used')
+    await expect(farts.first()).toContainText(/plays /)
+    await expect(farts.first()).toContainText(/\d{4}/)
+    await shot(other, 'toot-shared-parts')
+
+    // Nothing names a Recording: no id of any kind on the page, and a fart's audio is by its place.
+    expect(await other.content()).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-/i)
+    const before = await other.evaluate(() => window.__sounds.length)
+    const fart = other.waitForResponse(response =>
+      new URL(response.url()).pathname.endsWith(`${link}farts/0/audio/`)
+    )
+    await farts.first().getByRole('button').first().click()
+    expect((await fart).status()).toBe(200)
+    await expect.poll(() => other.evaluate(() => window.__sounds.length)).toBe(before + 1)
+    const played = await other.evaluate(() => window.__sounds.at(-1))
+    expect(played?.peak).toBeGreaterThan(0.05)
+    await expect(farts.first().getByRole('button').first()).toHaveAttribute('aria-pressed', 'true')
+    // Only that fart: the Toot's own Play isn't playing.
+    await expect(other.getByRole('button', { name: `Play ${title}` })).toBeVisible()
+    await farts.first().getByRole('button').first().click()
+    await expect(farts.first().getByRole('button').first()).toHaveAttribute('aria-pressed', 'false')
   })
 
   await test.step('reports it', async () => {
