@@ -201,19 +201,25 @@ test('the offer names the buyer and fits one screen with the Toot above it, on a
     'href',
     '/support/'
   )
-  for (const screen of [
+  for (const { smallest, ...screen } of [
     { width: 375, height: 667 },
-    { width: 390, height: 844 }
+    { width: 390, height: 844 },
+    // Small iPhones, with Safari's bars. The Toot's Play and state are behind the sheet here.
+    { width: 375, height: 553, smallest: true },
+    { width: 320, height: 568, smallest: true }
   ]) {
     await page.setViewportSize(screen)
     await expect(async () => {
       const box = await offer.boundingBox()
+      expect(box?.y ?? 0).toBeGreaterThan(0)
       // The Toot's title, Play and state are on the screen, all of each above the sheet.
-      for (const shown of [
-        page.locator('#app h1'),
-        page.getByTestId('song-creator-play'),
-        page.getByTestId('song-creator-state')
-      ]) {
+      for (const shown of smallest
+        ? []
+        : [
+            page.locator('#app h1'),
+            page.getByTestId('song-creator-play'),
+            page.getByTestId('song-creator-state')
+          ]) {
         await expect(shown).toBeVisible()
         const above = await shown.boundingBox()
         expect(above?.y ?? -1).toBeGreaterThanOrEqual(0)

@@ -189,6 +189,7 @@ describe('Save to Toots, where saving is paid', () => {
       'Keep this Toot, and every one after it.',
       'Save up to 300 Toots, from Songs and the Sound Pad',
       'Send any saved Toot by link. Anyone can play it, no account needed',
+      'Download any saved Toot as a file',
       "They're in your account, on any phone or tablet you sign in on",
       'Full Access',
       'Once, no subscription',

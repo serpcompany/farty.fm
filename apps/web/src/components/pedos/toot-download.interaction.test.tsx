@@ -424,12 +424,19 @@ describe('Download without Full Access', () => {
   it('offers the sheet, and gives no file', async () => {
     await showToots()
     await tapDownload()
-    expect(sheet()?.textContent).toContain('Pay $4.99')
+    expect(sheet()?.textContent).toContain('Download any saved Toot as a file')
     expect(calls.loadTootAudio).not.toHaveBeenCalled()
     expect(calls.handOverFile).not.toHaveBeenCalled()
     await tapButton('Not now')
     await settle()
     expect(calls.startDownloadCheckout).not.toHaveBeenCalled()
+  })
+
+  it('doesn’t say “this Toot” of one that’s already saved', async () => {
+    await showToots()
+    await tapDownload()
+    expect(sheet()?.querySelector('h2')?.textContent).toBe('Keep every Toot you make.')
+    expect(sheet()?.textContent).not.toContain('Keep this Toot')
   })
 
   it('says whose email it’s under, as Save does', async () => {

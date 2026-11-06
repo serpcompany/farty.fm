@@ -133,8 +133,13 @@ test('without Full Access, Download offers it, and paying comes back to a file o
     await tab(page, 'Toots').click()
     await openMore(page)
     await page.getByRole('menuitem', { name: 'Download' }).click()
+    await expect(sheet.getByRole('heading')).toHaveText('Keep every Toot you make.')
+    await expect(sheet).toContainText('Download any saved Toot as a file')
     await expect(sheet).toContainText('Once, no subscription')
     await expect(sheet).toContainText(`Buying for ${email}.`)
+    for (const name of ['Pay $4.99', 'Not now']) {
+      await expect(sheet.getByRole('button', { name })).toBeInViewport({ ratio: 1 })
+    }
     await sheet.getByRole('button', { name: 'Not now' }).click()
     await expect(sheet).toBeHidden()
     expect(noFile).toEqual([])

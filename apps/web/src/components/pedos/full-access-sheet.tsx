@@ -10,6 +10,7 @@ import { FULL_ACCESS_PRICE_LABEL, MAX_SAVED_TOOTS, MONEY_BACK_DAYS } from '@/lib
 const BENEFITS = [
   `Save up to ${MAX_SAVED_TOOTS} Toots, from Songs and the Sound Pad`,
   'Send any saved Toot by link. Anyone can play it, no account needed',
+  'Download any saved Toot as a file',
   "They're in your account, on any phone or tablet you sign in on"
 ]
 
@@ -19,6 +20,7 @@ const BENEFITS = [
  * Creator's Toot stays in view above it. The Sound Pad's take sits under the Pads, so there it's
  * covered. Pay stays busy while the page goes to Checkout.
  *
+ * `headline` is for where the default isn't true: Download opens on a Toot that's already saved.
  * `email` is the account's, which Checkout is given. A guest makes an account before this opens, so
  * it's theirs by then. With no email to show, the line is left out.
  */
@@ -26,12 +28,14 @@ export function FullAccessSheet({
   open,
   busy,
   email,
+  headline = 'Keep this Toot, and every one after it.',
   onPay,
   onClose
 }: {
   open: boolean
   busy: boolean
   email: string | null
+  headline?: string
   onPay: () => void
   onClose: () => void
 }) {
@@ -44,7 +48,7 @@ export function FullAccessSheet({
         showCloseButton={false}
       >
         <SheetTitle className="text-2xl leading-tight font-bold tracking-tight">
-          Keep this Toot, and every one after it.
+          {headline}
         </SheetTitle>
         <SheetDescription
           render={<ul />}
