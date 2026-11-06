@@ -113,7 +113,7 @@ export async function canSaveFromStored(accountId: string): Promise<boolean | nu
   return state ? state.active && !state.limitReached : null
 }
 
-/** How long an offer waits to hear whether the account has Full Access: it mustn't hold up a tap. */
+/** How long an offer holds a tap to hear whether the account has Full Access, at most. */
 export const OFFER_CHECK_MS = 2500
 
 /**

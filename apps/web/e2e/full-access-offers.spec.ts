@@ -16,11 +16,38 @@ import { aMoment, stepsFrom } from './steps'
 
 test.use({ permissions: ['microphone'] })
 
+/** What an offer can put on screen, each while it's open: one closing is on its way out. */
+const OPEN_OVERLAYS = [
+  '[role="dialog"][aria-labelledby="account-step-title"]',
+  '[data-testid="full-access-sheet"][data-open]',
+  '[data-testid="full-access-confirmation"][data-open]'
+].join(',')
+
+/** Remembers any moment two were open at once, however brief, across pages. */
+function watchForStacking(openOverlays: string): void {
+  new MutationObserver(() => {
+    if (document.querySelectorAll(openOverlays).length > 1) {
+      sessionStorage.setItem('e2e.stacked', 'yes')
+    }
+  }).observe(document, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ['data-open']
+  })
+}
+
 test.beforeEach(async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'phone', 'Welcome, where the first offer is, is phone-only')
   test.setTimeout(120_000)
   await ownClient(page.context())
   await page.addInitScript(fakeMicrophone, { wavs: fixtureWavs(), delayMs: getUserMediaMs })
+  await page.addInitScript(watchForStacking, OPEN_OVERLAYS)
+})
+
+test.afterEach(async ({ page }, testInfo) => {
+  if (testInfo.project.name !== 'phone') return
+  expect(await page.evaluate(() => sessionStorage.getItem('e2e.stacked'))).toBeNull()
 })
 
 const welcomeOffer = (page: Page) => page.getByRole('button', { name: 'Get Full Access for $4.99' })
@@ -28,12 +55,7 @@ const allowMicrophone = (page: Page) => page.getByRole('button', { name: 'Allow 
 const sheet = (page: Page) => page.getByTestId('full-access-sheet')
 const confirmation = (page: Page) => page.getByTestId('full-access-confirmation')
 
-/** What an offer can put on screen, each a dialog. A Result is one too, under them. */
-const overlays = (page: Page) =>
-  page
-    .getByRole('dialog', { name: /^(Make a free account|Keep your farts)$/ })
-    .or(sheet(page))
-    .or(confirmation(page))
+const overlays = (page: Page) => page.locator(OPEN_OVERLAYS)
 
 /** One thing at a time: the step, or a sheet, and never one over another. */
 async function expectOneOnScreen(page: Page, shown: Locator): Promise<void> {
@@ -72,6 +94,27 @@ async function atRecordOnANewBrowser(page: Page): Promise<void> {
   await page.addInitScript(() => {
     if (localStorage.getItem('pedos.steps') === null) {
       localStorage.setItem('pedos.steps', JSON.stringify({ open: 'sent' }))
+    }
+  })
+}
+
+/** Holds Farty's checks of Full Access for `ms`, so what they lead to comes that much later. */
+async function holdChecks(page: Page, ms: number): Promise<void> {
+  await page.route(
+    url => url.pathname === '/api/full-access/',
+    async route => {
+      await new Promise(resolve => setTimeout(resolve, ms))
+      await route.continue().catch(() => {})
+    }
+  )
+}
+
+/** Fakes the page going to the background and coming back, as reading another app does. */
+async function hideAndShow(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    for (const state of ['hidden', 'visible']) {
+      Object.defineProperty(document, 'visibilityState', { value: state, configurable: true })
+      document.dispatchEvent(new Event('visibilitychange'))
     }
   })
 }
@@ -209,6 +252,77 @@ test.describe('on Welcome', () => {
     await expectNothingOver(page)
     await expect(welcomeOffer(page)).toBeEnabled()
     expect(await hasFullAccess(page)).toBe(false)
+  })
+
+  test('its money-back link goes to Support, and the sheet goes with it', async ({
+    page
+  }, testInfo) => {
+    await page.goto('/privacy/')
+    await signInByApi(page, newEmail(testInfo, 'welcome-support'))
+    await page.goto('/')
+    await welcomeOffer(page).click()
+    await sheet(page).getByRole('link', { name: 'Get your money back' }).click()
+    await expect(page).toHaveURL(/\/support\/$/)
+    await expectNothingOver(page)
+    await page.goBack()
+    await expect(welcomeOffer(page)).toBeEnabled()
+    await expectNothingOver(page)
+  })
+
+  test('signed in, its button opens the sheet with no second check', async ({ page }, testInfo) => {
+    await page.goto('/privacy/')
+    await signInByApi(page, newEmail(testInfo, 'welcome-at-once'))
+    const checks: string[] = []
+    page.on('request', request => {
+      if (request.url().includes('/api/full-access/?')) checks.push(request.url())
+    })
+    await page.goto('/')
+    await expect(welcomeOffer(page)).toBeEnabled()
+    await welcomeOffer(page).click()
+    await expectOneOnScreen(page, sheet(page))
+    expect(checks).toHaveLength(1)
+  })
+
+  test('ended while the check is out, no sheet comes after', async ({ page }, testInfo) => {
+    await page.goto('/')
+    await welcomeOffer(page).click()
+    const step = page.getByRole('dialog', { name: 'Make a free account' })
+    await holdChecks(page, 1_000)
+    await signInAtTheStep(page, step, newEmail(testInfo, 'welcome-gone'))
+    await expect(step).toBeHidden()
+    await page.getByRole('button', { name: 'Not now' }).click()
+    await expect(page.getByTestId('record-button')).toBeVisible()
+    await page.waitForTimeout(1_500)
+    await expectNothingOver(page)
+  })
+
+  test('on a short screen, it scrolls to every button', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 460 })
+    await page.goto('/')
+    for (const button of [allowMicrophone(page), welcomeOffer(page)]) {
+      await button.scrollIntoViewIfNeeded()
+      await expect(button).toBeInViewport()
+    }
+    await page.getByRole('button', { name: 'Not now' }).click()
+    await expect(page.getByTestId('record-button')).toBeVisible()
+  })
+
+  test('with the account unreadable on the way back, it never asks them to sign in', async ({
+    page
+  }, testInfo) => {
+    await page.goto('/privacy/')
+    await signInByApi(page, newEmail(testInfo, 'welcome-unreachable'))
+    await page.goto('/')
+    await welcomeOffer(page).click()
+    await sheet(page).getByRole('button', { name: 'Pay $4.99' }).click()
+    await expect(page).toHaveURL(/\/dev\/checkout\//)
+    await page.route('**/api/auth/get-session', route => route.abort())
+    await page.getByRole('button', { name: 'Pay $4.99' }).click()
+
+    await expect(confirmation(page)).toContainText("Your payment hasn't come through yet")
+    await page.unroute('**/api/auth/get-session')
+    await confirmation(page).getByRole('button', { name: 'Check again' }).click()
+    await expect(confirmation(page)).toContainText('You have Full Access')
   })
 
   test('a guest signing in to an account that has it hears so, with no sheet', async ({
@@ -364,6 +478,69 @@ test.describe('at the first Result', () => {
     await confirmation(page).getByRole('button', { name: 'Close' }).click()
     await expect(page).toHaveURL(/\/recordings\/$/)
     await expectNothingOver(page)
+  })
+
+  test('its money-back link goes to Support, not where they tapped, and the Result closes', async ({
+    page
+  }, testInfo) => {
+    await atRecordOnANewBrowser(page)
+    await page.goto('/privacy/')
+    await signInByApi(page, newEmail(testInfo, 'result-support'))
+    await page.goto('/')
+    await firstResult(page)
+    await page.getByRole('button', { name: 'Done' }).click()
+    await sheet(page).getByRole('link', { name: 'Get your money back' }).click()
+
+    await expect(page).toHaveURL(/\/support\/$/)
+    await expectNothingOver(page)
+    await expect(page.getByTestId('result-note')).toBeHidden()
+    await aMoment(page)
+    await expect(page).toHaveURL(/\/support\/$/)
+  })
+
+  test('when Pay says they were charged, its link goes to Support and stays there', async ({
+    page
+  }, testInfo) => {
+    await atRecordOnANewBrowser(page)
+    await page.goto('/privacy/')
+    await signInByApi(page, newEmail(testInfo, 'result-charged'))
+    await page.route('**/api/full-access/checkout/', route =>
+      route.fulfill({ status: 409, json: { error: 'payment_mismatch' } })
+    )
+    await page.goto('/')
+    await firstResult(page)
+    await page.getByRole('button', { name: 'Done' }).click()
+    await sheet(page).getByRole('button', { name: 'Pay $4.99' }).click()
+    await confirmation(page).getByRole('link', { name: 'Contact support' }).click()
+
+    await expect(page).toHaveURL(/\/support\/$/)
+    await expectNothingOver(page)
+    await expect(page.getByTestId('result-note')).toBeHidden()
+    await aMoment(page)
+    await expect(page).toHaveURL(/\/support\/$/)
+  })
+
+  test('hidden and shown on the way back, the confirmation stays where it is', async ({
+    page
+  }, testInfo) => {
+    await atRecordOnANewBrowser(page)
+    await page.goto('/privacy/')
+    await signInByApi(page, newEmail(testInfo, 'result-hidden'))
+    await page.goto('/')
+    await firstResult(page)
+    await page.getByRole('button', { name: 'Record another' }).click()
+    await sheet(page).getByRole('button', { name: 'Pay $4.99' }).click()
+    await expect(page).toHaveURL(/\/dev\/checkout\//)
+    await holdChecks(page, 1_000)
+    await page.getByRole('button', { name: 'Pay $4.99' }).click()
+    await expect(confirmation(page)).toContainText('Confirming your payment')
+    await hideAndShow(page)
+
+    await expect(confirmation(page)).toContainText('You have Full Access')
+    await expect(page).toHaveURL(/\/recordings\/$/)
+    await confirmation(page).getByRole('button', { name: 'OK' }).click()
+    await expect(page.getByTestId('record-button')).toBeVisible()
+    await expect(page).toHaveURL(/\/$/)
   })
 
   test('already signed in, the sheet opens with no step', async ({ page }, testInfo) => {

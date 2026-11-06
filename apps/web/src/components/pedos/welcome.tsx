@@ -45,7 +45,7 @@ export function Welcome() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background p-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] md:hidden">
+    <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-background p-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] md:hidden">
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
         <div className="flex-1" />
         <Image

@@ -696,7 +696,7 @@ describe('with Stripe Checkout in test mode', () => {
     expect(await counted('checkout-started')).toBe(1)
   })
 
-  it('ends an open session for another place or a Toot first, so only one can be paid (#407)', async () => {
+  it('ends an open offer’s session for a Toot first, so only one can be paid (#407)', async () => {
     const a = await signUp('A')
     const toot = sessionFor(a.id, T1, {
       id: 'cs_test_second',
@@ -715,6 +715,65 @@ describe('with Stripe Checkout in test mode', () => {
     )
     const sent = stripe.mock.calls[3][1]?.body as URLSearchParams
     expect(sent.get('metadata[toot_id]')).toBe(T1)
+  })
+
+  it('ends an open session for another place too, and starts its own (#407)', async () => {
+    const a = await signUp('A')
+    const elsewhere = offerSessionFor(a.id, 'result', {
+      id: 'cs_test_second',
+      url: 'https://checkout.stripe.com/c/pay/cs_test_second'
+    })
+    const stripe = stubStripe(
+      offerSessionFor(a.id, 'welcome'),
+      offerSessionFor(a.id, 'welcome'),
+      offerSessionFor(a.id, 'welcome', { status: 'expired', url: null }),
+      elsewhere
+    )
+    await offerCheckout('welcome', a)
+    expect(await (await offerCheckout('result', a)).json()).toEqual({ url: elsewhere.url })
+    expect(String(stripe.mock.calls[2][0])).toBe(
+      'https://api.stripe.com/v1/checkout/sessions/cs_test_first/expire'
+    )
+    const sent = stripe.mock.calls[3][1]?.body as URLSearchParams
+    expect(sent.get('metadata[offer]')).toBe('result')
+  })
+
+  it('starts no second payment from an offer when the last session is already paid (#407)', async () => {
+    const a = await signUp('A')
+    const paid = offerSessionFor(a.id, 'welcome', {
+      status: 'complete',
+      payment_status: 'paid',
+      payment_intent: 'pi_test_first'
+    })
+    const stripe = stubStripe(offerSessionFor(a.id, 'welcome'), paid)
+    await offerCheckout('welcome', a)
+    // Paid at Stripe with no webhook yet, the other offer's tap has it, and starts nothing.
+    expect(await (await offerCheckout('result', a)).json()).toEqual({ active: true })
+    expect(stripe).toHaveBeenCalledTimes(2)
+    expect(await hasIt(a)).toBe(true)
+  })
+
+  it('starts no second payment from an offer when the last is paid at another price (#407)', async () => {
+    const a = await signUp('A')
+    const stripe = stubStripe(
+      offerSessionFor(a.id, 'welcome'),
+      offerSessionFor(a.id, 'welcome', {
+        status: 'complete',
+        payment_status: 'paid',
+        payment_intent: 'pi_test_first',
+        amount_total: 1
+      })
+    )
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {})
+    await offerCheckout('welcome', a)
+    const refused = await offerCheckout('result', a)
+    expect(refused.status).toBe(409)
+    expect(await refused.json()).toEqual({ error: 'payment_mismatch' })
+    expect(stripe).toHaveBeenCalledTimes(2)
+    expect(log).toHaveBeenCalledWith(
+      JSON.stringify({ event: 'stripe_paid_session_refused', session: 'cs_test_first' })
+    )
+    log.mockRestore()
   })
 
   it('has Full Access from an offer’s paid session, by the webhook and on the return (#407)', async () => {

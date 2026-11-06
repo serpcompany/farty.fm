@@ -18,6 +18,7 @@ import { type Tab, tabOf, tabs } from '@/lib/tabs'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { AccountStep } from './account-step'
+import { useFullAccessOffers } from './full-access-offers'
 import { appMain, Lander } from './lander'
 import { usePedos } from './pedos-provider'
 import { useTrackPages } from './previous-page'
@@ -38,8 +39,8 @@ const icons: Record<Tab, LucideIcon> = {
 
 /**
  * The five tabs, as the iPhone app's `AppTabs`. Playback stops on a tab change and while the page
- * is hidden. The page comes back on Record, unless Recording, Review, Result or the account step is
- * open. On a computer, every tab is the product page instead (`lander.tsx`), whose Download App
+ * is hidden. The page comes back on Record, unless Recording, Review, Result, the account step or a
+ * Full Access offer is open. On a computer, every tab is the product page instead (`lander.tsx`), whose Download App
  * shows `qrCode`.
  */
 export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: ReactNode }) {
@@ -47,6 +48,7 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
   const { stopPlayback, showsRecordFlow, finishWelcome, flow, capture, reviewOpen } = pedos
   // Reading the sign-in code in another app hides the page: the step stays where it was.
   const { stepOpen } = useAccount()
+  const { offerOpen } = useFullAccessOffers()
   const pathname = usePathname()
   const router = useRouter()
   const tab = tabOf(pathname)
@@ -90,13 +92,13 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
       } else if (wasHidden.current) {
         wasHidden.current = false
         // Pages outside the tabs stay where they are, and so does a computer's product page.
-        if (showsRecordFlow || stepOpen || tab === null || tab === 'record') return
+        if (showsRecordFlow || stepOpen || offerOpen || tab === null || tab === 'record') return
         if (!window.matchMedia(desktop).matches) router.push('/')
       }
     }
     document.addEventListener('visibilitychange', visibilityChanged)
     return () => document.removeEventListener('visibilitychange', visibilityChanged)
-  }, [router, showsRecordFlow, stepOpen, stopPlayback, tab])
+  }, [offerOpen, router, showsRecordFlow, stepOpen, stopPlayback, tab])
 
   return (
     <>

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   createContext,
   type ReactNode,
@@ -21,7 +21,6 @@ import {
   SheetTitle
 } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
-import { startAudioInTap } from '@/lib/audio/context'
 import {
   type Checkout,
   hasStoredFullAccess,
@@ -52,6 +51,8 @@ export type WelcomeOffer = 'none' | 'unsure' | 'shows'
 
 type OffersContext = {
   welcomeOffer: WelcomeOffer
+  /** An offer's sheet or its confirmation is up, or waiting on the account step. */
+  offerOpen: boolean
   /** Welcome's button: a guest makes an account first, and then the sheet opens. */
   offerAtWelcome(): void
   /**
@@ -89,9 +90,10 @@ type View =
  * between the two.
  */
 export function FullAccessOffersProvider({ children }: { children: ReactNode }) {
-  const { account, offerStep, openStep, stepOpen } = useAccount()
-  const { recordings, showsWelcome } = usePedos()
+  const { account, offerStep, openStep, retry, stepOpen } = useAccount()
+  const { finishFlow, recordings, showsWelcome } = usePedos()
   const router = useRouter()
+  const pathname = usePathname()
   const accountId = account.status === 'signedIn' ? account.id : null
   const [view, setView] = useState<View | null>(null)
   /** The account step closed, on the way to an offer. */
@@ -100,6 +102,10 @@ export function FullAccessOffersProvider({ children }: { children: ReactNode }) 
   const [stored, setStored] = useState<{ id: string; active: boolean | null } | null>(null)
   /** A check is out for an offer's tap, so a second tap waits for its sheet. */
   const asking = useRef(false)
+  const welcomeShown = useRef(showsWelcome)
+  useEffect(() => {
+    welcomeShown.current = showsWelcome
+  }, [showsWelcome])
 
   const setStage = useCallback((stage: Confirming) => {
     setView(current => (current?.kind === 'confirm' ? { ...current, stage } : current))
@@ -121,6 +127,8 @@ export function FullAccessOffersProvider({ children }: { children: ReactNode }) 
     asking.current = true
     const active = await hasStoredFullAccess(id)
     asking.current = false
+    // Welcome ended while this asked, and that's their answer.
+    if (place === 'welcome' && !welcomeShown.current) return
     if (active) {
       setStored({ id, active })
       // Welcome's tap asked for it, so it hears the answer. A Result's tap was going elsewhere.
@@ -128,8 +136,7 @@ export function FullAccessOffersProvider({ children }: { children: ReactNode }) 
       else next?.then()
       return
     }
-    // Unsure at a Result: never hold up the tap. Welcome's tap asked for the sheet, and Pay's answer
-    // decides.
+    // Unsure at a Result: the tap goes on. Welcome's tap asked for the sheet, and Pay's answer decides.
     if (active === null && place === 'result') {
       next?.then()
       return
@@ -164,7 +171,8 @@ export function FullAccessOffersProvider({ children }: { children: ReactNode }) 
   useEffect(() => {
     if (!waiting || !settled) return
     if (!accountId) {
-      setStage('signIn')
+      // Unreachable says nothing of whether they're signed in, so Check again is what's left.
+      setStage(account.status === 'unreachable' ? 'notPaid' : 'signIn')
       return
     }
     let current = true
@@ -179,7 +187,19 @@ export function FullAccessOffersProvider({ children }: { children: ReactNode }) 
     return () => {
       current = false
     }
-  }, [waiting, settled, accountId, setStage])
+  }, [waiting, settled, accountId, account.status, setStage])
+
+  // A link on a sheet, to Support, ends the offer. Provided above the pages, it would stay over the
+  // page it went to, and the tap it held would then take them off that page.
+  const shownPath = useRef(pathname)
+  useEffect(() => {
+    if (shownPath.current === pathname) return
+    shownPath.current = pathname
+    if (!view) return
+    setView(null)
+    takeOfferNext()
+    finishFlow()
+  }, [pathname, view, finishFlow])
 
   // Back from Checkout through the browser's history, the page can come back as it was left.
   useEffect(() => {
@@ -194,7 +214,8 @@ export function FullAccessOffersProvider({ children }: { children: ReactNode }) 
   const offerAtWelcome = () => {
     if (asking.current || view) return
     reachStep('offer-welcome-tapped')
-    if (accountId) void askThenOffer('welcome', null, accountId)
+    // Signed in, its button shows only once Farty has asked. Pay's answer covers anything since.
+    if (accountId) setView({ kind: 'offer', place: 'welcome', next: null, busy: false })
     else openStep(() => setAfterStep({ place: 'welcome', next: null }), 'pay')
   }
 
@@ -244,10 +265,7 @@ export function FullAccessOffersProvider({ children }: { children: ReactNode }) 
       return
     }
     const href = view.place === 'result' ? takeOfferNext() : null
-    if (!href) return
-    // Song Creator plays the Toot once it's made: this tap starts the sound it needs.
-    if (href.startsWith('/compose/')) startAudioInTap()
-    router.push(href)
+    if (href) router.push(href)
   }
 
   const knownActive = stored?.id === accountId ? stored?.active : null
@@ -259,7 +277,7 @@ export function FullAccessOffersProvider({ children }: { children: ReactNode }) 
         : 'shows'
 
   return (
-    <Context value={{ welcomeOffer, offerAtWelcome, offerAtResult }}>
+    <Context value={{ welcomeOffer, offerOpen: view !== null, offerAtWelcome, offerAtResult }}>
       {children}
       {/* The account step comes first: a sheet never opens over it. */}
       <FullAccessSheet
@@ -273,7 +291,10 @@ export function FullAccessOffersProvider({ children }: { children: ReactNode }) 
           open={!stepOpen}
           stage={view.stage}
           problem={view.problem}
-          onAgain={() => setStage('waiting')}
+          onAgain={() => {
+            if (account.status === 'unreachable') retry()
+            setStage('waiting')
+          }}
           onSignIn={() => openStep(() => setStage('waiting'))}
           onClose={closeConfirmation}
         />
