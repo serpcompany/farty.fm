@@ -483,7 +483,7 @@ test.describe('at the first Result', () => {
     await payOnTheOffer(page, '/')
     await expect(page.getByText(PAID)).toBeVisible({ timeout: 30_000 })
     await expect(page).toHaveURL(/\/$/)
-    // The note stays clear of the record button, and it can be tapped at once.
+    // Record answers the next tap. Stop, which the note used to cover, is in the slow Result journey.
     await page.getByTestId('record-button').click({ timeout: 2_000 })
     await expect(page.getByTestId('stop-button')).toBeVisible()
   })
