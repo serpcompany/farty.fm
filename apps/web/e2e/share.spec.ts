@@ -51,13 +51,18 @@ function evidenceFor(testInfo: TestInfo) {
     // Menus and dialogs fade in: each is shot as it ends up.
     if (out) await on.screenshot({ path: join(out, `${name}.png`), animations: 'disabled' })
   }
-  /** The whole page at a computer's width as well, then back to this project's size. */
-  const computerShot = async (on: Page, name: string) => {
+  /** The whole page at `width` as well, then back to this project's size. */
+  const wideShot = async (on: Page, name: string, width: number, height: number) => {
     const size = on.viewportSize()
     if (!out || !size) return
-    await on.setViewportSize({ width: 1280, height: 800 })
-    await on.screenshot({ path: join(out, `${name}-computer.png`), fullPage: true })
+    await on.setViewportSize({ width, height })
+    await on.screenshot({ path: join(out, `${name}.png`), fullPage: true })
     await on.setViewportSize(size)
+  }
+  /** At a computer's 1280 px and a small phone's 375 px. */
+  const computerShot = async (on: Page, name: string) => {
+    await wideShot(on, `${name}-computer`, 1280, 800)
+    await wideShot(on, `${name}-375`, 375, 812)
   }
   return { out, shot, computerShot }
 }
@@ -71,6 +76,34 @@ async function sidewaysAt375(on: Page): Promise<number> {
   )
   if (size) await on.setViewportSize(size)
   return overflow
+}
+
+/**
+ * At a computer's 1280 px, each share row is laid out as SoundCloud's (#448): its 140 px picture
+ * down the left, its waveform and Copy link in the column right of it, and the page no wider than
+ * `max-w-6xl`. Then back to `on`'s own size.
+ */
+async function expectComputerRows(on: Page) {
+  const size = on.viewportSize()
+  await on.setViewportSize({ width: 1280, height: 800 })
+  const rows = on.getByTestId('profile-shared-item')
+  await expect(rows.first()).toBeVisible()
+  for (const row of await rows.all()) {
+    const art = await row.getByTestId('profile-shared-art').boundingBox()
+    const wave = await row.getByTestId('replay-waveform').boundingBox()
+    const copy = await row.getByTestId('profile-copy-link').boundingBox()
+    if (!art || !wave || !copy)
+      throw new Error('A row is missing its picture, waveform or Copy link')
+    expect(Math.round(art.width)).toBe(140)
+    expect(Math.round(art.height)).toBe(140)
+    expect(wave.x).toBeGreaterThanOrEqual(art.x + art.width)
+    expect(copy.x).toBeGreaterThanOrEqual(art.x + art.width)
+    // On a phone, the waveform spans the whole row under the picture instead.
+    expect(wave.y).toBeLessThan(art.y + art.height)
+  }
+  const list = await on.locator('ul', { has: rows.first() }).boundingBox()
+  expect(list?.width ?? 0).toBeLessThanOrEqual(1152)
+  if (size) await on.setViewportSize(size)
 }
 
 /** Says each of `handle`'s Recordings was made in Testville: the real reading is wherever this runs. */
@@ -656,6 +689,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(rows.getByTestId('profile-shared-art').locator('rect').first()).toBeVisible()
     await shot(other, 'toot-profile')
     await computerShot(other, 'toot-profile')
+    await expectComputerRows(other)
     expect(await sidewaysAt375(other)).toBe(0)
 
     await shareTab('Recordings').click()
@@ -667,6 +701,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(rows).not.toContainText('Testville')
     await shot(other, 'toot-profile-recordings')
     await computerShot(other, 'toot-profile-recordings')
+    await expectComputerRows(other)
     await shareTab('Toots').click()
     await expect(rows.getByTestId('profile-shared-link')).toHaveAttribute('href', link)
 
@@ -742,10 +777,12 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(other.getByText('No Toots shared yet.')).toBeVisible()
     await expect(other.getByTestId('profile-banner')).toHaveCount(0)
     await shot(other, 'profile-no-toot')
+    await computerShot(other, 'profile-no-toot')
     await other.getByRole('tab', { name: 'Recordings' }).click()
     await expect(other.getByTestId('profile-shared-item')).toHaveCount(1)
     await shot(other, 'profile-no-toot-recordings')
     await computerShot(other, 'profile-no-toot-recordings')
+    await expectComputerRows(other)
     expect(await sidewaysAt375(other)).toBe(0)
     await expect(other.locator(`a[href="${link}"]`)).toHaveCount(0)
   })

@@ -443,11 +443,7 @@ export async function sharedTootParts(
     transposition: 0,
     recordingForPitch: {}
   }
-  const song = toot.score ? rollOfScore(toot.score) : null
-  const catalogSong = song ? null : (songIndex.find(s => s.id === toot.songId) ?? null)
-  const played = Object.keys(recordingForPitch)
-    .map(Number)
-    .sort((a, b) => a - b)
+  const { song, catalogSong, played } = arrangedRoll(toot)
   const pitches = song?.pitches ?? catalogSong?.pitches ?? played
   const rows: SharedFartRow[] = played.map(pitch => ({
     plays: noteName(pitch + transposition),
@@ -456,6 +452,28 @@ export async function sharedTootParts(
     fart: fartOf(recordingForPitch[pitch])
   }))
   return { song, catalogSong, transposition, lanes: false, rows }
+}
+
+/** A Song Toot's roll: its score or catalog Song, and the pitches it plays. No lookup needed. */
+function arrangedRoll(toot: SharedTootRow['toot']): TootRoll {
+  const song = toot.score ? rollOfScore(toot.score) : null
+  const catalogSong = song ? null : (songIndex.find(s => s.id === toot.songId) ?? null)
+  const played = Object.keys(toot.arrangement?.recordingForPitch ?? {})
+    .map(Number)
+    .sort((a, b) => a - b)
+  return { song, catalogSong, played }
+}
+
+/**
+ * A shared Toot's roll, as `tootRollOf(sharedTootParts(…))`, without its farts' lookups for a Song
+ * Toot. A Sound Pad Toot's notes last as long as its farts, so it still looks them up.
+ */
+export async function sharedTootRoll(
+  db: Database,
+  shared: { row: SharedTootRow }
+): Promise<TootRoll> {
+  const { toot } = shared.row
+  return toot.performance ? tootRollOf(await sharedTootParts(db, shared)) : arrangedRoll(toot)
 }
 
 /**
@@ -705,11 +723,11 @@ export async function sharedTootRow(
 ): Promise<Response> {
   const shared = await findSharedToot(db, handle, link)
   if (!shared) return apiError(404, 'not_found')
-  const [levels, parts] = await Promise.all([
+  const [levels, roll] = await Promise.all([
     sharedTootLevels(media, sharedTootKey(shared), servedOrigin(request)),
-    sharedTootParts(db, shared)
+    sharedTootRoll(db, shared)
   ])
-  const drawn: ProfileTootRow = { levels, roll: tootRollOf(parts) }
+  const drawn: ProfileTootRow = { levels, roll }
   return Response.json(drawn, { headers: { 'Cache-Control': 'private, no-cache' } })
 }
 

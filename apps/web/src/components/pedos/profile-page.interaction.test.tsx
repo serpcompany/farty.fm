@@ -406,6 +406,32 @@ describe('A row (#346, #448)', () => {
     expect(rowText('profile-shared-time')).toEqual([null])
   })
 
+  it('a Recording’s time never passes the length printed beside it, even over lead-in silence', async () => {
+    server()
+    // As the server gives it: 1.46 s served (a fart after lead-in silence), so "1.4 s".
+    const take: ProfileShare = { ...recording, length: '1.4 s', seconds: 1.46 }
+    await render({ items: [take] })
+    await act(async () => (tab('Recordings') as HTMLElement).click())
+    const frame = () =>
+      act(async () => {
+        await new Promise(resolve => requestAnimationFrame(() => resolve(null)))
+      })
+
+    heard.position = 0
+    await act(async () => rows()[0].querySelector('button')?.click())
+    // The whole of what its link serves, the 1.46 s its waveform draws.
+    expect(heard.plays.at(-1)?.segment).toBeNull()
+    const seen: string[] = []
+    for (const at of [0.7, 1.4, 1.46, 3]) {
+      heard.position = at
+      await frame()
+      seen.push(rowText('profile-shared-time')[0] ?? '')
+    }
+    // At its end, and past it, the time reads the same as the length at the bottom right.
+    expect(seen).toEqual(['0.7 s', '1.4 s', '1.4 s', '1.4 s'])
+    expect(rowText('profile-shared-length')).toEqual(['1.4 s'])
+  })
+
   it('Copy link copies its own page’s link, and says so', async () => {
     server()
     const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue()

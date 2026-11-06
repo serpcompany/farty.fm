@@ -3,10 +3,10 @@ import type { Kind } from '@/db/library'
 import { addProfileReport, type ProfileShareRow, profileShares, profileUser } from '@/db/profiles'
 import { liveRecordingsOf, sharedToot, tootRecordingIds } from '@/db/sharing'
 import { noteName } from '@/lib/pitch'
-import { formattedFartLength } from '@/lib/pitch-coverage'
+import { formattedFartSeconds } from '@/lib/pitch-coverage'
 import { recordingName, songPitch } from '@/lib/recordings'
 import { servedOrigin } from '@/lib/site'
-import { formattedTootLength, type TootRoll, tootRollOf } from '@/lib/toot'
+import { formattedTootLength, type TootRoll } from '@/lib/toot'
 
 import { consumeSlots, reporterLimitKey, requestClient } from './auth-config'
 import { type Stores, toRecording } from './library'
@@ -17,7 +17,7 @@ import {
   REPORT_LIMITS,
   SITE_REPORTS_KEY,
   sharedPart,
-  sharedTootParts,
+  sharedTootRoll,
   sharePath,
   tootSongTitle
 } from './sharing'
@@ -41,7 +41,10 @@ export type ProfileItem = {
   detail: string | null
   /** When it was shared, in ms, for the page to say "Today" in the viewer's own time zone. */
   sharedAt: number
-  /** "1.1 s", a Recording's fart, or "0:18", a Toot, as each one's own page says it. */
+  /**
+   * How long `seconds` is: "1.4 s", the part a Recording's link serves, rounded down, or "0:18", a
+   * Toot. The time its row shows while it plays never passes it.
+   */
   length: string
   /** How long the audio its link serves is, in seconds: what its row plays and draws, from 0. */
   seconds: number
@@ -105,9 +108,12 @@ function itemSound(
   }
   const recording = toRecording(row.recording)
   const part = sharedPart(recording)
+  // What its link serves and its own page plays: the waveform, Play and the time on it all cover
+  // this, so its length does too, and the time never runs past it.
+  const seconds = part.endSeconds - part.startSeconds
   return {
-    length: formattedFartLength(recording),
-    seconds: part.endSeconds - part.startSeconds,
+    length: formattedFartSeconds(seconds),
+    seconds,
     levels: partBars(recording.waveform, recording.seconds, part),
     farts: []
   }
@@ -131,7 +137,7 @@ async function heroOf(db: Database, handle: string, slug: string): Promise<Profi
   if (!row) return null
   return {
     path: sharePath('toots', handle, slug),
-    ...tootRollOf(await sharedTootParts(db, { row }))
+    ...(await sharedTootRoll(db, { row }))
   }
 }
 

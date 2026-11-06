@@ -78,7 +78,7 @@ const shareRoutes = { recordings: shareRecordingRoute, toots: shareTootRoute }
 /** Each kind of link's public routes, by its segment: `r` for a Recording, `t` for a Toot. */
 const linkRoutes = {
   r: { audio: audioRoute, image: imageRoute, report: reportRoute },
-  t: { audio: tootAudioRoute, image: tootImageRoute, report: tootReportRoute }
+  t: { audio: tootAudioRoute, image: tootImageRoute, report: tootReportRoute, row: tootRowRoute }
 }
 
 const share = {
@@ -110,6 +110,11 @@ const share = {
       new Request(`${url}farts/${place}/audio/`, { ...init, method: 'GET' }),
       params({ atHandle, id, place: String(place) })
     )
+  },
+  /** A shared Toot's bars and roll for its profile page row (#448), as anyone fetches them. */
+  row: (url: string) => {
+    const { atHandle, id } = linkParts(url)
+    return linkRoutes.t.row.GET(new Request(`${url}row/`), params({ atHandle, id }))
   },
   /** The shared item's link image, as a link preview fetches it. */
   image: (url: string) => {
@@ -165,6 +170,13 @@ function linkParts(url: string): {
     handle: decodeURIComponent(match[1]).replace(/^@/, ''),
     id: match[3]
   }
+}
+
+/** That a shared Toot's `row/` is gone: a bare 404 that says nothing of the Toot or its farts. */
+async function expectRowGone(url: string) {
+  const response = await share.row(url)
+  expect(response.status).toBe(404)
+  expect(await response.json()).toEqual({ error: 'not_found' })
 }
 
 async function upload(id: string, cookie: string) {
@@ -527,6 +539,7 @@ describe('Sharing a Recording', () => {
     const alice = await sharer('alice')
     expect((await api.deleteAccount(alice)).status).toBe(204)
     expect((await share.audio(alice.url)).status).toBe(404)
+    await expectRowGone(alice.url)
     expect(await testDb().select().from(shares)).toEqual([])
   })
 
@@ -851,9 +864,11 @@ describe('Sharing a saved Toot', () => {
 
   it('stops working when the Toot is deleted', async () => {
     const alice = await tootSharer('alice')
+    expect((await share.row(alice.url)).status).toBe(200)
     expect((await api.delete('toots', T1, alice)).status).toBe(204)
     expect((await share.audio(alice.url)).status).toBe(404)
     expect((await share.report(alice.url)).status).toBe(404)
+    await expectRowGone(alice.url)
     expect(await testDb().select().from(shares)).toEqual([])
     expect((await share.put(T1, alice, 'toots')).status).toBe(410)
   })
@@ -870,6 +885,7 @@ describe('Sharing a saved Toot', () => {
     await testDb().update(shares).set({ takenDownAt: new Date() })
     expect((await share.audio(alice.url)).status).toBe(404)
     expect((await share.report(alice.url)).status).toBe(404)
+    await expectRowGone(alice.url)
 
     const again = await share.put(T1, alice, 'toots')
     expect(again.status).toBe(403)
@@ -892,12 +908,14 @@ describe('Sharing a saved Toot', () => {
     expect(response.status).toBe(201)
     const { url } = (await response.json()) as { url: string }
     expect((await share.audio(url)).status).toBe(200)
+    expect((await share.row(url)).status).toBe(200)
 
     // Farty takes down R1's own link after a report.
     await testDb().update(shares).set({ takenDownAt: new Date() }).where(eq(shares.itemId, R1))
 
     expect((await share.audio(url)).status).toBe(404)
     expect((await share.report(url)).status).toBe(404)
+    await expectRowGone(url)
     const { handle, id } = linkParts(url)
     expect(await findSharedToot(testDb(), handle, id)).toBeNull()
     expect(await (await share.list(alice)).json()).toEqual({ handle: 'alice', shares: [] })
@@ -909,6 +927,7 @@ describe('Sharing a saved Toot', () => {
     // Deleting R1 keeps its take-down, so the Toots stay down.
     expect((await api.delete('recordings', R1, alice)).status).toBe(204)
     expect((await share.audio(url)).status).toBe(404)
+    await expectRowGone(url)
     expect((await share.put(T2, alice, 'toots')).status).toBe(403)
   })
 
@@ -968,10 +987,9 @@ describe('Sharing a saved Toot', () => {
     const samples = Float32Array.from({ length: 6000 }, (_, i) => (i < 3000 ? 0.5 : 0))
     await saveToot(T2, dora, new Uint8Array(encodeWav({ samples, sampleRate: 8000 })))
     const { url } = (await (await share.put(T2, dora, 'toots')).json()) as { url: string }
-    const { atHandle, id } = linkParts(url)
-    const row = () => tootRowRoute.GET(new Request(`${url}row/`), params({ atHandle, id }))
+    const { id } = linkParts(url)
 
-    const served = await row()
+    const served = await share.row(url)
     expect(served.status).toBe(200)
     expect(served.headers.get('cache-control')).toBe('private, no-cache')
     // Its roll as its own page draws it: saved before #254, so its Song's notes, which the page
@@ -986,13 +1004,9 @@ describe('Sharing a saved Toot', () => {
     })
 
     expect((await share.stop(T2, dora, 'toots')).status).toBe(204)
-    expect((await row()).status).toBe(404)
+    await expectRowGone(url)
     // And never for another Handle's link.
-    const wrong = tootRowRoute.GET(
-      new Request(`${ORIGIN}/@alice/t/${id}/row/`),
-      params({ atHandle: '@alice', id })
-    )
-    expect((await wrong).status).toBe(404)
+    await expectRowGone(`${ORIGIN}/@alice/t/${id}/`)
   })
 })
 

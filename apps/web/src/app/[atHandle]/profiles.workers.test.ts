@@ -378,10 +378,10 @@ describe('A profile page', () => {
       farts: ['Recording 1', 'Recording 2']
     })
     expect(await row('Pad')).toMatchObject({ length: '1:01', seconds: 61, farts: ['Recording 2'] })
-    // A Recording's length is its fart's, 0.08 s rounded down as its own page says it. Its bars
-    // and seconds are what its link serves: the whole take, which has no Trim.
+    // A Recording's length, bars and seconds are all what its link serves and its own page plays:
+    // the whole take, which has no Trim. So its length is its seconds, never its shorter fart's.
     expect(await row('Recording 1')).toMatchObject({
-      length: '0.0 s',
+      length: '0.1 s',
       seconds: 0.1,
       levels: [0, 0.5, 1],
       farts: []
