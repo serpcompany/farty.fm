@@ -10,6 +10,7 @@ import { handles, rateLimit, recordings, shareReports, shares, toots, user } fro
 import { NOT_SAID } from '@/lib/fart-place'
 import { noteName } from '@/lib/pitch'
 import { encodeWav } from '@/lib/wav'
+import { findProfile } from '@/server/profiles'
 import {
   findSharedRecording,
   findSharedToot,
@@ -46,6 +47,7 @@ import * as tootAudioRoute from './t/[id]/audio/route'
 import * as tootFartAudioRoute from './t/[id]/farts/[place]/audio/route'
 import * as tootImageRoute from './t/[id]/image/route'
 import * as tootReportRoute from './t/[id]/report/route'
+import * as tootRowRoute from './t/[id]/row/route'
 
 // Sharing (ADR 0020) in workerd, with a real D1 and R2: Handles, sharing and stopping sharing a
 // Recording or a saved Toot, its public audio and Report, and that a link works only while its
@@ -959,6 +961,39 @@ describe('Sharing a saved Toot', () => {
     const gone = await sharedTootLevels(media(), `users/${dora.id}/toots/${T1}.wav`, ORIGIN)
     expect(gone).toEqual(Array(SHARED_TOOT_BARS).fill(0.05))
   })
+
+  it('serves its bars and roll at `row/` for its profile page row, only while its link works (#448)', async () => {
+    const dora = await signUp('dora')
+    await share.pick('dora', dora)
+    const samples = Float32Array.from({ length: 6000 }, (_, i) => (i < 3000 ? 0.5 : 0))
+    await saveToot(T2, dora, new Uint8Array(encodeWav({ samples, sampleRate: 8000 })))
+    const { url } = (await (await share.put(T2, dora, 'toots')).json()) as { url: string }
+    const { atHandle, id } = linkParts(url)
+    const row = () => tootRowRoute.GET(new Request(`${url}row/`), params({ atHandle, id }))
+
+    const served = await row()
+    expect(served.status).toBe(200)
+    expect(served.headers.get('cache-control')).toBe('private, no-cache')
+    // Its roll as its own page draws it: saved before #254, so its Song's notes, which the page
+    // fetches, and the one pitch a fart plays. Nothing of its farts, so never where one was made.
+    expect(await served.json()).toEqual({
+      levels: [...Array(30).fill(1), ...Array(30).fill(0.05)],
+      roll: {
+        song: null,
+        catalogSong: expect.objectContaining({ id: 'twinkle' }),
+        played: [60]
+      }
+    })
+
+    expect((await share.stop(T2, dora, 'toots')).status).toBe(204)
+    expect((await row()).status).toBe(404)
+    // And never for another Handle's link.
+    const wrong = tootRowRoute.GET(
+      new Request(`${ORIGIN}/@alice/t/${id}/row/`),
+      params({ atHandle: '@alice', id })
+    )
+    expect((await wrong).status).toBe(404)
+  })
 })
 
 describe('Reporting a shared Toot', () => {
@@ -1165,6 +1200,20 @@ describe('Where a shared fart was made (#444)', () => {
     })
     expect((await api.put('recordings', R1, uploadBody(metadata, take()), alice)).status).toBe(201)
     expect(await placeKept(R1, alice.id)).toBeNull()
+  })
+
+  it('never sends it to the profile page, whose rows and banner say only the day (#448)', async () => {
+    const alice = await fromAustin()
+    const { recording } = await shareBoth(alice)
+    // Its own page says it.
+    expect(await viewOf(recording)).toMatchObject(SAID)
+    const profile = await findProfile(testDb(), 'alice')
+    expect(profile?.items).toHaveLength(2)
+    expect(profile?.hero).not.toBeNull()
+    const page = JSON.stringify(profile)
+    expect(page).not.toContain('Austin')
+    expect(page).not.toContain('Texas')
+    expect(page).not.toContain('America/Chicago')
   })
 
   it("never sends it to the owner's library", async () => {

@@ -277,7 +277,7 @@ export class Layout {
 }
 
 /** The element's width, kept current as it resizes. */
-function useWidth(element: RefObject<HTMLElement | null>): number {
+export function useWidth(element: RefObject<HTMLElement | null>): number {
   const [width, setWidth] = useState(0)
   // Before the first paint, so notes never show squeezed at the left.
   useLayoutEffect(() => {

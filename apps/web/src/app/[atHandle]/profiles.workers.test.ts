@@ -157,7 +157,17 @@ describe('A profile page', () => {
   })
 
   /** Each item's fields, which are all the page gets. */
-  const ITEM_KEYS = ['detail', 'kind', 'name', 'path', 'sharedAt']
+  const ITEM_KEYS = [
+    'detail',
+    'farts',
+    'kind',
+    'length',
+    'levels',
+    'name',
+    'path',
+    'seconds',
+    'sharedAt'
+  ]
 
   it('leaves out what was stopped, taken down or deleted, and what others share', async () => {
     const alice = await sharer('alice', [R1, R2, R3])
@@ -226,7 +236,7 @@ describe('A profile page', () => {
     expect(await names('bob')).toEqual(['Bob’s'])
   })
 
-  it('lists Toots with no taken-down Recording, without loading what they play (#346)', async () => {
+  it('lists Toots with no taken-down Recording, without loading a Sound Pad Toot’s taps (#346, #448)', async () => {
     const alice = await sharer('alice', [R1])
     const arrangement = { transposition: 0, recordingForPitch: { 64: R1 } }
     await savedToot(alice, tootMetadata(T1, { title: 'Song with R1', arrangement }), { minute: 2 })
@@ -256,19 +266,30 @@ describe('A profile page', () => {
     })
     const page = async () =>
       (await findProfile(createDatabase(watched), 'alice'))?.items.map(item => item.name)
-    const loadsTaps = () => /"arrangement"|"performance"/.test(statements.join('\n'))
+    // A Performance whole, rather than only its Recordings: its taps can run to thousands. Only
+    // the banner's one Toot is loaded whole, by its link, as its own page loads it (#448).
+    const wholePerformances = () =>
+      statements.filter(sql =>
+        /"performance"/.test(
+          sql.replaceAll(`json_extract("toots"."performance", '$.recordings')`, '')
+        )
+      )
 
     expect(await page()).toEqual(['Song with R1', 'Pad with R1', 'Recording 1'])
-    expect(loadsTaps()).toBe(false)
+    const [banner, ...more] = wholePerformances()
+    expect(more).toEqual([])
+    expect(banner).toMatch(/"shares"\."slug" = \?/)
 
-    // With Alice's own R1 taken down, the check loads what her Toots play, and drops them.
+    // With Alice's own R1 taken down, the Toots that play it are dropped, still without their taps,
+    // and with no Toot left there's no banner to load.
     statements = []
     await testDb()
       .update(shares)
       .set({ takenDownAt: new Date() })
       .where(and(eq(shares.userId, alice.id), eq(shares.itemId, R1)))
     expect(await page()).toEqual([])
-    expect(loadsTaps()).toBe(true)
+    expect(statements.length).toBeGreaterThan(0)
+    expect(wholePerformances()).toEqual([])
   })
 
   it('leaves out a Toot that was never shared, stopped, deleted or taken down (#346)', async () => {
@@ -329,9 +350,87 @@ describe('A profile page', () => {
     expect(await names('alice')).toEqual(['Song with R2'])
   })
 
+  it('gives each row its length and bars, and a Toot’s the farts it plays (#448)', async () => {
+    // R1 at 9:00, R2 at 9:01.
+    const alice = await sharer('alice', [R1, R2])
+    const arrangement = { transposition: 0, recordingForPitch: { 52: R1, 55: R2 } }
+    await savedToot(alice, tootMetadata(T1, { title: 'Song', arrangement, seconds: 18.4 }), {
+      minute: 3
+    })
+    // R3 was never uploaded, so the row names only R2.
+    const performance = {
+      recordings: [R2, R3],
+      taps: [
+        [0, 0],
+        [0.5, 1]
+      ]
+    }
+    await savedToot(alice, padTootMetadata(T2, { title: 'Pad', performance, seconds: 61 }), {
+      minute: 2
+    })
+
+    const row = async (name: string) =>
+      (await findProfile(testDb(), 'alice'))?.items.find(item => item.name === name)
+    expect(await row('Song')).toMatchObject({
+      length: '0:18',
+      seconds: 18.4,
+      levels: [],
+      farts: ['Recording 1', 'Recording 2']
+    })
+    expect(await row('Pad')).toMatchObject({ length: '1:01', seconds: 61, farts: ['Recording 2'] })
+    // A Recording's length is its fart's, 0.08 s rounded down as its own page says it. Its bars
+    // and seconds are what its link serves: the whole take, which has no Trim.
+    expect(await row('Recording 1')).toMatchObject({
+      length: '0.0 s',
+      seconds: 0.1,
+      levels: [0, 0.5, 1],
+      farts: []
+    })
+
+    // A deleted Recording is no longer named.
+    expect((await api.delete('recordings', R2, alice)).status).toBe(204)
+    expect((await row('Song'))?.farts).toEqual(['Recording 1'])
+    expect((await row('Pad'))?.farts).toEqual([])
+  })
+
+  it('puts the newest Toot’s roll in its banner, with only the pitches its farts play (#448)', async () => {
+    const alice = await sharer('alice', [R1])
+    expect((await findProfile(testDb(), 'alice'))?.hero).toBeNull()
+
+    const arrangement = { transposition: 0, recordingForPitch: { 60: R1 } }
+    await savedToot(alice, tootMetadata(T1, { title: 'Older', arrangement }), { minute: 2 })
+    await savedToot(alice, tootMetadata(T2, { title: 'Newest', arrangement }), { minute: 3 })
+    const profile = await findProfile(testDb(), 'alice')
+    const newest = profile?.items.find(item => item.name === 'Newest')
+    expect(profile?.hero?.path).toBe(newest?.path)
+    expect(Object.keys(profile?.hero ?? {}).sort()).toEqual([
+      'catalogSong',
+      'path',
+      'played',
+      'song'
+    ])
+    expect(profile?.hero?.played).toEqual([60])
+
+    // Stopped, the next newest takes the banner; with none, there's no banner.
+    for (const [id, next] of [
+      [T2, 'Older'],
+      [T1, null]
+    ] as const) {
+      const stopped = await shareTootRoute.DELETE(
+        request(`/api/share/toots/${id}/`, 'DELETE', alice),
+        params({ id })
+      )
+      expect(stopped.status).toBe(204)
+      const after = await findProfile(testDb(), 'alice')
+      expect(after?.hero?.path ?? null).toBe(
+        next && (after?.items.find(item => item.name === next)?.path ?? 'missing')
+      )
+    }
+  })
+
   it('is found by its Handle in any case, and is there with nothing shared', async () => {
     await sharer('alice', [])
-    expect(await findProfile(testDb(), 'ALICE')).toEqual({ handle: 'alice', items: [] })
+    expect(await findProfile(testDb(), 'ALICE')).toEqual({ handle: 'alice', items: [], hero: null })
   })
 
   it('is not found for a Handle no one has, one that could be no one’s, or a deleted account', async () => {

@@ -1,9 +1,9 @@
-import { and, eq, isNull } from 'drizzle-orm'
+import { and, eq, isNull, sql } from 'drizzle-orm'
 
 import type { Database } from './database'
 import type { RecordingRow, TootRow } from './library'
 import { handles, profileReports, recordings, shares, toots } from './schema'
-import { takenDownRecordings, tootsPlayingTakenDown } from './sharing'
+import { playsAny, type TootPlays, takenDownRecordings } from './sharing'
 
 // Profile pages in D1 (#319, ADR 0021): `/@<handle>/` lists what its user shares, and nothing
 // else. A share that was stopped, taken down, or whose Recording, Toot or account was deleted
@@ -25,7 +25,7 @@ export async function profileUser(
 /** A shared Recording or saved Toot on its owner's page. */
 export type ProfileShareRow = { shareId: string; slug: string | null; sharedAt: Date } & (
   | { kind: 'recordings'; recording: RecordingRow }
-  | { kind: 'toots'; toot: Pick<TootRow, 'title' | 'songId'> }
+  | { kind: 'toots'; toot: Pick<TootRow, 'title' | 'songId' | 'seconds'> & TootPlays }
 )
 
 /** Newest share first, and by link id when two were shared at once, as D1 would order them. */
@@ -37,8 +37,8 @@ const newestFirst = (a: ProfileShareRow, b: ProfileShareRow) =>
 export async function profileShares(db: Database, userId: string): Promise<ProfileShareRow[]> {
   const live = (kind: 'recordings' | 'toots') =>
     and(eq(shares.userId, userId), eq(shares.kind, kind), isNull(shares.takenDownAt))
-  // The take-downs come first, beside the shares, as `liveShares` checks them: a Toot's Recordings
-  // are loaded only when one of the user's Recordings was taken down.
+  // The take-downs come beside the shares. Each Toot's row carries the Recordings it plays, which
+  // its row names (#448), so the check needs nothing more.
   const [recordingRows, tootRows, takenDown] = await Promise.all([
     db
       .select({
@@ -58,32 +58,33 @@ export async function profileShares(db: Database, userId: string): Promise<Profi
         shareId: shares.id,
         slug: shares.slug,
         sharedAt: shares.createdAt,
-        tootId: toots.id,
         title: toots.title,
-        songId: toots.songId
+        songId: toots.songId,
+        seconds: toots.seconds,
+        arrangement: toots.arrangement,
+        // A Sound Pad Toot's Recordings only, never its taps, which can run to thousands.
+        padRecordings: sql<string | null>`json_extract(${toots.performance}, '$.recordings')`
       })
       .from(shares)
       .innerJoin(toots, and(eq(toots.userId, shares.userId), eq(toots.id, shares.itemId)))
       .where(and(live('toots'), isNull(toots.deletedAt))),
     takenDownRecordings(db, userId)
   ])
-  const down = await tootsPlayingTakenDown(
-    db,
-    userId,
-    tootRows.map(row => row.tootId),
-    takenDown
-  )
   return [
     ...recordingRows.map(row => ({ kind: 'recordings' as const, ...row })),
     ...tootRows
-      .filter(row => !down.has(row.tootId))
-      .map(({ shareId, slug, sharedAt, title, songId }) => ({
+      .map(({ shareId, slug, sharedAt, padRecordings, ...toot }) => ({
         kind: 'toots' as const,
         shareId,
         slug,
         sharedAt,
-        toot: { title, songId }
+        toot: {
+          ...toot,
+          performance:
+            padRecordings === null ? null : { recordings: JSON.parse(padRecordings) as string[] }
+        }
       }))
+      .filter(row => !playsAny(row.toot, takenDown))
   ].sort(newestFirst)
 }
 

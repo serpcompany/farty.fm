@@ -1,18 +1,31 @@
 import type { Database } from '@/db/database'
 import type { Kind } from '@/db/library'
 import { addProfileReport, type ProfileShareRow, profileShares, profileUser } from '@/db/profiles'
+import { liveRecordingsOf, sharedToot, tootRecordingIds } from '@/db/sharing'
 import { noteName } from '@/lib/pitch'
+import { formattedFartLength } from '@/lib/pitch-coverage'
 import { recordingName, songPitch } from '@/lib/recordings'
 import { servedOrigin } from '@/lib/site'
+import { formattedTootLength, type TootRoll, tootRollOf } from '@/lib/toot'
 
 import { consumeSlots, reporterLimitKey, requestClient } from './auth-config'
 import { type Stores, toRecording } from './library'
 import { apiError } from './require-user'
-import { giveSlugs, REPORT_LIMITS, SITE_REPORTS_KEY, sharePath, tootSongTitle } from './sharing'
+import {
+  giveSlugs,
+  partBars,
+  REPORT_LIMITS,
+  SITE_REPORTS_KEY,
+  sharedPart,
+  sharedTootParts,
+  sharePath,
+  tootSongTitle
+} from './sharing'
 
 // Profile pages (#319, ADR 0021): `/@<handle>/`, public, which lists only what its user shares,
-// Recordings and Toots (#346) together, newest first, each linking to its own shared page, with
-// Add friend and Report. No counts and no feed.
+// Toots and Recordings (#346) under a tab each (#448), newest first, each playing in place and
+// linking to its own shared page, under a banner of the newest Toot's note roll, with Add friend
+// and Report. No counts and no feed.
 
 /** A shared Recording or Toot, as its owner's page lists it: nothing private, and its link. */
 export type ProfileItem = {
@@ -28,9 +41,30 @@ export type ProfileItem = {
   detail: string | null
   /** When it was shared, in ms, for the page to say "Today" in the viewer's own time zone. */
   sharedAt: number
+  /** "1.1 s", a Recording's fart, or "0:18", a Toot, as each one's own page says it. */
+  length: string
+  /** How long the audio its link serves is, in seconds: what its row plays and draws, from 0. */
+  seconds: number
+  /**
+   * A Recording's loudness bars, each 0…1, of the part its link serves, from its upload. Empty for
+   * a Toot, whose bars are drawn from its saved WAV: its row fetches them with its roll (`row/`),
+   * so the page never reads every Toot's audio.
+   */
+  levels: number[]
+  /** The names of the farts a Toot plays, as its page lists them, leaving out any deleted. */
+  farts: string[]
 }
 
-export type Profile = { handle: string; items: ProfileItem[] }
+/**
+ * The newest shared Toot's note roll, which the page's banner draws and plays (#448), as that
+ * Toot's own page draws it: only its notes, nothing of its farts.
+ */
+export type ProfileHero = TootRoll & {
+  /** Its row's `path`. */
+  path: string
+}
+
+export type Profile = { handle: string; items: ProfileItem[]; hero: ProfileHero | null }
 
 /** A Handle from a link: lowercased, and only one that could be someone's, by its shape. */
 function linkHandle(handle: string): string | null {
@@ -56,7 +90,55 @@ function itemText(row: ProfileShareRow): { name: string; detail: string | null }
   return { name: recordingName(recording), detail: pitch === null ? null : noteName(pitch) }
 }
 
-/** The page at `/@<handle>/`: the Handle and the Recordings and Toots shared under it that work. */
+/** What a share's row plays and draws, and the farts a Toot's row names, from `fartNames`. */
+function itemSound(
+  row: ProfileShareRow,
+  fartNames: Map<string, string>
+): Pick<ProfileItem, 'length' | 'seconds' | 'levels' | 'farts'> {
+  if (row.kind === 'toots') {
+    return {
+      length: formattedTootLength(row.toot.seconds),
+      seconds: row.toot.seconds,
+      levels: [],
+      farts: tootRecordingIds(row.toot).flatMap(id => fartNames.get(id) ?? [])
+    }
+  }
+  const recording = toRecording(row.recording)
+  const part = sharedPart(recording)
+  return {
+    length: formattedFartLength(recording),
+    seconds: part.endSeconds - part.startSeconds,
+    levels: partBars(recording.waveform, recording.seconds, part),
+    farts: []
+  }
+}
+
+/** The names of the Recordings `rows`' Toots play that aren't deleted, by id, in one lookup. */
+async function tootFartNames(
+  db: Database,
+  userId: string,
+  rows: ProfileShareRow[]
+): Promise<Map<string, string>> {
+  const ids = new Set(rows.flatMap(row => (row.kind === 'toots' ? tootRecordingIds(row.toot) : [])))
+  if (ids.size === 0) return new Map()
+  const found = await liveRecordingsOf(db, userId, [...ids])
+  return new Map(found.map(row => [row.id, recordingName(toRecording(row))]))
+}
+
+/** The banner's roll: the Toot's at `slug`, as its own page finds and draws it. */
+async function heroOf(db: Database, handle: string, slug: string): Promise<ProfileHero | null> {
+  const row = await sharedToot(db, handle, slug)
+  if (!row) return null
+  return {
+    path: sharePath('toots', handle, slug),
+    ...tootRollOf(await sharedTootParts(db, { row }))
+  }
+}
+
+/**
+ * The page at `/@<handle>/`: the Handle, the Recordings and Toots shared under it that work, and
+ * the newest Toot's roll for its banner.
+ */
 export async function findProfile(db: Database, handle: string): Promise<Profile | null> {
   const owner = await profileOwner(db, handle)
   if (!owner) return null
@@ -65,14 +147,18 @@ export async function findProfile(db: Database, handle: string): Promise<Profile
     await giveSlugs(db, owner.userId)
     rows = await profileShares(db, owner.userId)
   }
+  const fartNames = await tootFartNames(db, owner.userId, rows)
+  const newest = rows.find(row => row.kind === 'toots')
   return {
     handle: owner.handle,
     items: rows.map(row => ({
       kind: row.kind,
       path: sharePath(row.kind, owner.handle, row.slug ?? row.shareId),
       ...itemText(row),
-      sharedAt: row.sharedAt.getTime()
-    }))
+      sharedAt: row.sharedAt.getTime(),
+      ...itemSound(row, fartNames)
+    })),
+    hero: newest ? await heroOf(db, owner.handle, newest.slug ?? newest.shareId) : null
   }
 }
 
