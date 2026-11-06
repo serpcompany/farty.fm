@@ -43,7 +43,7 @@ export function FullAccessSheet({
     <Sheet open={open} onOpenChange={next => !next && onClose()}>
       <SheetContent
         side="bottom"
-        className="mx-auto max-h-dvh max-w-md gap-0 overflow-y-auto rounded-t-2xl px-5 pt-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+        className="mx-auto max-h-dvh max-w-md gap-0 overflow-y-auto rounded-t-2xl px-5 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
         data-testid="full-access-sheet"
         showCloseButton={false}
       >
@@ -63,8 +63,8 @@ export function FullAccessSheet({
         </SheetDescription>
         <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-foreground px-4 py-2.5">
           <div>
-            <p className="text-base font-semibold">Full Access</p>
-            <p className="text-sm text-muted-foreground">Once, no subscription</p>
+            <p className="text-base leading-tight font-semibold">Full Access</p>
+            <p className="text-sm leading-tight text-muted-foreground">Once, no subscription</p>
           </div>
           <p className="text-5xl font-extrabold tracking-tight">{FULL_ACCESS_PRICE_LABEL}</p>
         </div>

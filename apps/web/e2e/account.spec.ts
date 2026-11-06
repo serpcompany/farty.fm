@@ -182,7 +182,8 @@ test('the offer names the buyer and fits one screen with the Toot above it, on a
 }, testInfo) => {
   test.setTimeout(180_000)
   await needsTheFixtureLibrary(request)
-  // A long address, the most lines the sheet gets.
+  // A long address, the most lines the sheet gets. CI's Linux draws it in DejaVu Sans, wider than
+  // a phone's font, so the price card's line wraps there at 375 wide too.
   const email = newEmail(testInfo, 'a-really-rather-long-address').replace(
     '@example.com',
     '@a-long-mail-domain.example.test'
@@ -223,7 +224,10 @@ test('the offer names the buyer and fits one screen with the Toot above it, on a
         await expect(shown).toBeVisible()
         const above = await shown.boundingBox()
         expect(above?.y ?? -1).toBeGreaterThanOrEqual(0)
-        expect((above?.y ?? screen.height) + (above?.height ?? 0)).toBeLessThanOrEqual(box?.y ?? 0)
+        expect(
+          (above?.y ?? screen.height) + (above?.height ?? 0),
+          `${shown} is above the sheet at ${screen.width}x${screen.height}`
+        ).toBeLessThanOrEqual(box?.y ?? 0)
       }
       // All of it is on the screen, with nothing to scroll to.
       expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(screen.height)
@@ -231,7 +235,10 @@ test('the offer names the buyer and fits one screen with the Toot above it, on a
         scrollHeight: sheet.scrollHeight,
         clientHeight: sheet.clientHeight
       }))
-      expect(scrollHeight).toBeLessThanOrEqual(clientHeight)
+      expect(
+        scrollHeight,
+        `the sheet has nothing to scroll to at ${screen.width}x${screen.height}`
+      ).toBeLessThanOrEqual(clientHeight)
     }).toPass({ timeout: 2_000 })
     await expectTappable(offer.getByRole('button', { name: 'Pay $4.99' }))
     await expectTappable(offer.getByRole('button', { name: 'Not now' }))
