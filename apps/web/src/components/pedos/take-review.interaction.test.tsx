@@ -89,6 +89,9 @@ vi.mock('./account-provider', () => ({
     openStep: page.openStep
   })
 }))
+vi.mock('./full-access-offers', () => ({
+  useFullAccessOffers: () => ({ offerAtResult: () => undefined })
+}))
 vi.mock('next/navigation', () => ({ useRouter: () => ({}), usePathname: () => '/' }))
 vi.mock('./piano-keys', async importOriginal => ({
   ...(await importOriginal<typeof import('./piano-keys')>()),

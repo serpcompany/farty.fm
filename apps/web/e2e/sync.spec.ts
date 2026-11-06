@@ -293,6 +293,7 @@ async function listenToThePage(context: BrowserContext) {
   await context.addInitScript(() => {
     localStorage.setItem('pedos.welcomed', '1')
     localStorage.setItem('pedos.accountStep', 'done')
+    localStorage.setItem('pedos.fullAccessOffer', 'offered')
     window.__sounds = []
     const start = AudioBufferSourceNode.prototype.start
     AudioBufferSourceNode.prototype.start = function (this: AudioBufferSourceNode, ...args) {

@@ -219,6 +219,7 @@ async function listenToTheSpeakers(page: Page) {
   await page.addInitScript(() => {
     localStorage.setItem('pedos.welcomed', '1')
     localStorage.setItem('pedos.accountStep', 'done')
+    localStorage.setItem('pedos.fullAccessOffer', 'offered')
     window.__bufferStarts = []
     window.__speakers = null
 

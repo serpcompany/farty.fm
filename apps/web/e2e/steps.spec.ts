@@ -8,6 +8,7 @@ import {
   waitForOpenMicrophone
 } from './fake-microphone'
 import { skipWelcome } from './record'
+import { aMoment, stepsFrom } from './steps'
 
 // The funnel's steps (#405): what a new phone's browser sends to /api/steps/. Each step goes once,
 // across reloads and a new visit, and nothing but its name. A browser from before this shipped,
@@ -21,21 +22,6 @@ test.beforeEach(async ({ page }, testInfo) => {
   await page.addInitScript(fakeMicrophone, { wavs: fixtureWavs(), delayMs: getUserMediaMs })
 })
 
-/** Every step this page sends, from now on, with what else its body held. */
-function stepsFrom(page: Page): string[] {
-  const sent: string[] = []
-  page.on('request', request => {
-    if (new URL(request.url()).pathname !== '/api/steps/') return
-    const { step, ...rest } = request.postDataJSON() as { step: string }
-    expect(rest).toEqual({})
-    sent.push(step)
-  })
-  return sent
-}
-
-/** Waits long enough for a step the page would send to have gone, across a navigation too. */
-const aMoment = (page: Page) => page.waitForTimeout(500)
-
 function tab(page: Page, label: string) {
   return page
     .getByRole('navigation', { name: 'Tabs' })
@@ -48,21 +34,23 @@ test('a new phone counts open, the microphone and its first Recording, each once
   const sent = stepsFrom(page)
   await page.goto('/')
   await expect(page.getByRole('button', { name: 'Allow microphone' })).toBeVisible()
-  await expect.poll(() => [...sent]).toEqual(['open'])
+  await expect.poll(() => [...sent]).toEqual(['open', 'offer-welcome-shown'])
 
   await page.reload()
   await expect(page.getByRole('button', { name: 'Allow microphone' })).toBeVisible()
   await aMoment(page)
-  expect(sent).toEqual(['open'])
+  expect(sent).toEqual(['open', 'offer-welcome-shown'])
 
   await page.getByRole('button', { name: 'Allow microphone' }).click()
-  await expect.poll(() => [...sent]).toEqual(['open', 'mic-allowed'])
+  await expect.poll(() => [...sent]).toEqual(['open', 'offer-welcome-shown', 'mic-allowed'])
 
   await waitForOpenMicrophone(page)
   await fartAndRecord(page, '095')
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(page.getByTestId('result-note')).toBeVisible()
-  await expect.poll(() => [...sent]).toEqual(['open', 'mic-allowed', 'first-recording'])
+  await expect
+    .poll(() => [...sent])
+    .toEqual(['open', 'offer-welcome-shown', 'mic-allowed', 'first-recording'])
 
   // A new visit, in a new tab, keeps what's been counted, though a guest's farts go.
   const nextVisit = await page.context().newPage()
@@ -88,12 +76,12 @@ test('a reload while a step is on its way doesn’t send it again', async ({ pag
   const allow = page.getByRole('button', { name: 'Allow microphone' })
   await page.goto('/')
   await expect(allow).toBeVisible()
-  await expect.poll(() => [...sent]).toEqual(['open'])
+  await expect.poll(() => [...sent]).toContain('open')
 
   await page.reload()
   await expect(allow).toBeVisible()
   await page.waitForTimeout(1_500)
-  expect(sent).toEqual(['open'])
+  expect(sent.filter(step => step === 'open')).toEqual(['open'])
 })
 
 test('hearing a Song, tapping Save and signing in count, once each', async ({ page }, testInfo) => {

@@ -563,6 +563,7 @@ async function listenToThePage(context: BrowserContext) {
   await context.addInitScript(() => {
     localStorage.setItem('pedos.welcomed', '1')
     localStorage.setItem('pedos.accountStep', 'done')
+    localStorage.setItem('pedos.fullAccessOffer', 'offered')
     // A relaunched profile isn't incognito, so Chrome may offer to install Farty, and the offer
     // would cover Save. install.spec.ts tests the offer.
     localStorage.setItem('pedos.installOffered', '1')

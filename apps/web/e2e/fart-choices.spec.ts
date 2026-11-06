@@ -329,6 +329,7 @@ async function listenToThePage(page: Page) {
   await page.addInitScript(() => {
     localStorage.setItem('pedos.welcomed', '1')
     localStorage.setItem('pedos.accountStep', 'done')
+    localStorage.setItem('pedos.fullAccessOffer', 'offered')
     // Chrome may offer to install Farty, and the offer would cover Save.
     localStorage.setItem('pedos.installOffered', '1')
     window.__starts = []

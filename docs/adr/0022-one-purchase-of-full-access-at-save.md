@@ -27,6 +27,12 @@ Checkout still goes back to the Toot whose Save asked for it, with its id, and s
 
 The Sound Pad keeps a take across Checkout as before (ADR 0017). On its next open, a take that started a Checkout and never got back is made again and saved if the account has Full Access by then, newest first and one per open. A kept take that couldn't be made again costs nothing now, as the purchase isn't tied to it, so the Pad says to record it again instead of reporting a refund, and the `pad-paid-take-lost` report is gone.
 
+## Offers before Save
+
+The owner added two offers on 2026-11-06 (#407): a second button on Welcome, and the same sheet at the first Result. Both can always be skipped, and Save still asks as above. An account still comes first, so a guest gets the account step and only then the sheet, and two never stack. Not now carries on where the person was going. Back from Checkout, a confirmation says Full Access has started, and its OK goes where the Result's tap was going.
+
+The first Result means a browser with at most one Recording, once per browser, so someone with a library is never asked there.
+
 ## The fee
 
 At Stripe's standard US card rate of 2.9% + 30¢, $4.99 pays about 44¢ and nets about $4.55, against 66¢ net of 99¢. A person needs to save seven Toots at 99¢ for Farty to net the same.
@@ -57,3 +63,6 @@ At Stripe's standard US card rate of 2.9% + 30¢, $4.99 pays about 44¢ and nets
 - A Toot's delete lasts as its tombstone does. With `saved_at` no longer blocking a save, once a tombstone is purged (30 days), a stale browser's outbox can bring a deleted Toot back on an account with Full Access, as it can a Recording. It's accepted.
 - Deleting an account deletes its `full_access` row. Stripe keeps its own record.
 - ADR 0010's table of where saving is paid, and its Stripe keys, still hold.
+- A guest sees the price on Welcome's button before giving an email, and pays only after making an account.
+- A reload while reading the sign-in code loses where the step was going. The step comes back from its draft, but its sheet doesn't follow: on Welcome the button can be tapped again, and at a Result the offer is already spent, so Save asks instead.
+- The first Result's offer is spent at its first tap, whatever happens next, so a person who taps Pay and cancels isn't asked again until Save.

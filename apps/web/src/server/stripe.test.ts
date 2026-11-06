@@ -287,6 +287,27 @@ describe('createCheckoutSession', () => {
     })
   })
 
+  it('names an offer instead of a Toot, and goes back to its place (#407)', async () => {
+    const fetch = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(Response.json(session({ status: 'open', payment_status: 'unpaid' })))
+    await createCheckoutSession(TEST_KEY, {
+      userId: 'userA',
+      email: 'a@example.test',
+      offer: 'welcome',
+      successUrl: 'https://staging.farty.fm/?offer=welcome&checkout=done',
+      cancelUrl: 'https://staging.farty.fm/?offer=welcome',
+      replaces: 'cs_test_last'
+    })
+    const [, init] = fetch.mock.calls[0]
+    expect(new Headers(init?.headers).get('idempotency-key')).toBe(
+      'full-access/userA/offer-welcome/cs_test_last'
+    )
+    const sent = init?.body as URLSearchParams
+    expect(sent.get('metadata[offer]')).toBe('welcome')
+    expect(sent.has('metadata[toot_id]')).toBe(false)
+  })
+
   it('fails with Stripe’s status alone, never its answer', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       Response.json(

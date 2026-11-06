@@ -3,11 +3,13 @@ import { expect, type Page, test } from '@playwright/test'
 
 /**
  * An init script: skips Welcome and, unless `offersAccount`, the account step, which offers itself
- * once, after the first Result (`account.spec.ts`).
+ * once, after the first Result (`account.spec.ts`). The same for the first Result's offer of Full
+ * Access, unless `offersFullAccess` (`full-access-offers.spec.ts`).
  */
-export function skipWelcome({ offersAccount = false } = {}): void {
+export function skipWelcome({ offersAccount = false, offersFullAccess = false } = {}): void {
   localStorage.setItem('pedos.welcomed', '1')
   if (!offersAccount) localStorage.setItem('pedos.accountStep', 'done')
+  if (!offersFullAccess) localStorage.setItem('pedos.fullAccessOffer', 'offered')
 }
 
 /**
@@ -33,15 +35,15 @@ export function withFakeMicrophone(fixture: string): void {
 }
 
 /**
- * Skips Welcome, records for `seconds`, stops, and saves the take. The account step stays out of
- * the way, as if already offered, unless `offersAccount` (`account.spec.ts`).
+ * Skips Welcome, records for `seconds`, stops, and saves the take. The account step and the Full
+ * Access offer stay out of the way, as if already offered, unless asked for.
  */
 export async function recordAndSave(
   page: Page,
   seconds: number,
-  { offersAccount = false } = {}
+  { offersAccount = false, offersFullAccess = false } = {}
 ): Promise<void> {
-  await page.addInitScript(skipWelcome, { offersAccount })
+  await page.addInitScript(skipWelcome, { offersAccount, offersFullAccess })
   await page.goto('/')
   await page.getByTestId('record-button').click()
   await expect(page.getByTestId('recording-timer')).toBeVisible()

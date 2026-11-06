@@ -36,6 +36,9 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: page.push }),
   usePathname: () => '/'
 }))
+vi.mock('./full-access-offers', () => ({
+  useFullAccessOffers: () => ({ offerAtResult: (_href: string, go: () => void) => go() })
+}))
 vi.mock('./account-provider', () => ({
   useAccount: () => ({ offerStep: (go: () => void) => go() })
 }))

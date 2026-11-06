@@ -412,6 +412,7 @@ async function listenToThePage(page: Page) {
   await page.addInitScript(() => {
     localStorage.setItem('pedos.welcomed', '1')
     localStorage.setItem('pedos.accountStep', 'done')
+    localStorage.setItem('pedos.fullAccessOffer', 'offered')
     // What the page hears: each sound it starts, with its length and loudest sample.
     window.__starts = []
     const start = AudioBufferSourceNode.prototype.start

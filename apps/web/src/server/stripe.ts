@@ -1,3 +1,4 @@
+import type { OfferPlace } from '@/lib/full-access-offers'
 import { builtFor, FULL_ACCESS_PRICE, savingIsPaid } from '@/lib/pricing'
 
 import type { SiteEnv } from '@/lib/site'
@@ -146,21 +147,30 @@ export type NewCheckout = {
   userId: string
   /** The account's email: Checkout doesn't ask for it, and a refund finds the payment by it. */
   email: string
-  /** The Toot whose Save asked for it, to make again and save on the way back from Checkout. */
-  tootId: string
   successUrl: string
   cancelUrl: string
   /** The account's last session, if any: it expired, or Stripe no longer has it. */
   replaces: string | null
-}
+} & (
+  | {
+      /** The Toot whose Save asked for it, to make again and save on the way back from Checkout. */
+      tootId: string
+      offer?: never
+    }
+  | {
+      /** The place that offered it before any Save (#407), which it goes back to. */
+      offer: OfferPlace
+      tootId?: never
+    }
+)
 
 /**
  * Starts a Checkout Session that pays `FULL_ACCESS_PRICE` for the account. Its metadata names the
- * account and the Toot it goes back to, which is how the webhook and the return find what was paid
- * for. Cards only, with Apple Pay and Google Pay, which pay at once: a slower method would leave the
+ * account and the Toot or offer it goes back to, which is how the webhook and the return find what
+ * was paid for. Cards only, with Apple Pay and Google Pay, which pay at once: a slower method would leave the
  * Toot unsaved after the return.
  *
- * Its idempotency key names the user, the Toot and the session it replaces, so two requests that
+ * Its idempotency key names the user, the Toot or offer and the session it replaces, so two requests that
  * cross, or a retry, get the same session from Stripe instead of a second one to pay.
  */
 export async function createCheckoutSession(
@@ -178,13 +188,16 @@ export async function createCheckoutSession(
     customer_email: checkout.email,
     'metadata[purchase]': FULL_ACCESS_PURCHASE,
     'metadata[user_id]': checkout.userId,
-    'metadata[toot_id]': checkout.tootId,
+    ...(checkout.offer
+      ? { 'metadata[offer]': checkout.offer }
+      : { 'metadata[toot_id]': checkout.tootId }),
     'payment_intent_data[metadata][purchase]': FULL_ACCESS_PURCHASE,
     'payment_intent_data[metadata][user_id]': checkout.userId,
     success_url: checkout.successUrl,
     cancel_url: checkout.cancelUrl
   })
-  const idempotencyKey = `full-access/${checkout.userId}/${checkout.tootId}/${checkout.replaces ?? 'first'}`
+  const target = checkout.offer ? `offer-${checkout.offer}` : checkout.tootId
+  const idempotencyKey = `full-access/${checkout.userId}/${target}/${checkout.replaces ?? 'first'}`
   return (await stripeRequest(secretKey, '/checkout/sessions', {
     body: params,
     idempotencyKey

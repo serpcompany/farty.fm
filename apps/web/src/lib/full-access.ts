@@ -1,3 +1,4 @@
+import type { OfferPlace } from './full-access-offers'
 import { answer, send } from './library-api'
 import { builtFor, savingIsPaid } from './pricing'
 
@@ -5,6 +6,7 @@ import { builtFor, savingIsPaid } from './pricing'
 // Performance (ADR 0017), asks whether the account has it (`/api/full-access/`). Without it, the
 // browser goes to pay (`/api/full-access/checkout/`), and Stripe sends it back to the screen it came
 // from with the Toot's id, which makes the same Toot again and saves it once the account has it.
+// Welcome and the first Result offer it before any Save (#407, `full-access-offers.ts`).
 
 /** Whether this build's Save to Toots asks for Full Access first: the environment it's built for. */
 export function saveAsksForPayment(): boolean {
@@ -33,15 +35,24 @@ function isCheckoutPage(url: string): boolean {
  * Starts paying for Full Access as `accountId`, coming back to the Toot `tootId` of `songId`, or of
  * a Sound Pad Performance with a null `songId`.
  */
-export async function startCheckout(
+export function startCheckout(
   tootId: string,
   songId: string | null,
   accountId: string
 ): Promise<Checkout> {
+  return askCheckout({ tootId, songId }, accountId)
+}
+
+/** Starts paying for Full Access as `accountId` from an offer, coming back to its place (#407). */
+export function startOfferCheckout(place: OfferPlace, accountId: string): Promise<Checkout> {
+  return askCheckout({ offer: place }, accountId)
+}
+
+async function askCheckout(body: object, accountId: string): Promise<Checkout> {
   const response = await send('/api/full-access/checkout/', accountId, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ tootId, songId })
+    body: JSON.stringify(body)
   })
   if (response?.ok) {
     const body = (await response.json().catch(() => null)) as {
@@ -100,6 +111,29 @@ export async function saveCheck(
 export async function canSaveFromStored(accountId: string): Promise<boolean | null> {
   const state = await askFullAccess('/api/full-access/?check=stored', accountId)
   return state ? state.active && !state.limitReached : null
+}
+
+/** How long an offer waits to hear whether the account has Full Access: it mustn't hold up a tap. */
+export const OFFER_CHECK_MS = 2500
+
+/**
+ * Whether the account has Full Access, from what's stored, as `canSaveFromStored` asks, within
+ * `waitMs`. Null when Farty couldn't say by then.
+ */
+export async function hasStoredFullAccess(
+  accountId: string,
+  waitMs = OFFER_CHECK_MS
+): Promise<boolean | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const late = new Promise<null>(resolve => {
+    timer = setTimeout(() => resolve(null), waitMs)
+  })
+  const state = await Promise.race([
+    askFullAccess('/api/full-access/?check=stored', accountId),
+    late
+  ])
+  clearTimeout(timer)
+  return state ? state.active : null
 }
 
 /** How long the return from Checkout waits for the payment: Stripe usually says in a second. */

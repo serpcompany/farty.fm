@@ -54,6 +54,7 @@ function Step({ underTopBar }: { underTopBar: boolean }) {
   const { account, skipStep, finishSignIn, stepReason } = useAccount()
   const again = account.status === 'expired'
   const toShare = stepReason === 'share' && !again
+  const toPay = stepReason === 'pay' && !again
   // Get Farty from a shared page (#318): the first of its two steps, offering a friend.
   const getFarty = useGetFarty()
   const toGet = getFarty?.stage === 'account' && !again
@@ -216,7 +217,7 @@ function Step({ underTopBar }: { underTopBar: boolean }) {
             >
               {again
                 ? 'Sign in again'
-                : toShare || toGet
+                : toShare || toGet || toPay
                   ? 'Make a free account'
                   : 'Keep your farts'}
             </h1>
@@ -227,7 +228,9 @@ function Step({ underTopBar }: { underTopBar: boolean }) {
                   ? 'It keeps your farts. Then add Farty to your Home Screen.'
                   : toShare
                     ? 'You need one to share. It keeps your farts too.'
-                    : 'Make a free account to keep your farts.'}
+                    : toPay
+                      ? 'You need one for Full Access. It keeps your farts too.'
+                      : 'Make a free account to keep your farts.'}
             </p>
           </div>
 

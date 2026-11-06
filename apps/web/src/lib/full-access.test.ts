@@ -2,9 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   canSaveFromStored,
+  hasStoredFullAccess,
   readCheckoutReturn,
   saveCheck,
   startCheckout,
+  startOfferCheckout,
   waitForFullAccess
 } from './full-access'
 
@@ -161,5 +163,40 @@ describe('readCheckoutReturn', () => {
     for (const search of ['', '?checkout=done', '?toot=abc&checkout=done', `?toot=${TOOT}x`]) {
       expect(readCheckoutReturn(search)).toBeNull()
     }
+  })
+})
+
+describe('startOfferCheckout', () => {
+  it('asks for a checkout that names the offer, and no Toot', async () => {
+    const fetch = answering(Response.json({ url: 'https://checkout.stripe.com/c/pay/cs_test_a' }))
+    expect(await startOfferCheckout('welcome', 'userA')).toEqual({
+      kind: 'pay',
+      url: 'https://checkout.stripe.com/c/pay/cs_test_a'
+    })
+    const [path, init] = fetch.mock.calls[0]
+    expect(path).toBe('/api/full-access/checkout/')
+    expect(new Headers(init?.headers).get('x-pedos-library')).toBe('userA')
+    expect(JSON.parse(String(init?.body))).toEqual({ offer: 'welcome' })
+  })
+})
+
+describe('hasStoredFullAccess', () => {
+  it('asks from what’s stored', async () => {
+    const fetch = answering(Response.json({ active: true, limitReached: true }))
+    expect(await hasStoredFullAccess('userA')).toBe(true)
+    expect(fetch.mock.calls[0][0]).toBe('/api/full-access/?check=stored')
+  })
+
+  it('says no when the account hasn’t it, and null when Farty couldn’t say', async () => {
+    answering(Response.json({ active: false, limitReached: false }))
+    expect(await hasStoredFullAccess('userA')).toBe(false)
+    vi.restoreAllMocks()
+    answering(Response.json({ error: 'nope' }, { status: 500 }))
+    expect(await hasStoredFullAccess('userA')).toBeNull()
+  })
+
+  it('never holds up a tap for longer than it’s given', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(() => new Promise(() => {}))
+    expect(await hasStoredFullAccess('userA', 5)).toBeNull()
   })
 })

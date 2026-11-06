@@ -107,6 +107,9 @@ vi.mock('@/lib/telemetry/errors', () => ({ reportError: mic.reportError }))
 vi.mock('./account-provider', () => ({
   useAccount: () => ({ account: { status: 'signedOut' }, offerStep: () => false })
 }))
+vi.mock('./full-access-offers', () => ({
+  useFullAccessOffers: () => ({ offerAtResult: () => undefined })
+}))
 vi.mock('next/navigation', () => ({ useRouter: () => ({}), usePathname: () => '/' }))
 
 const { PedosProvider, hintAfterMs } = await import('./pedos-provider')

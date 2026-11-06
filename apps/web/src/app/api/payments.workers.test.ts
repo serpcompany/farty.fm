@@ -85,6 +85,10 @@ const checkoutRequest = (as: As, body: unknown) =>
 const checkout = (tootId: string, as: As, songId: unknown = 'twinkle') =>
   checkoutRoute.POST(checkoutRequest(as, { tootId, songId }), noParams)
 
+/** A checkout from an offer before any Save (#407). */
+const offerCheckout = (offer: unknown, as: As) =>
+  checkoutRoute.POST(checkoutRequest(as, { offer }), noParams)
+
 const accessRequest = (as: As, query = '') =>
   new Request(`${ORIGIN}/api/full-access/${query}`, { headers: headersFor('GET', as) })
 
@@ -97,6 +101,17 @@ const payDev = (toot: string, as: As, song: string | null = 'twinkle') =>
       method: 'POST',
       headers: headersFor('POST', as, { 'content-type': 'application/x-www-form-urlencoded' }),
       body: new URLSearchParams(song === null ? { toot } : { toot, song })
+    }),
+    noParams
+  )
+
+/** The dev checkout's Pay for an offer. */
+const payDevOffer = (offer: string, as: As) =>
+  devCheckoutRoute.POST(
+    new Request(`${ORIGIN}/api/dev/checkout/`, {
+      method: 'POST',
+      headers: headersFor('POST', as, { 'content-type': 'application/x-www-form-urlencoded' }),
+      body: new URLSearchParams({ offer })
     }),
     noParams
   )
@@ -379,6 +394,69 @@ describe('on a local run, with the dev checkout', () => {
   })
 })
 
+describe('an offer before any Save, with the dev checkout (#407)', () => {
+  it('pays with no Toot, back to the offer’s place, and every Save then saves', async () => {
+    const a = await signUp('A')
+    const started = (await (await offerCheckout('welcome', a)).json()) as { url: string }
+    expect(started.url).toBe(`${ORIGIN}/dev/checkout/?offer=welcome`)
+    expect(await counted('checkout-started')).toBe(1)
+    const paid = await payDevOffer('welcome', a)
+    expect(paid.status).toBe(303)
+    expect(paid.headers.get('location')).toBe(`${ORIGIN}/?offer=welcome&checkout=done`)
+    expect(await hasIt(a)).toBe(true)
+    expect((await save(T1, a)).status).toBe(201)
+  })
+
+  it('goes back to the Recordings tab from a Result, which opens no microphone', async () => {
+    const a = await signUp('A')
+    await offerCheckout('result', a)
+    const paid = await payDevOffer('result', a)
+    expect(paid.headers.get('location')).toBe(`${ORIGIN}/recordings/?offer=result&checkout=done`)
+  })
+
+  it('has nothing to pay once the account has it, at the Toot limit too', async () => {
+    const a = await signUp('A')
+    await offerCheckout('welcome', a)
+    await payDevOffer('welcome', a)
+    expect(await (await offerCheckout('result', a)).json()).toEqual({ active: true })
+    await fillToots(a.id, 300)
+    expect(await (await offerCheckout('welcome', a)).json()).toEqual({ active: true })
+    expect(await counted('checkout-started')).toBe(1)
+  })
+
+  it('refuses an unknown place, a place with a Toot, and another library', async () => {
+    const a = await signUp('A')
+    expect((await offerCheckout('save', a)).status).toBe(400)
+    expect((await offerCheckout({ path: '//elsewhere.example' }, a)).status).toBe(400)
+    const both = await checkoutRoute.POST(
+      checkoutRequest(a, { offer: 'welcome', tootId: T1 }),
+      noParams
+    )
+    expect(both.status).toBe(400)
+    expect((await payDevOffer('save', a)).status).toBe(400)
+    expect((await offerCheckout('welcome', { ...a, library: 'userB' })).status).toBe(409)
+    expect((await offerCheckout('welcome', {})).status).toBe(401)
+    expect(await fullAccessPurchase(testDb(), a.id)).toBeNull()
+  })
+
+  it('refuses without Full Access at the Toot limit, before anything is paid', async () => {
+    const a = await signUp('A')
+    await fillToots(a.id, 300)
+    const full = await offerCheckout('result', a)
+    expect(full.status).toBe(409)
+    expect(await full.json()).toEqual({ error: 'limit_reached' })
+    expect(await fullAccessPurchase(testDb(), a.id)).toBeNull()
+  })
+
+  it('counts against the checkouts one user can start', async () => {
+    const a = await signUp('A')
+    for (let tap = 0; tap < PAYMENT_LIMITS.checkouts.max; tap++) {
+      expect((await offerCheckout('welcome', a)).status).toBe(200)
+    }
+    expect((await offerCheckout('welcome', a)).status).toBe(429)
+  })
+})
+
 describe('someone who paid for a Toot before Full Access', () => {
   it('has Full Access, with nothing more to pay', async () => {
     const a = await signUp('A')
@@ -430,6 +508,17 @@ const sessionFor = (
   livemode: false,
   amount_total: 499,
   currency: 'usd',
+  ...fields
+})
+
+/** A Checkout Session from an offer before any Save (#407): it names the place, and no Toot. */
+const offerSessionFor = (
+  userId: string,
+  offer: string,
+  fields: Partial<CheckoutSession> = {}
+): CheckoutSession => ({
+  ...sessionFor(userId, T1),
+  metadata: { purchase: 'full_access', user_id: userId, offer },
   ...fields
 })
 
@@ -573,6 +662,91 @@ describe('with Stripe Checkout in test mode', () => {
     expect(sent.get('line_items[0][price_data][unit_amount]')).toBe('499')
     expect(sent.get('success_url')).toBe(`${ORIGIN}/compose/pad/?toot=${T1}&checkout=done`)
     expect(sent.get('cancel_url')).toBe(`${ORIGIN}/compose/pad/?toot=${T1}`)
+  })
+
+  it('starts an offer’s session naming the offer and no Toot, back to its place (#407)', async () => {
+    const a = await signUp('A')
+    const stripe = stubStripe(offerSessionFor(a.id, 'result'))
+    expect(await (await offerCheckout('result', a)).json()).toEqual({
+      url: 'https://checkout.stripe.com/c/pay/cs_test_first'
+    })
+    expect(await counted('checkout-started')).toBe(1)
+    const [, init] = stripe.mock.calls[0]
+    expect(new Headers(init?.headers).get('idempotency-key')).toBe(
+      `full-access/${a.id}/offer-result/first`
+    )
+    const sent = init?.body as URLSearchParams
+    expect(sent.get('metadata[purchase]')).toBe('full_access')
+    expect(sent.get('metadata[user_id]')).toBe(a.id)
+    expect(sent.get('metadata[offer]')).toBe('result')
+    expect(sent.has('metadata[toot_id]')).toBe(false)
+    expect(sent.get('line_items[0][price_data][unit_amount]')).toBe('499')
+    expect(sent.get('success_url')).toBe(`${ORIGIN}/recordings/?offer=result&checkout=done`)
+    expect(sent.get('cancel_url')).toBe(`${ORIGIN}/recordings/?offer=result`)
+  })
+
+  it('reuses an open session for the same offer, so two taps can’t pay twice (#407)', async () => {
+    const a = await signUp('A')
+    const stripe = stubStripe(offerSessionFor(a.id, 'welcome'), offerSessionFor(a.id, 'welcome'))
+    await offerCheckout('welcome', a)
+    expect(await (await offerCheckout('welcome', a)).json()).toEqual({
+      url: 'https://checkout.stripe.com/c/pay/cs_test_first'
+    })
+    expect(stripe.mock.calls).toHaveLength(2)
+    expect(await counted('checkout-started')).toBe(1)
+  })
+
+  it('ends an open session for another place or a Toot first, so only one can be paid (#407)', async () => {
+    const a = await signUp('A')
+    const toot = sessionFor(a.id, T1, {
+      id: 'cs_test_second',
+      url: 'https://checkout.stripe.com/c/pay/cs_test_second'
+    })
+    const stripe = stubStripe(
+      offerSessionFor(a.id, 'welcome'),
+      offerSessionFor(a.id, 'welcome'),
+      offerSessionFor(a.id, 'welcome', { status: 'expired', url: null }),
+      toot
+    )
+    await offerCheckout('welcome', a)
+    expect(await (await checkout(T1, a)).json()).toEqual({ url: toot.url })
+    expect(String(stripe.mock.calls[2][0])).toBe(
+      'https://api.stripe.com/v1/checkout/sessions/cs_test_first/expire'
+    )
+    const sent = stripe.mock.calls[3][1]?.body as URLSearchParams
+    expect(sent.get('metadata[toot_id]')).toBe(T1)
+  })
+
+  it('has Full Access from an offer’s paid session, by the webhook and on the return (#407)', async () => {
+    const a = await signUp('A')
+    stubStripe(offerSessionFor(a.id, 'welcome'))
+    await offerCheckout('welcome', a)
+    expect(
+      (
+        await deliver(
+          completed(
+            offerSessionFor(a.id, 'welcome', {
+              status: 'complete',
+              payment_status: 'paid',
+              payment_intent: 'pi_test_first'
+            })
+          )
+        )
+      ).status
+    ).toBe(200)
+    expect(await hasIt(a)).toBe(true)
+
+    const b = await signUp('B')
+    stubStripe(
+      offerSessionFor(b.id, 'result'),
+      offerSessionFor(b.id, 'result', {
+        status: 'complete',
+        payment_status: 'paid',
+        payment_intent: 'pi_test_second'
+      })
+    )
+    await offerCheckout('result', b)
+    expect(await (await access(b)).json()).toEqual({ active: true, limitReached: false })
   })
 
   it('reuses an open session for the same Toot, so two taps can’t pay twice', async () => {

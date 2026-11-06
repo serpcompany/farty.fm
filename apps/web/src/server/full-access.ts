@@ -14,6 +14,7 @@ import {
 } from '@/db/payments'
 import { countStep } from '@/db/step-counts'
 import { songIndex } from '@/lib/catalog/song-index.generated'
+import { isOfferPlace, type OfferPlace, offerReturnPath } from '@/lib/full-access-offers'
 import { FULL_ACCESS_PRICE } from '@/lib/pricing'
 import { servedOrigin } from '@/lib/site'
 
@@ -87,17 +88,49 @@ function catalogSong(songId: unknown) {
 }
 
 /**
- * Where Checkout comes back to, which makes the same Toot again: the Song's Song Creator, or the
- * Sound Pad for a Toot of its Performance (a null `songId`, ADR 0017).
+ * What a checkout is for: the Toot whose Save asked for it, with its Song or null for a Sound Pad
+ * Toot (ADR 0017), or the place that offered it before any Save (#407).
  */
-function returnUrl(request: Request, songId: string | null, tootId: string, done: boolean): string {
+type CheckoutFor = { tootId: string; songId: string | null } | { offer: OfferPlace }
+
+/** What a request asks to pay for, or null when it's a bad id, an unknown Song or place. */
+function readCheckoutFor(fields: {
+  tootId?: unknown
+  songId?: unknown
+  offer?: unknown
+}): CheckoutFor | null {
+  const { tootId, songId, offer } = fields
+  if (offer !== undefined && offer !== null) {
+    return isOfferPlace(offer) && tootId === undefined ? { offer } : null
+  }
+  // A Sound Pad Toot has no Song, and returns to the Pad.
+  const song = songId === null ? null : catalogSong(songId)
+  if (!isItemId(tootId) || (songId !== null && !song)) return null
+  return { tootId, songId: song?.id ?? null }
+}
+
+/**
+ * Where Checkout comes back to. For a Toot, what makes it again: the Song's Song Creator, or the
+ * Sound Pad for a Toot of its Performance. For an offer, its place's fixed address.
+ */
+function returnUrl(request: Request, target: CheckoutFor, done: boolean): string {
+  if ('offer' in target) {
+    return new URL(offerReturnPath(target.offer, done), servedOrigin(request)).toString()
+  }
   const url = new URL(
-    songId === null ? '/compose/pad/' : `/compose/${songId}/`,
+    target.songId === null ? '/compose/pad/' : `/compose/${target.songId}/`,
     servedOrigin(request)
   )
-  url.searchParams.set('toot', tootId)
+  url.searchParams.set('toot', target.tootId)
   if (done) url.searchParams.set('checkout', 'done')
   return url.toString()
+}
+
+/** Whether an open Checkout Session already goes back to what this checkout is for. */
+function sameTarget(session: CheckoutSession, target: CheckoutFor): boolean {
+  return 'offer' in target
+    ? session.metadata?.offer === target.offer
+    : session.metadata?.toot_id === target.tootId
 }
 
 /**
@@ -125,12 +158,13 @@ async function paidAtStripe(
 
 /**
  * `POST /api/full-access/checkout/` with `{ tootId, songId }`, the Toot whose Save asked for it and
- * its Song, null for a Sound Pad Toot (ADR 0017): where to pay for Full Access. `{ url }`, Stripe
- * Checkout's page (or `/dev/checkout/` on a local run), or `{ active: true }` when there's nothing
- * to pay: the account has it, or saving is free here. An open Checkout Session for the same Toot is
- * reused, and one for another Toot is ended first, as it returns elsewhere, so two taps or two tabs
- * can't pay twice. 410 for a Toot that's been deleted and 409 at the Toot limit, with Full Access or
- * not and before anything is paid, 409 `payment_mismatch` when its last session is paid but not at
+ * its Song, null for a Sound Pad Toot (ADR 0017), or `{ offer }`, the place that offered it before
+ * any Save (#407): where to pay for Full Access. `{ url }`, Stripe Checkout's page (or
+ * `/dev/checkout/` on a local run), or `{ active: true }` when there's nothing to pay: the account
+ * has it, or saving is free here. An open Checkout Session for the same Toot or offer is reused, and
+ * any other is ended first, as it returns elsewhere, so two taps or two tabs can't pay twice. 410 for
+ * a Toot that's been deleted and 409 at the Toot limit before anything is paid: for a Toot, with Full
+ * Access or not; for an offer, only without it. 409 `payment_mismatch` when its last session is paid but not at
  * the price its row recorded (logged, and never paid for twice), 429 past
  * `PAYMENT_LIMITS.checkouts`, 503 when payments aren't set up here.
  */
@@ -146,16 +180,20 @@ export async function startCheckout(
   if (payments.kind === 'off') return unavailable()
   const body = await readJson(request)
   if (body instanceof Response) return body
-  const { tootId, songId } = (body.json ?? {}) as { tootId?: unknown; songId?: unknown }
-  // A Sound Pad Toot has no Song, and returns to the Pad.
-  const song = songId === null ? null : catalogSong(songId)
-  if (!isItemId(tootId) || (songId !== null && !song)) return apiError(400, 'invalid_request')
+  const target = readCheckoutFor((body.json ?? {}) as Parameters<typeof readCheckoutFor>[0])
+  if (!target) return apiError(400, 'invalid_request')
 
-  const saved = await uploadState(db, 'toots', user.id, tootId)
-  // Deleted, it can't be saved again: nothing to pay for here.
-  if (saved.status === 'deleted') return apiError(410, 'deleted')
-  if (saved.live >= LIMITS.toots.maxItems) return apiError(409, 'limit_reached')
+  if ('tootId' in target) {
+    const saved = await uploadState(db, 'toots', user.id, target.tootId)
+    // Deleted, it can't be saved again: nothing to pay for here.
+    if (saved.status === 'deleted') return apiError(410, 'deleted')
+    if (saved.live >= LIMITS.toots.maxItems) return apiError(409, 'limit_reached')
+  }
   if (await hasFullAccess(db, user.id)) return active()
+  // An offer saves nothing now, but what it sells couldn't be used: asked of no one who has it.
+  if ('offer' in target && (await liveItems(db, 'toots', user.id)) >= LIMITS.toots.maxItems) {
+    return apiError(409, 'limit_reached')
+  }
   const slot = await spend(db, user, 'checkouts')
   if (!slot.allowed) {
     const limited = apiError(429, 'rate_limited')
@@ -167,8 +205,11 @@ export async function startCheckout(
     await startFullAccess(db, user.id, `dev_${crypto.randomUUID()}`, FULL_ACCESS_PRICE)
     await countStep(db, 'checkout-started')
     const url = new URL('/dev/checkout/', servedOrigin(request))
-    url.searchParams.set('toot', tootId)
-    if (song) url.searchParams.set('song', song.id)
+    if ('offer' in target) url.searchParams.set('offer', target.offer)
+    else {
+      url.searchParams.set('toot', target.tootId)
+      if (target.songId) url.searchParams.set('song', target.songId)
+    }
     return Response.json({ url: url.toString() })
   }
 
@@ -190,7 +231,7 @@ export async function startCheckout(
         return apiError(409, 'payment_mismatch')
       }
       if (atStripe?.session.status === 'open' && atStripe.session.url) {
-        if (atStripe.session.metadata?.toot_id === tootId) {
+        if (sameTarget(atStripe.session, target)) {
           return Response.json({ url: atStripe.session.url })
         }
         await expireCheckoutSession(payments.secretKey, atStripe.session.id)
@@ -199,9 +240,9 @@ export async function startCheckout(
     const session = await createCheckoutSession(payments.secretKey, {
       userId: user.id,
       email: user.email,
-      tootId,
-      successUrl: returnUrl(request, song?.id ?? null, tootId, true),
-      cancelUrl: returnUrl(request, song?.id ?? null, tootId, false),
+      ...('offer' in target ? { offer: target.offer } : { tootId: target.tootId }),
+      successUrl: returnUrl(request, target, true),
+      cancelUrl: returnUrl(request, target, false),
       replaces: purchase?.checkoutSessionId ?? null
     })
     if (!session.url) throw new StripeError(502)
@@ -338,9 +379,10 @@ export async function receiveStripeEvent(
 }
 
 /**
- * `POST /api/dev/checkout/`, a form with `toot` and `song`, or no `song` for a Sound Pad Toot: the
- * dev checkout's Pay. It marks the account's dev purchase paid and goes back to Song Creator, or the
- * Sound Pad, as Stripe's success URL would. 404 anywhere but a local run on a local host with no
+ * `POST /api/dev/checkout/`, a form with `toot` and `song`, or no `song` for a Sound Pad Toot, or
+ * `offer` for an offer before any Save (#407): the dev checkout's Pay. It marks the account's dev
+ * purchase paid and goes back to Song Creator, the Sound Pad or the offer's place, as Stripe's
+ * success URL would. 404 anywhere but a local run on a local host with no
  * Stripe key.
  */
 export async function payDevCheckout(
@@ -353,16 +395,18 @@ export async function payDevCheckout(
   const body = await readCapped(request, 4 * 1024)
   if (body === null) return apiError(413, 'too_large')
   const form = new URLSearchParams(new TextDecoder().decode(body))
-  const tootId = form.get('toot')
-  const songId = form.get('song')
-  const song = songId === null ? null : catalogSong(songId)
-  if (!isItemId(tootId) || (songId !== null && !song)) return apiError(400, 'invalid_request')
+  const target = readCheckoutFor({
+    tootId: form.get('toot') ?? undefined,
+    songId: form.get('song'),
+    offer: form.get('offer')
+  })
+  if (!target) return apiError(400, 'invalid_request')
   const purchase = await fullAccessPurchase(db, user.id)
   if (!purchase?.checkoutSessionId.startsWith('dev_')) return notFound()
   await markFullAccessPaid(db, user.id, purchase.checkoutSessionId, null)
   return new Response(null, {
     status: 303,
-    headers: { Location: returnUrl(request, song?.id ?? null, tootId, true) }
+    headers: { Location: returnUrl(request, target, true) }
   })
 }
 

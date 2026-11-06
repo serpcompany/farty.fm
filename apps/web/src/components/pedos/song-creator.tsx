@@ -66,6 +66,7 @@ import { FartSheetView } from './fart-sheet'
 import { FavoriteButton } from './favorite-button'
 import { FullAccessSheet } from './full-access-sheet'
 import { NoteView, pitchColor } from './note-view'
+import { PAY_PROBLEMS } from './pay-problems'
 import { tootPlayback, usePedos } from './pedos-provider'
 import { pianoSchedule, stopPiano } from './piano-preview'
 import { previousPage } from './previous-page'
@@ -406,20 +407,8 @@ export function SongCreatorFromAddress() {
 
 /** What Save says when it didn't save the Toot. */
 const SAVE_PROBLEMS = {
+  ...PAY_PROBLEMS,
   saveFailed: "Couldn't save this Toot.",
-  unavailable: "Payments aren't available right now.",
-  limitReached: "You've kept as many Toots as an account can. Delete one to save this one.",
-  charged: (
-    <>
-      You were charged, but Full Access didn't start.{' '}
-      <Link href="/support/" className="underline">
-        Contact support
-      </Link>{' '}
-      for a refund.
-    </>
-  ),
-  tooMany: "You've started a lot of payments. Try again later.",
-  failed: "Couldn't start the payment.",
   notPaidYet: "Your payment hasn't come through yet. Tap Save to check again.",
   notKept: "This take can't be saved in this browser: it can't keep the take while you pay.",
   unreachable: "Couldn't reach your account. Tap Save to try again."

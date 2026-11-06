@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { AccountProvider } from '@/components/pedos/account-provider'
 import { AppShell } from '@/components/pedos/app-shell'
 import { DownloadQr } from '@/components/pedos/download-qr'
+import { FullAccessOffersProvider } from '@/components/pedos/full-access-offers'
 import { InstallPrompt } from '@/components/pedos/install-prompt'
 import { PedosProvider } from '@/components/pedos/pedos-provider'
 import { siteOrigin } from '@/lib/site'
@@ -48,7 +49,9 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       <body className="min-h-full">
         <AccountProvider>
           <PedosProvider>
-            <AppShell qrCode={<DownloadQr />}>{children}</AppShell>
+            <FullAccessOffersProvider>
+              <AppShell qrCode={<DownloadQr />}>{children}</AppShell>
+            </FullAccessOffersProvider>
             <InstallPrompt />
           </PedosProvider>
         </AccountProvider>

@@ -184,9 +184,10 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
           </nav>
         )}
         <RecordFlow />
-        <AccountStep />
         {/* Only on the tabs, so the privacy, support and 404 pages are always readable. */}
         {pedos.showsWelcome && tab !== null && <Welcome />}
+        {/* After Welcome, so the step its Full Access button opens (#407) shows over it. */}
+        <AccountStep />
       </div>
     </>
   )

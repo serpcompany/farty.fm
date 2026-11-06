@@ -29,13 +29,16 @@ import { openVisit } from '@/lib/visit'
  */
 export type SignOut = 'signedOut' | 'pending' | 'failed'
 
-export type StepReason = 'keep' | 'share'
+export type StepReason = 'keep' | 'share' | 'pay'
 
 type AccountContext = {
   account: Account
   /** The account step is on screen, over everything. */
   stepOpen: boolean
-  /** Why the step is open: to keep farts, or to share one (ADR 0020), which needs an account. */
+  /**
+   * Why the step is open: to keep farts, to share one (ADR 0020), or to buy Full Access on Welcome
+   * (#407), which each need an account.
+   */
   stepReason: StepReason
   /**
    * At a Result's button: shows the account step first the first time, then `then`, which goes
