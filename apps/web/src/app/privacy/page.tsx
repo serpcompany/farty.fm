@@ -36,11 +36,20 @@ export default function PrivacyPage() {
         <li>
           Nothing you record is public unless you share it. When you share a Recording or a saved
           Toot, anyone with its link can open it, signed in or not, and play it. The page shows your
-          handle and the Recording&apos;s name, note, length, waveform and when you recorded it. A
-          Toot&apos;s page shows its name, Song, length, waveform and notes, and the name, note,
-          length, waveform and recording time of each Recording it plays, each of which anyone on
-          the page can play on its own. Nothing else about you: never your email or your other
-          Recordings and Toots.
+          handle and the Recording&apos;s name, note, length, waveform, when you recorded it and the
+          city you recorded it in. A Toot&apos;s page shows its name, Song, length, waveform and
+          notes, and the name, note, length, waveform, recording time and city of each Recording it
+          plays, each of which anyone on the page can play on its own. Nothing else about you: never
+          your email or your other Recordings and Toots.
+        </li>
+        <li>
+          When a Recording first uploads within a day of recording it, Farty keeps the city, region,
+          country and time zone Cloudflare works out from your connection, and shows them only if
+          you share it. It doesn&apos;t ask your phone for its location, and never keeps your IP
+          address or an exact position for this, so a VPN shows the VPN&apos;s city. With Show where
+          I farted off on Profile, new Recordings keep none, and what you&apos;ve already shared
+          stops showing it at once, links already sent included. Deleting a Recording deletes its
+          place.
         </li>
         <li>
           What you share is listed on your page, farty.fm/@yourhandle, which anyone can open. Search

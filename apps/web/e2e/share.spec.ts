@@ -1,10 +1,17 @@
 import { randomInt } from 'node:crypto'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { type BrowserContext, expect, type Page, test } from '@playwright/test'
+import { type BrowserContext, expect, type Page, type TestInfo, test } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
 import { slugify } from '../src/lib/slug'
-import { codeFor, fromTheLocalDatabase, newEmail, ownClient, signInByApi } from './account'
+import {
+  codeFor,
+  fromTheLocalDatabase,
+  newEmail,
+  onTheLocalDatabase,
+  ownClient,
+  signInByApi
+} from './account'
 import { payToSave } from './pay'
 import { recordAndSave, skipWelcome, withFakeMicrophone } from './record'
 import { onPhone } from './screens'
@@ -35,6 +42,39 @@ declare global {
 test.use({ serviceWorkers: 'block' })
 
 const evidence = process.env.E2E_EVIDENCE_DIR ? resolve(process.env.E2E_EVIDENCE_DIR) : null
+
+/** Where this run keeps its screenshots, if it does, and what takes one. */
+function evidenceFor(testInfo: TestInfo) {
+  const out = evidence && join(evidence, testInfo.project.name)
+  if (out) mkdirSync(out, { recursive: true })
+  const shot = async (on: Page, name: string) => {
+    // Menus and dialogs fade in: each is shot as it ends up.
+    if (out) await on.screenshot({ path: join(out, `${name}.png`), animations: 'disabled' })
+  }
+  return { out, shot }
+}
+
+/** Says each of `handle`'s Recordings was made in Testville: the real reading is wherever this runs. */
+function madeInTestville(handle: string) {
+  const place = { city: 'Testville', region: 'Texas', country: 'US', timeZone: 'America/Chicago' }
+  onTheLocalDatabase(
+    `UPDATE recordings SET place = '${JSON.stringify(place)}'
+     WHERE user_id = (SELECT user_id FROM handles WHERE handle = '${handle}')`
+  )
+}
+
+/** Sets Profile's Show where I farted by its whole row, in a tab of its own, and the account keeps it. */
+async function showWhereIFarted(context: BrowserContext, on: boolean) {
+  const tab = await context.newPage()
+  await tab.goto('/profile/')
+  const control = tab.getByRole('switch', { name: 'Show where I farted' })
+  await expect(control).toBeChecked({ checked: !on })
+  await tab.locator('label', { has: control }).click()
+  await expect(control).toBeChecked({ checked: on })
+  await tab.reload()
+  await expect(control).toBeChecked({ checked: on })
+  await tab.close()
+}
 
 /** The share sheet, faked: it takes what it's handed, as tapping Copy in it would. */
 async function fakeShareSheet(context: BrowserContext) {
@@ -144,6 +184,7 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
   hasTouch
 }, testInfo) => {
   test.setTimeout(180_000)
+  const { shot } = evidenceFor(testInfo)
   const handle = `e2e_${randomInt(1e9)}`
   await fakeShareSheet(context)
   const page = await context.newPage()
@@ -258,6 +299,34 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
     await expect(other.getByText('Reported. Thanks.')).toBeVisible()
   })
 
+  await test.step('it says where the fart was made, until the owner turns that off (#444)', async () => {
+    // What the upload kept of this run's connection: nothing finer than a city.
+    const [{ place }] = fromTheLocalDatabase<{ place: string | null }>(
+      `SELECT place FROM recordings
+       WHERE user_id = (SELECT user_id FROM handles WHERE handle = '${handle}')`
+    )
+    const kept = JSON.parse(place ?? 'null')
+    expect(Object.keys(kept ?? {}).sort()).toEqual(['city', 'country', 'region', 'timeZone'])
+    expect(kept.country).toMatch(/^[A-Z]{2}$/)
+
+    madeInTestville(handle)
+    await other.goto(link)
+    const recorded = other.getByTestId('shared-recorded-at')
+    await expect(recorded).toHaveText(/^Recorded .*\d{4}.* · Testville, Texas$/)
+    await shot(other, 'recording-shared-place')
+    // Never in a link preview, which goes where the switch can't reach it.
+    await expect(other.locator('meta[content*="Testville"]')).toHaveCount(0)
+
+    await showWhereIFarted(context, false)
+    await other.goto(link)
+    await expect(recorded).toHaveText(/^Recorded .*\d{4}/)
+    expect(await other.content()).not.toContain('Testville')
+
+    await showWhereIFarted(context, true)
+    await other.goto(link)
+    await expect(recorded).toContainText('Testville, Texas')
+  })
+
   await test.step('the owner stops sharing, and the link is gone', async () => {
     await page.goto('/recordings/')
     await expect(page.getByTestId('recording-shared')).toBeVisible()
@@ -313,12 +382,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     'The Fixture Library is only in the Staging build (pnpm build:staging)'
   )
   test.setTimeout(300_000)
-  const out = evidence && join(evidence, testInfo.project.name)
-  if (out) mkdirSync(out, { recursive: true })
-  const shot = async (on: Page, name: string) => {
-    // Menus and dialogs fade in: each is shot as it ends up.
-    if (out) await on.screenshot({ path: join(out, `${name}.png`), animations: 'disabled' })
-  }
+  const { out, shot } = evidenceFor(testInfo)
   const handle = `e2e_${randomInt(1e9)}`
   await fakeShareSheet(context)
   await context.addInitScript(skipWelcome)
@@ -479,6 +543,20 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(other.getByRole('button', { name: `Play ${title}` })).toBeVisible()
     await farts.first().getByRole('button').first().click()
     await expect(farts.first().getByRole('button').first()).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  await test.step('each fart says where it was made, until the owner turns that off (#444)', async () => {
+    madeInTestville(handle)
+    await other.goto(link)
+    const fart = other.getByTestId('recording-used').first()
+    await expect(fart).toContainText('Testville, Texas')
+    await shot(other, 'toot-shared-place')
+
+    await showWhereIFarted(context, false)
+    await other.goto(link)
+    await expect(fart).toContainText(/\d{4}/)
+    expect(await other.content()).not.toContain('Testville')
+    await showWhereIFarted(context, true)
   })
 
   await test.step('reports it', async () => {

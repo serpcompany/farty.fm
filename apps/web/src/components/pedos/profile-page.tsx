@@ -232,7 +232,8 @@ function FriendControl({ handle, onOwn }: { handle: string; onOwn: (own: boolean
   if (known === 'own') {
     return (
       <p className="text-sm text-muted-foreground">
-        This is your page. It lists only what you've shared.
+        This is your page. It lists only what you've shared. Shared pages show when and in which
+        city each fart was recorded. You can turn the city off in Profile.
       </p>
     )
   }

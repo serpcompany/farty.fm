@@ -1,4 +1,5 @@
 import type { Song, SongNote, SongNotes, SongSummary } from '@/lib/catalog/song'
+import type { RecordedIn } from '@/lib/fart-place'
 import type { Performance } from '@/lib/performance'
 import { noteName } from '@/lib/pitch'
 import { formattedLength, type Recording, recordingName, songPitch } from '@/lib/recordings'
@@ -40,7 +41,7 @@ export type SharedFart = {
   levels: number[]
   /** When it was recorded, in ms. */
   recordedAt: number
-}
+} & RecordedIn
 
 /** A row of a shared Toot's "Recordings used". */
 export type SharedFartRow = {

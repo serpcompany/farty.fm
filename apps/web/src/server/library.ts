@@ -14,7 +14,7 @@ import {
   purgeTombstones,
   type RecordingRow,
   renameToot,
-  setMarketingEmail,
+  setAccountSwitch,
   TOMBSTONE_RETENTION_MS,
   type TootRow,
   tombstone,
@@ -23,12 +23,13 @@ import {
 } from '@/db/library'
 import { hasFullAccess } from '@/db/payments'
 import { removeShare } from '@/db/sharing'
+import type { AccountSwitch } from '@/lib/account'
 import { parseFartChoices } from '@/lib/engine/fart-choices'
 import type { Performance } from '@/lib/performance'
 import { MAX_SAVED_TOOTS } from '@/lib/pricing'
 import type { Recording, RecordingTrim } from '@/lib/recordings'
 import type { Toot, TootArrangement } from '@/lib/toot'
-
+import { placeOfUpload } from './fart-place'
 import {
   isItemId,
   parsePlacement,
@@ -319,7 +320,10 @@ export async function putItem(
   if (kind === 'recordings') {
     const recording = parseRecording(upload.metadata, id, wav.sampleRate)
     if (recording) {
-      add = audioBytes => insertRecording(db, user.id, { ...recording, audioBytes }, maxItems)
+      add = async audioBytes => {
+        const place = await placeOfUpload(db, user.id, recording.createdAt)
+        return insertRecording(db, user.id, { ...recording, place, audioBytes }, maxItems)
+      }
     }
   } else {
     const toot = parseToot(upload.metadata, id)
@@ -449,8 +453,11 @@ export async function patchRecording(
   return Response.json({ id, ...placement })
 }
 
+const ACCOUNT_SWITCHES: AccountSwitch[] = ['marketingEmail', 'showFartPlaces']
+
 /**
- * `PATCH /api/account/` with `{ marketingEmail }`: turns Farty news by email on or off. 409 when
+ * `PATCH /api/account/` with one of `{ marketingEmail }` (Farty news by email) and
+ * `{ showFartPlaces }` (saying where each shared fart was made): turns it on or off. 409 when
  * `LIBRARY_HEADER` names another account (`wrong_account`).
  */
 export async function patchAccount(
@@ -462,10 +469,12 @@ export async function patchAccount(
   if (wrong) return wrong
   const body = await readJson(request)
   if (body instanceof Response) return body
-  const marketingEmail = (body.json as { marketingEmail?: unknown } | null)?.marketingEmail
-  if (typeof marketingEmail !== 'boolean') return apiError(400, 'invalid_request')
-  if (!(await setMarketingEmail(db, user.id, marketingEmail))) return notFound()
-  return Response.json({ marketingEmail })
+  const sent = body.json as Partial<Record<AccountSwitch, unknown>> | null
+  const name = ACCOUNT_SWITCHES.find(each => typeof sent?.[each] === 'boolean')
+  if (!name) return apiError(400, 'invalid_request')
+  const on = sent?.[name] === true
+  if (!(await setAccountSwitch(db, user.id, name, on))) return notFound()
+  return Response.json({ [name]: on })
 }
 
 /**

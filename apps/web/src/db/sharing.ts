@@ -339,6 +339,12 @@ export async function sharedToot(
   return playsAny(row.toot, await takenDownRecordings(db, row.share.userId)) ? null : row
 }
 
+/** Whether what the user shares says where each fart was made (#444). No row says it doesn't. */
+export async function showsFartPlaces(db: Database, userId: string): Promise<boolean> {
+  const [row] = await db.select({ show: user.showFartPlaces }).from(user).where(eq(user.id, userId))
+  return row?.show ?? false
+}
+
 /** Keeps a report of `share` for Farty to check. */
 export async function addReport(db: Database, share: ShareRow, id: string, now: Date) {
   await db.insert(shareReports).values({

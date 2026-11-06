@@ -120,6 +120,13 @@
       "when": 1793979195238,
       "tag": "0016_share_slugs",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1793983887155,
+      "tag": "0017_fart_places",
+      "breakpoints": true
     }
   ]
 }

@@ -51,7 +51,9 @@ const recordingOf = (handle: string, slug: string) => ({
   length: '1.1 s',
   part: { startSeconds: 0, endSeconds: 1.1 },
   levels: [0.5],
-  recordedAt: 0
+  recordedAt: 0,
+  recordedIn: null,
+  timeZone: null
 })
 
 const tootOf = (handle: string, slug: string) => ({

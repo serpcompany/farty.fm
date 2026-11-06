@@ -23,7 +23,13 @@ describe('clearsOnOpen', () => {
   })
 
   it.each<Account>([
-    { status: 'signedIn', id: 'user-a', email: 'a@example.com', marketingEmail: true },
+    {
+      status: 'signedIn',
+      id: 'user-a',
+      email: 'a@example.com',
+      marketingEmail: true,
+      showFartPlaces: true
+    },
     { status: 'expired' },
     { status: 'unreachable' },
     { status: 'checking' }

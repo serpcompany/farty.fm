@@ -25,7 +25,8 @@ const page = vi.hoisted(() => ({
     status: 'signedIn',
     id: 'userA',
     email: 'a@example.test',
-    marketingEmail: false
+    marketingEmail: false,
+    showFartPlaces: true
   } as Account,
   stepOpen: false,
   retry: vi.fn(),
@@ -153,7 +154,13 @@ function asked(fetch: ReturnType<typeof server>, path: string) {
 }
 
 beforeEach(() => {
-  page.account = { status: 'signedIn', id: 'userA', email: 'a@example.test', marketingEmail: false }
+  page.account = {
+    status: 'signedIn',
+    id: 'userA',
+    email: 'a@example.test',
+    marketingEmail: false,
+    showFartPlaces: true
+  }
   page.saved = false
   page.stepOpen = false
   page.paid = true
@@ -210,7 +217,13 @@ describe('Save to Toots, where saving is paid', () => {
   })
 
   it('leaves out the email line when the account says no email, and Pay still goes to Checkout', async () => {
-    page.account = { status: 'signedIn', id: 'userA', email: '', marketingEmail: false }
+    page.account = {
+      status: 'signedIn',
+      id: 'userA',
+      email: '',
+      marketingEmail: false,
+      showFartPlaces: true
+    }
     const fetch = server()
     await render()
     await tapSave()
@@ -445,7 +458,8 @@ describe('Save to Toots, where saving is paid', () => {
       status: 'signedIn',
       id: 'userA',
       email: 'a@example.test',
-      marketingEmail: false
+      marketingEmail: false,
+      showFartPlaces: true
     }
     await render({ tootId: TOOT, done: true })
     expect(waitForFullAccess).toHaveBeenCalledWith('userA')
@@ -462,7 +476,8 @@ describe('Save to Toots, where saving is paid', () => {
       status: 'signedIn',
       id: 'userA',
       email: 'a@example.test',
-      marketingEmail: false
+      marketingEmail: false,
+      showFartPlaces: true
     }
     await render()
     expect(container.textContent).not.toContain("Couldn't reach your account.")
@@ -481,7 +496,8 @@ describe('Save to Toots, as a guest', () => {
     status: 'signedIn',
     id: 'userA',
     email: 'a@example.test',
-    marketingEmail: false
+    marketingEmail: false,
+    showFartPlaces: true
   }
 
   it('asks for an account before saving, where saving is free', async () => {
@@ -543,7 +559,8 @@ describe('Save to Toots, as a guest', () => {
       status: 'signedIn',
       id: 'userA',
       email: 'a@example.test',
-      marketingEmail: false
+      marketingEmail: false,
+      showFartPlaces: true
     }
     // Signed in later, from Profile: Save waits for its own tap.
     await render()

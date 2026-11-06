@@ -70,7 +70,8 @@ const signedIn = vi.hoisted(() => ({
   status: 'signedIn' as const,
   id: 'usersam',
   email: 'sam@example.test',
-  marketingEmail: false
+  marketingEmail: false,
+  showFartPlaces: true
 }))
 
 let root: Root | null = null

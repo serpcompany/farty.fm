@@ -10,6 +10,7 @@ import {
   uniqueIndex
 } from 'drizzle-orm/sqlite-core'
 import type { FartChoices } from '../lib/engine/fart-choices'
+import type { RecordedPlace } from '../lib/fart-place'
 import type { Performance } from '../lib/performance'
 import type { Analysis } from '../lib/recordings'
 import { SONG_REPORT_REASON_IDS } from '../lib/song-report'
@@ -38,6 +39,8 @@ export const user = sqliteTable('user', {
   image: text('image'),
   /** Farty news by email: on unless they turn it off (the owner's decision, #150). */
   marketingEmail: flag('marketing_email').notNull().default(true),
+  /** Whether what they share says where each fart was made: on unless they turn it off (#444). */
+  showFartPlaces: flag('show_fart_places').notNull().default(true),
   createdAt: timestamp('created_at').notNull(),
   updatedAt: timestamp('updated_at').notNull()
 })
@@ -166,6 +169,12 @@ export const recordings = sqliteTable(
      * `placedPitch`, it changes alone.
      */
     name: text('name'),
+    /**
+     * Where it was made, from the request that first uploaded it, never finer than a city, and
+     * null with none to say (`placeOfUpload`, #444). Nothing changes it, deleting it clears it, and
+     * only a shared page's data ever reads it, unless the owner's switch is off.
+     */
+    place: text('place', { mode: 'json' }).$type<RecordedPlace>(),
     /** The WAV's size in R2. */
     audioBytes: integer('audio_bytes').notNull(),
     updatedAt: timestamp('updated_at').notNull(),

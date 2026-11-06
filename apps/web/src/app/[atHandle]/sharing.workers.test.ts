@@ -1,4 +1,4 @@
-import { eq, like } from 'drizzle-orm'
+import { and, eq, like } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 
 import * as handleRoute from '@/app/api/handle/route'
@@ -6,7 +6,8 @@ import * as shareRecordingRoute from '@/app/api/share/recordings/[id]/route'
 import * as sharesRoute from '@/app/api/share/route'
 import * as shareTootRoute from '@/app/api/share/toots/[id]/route'
 import type { Kind } from '@/db/library'
-import { handles, rateLimit, shareReports, shares, toots } from '@/db/schema'
+import { handles, rateLimit, recordings, shareReports, shares, toots, user } from '@/db/schema'
+import { NOT_SAID } from '@/lib/fart-place'
 import { noteName } from '@/lib/pitch'
 import { encodeWav } from '@/lib/wav'
 import {
@@ -35,10 +36,12 @@ import {
   uploadBody,
   wav
 } from '@/test-support/library-api'
+import { requestCf } from '@/test-support/workers-cf'
 
 import * as audioRoute from './r/[id]/audio/route'
 import * as imageRoute from './r/[id]/image/route'
 import * as reportRoute from './r/[id]/report/route'
+import { sharedView } from './r/[id]/shared'
 import * as tootAudioRoute from './t/[id]/audio/route'
 import * as tootFartAudioRoute from './t/[id]/farts/[place]/audio/route'
 import * as tootImageRoute from './t/[id]/image/route'
@@ -1038,6 +1041,197 @@ describe('The frames a shared Trim covers', () => {
     expect(frames(0.5, 0.5)).toEqual({ start: 4000, end: 4001 })
     expect(frames(0.5, 0.25)).toEqual({ start: 4000, end: 4001 })
     expect(frames(1, 1)).toEqual({ start: 7999, end: 8000 })
+  })
+})
+
+describe('Where a shared fart was made (#444)', () => {
+  const AUSTIN = {
+    city: 'Austin',
+    region: 'Texas',
+    regionCode: 'TX',
+    country: 'US',
+    timezone: 'America/Chicago',
+    latitude: '30.27130',
+    longitude: '-97.74260',
+    postalCode: '78701',
+    metroCode: '635'
+  }
+  const PARIS = { city: 'Paris', country: 'FR', timezone: 'Europe/Paris' }
+  const KEPT = { city: 'Austin', region: 'Texas', country: 'US', timeZone: 'America/Chicago' }
+  const SAID = { recordedIn: 'Austin, Texas', timeZone: 'America/Chicago' }
+
+  const placeKept = async (id: string, userId: string) => {
+    const [row] = await testDb()
+      .select({ place: recordings.place })
+      .from(recordings)
+      .where(and(eq(recordings.userId, userId), eq(recordings.id, id)))
+    return row.place
+  }
+
+  /** Alice, with a Handle and `R1` uploaded from Austin, just recorded unless `fields` says. */
+  async function fromAustin(fields: Record<string, unknown> = {}) {
+    const alice = await signUp('alice')
+    expect((await share.pick('alice', alice)).status).toBe(201)
+    requestCf.current = AUSTIN
+    const metadata = recordingMetadata(R1, {
+      number: 1,
+      seconds: 1,
+      sampleRate: RATE,
+      createdAt: Date.now(),
+      ...fields
+    })
+    const uploaded = await api.put('recordings', R1, uploadBody(metadata, take()), alice)
+    expect(uploaded.status).toBe(201)
+    return alice
+  }
+
+  const urlOf = async (response: Response) => {
+    expect(response.status).toBe(201)
+    return ((await response.json()) as { url: string }).url
+  }
+
+  const viewOf = (url: string) => {
+    const { handle, id } = linkParts(url)
+    return sharedView(handle, id)
+  }
+
+  /** What the page gets for `url`, a shared Toot's link. */
+  const partsOf = async (url: string) => {
+    const { handle, id } = linkParts(url)
+    const shared = await findSharedToot(testDb(), handle, id)
+    if (!shared) throw new Error(`No shared Toot at ${url}`)
+    return sharedTootParts(testDb(), shared)
+  }
+
+  /** Shares `R1`, and a Toot that plays it, as `alice`. */
+  async function shareBoth(alice: Awaited<ReturnType<typeof signUp>>) {
+    const arrangement = { transposition: 0, recordingForPitch: { 60: R1 } }
+    await saveToot(T1, alice, tootWav(), tootMetadata(T1, { arrangement }))
+    return {
+      recording: await urlOf(await share.put(R1, alice)),
+      toot: await urlOf(await share.put(T1, alice, 'toots'))
+    }
+  }
+
+  it('keeps the city, region, country and time zone of the first upload, and nothing finer', async () => {
+    const alice = await fromAustin()
+    expect(await placeKept(R1, alice.id)).toEqual(KEPT)
+  })
+
+  it('tells a shared Recording and each row of a shared Toot where it was made', async () => {
+    const alice = await fromAustin()
+    const { recording, toot } = await shareBoth(alice)
+    expect(await viewOf(recording)).toMatchObject(SAID)
+    const { rows } = await partsOf(toot)
+    expect(rows[0].fart).toMatchObject(SAID)
+  })
+
+  it('never changes it by uploading again or editing', async () => {
+    const alice = await fromAustin()
+    requestCf.current = PARIS
+    const metadata = recordingMetadata(R1, {
+      number: 1,
+      seconds: 1,
+      sampleRate: RATE,
+      createdAt: Date.now()
+    })
+    expect((await api.put('recordings', R1, uploadBody(metadata, take()), alice)).status).toBe(200)
+    expect((await api.placeAndTrim(R1, { name: 'Big one' }, alice)).status).toBe(200)
+    expect((await api.place(R1, 60, alice)).status).toBe(200)
+    expect((await api.placeAndTrim(R1, { trim: trimmed(0.25, 0.5) }, alice)).status).toBe(200)
+    expect(await placeKept(R1, alice.id)).toEqual(KEPT)
+  })
+
+  it('keeps none for a take recorded more than a day before it uploads', async () => {
+    const alice = await fromAustin({ createdAt: Date.now() - 25 * 60 * 60 * 1000 })
+    expect(await placeKept(R1, alice.id)).toBeNull()
+    expect(await viewOf(await urlOf(await share.put(R1, alice)))).toMatchObject(NOT_SAID)
+  })
+
+  it('keeps one for a take up to a day old', async () => {
+    const alice = await fromAustin({ createdAt: Date.now() - 23 * 60 * 60 * 1000 })
+    expect(await placeKept(R1, alice.id)).toEqual(KEPT)
+  })
+
+  it('keeps none with no Cloudflare properties, whatever the browser says', async () => {
+    const alice = await signUp('alice')
+    requestCf.current = undefined
+    const metadata = recordingMetadata(R1, {
+      number: 1,
+      seconds: 1,
+      sampleRate: RATE,
+      createdAt: Date.now(),
+      place: KEPT
+    })
+    expect((await api.put('recordings', R1, uploadBody(metadata, take()), alice)).status).toBe(201)
+    expect(await placeKept(R1, alice.id)).toBeNull()
+  })
+
+  it("never sends it to the owner's library", async () => {
+    const alice = await fromAustin()
+    const library = await (await api.library(alice)).text()
+    expect(library).toContain(R1)
+    expect(library).not.toContain('Austin')
+    expect(library).not.toContain('America/Chicago')
+  })
+
+  it('leaves it out of links already sent as soon as the switch is off, and back on brings it back', async () => {
+    const alice = await fromAustin()
+    const { recording, toot } = await shareBoth(alice)
+
+    const off = await api.patchAccount({ showFartPlaces: false }, alice)
+    expect(off.status).toBe(200)
+    expect(await off.json()).toEqual({ showFartPlaces: false })
+
+    const view = await viewOf(recording)
+    expect(view).toMatchObject(NOT_SAID)
+    const parts = await partsOf(toot)
+    expect(parts.rows[0].fart).toMatchObject(NOT_SAID)
+    for (const data of [JSON.stringify(view), JSON.stringify(parts)]) {
+      expect(data).not.toContain('Austin')
+      expect(data).not.toContain('Texas')
+      expect(data).not.toContain('America/Chicago')
+    }
+
+    expect((await api.patchAccount({ showFartPlaces: true }, alice)).status).toBe(200)
+    expect(await viewOf(recording)).toMatchObject(SAID)
+    expect((await partsOf(toot)).rows[0].fart).toMatchObject(SAID)
+  })
+
+  it('keeps none for a Recording uploaded with the switch off', async () => {
+    const alice = await signUp('alice')
+    expect((await api.patchAccount({ showFartPlaces: false }, alice)).status).toBe(200)
+    requestCf.current = AUSTIN
+    const metadata = recordingMetadata(R1, {
+      number: 1,
+      seconds: 1,
+      sampleRate: RATE,
+      createdAt: Date.now()
+    })
+    expect((await api.put('recordings', R1, uploadBody(metadata, take()), alice)).status).toBe(201)
+    expect(await placeKept(R1, alice.id)).toBeNull()
+  })
+
+  it('forgets it when the Recording is deleted', async () => {
+    const alice = await fromAustin()
+    expect((await api.delete('recordings', R1, alice)).status).toBe(204)
+    expect(await placeKept(R1, alice.id)).toBeNull()
+  })
+
+  it('takes one switch at a time, and changes nothing for a bad one', async () => {
+    const alice = await signUp('alice')
+    const switches = async () => {
+      const [row] = await testDb()
+        .select({ news: user.marketingEmail, places: user.showFartPlaces })
+        .from(user)
+        .where(eq(user.id, alice.id))
+      return row
+    }
+    expect(await switches()).toEqual({ news: true, places: true })
+    expect((await api.patchAccount({ showFartPlaces: 'no' }, alice)).status).toBe(400)
+    expect(await switches()).toEqual({ news: true, places: true })
+    expect((await api.patchAccount({ showFartPlaces: false }, alice)).status).toBe(200)
+    expect(await switches()).toEqual({ news: true, places: false })
   })
 })
 

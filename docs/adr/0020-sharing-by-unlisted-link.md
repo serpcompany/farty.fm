@@ -67,6 +67,16 @@ A saved Toot shares the same way, through the same Handle, `shares` rows (`kind`
 - Deleting a shared Toot says its link stops working too.
 - **A Toot that plays a taken-down Recording is down too.** Its page, image, audio and Report answer 404 while any Recording in its Arrangement or Sound Pad Performance is taken down, and sharing it answers 403 `taken_down`, so a Toot never makes that Recording's audio public again (`sharedToot`, `tootPlaysTakenDown` in `src/db/sharing.ts`).
 
+## Where a fart was made (#444)
+
+On 2026-11-07 the owner asked for "the date and time of the fart, and the geolocation, etc. and including that data bc its hilarious". #443 shows the date and time. This adds the place, as far as a public page can:
+
+- **A city, never closer.** These pages are public, and a street-level position would show where someone lives. So there's no browser prompt and no GPS. A Recording's `place` keeps the `city`, `region`, `country` and time zone of the request's Cloudflare properties (`recordedPlaceOf()`, `src/lib/fart-place.ts`), and never its IP address, coordinates, postal code or metro code. It comes from the connection, so a VPN gives the VPN's city. Tor, and a request naming no country, keep nothing.
+- **From the first upload, once.** Uploading again and editing never change it, and the library API never returns or takes it, so no browser holds it or can say it. A take more than a day old when it uploads keeps none, since it may have been made anywhere since (`placeOfUpload()`). Recordings from before #444 have none, so nothing already shared gains one. Deleting a Recording clears it from its tombstone.
+- **The pages say "Recorded Nov 6, 2026, 3:12 PM · Austin, Texas"**, on a shared Recording and each of a shared Toot's "Recordings used" rows: a city and state in the US, a city and country elsewhere, with the time in that place's time zone. With no place, the time is the viewer's own. Link previews never say it, since apps keep them.
+- **Profile's Show where I farted**, on by default (`user.show_fart_places`). Off, the pages' data leaves out the place and the time zone, at once, since each page reads D1, links already sent included. New Recordings keep none while it's off. On again, what was kept comes back.
+- **It says so before anything's public:** Pick a handle, the owner's own profile page (for a Handle from before this, which never saw that step) and the Privacy page.
+
 ## Tables
 
 Migration `0008_sharing`, and `slug` from `0016_share_slugs`:
@@ -81,6 +91,8 @@ Migration `0008_sharing`, and `slug` from `0016_share_slugs`:
 - **A random id in the link.** What links had until #441. It kept a stopped link from ever working again, but it says nothing about the fart, and the owner asked for the Song's name.
 - **A public R2 bucket, or a signed R2 URL.** A bucket URL outlives Stop sharing and take-downs in every cache it reaches, and #315 rules it out. A signed URL would still play until it expired.
 - **Caching the page or image at the edge.** It would serve a stopped link until the cache expired. The D1 lookup is one indexed join.
+- **The browser's exact location.** Funnier, but a public page would show where someone lives, and it would need a permission prompt on the record screen. Refused.
+- **Keeping the place with the switch off, to show if it's turned on.** It would keep what the user said not to show.
 - **Emailing Farty for each report.** Left for later: the log line and the table are enough while reports are rare, and Staging's email goes only to its allowlist.
 
 ## Consequences

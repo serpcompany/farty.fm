@@ -63,7 +63,7 @@ test('a code from the dev mailbox signs in to the library, and signing out ends 
   const session = await call(page, 'GET', '/api/auth/get-session')
   expect(session).toMatchObject({
     status: 200,
-    body: { user: { email, emailVerified: true, marketingEmail: true } }
+    body: { user: { email, emailVerified: true, marketingEmail: true, showFartPlaces: true } }
   })
   const cookies = await page.context().cookies()
   expect(cookies.find(cookie => cookie.name === 'pedos.session_token')).toMatchObject({
