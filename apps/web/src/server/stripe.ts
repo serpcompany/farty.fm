@@ -152,7 +152,7 @@ export type NewCheckout = {
   replaces: string | null
 } & (
   | {
-      /** The Toot whose Save asked for it, to make again and save on the way back from Checkout. */
+      /** The Toot whose Save or Download asked for it, to come back to from Checkout. */
       tootId: string
     }
   | {
