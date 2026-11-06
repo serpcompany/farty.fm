@@ -241,8 +241,16 @@ jobs:
       - name: Apply the migrations to the local database
         if: env.RUN == 'true'
         run: pnpm db:migrate:local
-      - if: env.RUN == 'true'
-        run: pnpm exec playwright install --with-deps chromium
+      # The browser alone, since the runner image already has every library it needs. `--with-deps`
+      # also installed nine font packages no journey needs, and Ubuntu's mirror could take 10 of this
+      # job's 20 minutes to serve them (#439). If an image ever lacks a library, this installs them.
+      - name: Install the browser, and its system packages only if a library is missing
+        if: env.RUN == 'true'
+        run: |
+          pnpm exec playwright install --only-shell chromium
+          if ldd ~/.cache/ms-playwright/chromium_headless_shell-*/*/chrome-headless-shell | grep 'not found'; then
+            pnpm exec playwright install-deps chromium
+          fi
       - name: Record journeys on workerd
         if: env.RUN == 'true'
         run: pnpm test:e2e --shard="$SHARD"
