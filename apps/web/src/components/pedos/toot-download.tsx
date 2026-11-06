@@ -99,7 +99,7 @@ export function useTootDownload(toot: Toot, backFromCheckout = false): TootDownl
 
   /** Whether the account has Full Access. If not, says why, or offers it. */
   const checkAccess = async (accountId: string, afterPaying: boolean): Promise<boolean> => {
-    // Paid at an offer, and not through yet, counts too: another Checkout could charge twice.
+    // Paid, and not through yet, counts too: another Checkout could charge twice.
     if (afterPaying || paymentPending(accountId)) {
       if ((await waitForFullAccess(accountId)) !== null) return true
       setNote(NOT_PAID_YET)

@@ -517,7 +517,7 @@ export function SaveToToots({
   /** Saves the Toot if the account has Full Access, and offers it if not. */
   const saveOrOffer = async (accountId: string) => {
     if (paying.current) return
-    // Paid at an offer, and not through yet: another Checkout could charge twice.
+    // Paid, and not through yet: another Checkout could charge twice.
     if (paymentPending(accountId)) return waitAndSave(accountId)
     paying.current = true
     setBusy('paying')
