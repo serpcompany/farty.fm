@@ -15,10 +15,11 @@ import { actOnFriend, type FriendAction, type FriendState, readFriendState } fro
 import { useGetFarty } from '@/lib/get-farty'
 import { profilePath } from '@/lib/handle'
 import { formattedTootDate } from '@/lib/toot'
+import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { FriendsUnreachable, RemoveFriendDialog, refusalMessage, useFriendRequest } from './friends'
 import { useStartGetFarty } from './get-farty'
-import { Report, SharedTopBar } from './shared-recording-page'
+import { handlePageColumn, Report, SharedTopBar } from './shared-recording-page'
 
 // A profile page, `/@<handle>/` (#319, ADR 0021): what anyone sees, signed in or not, in any
 // browser. The Handle, the friend control, and the Recordings and Toots they've shared (#346),
@@ -38,11 +39,10 @@ export type ProfilePageProps = {
   handle: string
   items: {
     kind: 'recordings' | 'toots'
-    shareId: string
-    /** Its shared page, which its audio is under. */
+    /** Its shared page, which its audio is under: a Recording's and a Toot's differ by kind. */
     path: string
     name: string
-    /** A Recording's note, or a Toot's Song. */
+    /** A Recording's note, or a Toot's Song when that isn't its name. */
     detail: string | null
     /** When it was shared, in ms. */
     sharedAt: number
@@ -60,16 +60,16 @@ export function ProfilePage({ handle, items }: ProfilePageProps) {
   // Leaving the page stops it, as a tab change does in the app.
   useEffect(() => stopPlayback, [])
 
-  const toggle = ({ shareId, path }: ProfilePageProps['items'][number]) => {
-    if (playing === shareId) {
+  const toggle = ({ path }: ProfilePageProps['items'][number]) => {
+    if (playing === path) {
       stopPlayback()
       setPlaying(null)
       return
     }
-    setPlaying(shareId)
+    setPlaying(path)
     setUnplayable(false)
     void play(
-      `shared:${shareId}`,
+      `shared:${path}`,
       async () => {
         const response = await fetch(`${path}audio/`)
         if (!response.ok) {
@@ -79,14 +79,14 @@ export function ProfilePage({ handle, items }: ProfilePageProps) {
         return response.arrayBuffer()
       },
       null,
-      () => setPlaying(current => (current === shareId ? null : current))
+      () => setPlaying(current => (current === path ? null : current))
     )
   }
 
   return (
     <div className="flex flex-1 flex-col">
       <SharedTopBar friend={handle} />
-      <div className="flex flex-1 flex-col px-4 pb-6">
+      <div className={cn(handlePageColumn, 'px-4 pb-6')}>
         <h1 className="pt-3 text-3xl font-bold tracking-tight break-all">@{handle}</h1>
         <div className="mt-4">
           <FriendControl handle={handle} onOwn={setOwn} />
@@ -101,7 +101,7 @@ export function ProfilePage({ handle, items }: ProfilePageProps) {
           ) : (
             <ul className="divide-y overflow-hidden rounded-xl bg-muted/60">
               {items.map(item => {
-                const isPlaying = playing === item.shareId
+                const isPlaying = playing === item.path
                 const PlayIcon = isPlaying ? Square : Play
                 const detail = [
                   KIND_LABEL[item.kind],
@@ -112,7 +112,7 @@ export function ProfilePage({ handle, items }: ProfilePageProps) {
                   .join(' · ')
                 return (
                   <li
-                    key={item.shareId}
+                    key={item.path}
                     className="flex items-center gap-1 pl-2"
                     data-testid="profile-shared-item"
                   >

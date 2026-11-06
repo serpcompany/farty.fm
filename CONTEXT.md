@@ -121,7 +121,7 @@ _Avoid_: Sequence, pattern, loop, beat, track
 ## Sharing
 
 **Handle**:
-The name a user's links carry, as in `farty.fm/@<handle>/r/<id>`. The user picks it the first time they share: 3 to 20 lowercase letters, numbers or `_`, unique, and not on Farty's block list. It is the only thing about the user a Shared Recording shows. Only a user with an account has one (ADR 0020).
+The name a user's links carry, as in `farty.fm/@<handle>/r/<name>`. The user picks it the first time they share: 3 to 20 lowercase letters, numbers or `_`, unique, and not on Farty's block list. It is the only thing about the user a Shared Recording shows. Only a user with an account has one (ADR 0020).
 _Avoid_: Username, display name, screen name
 
 **Shared Recording**:

@@ -8,7 +8,7 @@ import { servedOrigin } from '@/lib/site'
 import { consumeSlots, reporterLimitKey, requestClient } from './auth-config'
 import { type Stores, toRecording } from './library'
 import { apiError } from './require-user'
-import { REPORT_LIMITS, SITE_REPORTS_KEY, sharePath, tootSongTitle } from './sharing'
+import { giveSlugs, REPORT_LIMITS, SITE_REPORTS_KEY, sharePath, tootSongTitle } from './sharing'
 
 // Profile pages (#319, ADR 0021): `/@<handle>/`, public, which lists only what its user shares,
 // Recordings and Toots (#346) together, newest first, each linking to its own shared page, with
@@ -17,14 +17,13 @@ import { REPORT_LIMITS, SITE_REPORTS_KEY, sharePath, tootSongTitle } from './sha
 /** A shared Recording or Toot, as its owner's page lists it: nothing private, and its link. */
 export type ProfileItem = {
   kind: Kind
-  shareId: string
-  /** Its shared page, `/@<handle>/r/<id>/` or `/@<handle>/t/<id>/`, which its audio is under. */
+  /** Its shared page, `/@<handle>/r/<slug>/` or `/@<handle>/t/<slug>/`, which its audio is under. */
   path: string
   /** "Recording 8", or a Toot's title. */
   name: string
   /**
    * A Recording's note, "E3", or null for a Noise-like one. A Toot's Song, "Twinkle, Twinkle,
-   * Little Star", or "Sound Pad", or null for a Song that isn't in Farty any more.
+   * Little Star", or "Sound Pad", or null when that's its name, or the Song isn't in Farty any more.
    */
   detail: string | null
   /** When it was shared, in ms, for the page to say "Today" in the viewer's own time zone. */
@@ -49,7 +48,8 @@ async function profileOwner(db: Database, handle: string) {
 /** A share's name and detail on its row: a Recording's name and note, or a Toot's title and Song. */
 function itemText(row: ProfileShareRow): { name: string; detail: string | null } {
   if (row.kind === 'toots') {
-    return { name: row.toot.title, detail: tootSongTitle(row.toot.songId) }
+    const song = tootSongTitle(row.toot.songId)
+    return { name: row.toot.title, detail: song === row.toot.title ? null : song }
   }
   const recording = toRecording(row.recording)
   const pitch = songPitch(recording)
@@ -60,13 +60,16 @@ function itemText(row: ProfileShareRow): { name: string; detail: string | null }
 export async function findProfile(db: Database, handle: string): Promise<Profile | null> {
   const owner = await profileOwner(db, handle)
   if (!owner) return null
-  const rows = await profileShares(db, owner.userId)
+  let rows = await profileShares(db, owner.userId)
+  if (rows.some(row => row.slug === null)) {
+    await giveSlugs(db, owner.userId)
+    rows = await profileShares(db, owner.userId)
+  }
   return {
     handle: owner.handle,
     items: rows.map(row => ({
       kind: row.kind,
-      shareId: row.shareId,
-      path: sharePath(row.kind, owner.handle, row.shareId),
+      path: sharePath(row.kind, owner.handle, row.slug ?? row.shareId),
       ...itemText(row),
       sharedAt: row.sharedAt.getTime()
     }))

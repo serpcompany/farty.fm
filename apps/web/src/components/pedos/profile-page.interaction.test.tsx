@@ -91,7 +91,6 @@ describe('A shared Toot’s row (#346)', () => {
           items={[
             {
               kind: 'toots',
-              shareId: 'tttttttttttt',
               path: '/@alice/t/tttttttttttt/',
               name: 'Twinkle for Mum',
               detail: 'Sound Pad',
@@ -99,7 +98,6 @@ describe('A shared Toot’s row (#346)', () => {
             },
             {
               kind: 'recordings',
-              shareId: 'rrrrrrrrrrrr',
               path: '/@alice/r/rrrrrrrrrrrr/',
               name: 'Recording 1',
               detail: 'E3',
@@ -122,7 +120,7 @@ describe('A shared Toot’s row (#346)', () => {
 
     await act(async () => rows[0].querySelector('button')?.click())
     const [key, load] = vi.mocked(play).mock.calls.at(-1) ?? []
-    expect(key).toBe('shared:tttttttttttt')
+    expect(key).toBe('shared:/@alice/t/tttttttttttt/')
     await load?.()
     expect(fetched).toContain('/@alice/t/tttttttttttt/audio/')
   })

@@ -270,7 +270,7 @@ export function useShare({ kind, id, name }: { kind: ShareKind; id: string; name
           <AlertDialogHeader>
             <AlertDialogTitle>Stop sharing {name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              The link stops working for everyone who has it. Sharing it again makes a new link.
+              The link stops working for everyone who has it, until you share it again.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

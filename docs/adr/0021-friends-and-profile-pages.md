@@ -9,6 +9,7 @@
    - So ADR 0020's links are no longer listed nowhere: a user's page lists them. Search engines are still asked not to index the page (`noindex, nofollow`, no canonical, not in the sitemaps), it's `private, no-cache`, and the service worker leaves `/@<handle>/` alone.
    - No counts, no feed, no likes, comments or messages (#315).
    - A Handle no one has answers the shared page's 404, "This link doesn't work any more."
+   - It has the site's header and footer, and the tab bar on a phone, as other social sites do (#441, ADR 0020 item 10). A Toot's row doesn't repeat its Song when that's its name.
 2. **The friend control has five states.** Add friend; Requested, which can be cancelled; their request, with Accept and Decline; Friends, which can be removed; and on your own page, a note that it lists only what you've shared. Signed out, Add friend opens `/` until #318 makes it Get Farty with the friend offer.
 3. **Friends in Profile, under Stats.** "Friend requests" shows only when someone asked, with Accept and Decline. "Friends" lists friends, each opening their page, and the requests you've sent; ⋯ removes a friend or cancels a request, and removing asks first ("@maya isn't told"). "Add friend" takes a Handle. Account's Handle row becomes "Your page".
 4. **A request needs the sender's Handle.** The first request asks for one, with the dialog the first share uses, because the person asked sees only a Handle. `POST /api/friends/` answers 409 `no_handle` without one, so #318's sign-up picks a Handle before it sends its request.

@@ -165,7 +165,7 @@ SELECT r.created_at, r.kind, r.item_id, r.share_id,
 UPDATE shares SET taken_down_at = unixepoch() * 1000 WHERE id = '<share_id>';
 ```
 
-The link to open is `/@<handle>/r/<share_id>/` for a `recordings` report and `/@<handle>/t/<share_id>/` for a `toots` one.
+The link to open is `/@<handle>/r/<share_id>/` for a `recordings` report and `/@<handle>/t/<share_id>/` for a `toots` one. It redirects to the link's name (#441).
 
 **What a take-down covers.** The item behind that one share. A link taken down stays down: its row is kept, so the owner can't share that Recording or Toot again (403 `taken_down`), and neither Stop sharing nor deleting it removes it. Taking down a Recording also takes down every Toot that plays it (in its Arrangement or its Sound Pad Performance): those Toots' links answer 404 at once, they drop out of the owner's shares, and sharing one again answers 403 `taken_down`, so no Toot carries the Recording's audio back out. Taking down a Toot covers only that Toot, not the Recordings it plays. To put a link back, set `taken_down_at` to `NULL`; the Toots that play a Recording come back with it. Deleting the account removes it, with the reports.
 

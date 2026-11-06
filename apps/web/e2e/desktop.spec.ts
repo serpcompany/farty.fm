@@ -143,6 +143,17 @@ test("a shared page's Get Farty shows the QR code, not the account step (#318)",
   }
 })
 
+test("a shared page has the site's header and footer, with no tabs (#441)", async ({ page }) => {
+  // A link that no longer works has them too, with no account needed to show it.
+  await page.goto('/@nobody/r/no-such-link/')
+  await expect(page.getByRole('heading', { name: "This link doesn't work any more" })).toBeVisible()
+  const sections = page.getByRole('navigation', { name: 'Sections' })
+  await expect(sections.getByRole('link', { name: 'FAQ' })).toHaveAttribute('href', '/#faq')
+  const footer = page.getByRole('navigation', { name: 'Footer' })
+  await expect(footer.getByRole('link', { name: 'Privacy' })).toBeVisible()
+  await expect(page.getByRole('navigation', { name: 'Tabs' })).toBeHidden()
+})
+
 test('the privacy, support and 404 pages stay pages, with no tabs', async ({ page }) => {
   for (const [path, content] of [
     ['/privacy/', page.getByRole('heading', { name: 'Privacy', level: 1 })],

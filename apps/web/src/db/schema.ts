@@ -339,10 +339,13 @@ export const handles = sqliteTable('handles', {
 })
 
 /**
- * A shared item: one row while its owner shares it, keyed by a random id that is the link's
- * (`/@<handle>/r/<id>/`). Stop sharing and deleting the item delete the row, so sharing again
- * makes a new link. `taken_down_at` is set by Farty after a report (docs/agents/web.md), and keeps
- * the row, so the item can't be shared again.
+ * A shared item: one row while its owner shares it. Its link ends in its `slug`, named after the
+ * Song or the item (`/@<handle>/t/i-saw-three-ships/`, #441), unique to its user and kind. A row
+ * from before #441 has none until it's next needed (`giveSlugs`), and its random `id`, which links
+ * ended in then, redirects to its slug for good. Stop sharing and deleting the item delete the
+ * row, which frees the slug, so sharing the item again brings the same link back. `taken_down_at`
+ * is set by Farty after a report (docs/agents/web.md), and keeps the row, so the item can't be
+ * shared again and no other item takes its link.
  */
 export const shares = sqliteTable(
   'shares',
@@ -353,11 +356,14 @@ export const shares = sqliteTable(
       .references(() => user.id, { onDelete: 'cascade' }),
     kind: text('kind', { enum: ['recordings', 'toots'] }).notNull(),
     itemId: text('item_id').notNull(),
+    /** What its link ends in: `i-saw-three-ships`, `recording-3`. */
+    slug: text('slug'),
     createdAt: timestamp('created_at').notNull(),
     takenDownAt: timestamp('taken_down_at')
   },
   table => [
-    uniqueIndex('shares_user_id_kind_item_id_idx').on(table.userId, table.kind, table.itemId)
+    uniqueIndex('shares_user_id_kind_item_id_idx').on(table.userId, table.kind, table.itemId),
+    uniqueIndex('shares_user_id_kind_slug_idx').on(table.userId, table.kind, table.slug)
   ]
 )
 

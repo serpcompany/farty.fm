@@ -23,7 +23,7 @@ export async function profileUser(
 }
 
 /** A shared Recording or saved Toot on its owner's page. */
-export type ProfileShareRow = { shareId: string; sharedAt: Date } & (
+export type ProfileShareRow = { shareId: string; slug: string | null; sharedAt: Date } & (
   | { kind: 'recordings'; recording: RecordingRow }
   | { kind: 'toots'; toot: Pick<TootRow, 'title' | 'songId'> }
 )
@@ -41,7 +41,12 @@ export async function profileShares(db: Database, userId: string): Promise<Profi
   // are loaded only when one of the user's Recordings was taken down.
   const [recordingRows, tootRows, takenDown] = await Promise.all([
     db
-      .select({ shareId: shares.id, sharedAt: shares.createdAt, recording: recordings })
+      .select({
+        shareId: shares.id,
+        slug: shares.slug,
+        sharedAt: shares.createdAt,
+        recording: recordings
+      })
       .from(shares)
       .innerJoin(
         recordings,
@@ -51,6 +56,7 @@ export async function profileShares(db: Database, userId: string): Promise<Profi
     db
       .select({
         shareId: shares.id,
+        slug: shares.slug,
         sharedAt: shares.createdAt,
         tootId: toots.id,
         title: toots.title,
@@ -71,9 +77,10 @@ export async function profileShares(db: Database, userId: string): Promise<Profi
     ...recordingRows.map(row => ({ kind: 'recordings' as const, ...row })),
     ...tootRows
       .filter(row => !down.has(row.tootId))
-      .map(({ shareId, sharedAt, title, songId }) => ({
+      .map(({ shareId, slug, sharedAt, title, songId }) => ({
         kind: 'toots' as const,
         shareId,
+        slug,
         sharedAt,
         toot: { title, songId }
       }))

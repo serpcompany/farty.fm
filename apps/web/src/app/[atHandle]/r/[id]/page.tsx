@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { linkParams } from '@/app/[atHandle]/link-params'
 import { SharedRecordingPage } from '@/components/pedos/shared-recording-page'
 import { linkPreviewMetadata } from '@/server/link-preview'
@@ -22,7 +22,7 @@ export async function generateMetadata({
     view && {
       title: `${view.name} by @${view.handle}`,
       description: `${fartPhrase(view.note)} on Farty. Tap to play.`,
-      path: sharePath('recordings', view.handle, view.shareId),
+      path: sharePath('recordings', view.handle, view.slug),
       imageAlt: 'A fart on Farty'
     }
   )
@@ -32,5 +32,7 @@ export default async function SharedRecording({ params }: PageProps<'/[atHandle]
   const { handle, id } = await linkParams(params)
   const view = await sharedView(handle, id)
   if (!view) notFound()
+  // A link from before #441, by its random id, keeps working.
+  if (view.slug !== id) permanentRedirect(sharePath('recordings', view.handle, view.slug))
   return <SharedRecordingPage {...view} />
 }
