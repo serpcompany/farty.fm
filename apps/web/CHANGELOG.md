@@ -1,5 +1,61 @@
 # Changelog
 
+## [1.13.0](https://github.com/serpcompany/farty.fm/compare/v1.12.1...v1.13.0) (2026-11-06)
+
+
+### Features
+
+* **catalog:** a composer for every Song, with a source ([#357](https://github.com/serpcompany/farty.fm/issues/357)) ([#377](https://github.com/serpcompany/farty.fm/issues/377)) ([b6f6040](https://github.com/serpcompany/farty.fm/commit/b6f60406903fb3f1b024c6cd38b3c4aef71af226))
+* **catalog:** keep the tune where it moves to another staff ([#380](https://github.com/serpcompany/farty.fm/issues/380)) ([#385](https://github.com/serpcompany/farty.fm/issues/385)) ([66aed93](https://github.com/serpcompany/farty.fm/commit/66aed9314ced608e6e46b983d15097d1b2563db7))
+* **catalog:** name each Song's composer, with the first 100 lookups ([#357](https://github.com/serpcompany/farty.fm/issues/357)) ([#366](https://github.com/serpcompany/farty.fm/issues/366)) ([9fe4d75](https://github.com/serpcompany/farty.fm/commit/9fe4d75aecf6e67f43a921778d8aac408620c046))
+* **catalog:** tag every Song with its kind, origin and fame ([#383](https://github.com/serpcompany/farty.fm/issues/383)) ([#387](https://github.com/serpcompany/farty.fm/issues/387)) ([7d79ca9](https://github.com/serpcompany/farty.fm/commit/7d79ca91bd7994bf8e34ce2a58ef9315843bb964))
+* count how far new phone visitors get, anonymously ([#411](https://github.com/serpcompany/farty.fm/issues/411)) ([ec82acf](https://github.com/serpcompany/farty.fm/commit/ec82acf20c09a53bf26f6a4e6f061433c588e376))
+* download a saved Toot as a file with Full Access ([#428](https://github.com/serpcompany/farty.fm/issues/428)) ([d3930f0](https://github.com/serpcompany/farty.fm/commit/d3930f08336aa78f7cf876c4b1a3e566aff30bcf))
+* email the owner when someone buys Full Access ([#423](https://github.com/serpcompany/farty.fm/issues/423)) ([8ee4432](https://github.com/serpcompany/farty.fm/commit/8ee443238dee3da7a42bde611b09343846579e18))
+* friends, with requests in Profile and a profile page listing what you share ([#319](https://github.com/serpcompany/farty.fm/issues/319)) ([#335](https://github.com/serpcompany/farty.fm/issues/335)) ([32e470a](https://github.com/serpcompany/farty.fm/commit/32e470afb05372be1c69946abba3d7249ec85d48))
+* let people buy Full Access on the first screen and the first Result ([#431](https://github.com/serpcompany/farty.fm/issues/431)) ([aef362f](https://github.com/serpcompany/farty.fm/commit/aef362fc4a51caf31bd48db817c40287800b87a9))
+* list every catalog Song in Compose ([#328](https://github.com/serpcompany/farty.fm/issues/328)) ([9ac6ac9](https://github.com/serpcompany/farty.fm/commit/9ac6ac9647c04ebfa12d7200e1481cc786c7e7ac))
+* one $4.99 purchase at Save replaces paying per Toot ([#417](https://github.com/serpcompany/farty.fm/issues/417)) ([1be0bac](https://github.com/serpcompany/farty.fm/commit/1be0bacfc49a60e18ed527c573466a860fc2759a))
+* share a Recording by link, with a handle, a public page and link previews ([#329](https://github.com/serpcompany/farty.fm/issues/329)) ([ff3856a](https://github.com/serpcompany/farty.fm/commit/ff3856a7662e84e94fd77631a442e1f7ca24dac5))
+* share a saved Toot by link ([#317](https://github.com/serpcompany/farty.fm/issues/317)) ([#339](https://github.com/serpcompany/farty.fm/issues/339)) ([6829bdc](https://github.com/serpcompany/farty.fm/commit/6829bdc3288aaa886c66a4aaadbf4ab238062f9b))
+* show what Full Access gets and whose email it's under at Save ([#429](https://github.com/serpcompany/farty.fm/issues/429)) ([34a30ba](https://github.com/serpcompany/farty.fm/commit/34a30ba1f462252157a98902814d5f3357025c23))
+* tell iPhone users how to make Farty louder with Safari's Microphone setting ([#404](https://github.com/serpcompany/farty.fm/issues/404)) ([8de97f3](https://github.com/serpcompany/farty.fm/commit/8de97f3dcc31d84791f21d8b2d1149743eaaa4c9))
+* **web:** favorite Songs on Compose, and filter or sort by them ([#327](https://github.com/serpcompany/farty.fm/issues/327)) ([7edc314](https://github.com/serpcompany/farty.fm/commit/7edc31454c2bed81a67b9da5918861db4cda57c8))
+* **web:** find a Song in Compose with one row of dropdowns ([#397](https://github.com/serpcompany/farty.fm/issues/397)) ([#399](https://github.com/serpcompany/farty.fm/issues/399)) ([9ad27d0](https://github.com/serpcompany/farty.fm/commit/9ad27d02697bb1b1854bc55f344794cebb51b1a2))
+* **web:** Get Farty on a shared page offers the friend who shared ([#318](https://github.com/serpcompany/farty.fm/issues/318)) ([#345](https://github.com/serpcompany/farty.fm/issues/345)) ([e343c18](https://github.com/serpcompany/farty.fm/commit/e343c18fc61ee07e4bf0d1b9b6804b68fc77ba52))
+* **web:** hear a Song's melody on piano, then with farts ([#359](https://github.com/serpcompany/farty.fm/issues/359)) ([#368](https://github.com/serpcompany/farty.fm/issues/368)) ([bb8dcda](https://github.com/serpcompany/farty.fm/commit/bb8dcdabb56ce9e031befba934436a33c437a270))
+* **web:** hear the fart sheet's pitch on piano ([#373](https://github.com/serpcompany/farty.fm/issues/373)) ([#376](https://github.com/serpcompany/farty.fm/issues/376)) ([421b62b](https://github.com/serpcompany/farty.fm/commit/421b62b685a9947577f526e4adadb419f68e7c0f))
+* **web:** keep Compose quick and searchable with 1,000+ Songs ([#323](https://github.com/serpcompany/farty.fm/issues/323)) ([#349](https://github.com/serpcompany/farty.fm/issues/349)) ([c40e2c1](https://github.com/serpcompany/farty.fm/commit/c40e2c13ca6a8e968bb09e3a1fe9613089dfb9c2))
+* **web:** Kind chips, Most popular by fame and search by origin and kind in Compose ([#384](https://github.com/serpcompany/farty.fm/issues/384)) ([#388](https://github.com/serpcompany/farty.fm/issues/388)) ([98f0bc0](https://github.com/serpcompany/farty.fm/commit/98f0bc079b47af915662cfdeeaaec69786299292))
+* **web:** list shared Toots on the profile page ([#346](https://github.com/serpcompany/farty.fm/issues/346)) ([#347](https://github.com/serpcompany/farty.fm/issues/347)) ([74fce58](https://github.com/serpcompany/farty.fm/commit/74fce58975cd3ed8ebdb7d3e18c9342ebab5c991))
+* **web:** load the Song Catalog as data, not in the JavaScript ([#322](https://github.com/serpcompany/farty.fm/issues/322)) ([#334](https://github.com/serpcompany/farty.fm/issues/334)) ([52f7500](https://github.com/serpcompany/farty.fm/commit/52f75003b59b30700ed9050bc7a5f5a0effd66ad))
+* **web:** one review for every take: Trim, note and name ([#330](https://github.com/serpcompany/farty.fm/issues/330)) ([fb1537c](https://github.com/serpcompany/farty.fm/commit/fb1537cc502f8e9eb132ecfb8df893a909ea86c7))
+* **web:** profile pages and shared links at /[@handle](https://github.com/handle) ([#382](https://github.com/serpcompany/farty.fm/issues/382)) ([#386](https://github.com/serpcompany/farty.fm/issues/386)) ([3108784](https://github.com/serpcompany/farty.fm/commit/3108784971bc0ec6e3a75c5c14031a03d33d0b14))
+* **web:** Record turns the whole screen red the moment it records ([#326](https://github.com/serpcompany/farty.fm/issues/326)) ([dbc22ab](https://github.com/serpcompany/farty.fm/commit/dbc22ab3fc524876b4b624d2380db9b29641d735))
+* **web:** report a Song that's wrong ([#358](https://github.com/serpcompany/farty.fm/issues/358)) ([#365](https://github.com/serpcompany/farty.fm/issues/365)) ([cd0dcff](https://github.com/serpcompany/farty.fm/commit/cd0dcff857ab5afd5e9f74c26ebaf41e3ce396f0))
+* **web:** richer Song rows, composer search, more sorts and a Ready filter in Compose ([#356](https://github.com/serpcompany/farty.fm/issues/356)) ([#367](https://github.com/serpcompany/farty.fm/issues/367)) ([2fc128f](https://github.com/serpcompany/farty.fm/commit/2fc128f0de51545fc266d2e1205af5f0f6741b46))
+* **web:** share a take from Result once it's saved ([#342](https://github.com/serpcompany/farty.fm/issues/342)) ([1a907fe](https://github.com/serpcompany/farty.fm/commit/1a907fe6a76f3751d3dcccc8e368786a959e78b5))
+* **web:** ship every catalog Song in Compose ([#350](https://github.com/serpcompany/farty.fm/issues/350)) ([#353](https://github.com/serpcompany/farty.fm/issues/353)) ([efcd7b7](https://github.com/serpcompany/farty.fm/commit/efcd7b73c800f6188d056cc6caf252c64fd2f7d6))
+* **web:** show newly unlocked Songs as a reward on the Result ([#363](https://github.com/serpcompany/farty.fm/issues/363)) ([#375](https://github.com/serpcompany/farty.fm/issues/375)) ([37afc21](https://github.com/serpcompany/farty.fm/commit/37afc21769335dd86860b961d65282d32eca29b9))
+* **web:** swap or leave out a note's fart in Song Creator ([#360](https://github.com/serpcompany/farty.fm/issues/360)) ([#370](https://github.com/serpcompany/farty.fm/issues/370)) ([0e6cb74](https://github.com/serpcompany/farty.fm/commit/0e6cb74c448963ac59c0ebd6ced1ddc2d8265879))
+
+
+### Fixes
+
+* a saved Toot keeps the notes it was rendered with ([#414](https://github.com/serpcompany/farty.fm/issues/414)) ([3f2b24c](https://github.com/serpcompany/farty.fm/commit/3f2b24cf2c557c0d861b9931460364ce77472486)), closes [#254](https://github.com/serpcompany/farty.fm/issues/254)
+* **catalog:** Songs end at the end of a strain ([#402](https://github.com/serpcompany/farty.fm/issues/402)) ([#410](https://github.com/serpcompany/farty.fm/issues/410)) ([550f64d](https://github.com/serpcompany/farty.fm/commit/550f64d2386c61f8907b60838542bec6da08605c))
+* **catalog:** Songs end on their phrase's held last note ([#392](https://github.com/serpcompany/farty.fm/issues/392)) ([92f9ac5](https://github.com/serpcompany/farty.fm/commit/92f9ac5a230ff01362515ebb6fb33f919204d8bd))
+* **catalog:** Songs finish the held note that runs past 32 beats ([#394](https://github.com/serpcompany/farty.fm/issues/394)) ([#398](https://github.com/serpcompany/farty.fm/issues/398)) ([4496ee0](https://github.com/serpcompany/farty.fm/commit/4496ee09b075e1fb8017c08fb37177dc643565ce))
+* **catalog:** Songs keep the notes their other hand plays in a short rest ([#400](https://github.com/serpcompany/farty.fm/issues/400)) ([8d8de58](https://github.com/serpcompany/farty.fm/commit/8d8de58836f598c70b2519aeb0883982b8e30be0))
+* Compose locks a Song once a left-out fart locks it ([#403](https://github.com/serpcompany/farty.fm/issues/403)) ([35d1ca2](https://github.com/serpcompany/farty.fm/commit/35d1ca268b42699c062017511961679f493b43cb))
+* **engine:** a note shorter than the gap no longer breaks Melody Fit ([#332](https://github.com/serpcompany/farty.fm/issues/332)) ([#333](https://github.com/serpcompany/farty.fm/issues/333)) ([7a7db85](https://github.com/serpcompany/farty.fm/commit/7a7db850122b616265b9fef38b00801539f2e715))
+* **web:** a browser away more than 30 days keeps its whole library ([#327](https://github.com/serpcompany/farty.fm/issues/327)) ([7edc314](https://github.com/serpcompany/farty.fm/commit/7edc31454c2bed81a67b9da5918861db4cda57c8))
+* **web:** a Song's tab keeps its own title when hydration lands late ([#351](https://github.com/serpcompany/farty.fm/issues/351)) ([#352](https://github.com/serpcompany/farty.fm/issues/352)) ([1e49904](https://github.com/serpcompany/farty.fm/commit/1e499043656d4703b363bb86768cdb7cd5b67e4f))
+* **web:** draw touching notes in the piano roll as one line ([#390](https://github.com/serpcompany/farty.fm/issues/390)) ([#391](https://github.com/serpcompany/farty.fm/issues/391)) ([d491b6d](https://github.com/serpcompany/farty.fm/commit/d491b6d2bdf6d5f511885cccc755d0440e5b12c1))
+* **web:** hear the review's piano note on a phone speaker ([#362](https://github.com/serpcompany/farty.fm/issues/362)) ([#364](https://github.com/serpcompany/farty.fm/issues/364)) ([5a21662](https://github.com/serpcompany/farty.fm/commit/5a216622359f345300da1857d32354418ad27eab))
+* **web:** let a remembered mic go off Record so playback is louder ([#369](https://github.com/serpcompany/farty.fm/issues/369)) ([#371](https://github.com/serpcompany/farty.fm/issues/371)) ([68b3353](https://github.com/serpcompany/farty.fm/commit/68b3353fcb52fda5670b96c8a2424fe8821e2c58))
+* **web:** Retry after a failed Trim and failed analysis says the take was kept whole ([#340](https://github.com/serpcompany/farty.fm/issues/340)) ([ab5faaf](https://github.com/serpcompany/farty.fm/commit/ab5faafb88de4b3e55bba2e37872378b88f4ac4d))
+
 ## [1.12.1](https://github.com/serpcompany/farty.fm/compare/v1.12.0...v1.12.1) (2026-10-30)
 
 
