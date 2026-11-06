@@ -1,6 +1,6 @@
 'use client'
 
-import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { wide } from '@/lib/desktop'
@@ -283,7 +283,9 @@ export function FullAccessReturn() {
   )
   const noted = useRef(false)
 
-  useEffect(() => {
+  // Ahead of the screens' effects, so one acting the moment the account is known, as Save does after
+  // its sign-in, sees the note.
+  useLayoutEffect(() => {
     if (!paidReturn || !accountId || noted.current) return
     noted.current = true
     notePaymentPending(accountId)

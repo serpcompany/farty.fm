@@ -1,5 +1,5 @@
 import { type APIRequestContext, expect, type Page, test } from '@playwright/test'
-import { newEmail, onTheLocalDatabase, signInByApi } from './account'
+import { codeFor, newEmail, onTheLocalDatabase, signInByApi } from './account'
 import { payOnTheSheet, payToSave } from './pay'
 import { skipWelcome } from './record'
 
@@ -136,6 +136,44 @@ test('at Save, gone by a tab before the account is even read, another Song’s S
   await openSong(page, 'twinkle')
   await expect(saveButton(page)).toBeEnabled({ timeout: 60_000 })
   await saveWaitsOnThePayment(page)
+  await saveOnceThrough(page, slow)
+})
+
+test('at Save, back from paying with the session gone, signing in from Save never offers Pay', async ({
+  page
+}, testInfo) => {
+  test.setTimeout(240_000)
+  const email = newEmail(testInfo, 'slow-save-signed-out')
+  await aSong(page, email)
+  const slow = await holdThePayment(page)
+  await saveButton(page).click()
+
+  // Paid, and the session goes on the way back.
+  await page.route('**/api/dev/checkout/', async route => {
+    const paid = await route.fetch({ maxRedirects: 0 })
+    await page.context().clearCookies()
+    await route.fulfill({ response: paid })
+  })
+  await payAndComeBack(page, /\/compose\/mary\/\?toot=[\w-]+&checkout=done$/)
+
+  // The step opens by itself once. Not now leaves Save to open it, and signing in there goes on to
+  // save in the same moment as the account is known.
+  const step = page.getByRole('dialog', { name: 'Sign in again' })
+  await step.getByRole('button', { name: 'Not now' }).click()
+  await expect(step).toBeHidden()
+  await saveButton(page).click()
+  await step.getByLabel('Email').fill(email)
+  await step.getByRole('button', { name: 'Send code' }).click()
+  // Once it's sent: until then, the newest code is the one from signing in the first time.
+  await expect(step.getByLabel('Code')).toBeVisible({ timeout: 30_000 })
+  await step.getByLabel('Code').fill(await codeFor(page, email))
+  await step.getByRole('button', { name: 'Sign in' }).click()
+  await expect(step).toBeHidden()
+
+  await expect(page.getByText('Tap Save to check again.').or(sheet(page))).toBeVisible({
+    timeout: 60_000
+  })
+  await expectNoPayOffered(page)
   await saveOnceThrough(page, slow)
 })
 
