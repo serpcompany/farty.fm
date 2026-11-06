@@ -239,6 +239,16 @@ describe('Download on a saved Toot', () => {
     expect(await menu('Here')).toContain('Download')
   })
 
+  it('drops an earlier note when the next try works', async () => {
+    await renderList()
+    fetchTootFile.mockResolvedValueOnce({ error: 'failed' })
+    await tapDownload('Here')
+    expect(note()).toBe("Couldn't download. Check your connection and try again.")
+    await tapDownload('Here')
+    expect(offerTootFile).toHaveBeenCalledTimes(1)
+    expect(note() ?? '').toBe('')
+  })
+
   it('offers the file again from a fresh tap when the browser held it back', async () => {
     offerTootFile.mockResolvedValueOnce('needsTap')
     await renderList()

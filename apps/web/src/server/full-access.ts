@@ -218,8 +218,8 @@ export async function startCheckout(
  * it, whether it's at the Toot limit, which Save says instead of saving. Without it but with an
  * unpaid Stripe Checkout Session, it asks Stripe, so the return from Checkout doesn't wait for the
  * webhook, up to `PAYMENT_LIMITS.stripeChecks`; past it, D1 alone answers. With `?check=stored` (the
- * Sound Pad's check on open) D1 alone answers, so the open never spends the return's Stripe checks:
- * a purchase whose webhook hasn't landed reads as none.
+ * Sound Pad's check on open, and Download's menu item) D1 alone answers, so neither ever spends the
+ * return's Stripe checks: a purchase whose webhook hasn't landed reads as none.
  */
 export async function getFullAccess(
   { db }: Pick<Stores, 'db'>,

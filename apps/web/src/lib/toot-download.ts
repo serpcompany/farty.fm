@@ -5,6 +5,22 @@ import { send } from './library-api'
 
 const MAX_NAME_LENGTH = 100
 
+/**
+ * How long a file's bytes may take once they start: the largest Toot at about 1 Mbit/s. `send`'s
+ * timeout ends when the headers arrive, so without this a stalled file would never finish.
+ */
+export const FILE_TIMEOUT_MS = 180_000
+
+function readFile(response: Response): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('stalled')), FILE_TIMEOUT_MS)
+    response
+      .blob()
+      .then(resolve, reject)
+      .finally(() => clearTimeout(timer))
+  })
+}
+
 /** A file name from a Toot's title, without what a phone's or computer's files refuse. */
 export function tootFileName(title: string): string {
   const name = title
@@ -29,7 +45,7 @@ export async function fetchTootFile(
   if (response?.status === 404) return { error: 'notUploaded' }
   if (!response?.ok) return { error: 'failed' }
   try {
-    const audio = await response.blob()
+    const audio = await readFile(response)
     return { file: new File([audio], tootFileName(title), { type: 'audio/wav' }) }
   } catch {
     return { error: 'failed' }

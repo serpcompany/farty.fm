@@ -1,9 +1,10 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { fetchTootFile, offerTootFile, tootFileName } from './toot-download'
+import { FILE_TIMEOUT_MS, fetchTootFile, offerTootFile, tootFileName } from './toot-download'
 
 afterEach(() => {
+  vi.useRealTimers()
   vi.unstubAllGlobals()
   vi.restoreAllMocks()
   delete (navigator as Navigator & { standalone?: boolean }).standalone
@@ -59,6 +60,23 @@ describe('fetchTootFile', () => {
     expect(await fetchTootFile('t', 'T', 'a')).toEqual({ error: 'failed' })
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('offline')))
     expect(await fetchTootFile('t', 'T', 'a')).toEqual({ error: 'failed' })
+  })
+})
+
+describe('a file that stalls after its headers', () => {
+  it('fails once the largest Toot would have arrived, and not before', async () => {
+    vi.useFakeTimers()
+    const stalled = new Response('')
+    vi.spyOn(stalled, 'blob').mockReturnValue(new Promise(() => {}))
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(stalled)
+    let answer: unknown = null
+    void fetchTootFile('t1', 'Song', 'userA').then(file => {
+      answer = file
+    })
+    await vi.advanceTimersByTimeAsync(FILE_TIMEOUT_MS - 1)
+    expect(answer).toBeNull()
+    await vi.advanceTimersByTimeAsync(1)
+    expect(answer).toEqual({ error: 'failed' })
   })
 })
 

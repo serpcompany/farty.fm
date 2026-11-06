@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   canSaveFromStored,
+  hasStoredFullAccess,
   readCheckoutReturn,
   saveCheck,
   startCheckout,
@@ -119,6 +120,23 @@ describe('canSaveFromStored', () => {
     for (const [response, then] of cases) {
       const fetch = answering(response)
       expect(await canSaveFromStored('userA')).toBe(then)
+      expect(fetch.mock.calls[0][0]).toBe('/api/full-access/?check=stored')
+      vi.restoreAllMocks()
+    }
+  })
+})
+
+describe('hasStoredFullAccess', () => {
+  it('asks what D1 has, and an account at the Toot limit still has Full Access', async () => {
+    const cases: [Response, boolean | null][] = [
+      [Response.json({ active: true, limitReached: false }), true],
+      [Response.json({ active: true, limitReached: true }), true],
+      [Response.json({ active: false, limitReached: false }), false],
+      [Response.json({ error: 'signed_out' }, { status: 401 }), null]
+    ]
+    for (const [response, then] of cases) {
+      const fetch = answering(response)
+      expect(await hasStoredFullAccess('userA')).toBe(then)
       expect(fetch.mock.calls[0][0]).toBe('/api/full-access/?check=stored')
       vi.restoreAllMocks()
     }

@@ -19,7 +19,8 @@ import { fetchTootFile, offerTootFile, type TootFile } from '@/lib/toot-download
 import { useAccount } from './account-provider'
 
 // Download on a saved Toot, for an account with Full Access (#408). The server decides, at the tap:
-// this only hides the menu item from an account it knows doesn't have it, so every row of the Toots
+// this only shows the menu item once a read says the account has it. Until then, or when the read
+// fails, there's no item, and the screen reads again the next time it opens. Every row of the Toots
 // list shares one read, as they do for Share.
 
 type Known = { accountId: string; active: boolean; readAt: number }
@@ -98,6 +99,7 @@ export function useTootDownload(toot: Toot | undefined): TootDownloadFlow {
 
   const download = async () => {
     if (!toot || !accountId) return
+    setNote(null)
     setBusy(true)
     const fetched = await fetchTootFile(toot.id, toot.title, accountId)
     setBusy(false)
