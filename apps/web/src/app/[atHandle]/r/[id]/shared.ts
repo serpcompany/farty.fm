@@ -28,8 +28,9 @@ export type SharedView = {
 }
 
 /**
- * The shared Recording at `/@<handle>/r/<id>/`, by its slug or its old random id, or null when that link doesn't work: never
- * shared, stopped, taken down, or its Recording or account deleted. Once per request.
+ * The shared Recording at `/@<handle>/r/<id>/`, by its slug or its old random id, or null when that
+ * link doesn't work: never shared, stopped, taken down, or its Recording or account deleted. Once
+ * per request.
  */
 export const sharedView = cache(async (handle: string, id: string): Promise<SharedView | null> => {
   const shared = await findSharedRecording(getDb(), handle, id)

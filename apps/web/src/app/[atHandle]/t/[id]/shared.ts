@@ -27,8 +27,9 @@ export type SharedTootView = {
 }
 
 /**
- * The saved Toot shared at `/@<handle>/t/<id>/`, by its slug or its old random id, or null when that link doesn't work: never
- * shared, stopped, taken down, never saved, or its Toot or account deleted. Once per request.
+ * The saved Toot shared at `/@<handle>/t/<id>/`, by its slug or its old random id, or null when
+ * that link doesn't work: never shared, stopped, taken down, never saved, or its Toot or account
+ * deleted. Once per request.
  */
 export const sharedTootView = cache(
   async (handle: string, id: string): Promise<SharedTootView | null> => {

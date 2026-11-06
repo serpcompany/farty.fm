@@ -96,7 +96,6 @@ export function SharedRecordingPage({ handle, slug, name, note, ...player }: Sha
     <SharedItemPage
       what="Recording"
       handle={handle}
-      slug={slug}
       base={`${profilePath(handle)}r/${slug}/`}
       name={name}
       {...player}
@@ -141,7 +140,6 @@ export function SharedTootPage({
     <SharedItemPage
       what="Toot"
       handle={handle}
-      slug={slug}
       base={`${profilePath(handle)}t/${slug}/`}
       name={title}
       length={length}
@@ -165,7 +163,6 @@ export function SharedTootPage({
 function SharedItemPage({
   what,
   handle,
-  slug,
   base,
   name,
   length,
@@ -175,7 +172,6 @@ function SharedItemPage({
 }: {
   what: 'Recording' | 'Toot'
   handle: string
-  slug: string
   base: string
   name: string
   length: string
@@ -196,7 +192,7 @@ function SharedItemPage({
       setPlaying(segment)
       setUnplayable(false)
       void play(
-        `shared:${slug}`,
+        `shared:${base}`,
         async () => {
           const response = await fetch(`${base}audio/`)
           if (!response.ok) {
@@ -209,7 +205,7 @@ function SharedItemPage({
         () => setPlaying(current => (current === segment ? null : current))
       )
     },
-    [base, part.endSeconds, slug]
+    [base, part.endSeconds]
   )
 
   const toggle = () => {

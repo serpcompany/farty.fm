@@ -110,12 +110,15 @@ async function slugOf(db: Database, share: ShareRow): Promise<string> {
 }
 
 /**
- * The Handle a link names, lowercased, when the link has the shape of one, or else null. The shape
- * only: a Handle the block list gained since it was picked still finds its links.
+ * The Handle and the name a link names, each lowercased, as every Handle, slug and random id is,
+ * when the link has the shape of one, or else null. The shape only: a Handle the block list gained
+ * since it was picked still finds its links.
  */
-function linkHandle(handle: string, link: string): string | null {
-  const lower = handle.toLowerCase()
-  return /^[a-z0-9_]{3,20}$/.test(lower) && link.length <= MAX_LINK && LINK.test(link)
+function linkNames(handle: string, link: string): { handle: string; link: string } | null {
+  const lower = { handle: handle.toLowerCase(), link: link.toLowerCase() }
+  return /^[a-z0-9_]{3,20}$/.test(lower.handle) &&
+    lower.link.length <= MAX_LINK &&
+    LINK.test(lower.link)
     ? lower
     : null
 }
@@ -258,9 +261,9 @@ export async function findSharedRecording(
   handle: string,
   link: string
 ): Promise<(SharedRecording & { row: SharedRecordingRow }) | null> {
-  const lower = linkHandle(handle, link)
-  if (lower === null) return null
-  const row = await sharedRecording(db, lower, link)
+  const names = linkNames(handle, link)
+  if (names === null) return null
+  const row = await sharedRecording(db, names.handle, names.link)
   if (!row) return null
   const { audioBytes: _, ...recording } = toRecording(row.recording)
   const slug = await slugOf(db, row.share)
@@ -287,9 +290,9 @@ export async function findSharedToot(
   handle: string,
   link: string
 ): Promise<(SharedToot & { row: SharedTootRow }) | null> {
-  const lower = linkHandle(handle, link)
-  if (lower === null) return null
-  const row = await sharedToot(db, lower, link)
+  const names = linkNames(handle, link)
+  if (names === null) return null
+  const row = await sharedToot(db, names.handle, names.link)
   if (!row) return null
   const { title, songId, seconds } = row.toot
   return { handle: row.handle, slug: await slugOf(db, row.share), title, songId, seconds, row }

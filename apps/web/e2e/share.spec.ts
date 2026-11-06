@@ -4,7 +4,7 @@ import { join, resolve } from 'node:path'
 import { type BrowserContext, expect, type Page, test } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
 import { slugify } from '../src/lib/slug'
-import { codeFor, newEmail, ownClient, signInByApi } from './account'
+import { codeFor, fromTheLocalDatabase, newEmail, ownClient, signInByApi } from './account'
 import { payToSave } from './pay'
 import { recordAndSave, skipWelcome, withFakeMicrophone } from './record'
 import { onPhone } from './screens'
@@ -457,6 +457,34 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(dialog.getByRole('heading', { name: 'Report this Toot?' })).toBeVisible()
     await dialog.getByRole('button', { name: 'Report' }).click()
     await expect(other.getByText('Reported. Thanks.')).toBeVisible()
+  })
+
+  await test.step('an old random-id link, or one in capitals, answers a 308 to the named link, with its query (#441)', async () => {
+    const [{ id }] = fromTheLocalDatabase<{ id: string }>(
+      `SELECT s.id FROM shares s JOIN handles h ON h.user_id = s.user_id
+       WHERE h.handle = '${handle}' AND s.kind = 'toots'`
+    )
+    const slug = link.split('/').at(-2) ?? ''
+    expect(id).not.toBe(slug)
+    const query = '?from=mail&tag=a&tag=b'
+    for (const name of [id, slug.toUpperCase()]) {
+      const old = `/@${handle}/t/${name}/`
+      const redirect = await other.request.get(`${old}${query}`, { maxRedirects: 0 })
+      expect(redirect.status()).toBe(308)
+      const to = new URL(redirect.headers().location ?? '', baseURL)
+      expect(to.pathname + to.search).toBe(`${link}${query}`)
+      // A browser never keeps it: the name can go to the next thing shared by it.
+      const redirectCache = redirect.headers()['cache-control'] ?? ''
+      expect(redirectCache).toContain('private')
+      expect(redirectCache).toContain('no-cache')
+
+      expect((await other.request.get(`${old}audio/`)).status()).toBe(200)
+      expect((await other.request.get(`${old}image/`)).status()).toBe(200)
+    }
+
+    await other.goto(`/@${handle}/t/${id}/${query}`)
+    await expect(other).toHaveURL(new URL(`${link}${query}`, baseURL).href)
+    await expect(other.getByRole('heading', { name: title })).toBeVisible()
   })
 
   await test.step('the owner shares a Recording too, and their page lists both, newest first, and plays the Toot (#346)', async () => {

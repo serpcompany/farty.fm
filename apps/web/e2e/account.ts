@@ -102,3 +102,13 @@ export function onTheLocalDatabase(sql: string): void {
     { stdio: 'pipe' }
   )
 }
+
+/** The rows `sql` answers on the local run's database, for what no local page shows. */
+export function fromTheLocalDatabase<Row>(sql: string): Row[] {
+  const output = execFileSync(
+    'pnpm',
+    ['exec', 'wrangler', 'd1', 'execute', 'pedos-local', '--local', '--json', '--command', sql],
+    { stdio: 'pipe', encoding: 'utf8' }
+  )
+  return (JSON.parse(output) as { results: Row[] }[])[0].results
+}

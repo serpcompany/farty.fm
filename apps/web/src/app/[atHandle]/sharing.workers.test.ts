@@ -1067,7 +1067,7 @@ describe('A link named for what it shares (#441)', () => {
   })
 
   it('names a share from before it, and still finds it by its random id', async () => {
-    const alice = await sharer('alice')
+    await sharer('alice')
     const old = await fromBefore('recordings')
     expect(await findSharedRecording(testDb(), 'alice', 'recording-1')).toBeNull()
 
@@ -1076,6 +1076,33 @@ describe('A link named for what it shares (#441)', () => {
     expect((await findSharedRecording(testDb(), 'alice', 'recording-1'))?.slug).toBe('recording-1')
     expect((await findSharedRecording(testDb(), 'alice', old))?.slug).toBe('recording-1')
     expect((await share.audio(`${ORIGIN}/@alice/r/${old}/`)).status).toBe(200)
+  })
+
+  it('finds a link with its name in capitals, and its image, audio and report answer', async () => {
+    const alice = await sharer('alice')
+    await saveToot(T1, alice)
+    expect((await share.put(T1, alice, 'toots')).status).toBe(201)
+    const recording = `${ORIGIN}/@alice/r/Recording-1/`
+    const toot = `${ORIGIN}/@alice/t/TWINKLE-Twinkle-Little-Star/`
+
+    // Its own slug, not the capitals, so the page sends this link on to the lowercase one.
+    expect((await findSharedRecording(testDb(), 'alice', 'Recording-1'))?.slug).toBe('recording-1')
+    expect((await findSharedToot(testDb(), 'alice', 'TWINKLE-Twinkle-Little-Star'))?.slug).toBe(
+      'twinkle-twinkle-little-star'
+    )
+    for (const url of [recording, toot]) {
+      expect((await share.audio(url)).status).toBe(200)
+      expect((await share.report(url)).status).toBe(204)
+    }
+    // A Toot's image reads the request's host, which only the journey has (e2e/share.spec.ts).
+    expect((await share.image(recording)).status).toBe(200)
+
+    // A random id from before it, in capitals too.
+    const old = await fromBefore('recordings')
+    expect((await findSharedRecording(testDb(), 'alice', old.toUpperCase()))?.slug).toBe(
+      'recording-1'
+    )
+    expect((await share.audio(`${ORIGIN}/@alice/r/${old.toUpperCase()}/`)).status).toBe(200)
   })
 
   it('names a share from before it when its owner lists their links', async () => {

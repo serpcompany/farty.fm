@@ -18,7 +18,7 @@ Until #316 nothing a user made could leave their account. On 2026-11-03 the prod
    - `/@<handle>/r/<slug>/`, where the slug is the Recording's name, as in `/@maya/r/recording-3/`, lowercased with hyphens (`slugify()`, `src/lib/slug.ts`). When that user has that kind of link by that name already, the next takes `-2`, `-3` and so on. Renaming the Recording keeps its link.
    - It was the share id until #441 (2026-11-07), when the owner said "the 'urls' generated are gibbeish": 12 random characters of lowercase Crockford base 32 (60 bits, `newShareId()`). That id is still the `shares` row's key. A link sent with one keeps working: its page answers one 308 to the named link, and its image, audio and Report answer as before. A share from before #441 gets its slug the first time anything reads it (`giveSlugs()`, `slugOf()` in `src/server/sharing.ts`).
    - Links were `/u/<handle>/…` until #382 (2026-11-04), when the owner moved them under `/@<handle>/`. Each old path answers one 308 to its new one, query included (`next.config.ts`), so a link already sent keeps working. A Handle never holds `@` or `/`, so a path names one Handle only.
-   - Stop sharing deletes the share, so the link stops working and its name is free. Sharing again makes a new share, which gets that name back if nothing else has taken it, so the same link works again (#441). A share taken down keeps its row, and so its name.
+   - Stop sharing deletes the share, so the link stops working and its name is free. Sharing again makes a new share, which gets that name back if nothing else has taken it, so the same link works again (#441). The next thing shared by that name takes the link, so whoever holds the old link hears that instead. A share taken down keeps its row, and so its name.
    - A slug can be guessed, which an unlisted link's random id couldn't be, but a profile page already lists every share (ADR 0021), so this shows no one anything new. A Recording that isn't shared has no link by any name.
 4. **Unlisted: anyone with the link, and nothing else.**
    - The page, its image and its audio need no account. Nothing lists a link: there's no profile page until #319 (which lists a user's shares on it, ADR 0021), every shared page is `noindex, nofollow` with no canonical, and the sitemaps leave `/@<handle>/` out.
@@ -38,7 +38,7 @@ Until #316 nothing a user made could leave their account. On 2026-11-03 the prod
    - On a Recording's row, Share puts the link on the phone's share sheet (`navigator.share`), or copies it where there's none. A row that is shared says "Shared", and its button opens Share link and Stop sharing.
    - The record flow offers the same Share at the top of Result, the step after its review's Save, once the take is saved (#320). The review before Save has none: the take isn't a Recording yet.
    - When the browser has spent the tap's activation on the requests before the sheet (a `NotAllowedError`), a "Your link is ready" dialog offers the sheet on a fresh tap.
-   - Stop sharing asks first: "The link stops working for everyone who has it, until you share it again." Deleting a shared Recording, or the account, says its links stop working too.
+   - Stop sharing asks first: "The link stops working for everyone who has it, until you share something by that name again." Deleting a shared Recording, or the account, says its links stop working too.
 9. **Report, on every shared page, reaches Farty in D1.**
    - Report asks first, then `POST /@<handle>/r/<id>/report/`, from Farty's own origin only. Each report is a `share_reports` row (the share, its owner, the item, when) and a `share_reported` log line. Nothing about the person who reported is kept.
    - A reporter keeps at most 10 an hour, a Recording 5 a day whichever link it's shared under, and the site 300 an hour (`REPORT_LIMITS`, counted in `rate_limit`), so one client can't spend the site's and a script can't fill D1. The reporter's row is keyed by an HMAC of their `cf-connecting-ip`, never the address. A report spends a slot of each only when all three have one, and past any of them it answers 429, which the page says.
@@ -65,7 +65,7 @@ A saved Toot shares the same way, through the same Handle, `shares` rows (`kind`
 
 ## Tables
 
-Migration `0008_sharing`, and `slug` from `0016`:
+Migration `0008_sharing`, and `slug` from `0016_share_slugs`:
 
 - `handles`: `user_id` (primary key, on delete cascade), `handle` (unique), `created_at`.
 - `shares`: `id` (the share id), `user_id` (on delete cascade), `kind` (`recordings`, and `toots` from #317), `item_id`, `slug` (null until it's read, on a share from before #441), `created_at`, `taken_down_at`. One per user, kind and item, and one per user, kind and slug.
@@ -84,4 +84,5 @@ Migration `0008_sharing`, and `slug` from `0016`:
 - The Worker carries `next/og`'s renderer (`resvg.wasm`, 1.4 MB, and `yoga.wasm`) for the link image.
 - Shared pages are behind the Staging gate on Staging, so link previews can be checked only on Production.
 - A Handle can't be changed or released yet. Deleting the account frees it.
+- A stranger can then claim that Handle, and whatever they share by the same name answers the old owner's link. Accepted for now.
 - Taking down needs the owner in the D1 console. A moderation screen comes when reports need one.
