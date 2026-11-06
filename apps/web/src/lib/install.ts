@@ -45,13 +45,16 @@ type Browser = {
   canPrompt: boolean
 }
 
+/** iPadOS Safari reports itself as a Mac, and only touch gives it away. */
+const isIPhoneOrIPad = (userAgent: string, touch: boolean) =>
+  /iPhone|iPad|iPod/.test(userAgent) || (/Macintosh/.test(userAgent) && touch)
+
 export function installGuideFor(browser: Browser): InstallGuide {
   if (browser.standalone) return 'installed'
   if (browser.canPrompt) return 'prompt'
   const { userAgent } = browser
   const touch = browser.maxTouchPoints > 1
-  // iPadOS Safari reports itself as a Mac, and only touch gives it away.
-  if (/iPhone|iPad|iPod/.test(userAgent) || (/Macintosh/.test(userAgent) && touch)) {
+  if (isIPhoneOrIPad(userAgent, touch)) {
     // Safari, and Chrome and Firefox on iOS, send "Safari/". Most in-app browsers leave it out.
     return /Safari\//.test(userAgent) && !inAppBrowser.test(userAgent)
       ? 'share-sheet'
@@ -110,11 +113,15 @@ export function currentInstallGuide(): InstallGuide | null {
   })
 }
 
-function runsFromHomeScreen(): boolean {
+export function runsFromHomeScreen(): boolean {
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
     (navigator as Navigator & { standalone?: boolean }).standalone === true
   )
+}
+
+export function runsOnIPhoneOrIPad(): boolean {
+  return isIPhoneOrIPad(navigator.userAgent, navigator.maxTouchPoints > 1)
 }
 
 /**

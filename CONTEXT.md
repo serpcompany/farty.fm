@@ -93,7 +93,7 @@ A saved result, of one of two kinds: a Song played with the user's Recordings, m
 _Avoid_: Created Melody, Melody, Created Song, generated song, track, output
 
 **Full Access**:
-One purchase per account that lets every Save keep its Toot (ADR 0022). An account that paid for a Toot before it has it too, and a full refund ends it. It doesn't change which Songs are Unlocked Songs.
+One purchase per account that lets every Save keep its Toot and every saved Toot download as a file (ADR 0022, #408). An account that paid for a Toot before it has it too, and a full refund ends it. It doesn't change which Songs are Unlocked Songs.
 _Avoid_: Premium, Pro, subscription, unlock
 
 ## Creation areas

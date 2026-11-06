@@ -2,9 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   canSaveFromStored,
+  hasFullAccess,
   readCheckoutReturn,
   saveCheck,
   startCheckout,
+  startDownloadCheckout,
   waitForFullAccess
 } from './full-access'
 
@@ -82,6 +84,46 @@ describe('startCheckout', () => {
     for (const [response, problem] of cases) {
       answering(response)
       expect(await startCheckout(TOOT, 'twinkle', 'userA')).toEqual({ kind: 'failed', problem })
+      vi.restoreAllMocks()
+    }
+  })
+})
+
+describe('startDownloadCheckout', () => {
+  it('asks for Checkout to come back to the Toot’s screen, with no Song', async () => {
+    const fetch = answering(Response.json({ url: 'https://checkout.stripe.com/c/pay/cs_test_a' }))
+    expect(await startDownloadCheckout(TOOT, 'userA')).toEqual({
+      kind: 'pay',
+      url: 'https://checkout.stripe.com/c/pay/cs_test_a'
+    })
+    const [path, init] = fetch.mock.calls[0]
+    expect(path).toBe('/api/full-access/checkout/')
+    expect(new Headers(init?.headers).get('x-pedos-library')).toBe('userA')
+    expect(JSON.parse(String(init?.body))).toEqual({ tootId: TOOT, returnTo: 'toot' })
+  })
+
+  it('goes nowhere but Stripe’s page or this site’s dev checkout', async () => {
+    answering(Response.json({ url: 'https://evil.example/pay' }))
+    expect(await startDownloadCheckout(TOOT, 'userA')).toEqual({
+      kind: 'failed',
+      problem: 'failed'
+    })
+  })
+})
+
+describe('hasFullAccess', () => {
+  it('says whether the account has it, whatever its Toot limit', async () => {
+    const cases: [Response | Error, boolean | null][] = [
+      [Response.json({ active: true, limitReached: false }), true],
+      [Response.json({ active: true, limitReached: true }), true],
+      [Response.json({ active: false, limitReached: false }), false],
+      [Response.json({ error: 'failed' }, { status: 502 }), null],
+      [new TypeError('offline'), null]
+    ]
+    for (const [response, then] of cases) {
+      const fetch = answering(response)
+      expect(await hasFullAccess('userA')).toBe(then)
+      expect(fetch.mock.calls[0][0]).toBe('/api/full-access/')
       vi.restoreAllMocks()
     }
   })

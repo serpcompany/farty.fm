@@ -380,6 +380,76 @@ describe('on a local run, with the dev checkout', () => {
     expect(await fullAccessPurchase(testDb(), a.id)).toBeNull()
   })
 
+  describe('from a saved Toot’s Download (#408)', () => {
+    /** Checkout as a saved Toot's Download asks for it, with no Song. */
+    const checkoutToDownload = (tootId: string, as: As) =>
+      checkoutRoute.POST(checkoutRequest(as, { tootId, returnTo: 'toot' }), noParams)
+    const payDevToDownload = (toot: string, as: As) =>
+      devCheckoutRoute.POST(
+        new Request(`${ORIGIN}/api/dev/checkout/`, {
+          method: 'POST',
+          headers: headersFor('POST', as, { 'content-type': 'application/x-www-form-urlencoded' }),
+          body: new URLSearchParams({ toot, return: 'toot' })
+        }),
+        noParams
+      )
+
+    it('comes back to the Toot’s screen once paid, with Full Access', async () => {
+      const a = await signUp('A')
+      const started = await checkoutToDownload(T1, a)
+      expect(await started.json()).toEqual({
+        url: `${ORIGIN}/dev/checkout/?toot=${T1}&return=toot`
+      })
+      expect(await hasIt(a)).toBe(false)
+      const paying = await payDevToDownload(T1, a)
+      expect(paying.status).toBe(303)
+      expect(paying.headers.get('location')).toBe(`${ORIGIN}/toots/toot/?id=${T1}&checkout=done`)
+      expect(await hasIt(a)).toBe(true)
+      expect(await counted('paid')).toBe(1)
+      // Nothing more to pay.
+      expect(await (await checkoutToDownload(T1, a)).json()).toEqual({ active: true })
+    })
+
+    it('needs no room for a new Toot, since downloading keeps none', async () => {
+      const a = await signUp('A')
+      await fillToots(a.id, 300)
+      expect((await checkoutToDownload(T1, a)).status).toBe(200)
+      await payDevToDownload(T1, a)
+      expect(await (await access(a)).json()).toEqual({ active: true, limitReached: true })
+    })
+
+    it('has nothing to pay for on a Toot that was deleted', async () => {
+      const a = await signUp('A')
+      await checkout(T2, a)
+      await payDev(T2, a)
+      expect((await save(T1, a)).status).toBe(201)
+      expect((await api.delete('toots', T1, a)).status).toBe(204)
+      const refused = await checkoutToDownload(T1, a)
+      expect(refused.status).toBe(410)
+      expect(await refused.json()).toEqual({ error: 'deleted' })
+    })
+
+    it('asks for a real Toot, and a Save still for a real Song', async () => {
+      const a = await signUp('A')
+      expect((await checkoutToDownload('not-a-toot', a)).status).toBe(400)
+      for (const body of [
+        { tootId: T1 },
+        { tootId: T1, returnTo: 'elsewhere' },
+        { tootId: T1, returnTo: 'elsewhere', songId: 'not-a-song' }
+      ]) {
+        expect((await checkoutRoute.POST(checkoutRequest(a, body), noParams)).status).toBe(400)
+      }
+    })
+
+    it('never pays for another account', async () => {
+      const a = await signUp('A')
+      const b = await signUp('B')
+      await checkoutToDownload(T1, a)
+      expect((await payDevToDownload(T1, b)).status).toBe(404)
+      expect(await hasIt(a)).toBe(false)
+    })
+  })
+
   it('says when an account with Full Access is at the Toot limit, as Save has to say it', async () => {
     const a = await signUp('A')
     await fillToots(a.id, 299)
@@ -591,6 +661,24 @@ describe('with Stripe Checkout in test mode', () => {
     expect(sent.get('line_items[0][price_data][unit_amount]')).toBe('499')
     expect(sent.get('success_url')).toBe(`${ORIGIN}/compose/pad/?toot=${T1}&checkout=done`)
     expect(sent.get('cancel_url')).toBe(`${ORIGIN}/compose/pad/?toot=${T1}`)
+  })
+
+  it('goes back to the Toot’s screen for a saved Toot’s Download (#408)', async () => {
+    const a = await signUp('A')
+    const stripe = stubStripe(sessionFor(a.id, T1))
+    const started = await checkoutRoute.POST(
+      checkoutRequest(a, { tootId: T1, returnTo: 'toot' }),
+      noParams
+    )
+    expect(await started.json()).toEqual({
+      url: 'https://checkout.stripe.com/c/pay/cs_test_first'
+    })
+    const sent = stripe.mock.calls[0][1]?.body as URLSearchParams
+    expect(sent.get('line_items[0][price_data][unit_amount]')).toBe('499')
+    expect(sent.get('metadata[purchase]')).toBe('full_access')
+    expect(sent.get('metadata[toot_id]')).toBe(T1)
+    expect(sent.get('success_url')).toBe(`${ORIGIN}/toots/toot/?id=${T1}&checkout=done`)
+    expect(sent.get('cancel_url')).toBe(`${ORIGIN}/toots/toot/?id=${T1}`)
   })
 
   it('reuses an open session for the same Toot, so two taps can’t pay twice', async () => {
