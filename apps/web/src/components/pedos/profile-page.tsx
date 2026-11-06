@@ -2,7 +2,7 @@
 
 import { Clock, Play, Square, UserCheck, UserPlus, X } from 'lucide-react'
 import Link from 'next/link'
-import { type ReactNode, useCallback, useEffect, useState, useSyncExternalStore } from 'react'
+import { type ReactNode, useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import { actOnFriend, type FriendAction, type FriendState, readFriendState } fro
 import { useGetFarty } from '@/lib/get-farty'
 import { profilePath } from '@/lib/handle'
 import { formattedTootDate } from '@/lib/toot'
+import { useInBrowser } from '@/lib/use-in-browser'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { FriendsUnreachable, RemoveFriendDialog, refusalMessage, useFriendRequest } from './friends'
@@ -24,16 +25,6 @@ import { handlePageColumn, Report, SharedTopBar } from './shared-recording-page'
 // A profile page, `/@<handle>/` (#319, ADR 0021): what anyone sees, signed in or not, in any
 // browser. The Handle, the friend control, and the Recordings and Toots they've shared (#346),
 // newest first, each playing in place and opening its own page. No counts and no feed.
-
-const noSubscribe = () => () => {}
-
-/** True once the page runs in the browser: dates read the viewer's own day, not the server's. */
-const useInBrowser = () =>
-  useSyncExternalStore(
-    noSubscribe,
-    () => true,
-    () => false
-  )
 
 export type ProfilePageProps = {
   handle: string

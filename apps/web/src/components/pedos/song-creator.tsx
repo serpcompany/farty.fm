@@ -5,13 +5,11 @@ import {
   Ban,
   Check,
   ChevronLeft,
-  ChevronRight,
   CircleAlert,
   Lock,
   Piano,
   Play,
-  Square,
-  Trash2
+  Square
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -71,11 +69,11 @@ import { PAYMENT_PROBLEMS } from './payment-problems'
 import { tootPlayback, usePedos } from './pedos-provider'
 import { pianoSchedule, stopPiano } from './piano-preview'
 import { previousPage } from './previous-page'
+import { DeletedRecordingRow, PlaysBadge, RecordingUsedRowView } from './recording-used-row'
 import { ReportSong } from './report-song-sheet'
 import { changeFartChoices, useFartChoices } from './use-fart-choices'
 import { usePianoPreview } from './use-piano-preview'
 import { useSongNotes } from './use-song-notes'
-import { Waveform } from './waveform'
 
 type Phase =
   /** `again`: after a change to the Song's farts, the Toot shows while it's made again. */
@@ -1007,11 +1005,7 @@ export function TootLayout(
   )
 }
 
-/**
- * A Recording the Toot uses: the color of its notes, play, its name, its waveform and its fart's
- * length, "Your pick" when the user swapped it in (#360), and the note it plays in the Song. As
- * the iPhone app's `RecordingRow` in Song Creator, which shows the whole take's length.
- */
+/** A Recording the Toot uses, playing and showing what it plays as the user's own device has it. */
 function RecordingUsedRow({
   recording,
   color,
@@ -1037,94 +1031,27 @@ function RecordingUsedRow({
   const length = formattedFartLength(recording)
 
   return (
-    <li
-      className={cn(
-        'flex items-center gap-3 py-2 pr-4 pl-4',
-        (isPlaying || isHighlighted) && 'bg-primary/10'
-      )}
-      data-testid="recording-used"
-    >
-      <button
-        type="button"
-        className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-lg text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-        aria-label={[
-          name,
-          `plays ${plays}`,
-          length,
-          isYourPick && 'your pick',
-          isHighlighted && 'highlighted',
-          pitch === null ? 'noise-like' : noteName(pitch)
-        ]
-          .filter(Boolean)
-          .join(', ')}
-        aria-pressed={isPlaying}
-        onClick={onTap}
-      >
-        <span
-          aria-hidden
-          className="size-2.5 shrink-0 rounded-full"
-          style={{ backgroundColor: color }}
-        />
-        <span
-          aria-hidden
-          className={cn(
-            'flex size-11 shrink-0 items-center justify-center rounded-full',
-            isPlaying ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'
-          )}
-        >
-          {isPlaying ? (
-            <Square className="size-4 fill-current" />
-          ) : (
-            <Play className="size-4 fill-current" />
-          )}
-        </span>
-        <span className="flex min-w-0 flex-col gap-1">
-          <span>{name}</span>
-          <span className="flex items-center gap-2">
-            <Waveform
-              levels={levels}
-              isPlaying={isPlaying}
-              className="h-[18px] w-[72px] gap-[1.5px]"
-            />
-            <span className="text-sm text-muted-foreground">{length}</span>
-          </span>
-          {isYourPick && <span className="text-sm font-semibold text-brand-strong">Your pick</span>}
-        </span>
-      </button>
-      {badge}
-    </li>
-  )
-}
-
-/** A Recording the Toot used that has since been deleted: the note it played, and no play button. */
-function DeletedRecordingRow({
-  color,
-  isHighlighted,
-  badge
-}: {
-  color: string
-  isHighlighted: boolean
-  badge: ReactNode
-}) {
-  return (
-    <li
-      className={cn(
-        'flex min-h-15 items-center gap-3 py-2 pr-4 pl-4',
-        isHighlighted && 'bg-primary/10'
-      )}
-      data-testid="recording-used"
-    >
-      <span
-        aria-hidden
-        className="size-2.5 shrink-0 rounded-full"
-        style={{ backgroundColor: color }}
-      />
-      <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-        <Trash2 className="size-4" aria-hidden />
-      </span>
-      <span className="min-w-0 flex-1 text-muted-foreground">Recording deleted</span>
-      {badge}
-    </li>
+    <RecordingUsedRowView
+      name={name}
+      length={length}
+      levels={levels}
+      color={color}
+      label={[
+        name,
+        `plays ${plays}`,
+        length,
+        isYourPick && 'your pick',
+        isHighlighted && 'highlighted',
+        pitch === null ? 'noise-like' : noteName(pitch)
+      ]
+        .filter(Boolean)
+        .join(', ')}
+      isPlaying={isPlaying}
+      isHighlighted={isHighlighted}
+      isYourPick={isYourPick}
+      badge={badge}
+      onTap={onTap}
+    />
   )
 }
 
@@ -1165,37 +1092,6 @@ function NoFartRow({
       </span>
       {badge}
     </li>
-  )
-}
-
-/**
- * "plays F3": the note a Recording plays in the Song. In Song Creator it opens the fart sheet for
- * that pitch (#360).
- */
-function PlaysBadge({ plays, onChangeFart }: { plays: string; onChangeFart?: () => void }) {
-  const pill = 'shrink-0 rounded-full bg-muted px-3 py-1 text-sm font-semibold tabular-nums'
-  if (!onChangeFart) {
-    return (
-      <span aria-hidden className={pill}>
-        plays {plays}
-      </span>
-    )
-  }
-  // A thumb's 44 points around the pill.
-  return (
-    <button
-      type="button"
-      aria-label={`Change the fart for ${plays}`}
-      className="-my-1 flex h-11 shrink-0 items-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-      onClick={onChangeFart}
-    >
-      <span
-        className={cn(pill, 'flex h-9 items-center gap-0.5 bg-background pr-2 ring-1 ring-border')}
-      >
-        plays {plays}
-        <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
-      </span>
-    </button>
   )
 }
 

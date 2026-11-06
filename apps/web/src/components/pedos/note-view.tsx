@@ -8,9 +8,9 @@ import {
   useRef,
   useState
 } from 'react'
-import type { Song, SongNote } from '@/lib/catalog/song'
+import type { SongNote } from '@/lib/catalog/song'
 import { noteName } from '@/lib/pitch'
-import { noteSeconds, soundingPitch, type TootArrangement } from '@/lib/toot'
+import { noteSeconds, type RollSong, soundingPitch, type TootArrangement } from '@/lib/toot'
 
 /** The iPhone's system colors for a Song's pitches, lowest first. Red is kept for recording. */
 const colors = [
@@ -50,9 +50,10 @@ export function NoteView({
   highlightedPitch,
   selectedNote,
   playingNote,
+  lanes = false,
   onTapNote
 }: {
-  song: Song
+  song: RollSong
   arrangement: TootArrangement
   /** The name of the Recording that plays a note: "Recording 3". */
   recordingName: (note: SongNote) => string
@@ -62,6 +63,8 @@ export function NoteView({
   highlightedPitch: number | null
   selectedNote: number | null
   playingNote: number | null
+  /** A note's pitch is a lane, one per fart, not a note, as a Sound Pad Toot's taps are. */
+  lanes?: boolean
   onTapNote: (index: number) => void
 }) {
   const area = useRef<HTMLDivElement>(null)
@@ -87,7 +90,7 @@ export function NoteView({
     const note = song.notes[index]
     const start = noteSeconds(song, note).start.toFixed(1)
     return [
-      `${noteName(soundingPitch(arrangement, note.pitch))} at ${start} s`,
+      lanes ? `At ${start} s` : `${noteName(soundingPitch(arrangement, note.pitch))} at ${start} s`,
       recordingName(note),
       index === selectedNote && 'selected',
       highlightedPitch === note.pitch && 'highlighted',
@@ -212,7 +215,7 @@ export class Layout {
   private readonly starts: readonly number[]
 
   constructor(
-    song: Song,
+    song: RollSong,
     readonly width: number,
     readonly height: number
   ) {

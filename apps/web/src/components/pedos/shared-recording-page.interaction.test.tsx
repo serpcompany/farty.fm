@@ -50,7 +50,8 @@ const recordingOf = (handle: string, slug: string) => ({
   note: null,
   length: '1.1 s',
   part: { startSeconds: 0, endSeconds: 1.1 },
-  levels: [0.5]
+  levels: [0.5],
+  recordedAt: 0
 })
 
 const tootOf = (handle: string, slug: string) => ({
@@ -60,7 +61,8 @@ const tootOf = (handle: string, slug: string) => ({
   song: null,
   length: '0:18',
   seconds: 18,
-  levels: [0.5]
+  levels: [0.5],
+  parts: { song: null, catalogSong: null, transposition: 0, lanes: false, rows: [] }
 })
 
 beforeEach(() => {

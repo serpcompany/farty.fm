@@ -1,10 +1,16 @@
 import 'server-only'
 
 import { cache } from 'react'
-import { formattedTootLength } from '@/lib/toot'
+import { formattedTootLength, type SharedTootParts } from '@/lib/toot'
 import { requestStores } from '@/server/library'
 import { pageOrigin } from '@/server/link-preview'
-import { findSharedToot, sharedTootKey, sharedTootLevels, tootSongTitle } from '@/server/sharing'
+import {
+  findSharedToot,
+  sharedTootKey,
+  sharedTootLevels,
+  sharedTootParts,
+  tootSongTitle
+} from '@/server/sharing'
 
 /** What a shared Toot's page, and its link image, show of it: nothing private. */
 export type SharedTootView = {
@@ -26,6 +32,11 @@ export type SharedTootView = {
   levels: number[]
 }
 
+/** The share behind a link, or null: once per request, whatever asks. */
+const sharedTootOf = cache((handle: string, id: string) =>
+  findSharedToot(requestStores().db, handle, id)
+)
+
 /**
  * The saved Toot shared at `/@<handle>/t/<id>/`, by its slug or its old random id, or null when
  * that link doesn't work: never shared, stopped, taken down, never saved, or its Toot or account
@@ -33,8 +44,8 @@ export type SharedTootView = {
  */
 export const sharedTootView = cache(
   async (handle: string, id: string): Promise<SharedTootView | null> => {
-    const { db, media } = requestStores()
-    const shared = await findSharedToot(db, handle, id)
+    const { media } = requestStores()
+    const shared = await sharedTootOf(handle, id)
     if (!shared) return null
     const song = tootSongTitle(shared.songId)
     const origin = (await pageOrigin()) ?? 'http://localhost'
@@ -50,6 +61,15 @@ export const sharedTootView = cache(
     }
   }
 )
+
+/** What the shared Toot's page shows of what it's made of, or null when the link doesn't work. */
+export async function sharedTootPartsView(
+  handle: string,
+  id: string
+): Promise<SharedTootParts | null> {
+  const shared = await sharedTootOf(handle, id)
+  return shared && sharedTootParts(requestStores().db, shared)
+}
 
 /** What the link's description says: "Twinkle, Twinkle, Little Star, played on farts. …" */
 export function tootDescription(view: SharedTootView): string {

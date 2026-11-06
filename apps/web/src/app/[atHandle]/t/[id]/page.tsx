@@ -4,7 +4,7 @@ import { linkParams, withQuery } from '@/app/[atHandle]/link-params'
 import { SharedTootPage } from '@/components/pedos/shared-recording-page'
 import { linkPreviewMetadata } from '@/server/link-preview'
 import { sharePath } from '@/server/sharing'
-import { sharedTootView, tootDescription } from './shared'
+import { sharedTootPartsView, sharedTootView, tootDescription } from './shared'
 
 // A shared Toot's page (ADR 0020), at `/@<handle>/t/<id>/` (#382), as a shared Recording's:
 // public, unlisted, and read from D1 on every request, so a stopped, taken-down or deleted link is
@@ -34,8 +34,11 @@ export default async function SharedToot({
   searchParams
 }: PageProps<'/[atHandle]/t/[id]'>) {
   const { handle, id } = await linkParams(params)
-  const view = await sharedTootView(handle, id)
-  if (!view) notFound()
+  const [view, parts] = await Promise.all([
+    sharedTootView(handle, id),
+    sharedTootPartsView(handle, id)
+  ])
+  if (!view || !parts) notFound()
   // A link from before #441, by its random id, keeps working, and a name in capitals finds it.
   if (view.slug !== id) {
     permanentRedirect(await withQuery(sharePath('toots', view.handle, view.slug), searchParams))
@@ -49,6 +52,7 @@ export default async function SharedToot({
       length={view.length}
       seconds={view.seconds}
       levels={view.levels}
+      parts={parts}
     />
   )
 }
