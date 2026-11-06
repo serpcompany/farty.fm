@@ -1,13 +1,21 @@
 import { expect, test } from '@playwright/test'
 import { onPhone } from './screens'
 
-test('the privacy page covers accounts, news email, Turnstile, guests, error reports, page views and deleting', async ({
+test('the privacy page covers accounts, news email, Turnstile, guests, error reports, page views, fart places and deleting', async ({
   page
 }) => {
   await page.goto('/privacy/')
   await expect(page.getByRole('heading', { name: 'Privacy', level: 1 })).toBeVisible()
   await expect(
-    page.getByText('Your email, Recordings and Toots (audio included) are stored on Cloudflare')
+    page.getByText(
+      'Your email, Recordings and Toots (audio included), and the city each Recording was first uploaded from, are stored on Cloudflare'
+    )
+  ).toBeVisible()
+  await expect(page.getByText('the city you recorded it in')).toBeVisible()
+  await expect(page.getByText("It doesn't ask your phone for its location")).toBeVisible()
+  await expect(page.getByText("so a VPN shows the VPN's city")).toBeVisible()
+  await expect(
+    page.getByText('Turning off Show where I farted on Profile deletes every place Farty kept')
   ).toBeVisible()
   await expect(page.getByText('Farty news, which is on by default')).toBeVisible()
   await expect(page.getByText('unsubscribe from any email or on Profile')).toBeVisible()
