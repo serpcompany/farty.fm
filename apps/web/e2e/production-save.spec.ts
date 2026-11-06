@@ -95,7 +95,7 @@ test('a signed-in save pays $4.99 first, and two taps pay for and save one Toot'
     ;(button as HTMLButtonElement).click()
     ;(button as HTMLButtonElement).click()
   })
-  await expect(page.getByTestId('full-access-sheet')).toContainText('$4.99, once.')
+  await expect(page.getByTestId('full-access-sheet')).toContainText('Once, no subscription')
   await payOnTheSheet(page)
   await payAtTheDevCheckout(page)
   await expect(page.getByText("Couldn't save this Toot.")).toHaveCount(0)

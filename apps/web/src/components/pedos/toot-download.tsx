@@ -225,6 +225,8 @@ export function useTootDownload(toot: Toot, backFromCheckout = false): TootDownl
       <FullAccessSheet
         open={offering}
         busy={paying}
+        email={account.status === 'signedIn' ? account.email : null}
+        headline="Keep every Toot you make."
         onPay={() => void pay()}
         onClose={() => setOffering(false)}
       />

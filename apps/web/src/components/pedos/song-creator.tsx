@@ -625,6 +625,7 @@ export function SaveToToots({
       <FullAccessSheet
         open={offering}
         busy={busy === 'paying'}
+        email={account.status === 'signedIn' ? account.email : null}
         onPay={() => {
           if (accountId) void pay(accountId)
           else setOffering(false)

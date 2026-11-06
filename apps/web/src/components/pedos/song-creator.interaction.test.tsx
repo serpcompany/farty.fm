@@ -180,14 +180,76 @@ describe('Save to Toots, where saving is paid', () => {
     expect(page.saveToot).toHaveBeenCalledWith(draft)
   })
 
-  it('offers Full Access on a sheet to an account without it, with the price and the money back', async () => {
+  it('offers Full Access on a sheet to an account without it, in the order the offer reads', async () => {
     const fetch = server()
     await render()
     await tapSave()
-    expect(sheet()?.textContent).toContain('Full Access')
-    expect(sheet()?.textContent).toContain('$4.99, once.')
-    expect(sheet()?.textContent).toContain('within 14 days')
+    const text = sheet()?.textContent ?? ''
+    const lines = [
+      'Keep this Toot, and every one after it.',
+      'Save up to 300 Toots, from Songs and the Sound Pad',
+      'Send any saved Toot by link. Anyone can play it, no account needed',
+      'Download any saved Toot as a file',
+      "They're in your account, on any phone or tablet you sign in on",
+      'Full Access',
+      'Once, no subscription',
+      '$4.99',
+      'Pay $4.99',
+      '14 days to get your money back.',
+      'Not now',
+      'Buying for a@example.test. Checkout uses this email, and refunds are looked up by it.'
+    ]
+    const places = lines.map(line => text.indexOf(line))
+    expect(places).not.toContain(-1)
+    expect(places).toEqual([...places].sort((a, b) => a - b))
+    expect(sheet()?.querySelector('a')?.getAttribute('href')).toMatch(/^\/support\/?$/)
+    expect(sheet()?.querySelector('a')?.textContent).toBe('14 days to get your money back')
     expect(asked(fetch, CHECKOUT_PATH)).toBe(0)
+    expect(page.saveToot).not.toHaveBeenCalled()
+  })
+
+  it('leaves out the email line when the account says no email, and Pay still goes to Checkout', async () => {
+    page.account = { status: 'signedIn', id: 'userA', email: '', marketingEmail: false }
+    const fetch = server()
+    await render()
+    await tapSave()
+    expect(sheet()?.textContent).not.toContain('Buying for')
+    expect(sheet()?.textContent).not.toContain('Checkout uses this email')
+    await tapOnSheet('Pay $4.99')
+    expect(asked(fetch, CHECKOUT_PATH)).toBe(1)
+  })
+
+  it('leaves out the email line with no account signed in, and Pay only closes the sheet', async () => {
+    const fetch = server()
+    await render()
+    await tapSave()
+    expect(sheet()?.textContent).toContain('Buying for a@example.test.')
+
+    page.account = { status: 'expired' }
+    await render()
+    expect(sheet()?.textContent).not.toContain('Buying for')
+    await tapOnSheet('Pay $4.99')
+    expect(sheet()).toBeNull()
+    expect(asked(fetch, CHECKOUT_PATH)).toBe(0)
+    expect(page.saveToot).not.toHaveBeenCalled()
+  })
+
+  it('closes the sheet and says so when the session ended before Pay, with no charge started', async () => {
+    const fetch = server({ checkout: { error: 'unauthorized' }, checkoutStatus: 401 })
+    const assign = vi.fn()
+    vi.spyOn(window, 'location', 'get').mockReturnValue({
+      ...window.location,
+      origin: window.location.origin,
+      assign
+    } as Location)
+    await render()
+    await tapSave()
+    expect(sheet()?.textContent).toContain('Buying for a@example.test.')
+    await tapOnSheet('Pay $4.99')
+    expect(asked(fetch, CHECKOUT_PATH)).toBe(1)
+    expect(sheet()).toBeNull()
+    expect(container.textContent).toContain("Couldn't start the payment.")
+    expect(assign).not.toHaveBeenCalled()
     expect(page.saveToot).not.toHaveBeenCalled()
   })
 
@@ -417,14 +479,16 @@ describe('Save to Toots, as a guest', () => {
     expect(fetch).not.toHaveBeenCalled()
     expect(sheet()).toBeNull()
 
-    // The step signs in and closes: on to the offer.
+    // The step signs in and closes: on to the offer, under the account just made, and on to Pay.
     page.account = signedIn
     page.stepOpen = false
     await render()
     expect(asked(fetch, ACCESS_PATH)).toBe(1)
     expect(asked(fetch, CHECKOUT_PATH)).toBe(0)
-    expect(sheet()).not.toBeNull()
+    expect(sheet()?.textContent).toContain('Buying for a@example.test.')
     expect(page.saveToot).not.toHaveBeenCalled()
+    await tapOnSheet('Pay $4.99')
+    expect(asked(fetch, CHECKOUT_PATH)).toBe(1)
   })
 
   it('saves once the step signs in to an account with Full Access', async () => {

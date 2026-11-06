@@ -120,7 +120,8 @@ test('a guest who signs in at Save pays $4.99, and the Toot is saved to the acco
 
   // Signed in, Save goes on to the offer by itself, and paid, the Toot is saved.
   const offer = page.getByTestId('full-access-sheet')
-  await expect(offer).toContainText('$4.99, once.')
+  await expect(offer).toContainText('Keep this Toot, and every one after it.')
+  await expect(offer).toContainText(`Buying for ${email}.`)
   await expectTappable(offer.getByRole('button', { name: 'Pay $4.99' }))
   await expectTappable(offer.getByRole('button', { name: 'Not now' }))
   await payOnTheSheet(page)
@@ -173,6 +174,75 @@ test('cancelled at the checkout, the Toot is still unsaved, and paying saves tha
   expect(await checkoutToot(page)).toBe(toot)
   await payAtTheDevCheckout(page)
   expect(await recordingsStored(page, 'toots')).toBe(1)
+})
+
+test('the offer names the buyer and fits one screen with the Toot above it, on a small phone too', async ({
+  page,
+  request
+}, testInfo) => {
+  test.setTimeout(180_000)
+  await needsTheFixtureLibrary(request)
+  // A long address, the most lines the sheet gets. CI's Linux draws it in DejaVu Sans, wider than
+  // a phone's font, so the price card's line wraps there at 375 wide too.
+  const email = newEmail(testInfo, 'a-really-rather-long-address').replace(
+    '@example.com',
+    '@a-long-mail-domain.example.test'
+  )
+  await page.addInitScript(skipWelcome)
+  await page.goto('/profile/')
+  await signInByApi(page, email)
+  await page.reload()
+  await loadTheFixtureLibrary(page)
+  await openASong(page, 'mary')
+
+  await page.getByRole('button', { name: 'Save to Toots' }).click()
+  const offer = page.getByTestId('full-access-sheet')
+  await expect(offer).toContainText(`Buying for ${email}.`)
+  await expect(offer.getByRole('link', { name: '14 days to get your money back' })).toHaveAttribute(
+    'href',
+    '/support/'
+  )
+  for (const { smallest, ...screen } of [
+    { width: 375, height: 667 },
+    { width: 390, height: 844 },
+    // Small iPhones, with Safari's bars. The Toot's Play and state are behind the sheet here.
+    { width: 375, height: 553, smallest: true },
+    { width: 320, height: 568, smallest: true }
+  ]) {
+    await page.setViewportSize(screen)
+    await expect(async () => {
+      const box = await offer.boundingBox()
+      expect(box?.y ?? 0).toBeGreaterThan(0)
+      // The Toot's title, Play and state are on the screen, all of each above the sheet.
+      for (const shown of smallest
+        ? []
+        : [
+            page.locator('#app h1'),
+            page.getByTestId('song-creator-play'),
+            page.getByTestId('song-creator-state')
+          ]) {
+        await expect(shown).toBeVisible()
+        const above = await shown.boundingBox()
+        expect(above?.y ?? -1).toBeGreaterThanOrEqual(0)
+        expect(
+          (above?.y ?? screen.height) + (above?.height ?? 0),
+          `${shown} is above the sheet at ${screen.width}x${screen.height}`
+        ).toBeLessThanOrEqual(box?.y ?? 0)
+      }
+      // All of it is on the screen, with nothing to scroll to.
+      expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(screen.height)
+      const { scrollHeight, clientHeight } = await offer.evaluate(sheet => ({
+        scrollHeight: sheet.scrollHeight,
+        clientHeight: sheet.clientHeight
+      }))
+      expect(
+        scrollHeight,
+        `the sheet has nothing to scroll to at ${screen.width}x${screen.height}`
+      ).toBeLessThanOrEqual(clientHeight)
+    }).toPass({ timeout: 2_000 })
+    await expectTappable(offer.getByRole('button', { name: 'Pay $4.99' }))
+    await expectTappable(offer.getByRole('button', { name: 'Not now' }))
+  }
 })
 
 test('Not now on the offer saves nothing, and starts no checkout', async ({
@@ -244,7 +314,7 @@ test('a refund ends Full Access: the saved Toot stays, and the next Save offers 
   await openASong(page, 'hot-cross-buns')
   await page.getByRole('button', { name: 'Save to Toots' }).click()
   const offer = page.getByTestId('full-access-sheet')
-  await expect(offer).toContainText('$4.99, once.')
+  await expect(offer).toContainText('Once, no subscription')
   await offer.getByRole('button', { name: 'Not now' }).click()
   await expect(offer).toBeHidden()
 

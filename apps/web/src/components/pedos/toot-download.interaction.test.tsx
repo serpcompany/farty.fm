@@ -29,7 +29,11 @@ const aToot = (fields: Pick<Toot, 'isAudioMissing'> = {}): Toot => ({
 const page = vi.hoisted(() => ({
   toots: [] as Toot[],
   search: { id: 'toot-1' } as Record<string, string>,
-  account: { status: 'signedIn', id: 'account-1' } as { status: string; id?: string },
+  account: { status: 'signedIn', id: 'account-1' } as {
+    status: string
+    id?: string
+    email?: string
+  },
   afterStep: null as (() => void) | null,
   markAudioMissing: vi.fn(),
   openStep: vi.fn(),
@@ -420,12 +424,32 @@ describe('Download without Full Access', () => {
   it('offers the sheet, and gives no file', async () => {
     await showToots()
     await tapDownload()
-    expect(sheet()?.textContent).toContain('and download them')
+    expect(sheet()?.textContent).toContain('Download any saved Toot as a file')
     expect(calls.loadTootAudio).not.toHaveBeenCalled()
     expect(calls.handOverFile).not.toHaveBeenCalled()
     await tapButton('Not now')
     await settle()
     expect(calls.startDownloadCheckout).not.toHaveBeenCalled()
+  })
+
+  it('doesn’t say “this Toot” of one that’s already saved', async () => {
+    await showToots()
+    await tapDownload()
+    expect(sheet()?.querySelector('h2')?.textContent).toBe('Keep every Toot you make.')
+    expect(sheet()?.textContent).not.toContain('Keep this Toot')
+  })
+
+  it('says whose email it’s under, as Save does', async () => {
+    page.account = { status: 'signedIn', id: 'account-1', email: 'buyer@example.com' }
+    await showToots()
+    await tapDownload()
+    expect(sheet()?.textContent).toContain('Buying for buyer@example.com.')
+  })
+
+  it('leaves the email line out when the account says no email', async () => {
+    await showToots()
+    await tapDownload()
+    expect(sheet()?.textContent).not.toContain('Buying for')
   })
 
   it('goes to Checkout for this Toot on Pay', async () => {
