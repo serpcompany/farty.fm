@@ -1,6 +1,15 @@
 'use client'
 
-import { Ellipsis, ListMusic, Pencil, Play, Square, Trash2, TriangleAlert } from 'lucide-react'
+import {
+  Download,
+  Ellipsis,
+  ListMusic,
+  Pencil,
+  Play,
+  Square,
+  Trash2,
+  TriangleAlert
+} from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -27,6 +36,7 @@ import { PAD_TOOT_TITLE, type Toot, tootDetails } from '@/lib/toot'
 import { cn } from '@/lib/utils'
 import { tootPlayback, usePedos } from './pedos-provider'
 import { type ShareFlow, ShareMenuItems, useShare, useShares } from './share-recording'
+import { type TootDownload, useTootDownload } from './toot-download'
 
 /** Where a Toot's screen is: one page for every Toot, since a Toot's id is made on the device. */
 export function tootPage(id: string): string {
@@ -35,8 +45,8 @@ export function tootPage(id: string): string {
 
 /**
  * Every Toot, newest first. Tap a row's play button to play it, or the row to open it; its More
- * menu shares, renames or deletes it (the iPhone app's long-press and swipe; Share is ADR 0020's).
- * As the iPhone app's `TootsTab`.
+ * menu shares, downloads, renames or deletes it (the iPhone app's long-press and swipe; Share is
+ * ADR 0020's, Download #408's). As the iPhone app's `TootsTab`.
  */
 export function TootsScreen() {
   const pedos = usePedos()
@@ -190,6 +200,7 @@ function TootRow({
     pedos.tootPlayFailed === toot.id ? `${songTitle} · Couldn't play` : tootDetails(toot, songTitle)
   const Icon = toot.isAudioMissing ? TriangleAlert : isPlaying ? Square : Play
   const share = useShare({ kind: 'toots', id: toot.id, name: toot.title })
+  const download = useTootDownload(toot)
 
   return (
     <li
@@ -225,26 +236,34 @@ function TootRow({
         // A Toot that can't play here has nothing to share, but once shared (from another
         // device, say) its link plays from the account, so Share link and Stop sharing stay.
         share={toot.isAudioMissing && !share.link ? undefined : share}
+        download={toot.isAudioMissing ? undefined : download}
         onRename={onRename}
         onDelete={onDelete}
       />
       {share.dialogs}
+      {download.dialogs}
     </li>
   )
 }
 
-/** Rename and Delete, behind More, and on a Toots row, Share first. */
+/**
+ * Rename and Delete, behind More, with Download above them when the Toot's audio is here to give,
+ * and on a Toots row, Share first. It holds a spinner while Download works.
+ */
 export function TootMenu({
   title,
   share,
+  download,
   onRename,
   onDelete
 }: {
   title: string
   share?: ShareFlow
+  download?: TootDownload
   onRename: () => void
   onDelete: () => void
 }) {
+  const downloading = download?.busy ?? false
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -254,13 +273,21 @@ export function TootMenu({
             size="icon"
             className="size-11 shrink-0"
             aria-label={`More for ${title}`}
+            aria-busy={downloading}
+            disabled={downloading}
           />
         }
       >
-        <Ellipsis className="size-5" />
+        {downloading ? <Spinner className="size-5" /> : <Ellipsis className="size-5" />}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-auto">
         {share && <ShareMenuItems flow={share} />}
+        {download && (
+          <DropdownMenuItem className="min-h-11 px-3 text-base" onClick={download.start}>
+            <Download />
+            Download
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem className="min-h-11 px-3 text-base" onClick={onRename}>
           <Pencil />
           Rename

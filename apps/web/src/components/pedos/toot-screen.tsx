@@ -13,17 +13,19 @@ import { usePedos } from './pedos-provider'
 import { previousPage } from './previous-page'
 import { ShareButton, useShares } from './share-recording'
 import { TootLayout } from './song-creator'
+import { useTootDownload } from './toot-download'
 import { DeleteTootDialog, RenameTootDialog, TootMenu } from './toots-screen'
 import { useSongNotes } from './use-song-notes'
 
 /**
  * A Toot's screen, opened from the Toots tab: Song Creator's layout without Save, showing which
  * Recording played which notes, or for a Sound Pad Toot its Play and what it played (ADR 0017).
- * Share is in its header (ADR 0020), and Rename and Delete in its More menu. As the iPhone app's
- * `TootDetailView`. The Toot is `?id=`, so one page serves every Toot, offline too.
+ * Share is in its header (ADR 0020), and Download, Rename and Delete in its More menu. As the
+ * iPhone app's `TootDetailView`. The Toot is `?id=`, so one page serves every Toot, offline too.
  */
 export function TootScreen() {
-  const id = useSearchParams().get('id') ?? ''
+  const search = useSearchParams()
+  const id = search.get('id') ?? ''
   const pedos = usePedos()
   const router = useRouter()
   const [isRenaming, setIsRenaming] = useState(false)
@@ -111,8 +113,8 @@ export function TootScreen() {
               {(!toot.isAudioMissing || isShared) && (
                 <ShareButton kind="toots" id={toot.id} name={toot.title} className="size-11" />
               )}
-              <TootMenu
-                title={toot.title}
+              <TootScreenMenu
+                toot={toot}
                 onRename={() => setIsRenaming(true)}
                 onDelete={() => setIsConfirmingDelete(true)}
               />
@@ -128,6 +130,8 @@ export function TootScreen() {
       ) : !toot ? (
         <p className="flex flex-1 items-center justify-center px-6 text-center text-muted-foreground">
           {pedos.tootsFailed ? "Couldn't load your Toots." : "Couldn't find this Toot."}
+          {search.get('checkout') === 'done' &&
+            ' Your payment went through: Full Access is on your account, wherever you sign in.'}
         </p>
       ) : toot.songId === null ? (
         <div className="px-4">
@@ -193,5 +197,29 @@ export function TootScreen() {
         }}
       />
     </div>
+  )
+}
+
+/** The screen's More menu, where Download is, and where Checkout comes back to for it (#408). */
+function TootScreenMenu({
+  toot,
+  onRename,
+  onDelete
+}: {
+  toot: Toot
+  onRename: () => void
+  onDelete: () => void
+}) {
+  const download = useTootDownload(toot, useSearchParams().get('checkout') === 'done')
+  return (
+    <>
+      <TootMenu
+        title={toot.title}
+        download={toot.isAudioMissing ? undefined : download}
+        onRename={onRename}
+        onDelete={onDelete}
+      />
+      {download.dialogs}
+    </>
   )
 }

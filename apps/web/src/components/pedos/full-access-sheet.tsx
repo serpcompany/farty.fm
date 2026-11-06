@@ -14,10 +14,10 @@ const BENEFITS = [
 ]
 
 /**
- * What Save asks of an account without Full Access (ADR 0022): what it gets, the price, the money
- * back and who's buying, with Pay and Not now, on one phone screen. Song Creator's Toot stays in view
- * above it. The Sound Pad's take sits under the Pads, so there it's covered. Pay stays busy while the
- * page goes to Checkout.
+ * What Save, or a saved Toot's Download, asks of an account without Full Access (ADR 0022): what it
+ * gets, the price, the money back and who's buying, with Pay and Not now, on one phone screen. Song
+ * Creator's Toot stays in view above it. The Sound Pad's take sits under the Pads, so there it's
+ * covered. Pay stays busy while the page goes to Checkout.
  *
  * `email` is the account's, which Checkout is given. A guest makes an account before this opens, so
  * it's theirs by then. With no email to show, the line is left out.

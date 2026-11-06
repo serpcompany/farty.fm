@@ -230,7 +230,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 **WHAT'S ON THE SCREEN:**
 - Rows with a play button, title, origin (the Song's title; "AI · Happy" once AI Song Creator returns), date and length
 **PRIMARY ACTION:** Play (the row's play button).
-**SECONDARY ACTIONS:** Tap the row to open the Toot. Long-press for Rename or Delete (with confirmation).
+**SECONDARY ACTIONS:** Tap the row to open the Toot. Long-press for Rename or Delete (with confirmation). On the web, the row's More menu has Share, Download (#408), Rename and Delete.
 **STATES:**
 - Empty ("Nothing yet. Make one in Compose.")
 - Populated
@@ -249,7 +249,7 @@ Reference apps for feel (in place of screenshots): Apple Voice Memos for recordi
 - Play/Stop and the note view with its playhead
 - the Recordings used, as in Song Creator; a Recording deleted since shows as "Recording deleted", with the note it played and no play button
 **PRIMARY ACTION:** Play.
-**SECONDARY ACTIONS:** Tap a Recording or a note, as in Song Creator. Rename and Delete in the toolbar menu; Delete goes back to the list.
+**SECONDARY ACTIONS:** Tap a Recording or a note, as in Song Creator. Rename and Delete in the toolbar menu; Delete goes back to the list. On the web, Download (#408) is in that menu too.
 **STATES:** Default, Playing, Note selected, Recording deleted.
 **NAVIGATION TYPE:** Push.
 **NOTES:** A Toot keeps its Arrangement from when it was made, and plays its own audio.

@@ -86,6 +86,9 @@ vi.mock('./use-fart-choices', () => ({
   changeFartChoices: vi.fn()
 }))
 vi.mock('./share-recording', () => ({ ShareButton: () => null, useShares: () => null }))
+vi.mock('./toot-download', () => ({
+  useTootDownload: () => ({ busy: false, start: () => {}, dialogs: null })
+}))
 vi.mock('./toots-screen', () => ({
   TootMenu: () => null,
   RenameTootDialog: () => null,
