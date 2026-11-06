@@ -97,7 +97,7 @@ export function formattedFartLength(recording: Recording): string {
 }
 
 /** A fart `seconds` long as rows show it, rounded down. */
-function formattedFartSeconds(seconds: number): string {
+export function formattedFartSeconds(seconds: number): string {
   return formattedLength(Math.floor(seconds * 10 + 1e-9) / 10)
 }
 

@@ -101,6 +101,7 @@ export function SharedTootParts({ parts, player }: { parts: Parts; player: Share
                 isPlaying={isPlaying}
                 isHighlighted={isHighlighted}
                 badge={badge}
+                disabled={!fart.playable}
                 onTap={() => {
                   setTapped(pitch)
                   if (isPlaying) player.stop()

@@ -24,6 +24,7 @@ export function RecordingUsedRowView({
   isHighlighted,
   isYourPick = false,
   badge,
+  disabled = false,
   onTap
 }: {
   name: string
@@ -37,6 +38,8 @@ export function RecordingUsedRowView({
   isHighlighted: boolean
   isYourPick?: boolean
   badge?: ReactNode
+  /** It has nothing to play. */
+  disabled?: boolean
   onTap: () => void
 }) {
   return (
@@ -49,9 +52,10 @@ export function RecordingUsedRowView({
     >
       <button
         type="button"
-        className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-lg text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-lg text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
         aria-label={label}
         aria-pressed={isPlaying}
+        disabled={disabled}
         onClick={onTap}
       >
         <span

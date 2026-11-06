@@ -1263,6 +1263,10 @@ describe('Where a shared fart was made (#444)', () => {
 })
 
 describe("What a shared Toot shows of what it's made of (#443)", () => {
+  /** The frames of the fart `recordingMetadata` says analysis found, 0.01 s to 0.09 s, at `RATE`. */
+  const FOUND_START = 80
+  const FOUND_END = 720
+
   /** What the page gets for the link at `url`. */
   async function partsOf(url: string) {
     const { handle, id } = linkParts(url)
@@ -1302,17 +1306,84 @@ describe("What a shared Toot shows of what it's made of (#443)", () => {
     return { ...alice, url: await urlOf(await share.put(T1, alice, 'toots')) }
   }
 
-  it('plays each fart alone, by its place, and only the part it plays', async () => {
+  it('plays each fart alone, by its place, and only the fart', async () => {
     const { url } = await songToot()
     const first = await share.fart(url, 0)
     expect(first.headers.get('cache-control')).toBe('private, no-cache')
     const etag = first.headers.get('etag')
+    // It says nothing of where the fart sits in its take.
+    expect(etag).toMatch(/^"[0-9a-f]{64}"$/)
     expect(await framesOf(first)).toEqual(range(2000, 4000))
-    expect(await framesOf(await share.fart(url, 1))).toEqual(range(0, RATE))
+    expect(await framesOf(await share.fart(url, 1))).toEqual(range(FOUND_START, FOUND_END))
 
     // Each play asks D1 again, as the link's own audio does.
     const again = await share.fart(url, 0, { headers: { 'if-none-match': etag ?? '' } })
     expect(again.status).toBe(304)
+  })
+
+  /** Alice's Toot `T1`, shared, played by `R1`, uploaded with `fields` and never placed. */
+  async function tootOfOneFart(fields: Record<string, unknown>) {
+    const alice = await signUp('alice')
+    expect((await share.pick('alice', alice)).status).toBe(201)
+    const metadata = recordingMetadata(R1, { seconds: 1, sampleRate: RATE, ...fields })
+    expect((await api.put('recordings', R1, uploadBody(metadata, take()), alice)).status).toBe(201)
+    const recordingForPitch = { 60: R1 }
+    await saveToot(
+      T1,
+      alice,
+      tootWav(),
+      tootMetadata(T1, { arrangement: { transposition: 0, recordingForPitch } })
+    )
+    return { ...alice, url: await urlOf(await share.put(T1, alice, 'toots')) }
+  }
+
+  it('never serves the rest of a long take, only the fart analysis found in it', async () => {
+    // A take with talking around its fart: only 0.25 s to 0.5 s of it is the fart.
+    const { analysis } = recordingMetadata(R1) as { analysis: { analysis: object } }
+    const { url } = await tootOfOneFart({
+      waveform: [0.1, 0.2, 0.3, 0.4],
+      analysis: {
+        state: 'analyzed',
+        analysis: { ...analysis.analysis, gestureStartSeconds: 0.25, gestureEndSeconds: 0.5 }
+      }
+    })
+    expect(await framesOf(await share.fart(url, 0))).toEqual(range(2000, 4000))
+
+    const [row] = (await partsOf(url)).rows
+    expect(row.fart).toMatchObject({ length: '0.2 s', levels: [0.2], playable: true })
+  })
+
+  it("has nothing to play of a fart analysis hasn't found, with no Trim", async () => {
+    const { url } = await tootOfOneFart({ analysis: { state: 'notAnalyzed' } })
+    expect((await share.fart(url, 0)).status).toBe(404)
+
+    const [row] = (await partsOf(url)).rows
+    expect(row.fart).toMatchObject({ name: 'Recording 1', length: '', levels: [], playable: false })
+  })
+
+  it("serves a stored Trim's fart without what else its handles hold, even before analysis", async () => {
+    const trim = {
+      startSeconds: 0.25,
+      endSeconds: 0.75,
+      fart: { startSeconds: 0.375, endSeconds: 0.5 }
+    }
+    const alice = await tootOfOneFart({ analysis: { state: 'notAnalyzed' }, trim })
+    expect(await framesOf(await share.fart(alice.url, 0))).toEqual(range(3000, 4000))
+
+    // The Recording's own link serves all its owner left between the handles.
+    const { url } = (await (await share.put(R1, alice)).json()) as { url: string }
+    expect(await framesOf(await share.audio(url))).toEqual(range(2000, 6000))
+  })
+
+  it('never serves what its handles cut off, when its fart reaches past them', async () => {
+    // A fart may start half a sample before its handle (`parseTrim`).
+    const trim = {
+      startSeconds: 0.25,
+      endSeconds: 0.5,
+      fart: { startSeconds: 0.2495, endSeconds: 0.5 }
+    }
+    const { url } = await tootOfOneFart({ trim })
+    expect(await framesOf(await share.fart(url, 0))).toEqual(range(2000, 4000))
   })
 
   it('answers 404 for a place that names no fart', async () => {
@@ -1439,7 +1510,7 @@ describe("What a shared Toot shows of what it's made of (#443)", () => {
       notes: [
         { start: 0, dur: 0.25, pitch: 0 },
         // Cut where the Toot ends.
-        { start: 0.25, dur: 0.75, pitch: 1 },
+        { start: 0.25, dur: 0.09 - 0.01, pitch: 1 },
         { start: 0.5, dur: 0.25, pitch: 0 }
       ],
       pitches: [0, 1]
@@ -1449,7 +1520,7 @@ describe("What a shared Toot shows of what it's made of (#443)", () => {
       { plays: null, pitch: 1 }
     ])
     expect(JSON.stringify(parts)).not.toContain(R1)
-    expect(await framesOf(await share.fart(url, 1))).toEqual(range(0, RATE))
+    expect(await framesOf(await share.fart(url, 1))).toEqual(range(FOUND_START, FOUND_END))
 
     // A tap of a Recording since deleted keeps its place on the roll.
     expect((await api.delete('recordings', R2, alice)).status).toBe(204)

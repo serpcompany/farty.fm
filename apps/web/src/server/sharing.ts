@@ -1,5 +1,5 @@
 import type { Database } from '@/db/database'
-import { itemStatus, type Kind, type RecordingRow } from '@/db/library'
+import { itemStatus, type Kind } from '@/db/library'
 import {
   addReport,
   addShare,
@@ -26,7 +26,7 @@ import { songIndex } from '@/lib/catalog/song-index.generated'
 import { NOT_SAID, recordedInOf } from '@/lib/fart-place'
 import { handleProblem, normalizeHandle, profilePath, suggestHandle } from '@/lib/handle'
 import { noteName } from '@/lib/pitch'
-import { formattedFartLength } from '@/lib/pitch-coverage'
+import { formattedFartSeconds } from '@/lib/pitch-coverage'
 import { type Recording, recordingName, type Trim } from '@/lib/recordings'
 import { servedOrigin } from '@/lib/site'
 import { slugify } from '@/lib/slug'
@@ -327,6 +327,26 @@ export function sharedPart(recording: Recording): Trim {
     : { startSeconds: 0, endSeconds: recording.seconds }
 }
 
+/**
+ * What a shared Toot's row plays and draws: only the fart. That's the fart between its Trim's
+ * handles, or what analysis found. The rest of a take is whatever else the microphone heard, and
+ * sharing a Toot doesn't share that. Null before analysis has found it, when there's nothing to play.
+ */
+export function tootFartPart({ trim, analysis }: Recording): Trim | null {
+  const fart = trim
+    ? trim.fart
+    : analysis.state === 'analyzed'
+      ? {
+          startSeconds: analysis.analysis.gestureStartSeconds,
+          endSeconds: analysis.analysis.gestureEndSeconds
+        }
+      : null
+  if (!fart) return null
+  const startSeconds = Math.max(fart.startSeconds, trim?.startSeconds ?? 0)
+  const endSeconds = Math.min(fart.endSeconds, trim?.endSeconds ?? Number.POSITIVE_INFINITY)
+  return endSeconds > startSeconds ? { startSeconds, endSeconds } : null
+}
+
 /** The bars of a whole take's `waveform` that fall in `part`. */
 export function partBars(waveform: number[], seconds: number, part: Trim): number[] {
   if (waveform.length === 0 || seconds <= 0) return waveform
@@ -352,8 +372,8 @@ function fewerBars(levels: number[], count: number): number[] {
   )
 }
 
-/** How long a tap of a deleted Recording is drawn, in seconds, since its length is gone with it. */
-const DELETED_TAP_SECONDS = 0.25
+/** How long a tap is drawn, in seconds, when its fart's length isn't known: deleted, or not found. */
+const UNKNOWN_TAP_SECONDS = 0.25
 
 /**
  * What a shared Toot's page shows of what it's made of: its roll, and each fart it plays by its
@@ -372,16 +392,17 @@ export async function sharedTootParts(
   const fartOf = (id: string): SharedFart | null => {
     const recording = live.get(id)
     if (!recording) return null
+    const part = tootFartPart(recording)
     return {
       ...(showPlaces ? recordedInOf(places.get(id) ?? null) : NOT_SAID),
       place: ids.indexOf(id),
       name: recordingName(recording),
-      length: formattedFartLength(recording),
-      levels: fewerBars(
-        partBars(recording.waveform, recording.seconds, sharedPart(recording)),
-        FART_ROW_BARS
-      ),
-      recordedAt: recording.createdAt
+      length: part ? formattedFartSeconds(part.endSeconds - part.startSeconds) : '',
+      levels: part
+        ? fewerBars(partBars(recording.waveform, recording.seconds, part), FART_ROW_BARS)
+        : [],
+      recordedAt: recording.createdAt,
+      playable: part !== null
     }
   }
 
@@ -389,9 +410,8 @@ export async function sharedTootParts(
     const { recordings: farts, taps } = toot.performance
     const tapSeconds = farts.map(id => {
       const recording = live.get(id)
-      if (!recording) return DELETED_TAP_SECONDS
-      const part = sharedPart(recording)
-      return part.endSeconds - part.startSeconds
+      const part = recording ? tootFartPart(recording) : null
+      return part ? part.endSeconds - part.startSeconds : UNKNOWN_TAP_SECONDS
     })
     return {
       song: {
@@ -493,7 +513,14 @@ async function cutWav(
   const bytes = new Uint8Array(HEADER_BYTES + length)
   bytes.set(wavHeader(header.sampleRate, length))
   bytes.set(new Uint8Array(await body.arrayBuffer()), HEADER_BYTES)
-  return { bytes, etag: `"${body.etag}-${start}-${end}"` }
+  return { bytes, etag: await partEtag(body.etag, start, end) }
+}
+
+/** A part's ETag: it changes with the part, and doesn't say where in its take the part sits. */
+async function partEtag(objectEtag: string, start: number, end: number): Promise<string> {
+  const name = new TextEncoder().encode(`${objectEtag}-${start}-${end}`)
+  const hash = await crypto.subtle.digest('SHA-256', name)
+  return `"${[...new Uint8Array(hash)].map(byte => byte.toString(16).padStart(2, '0')).join('')}"`
 }
 
 /** Shared audio, as it's served: a WAV's bytes or stream, its size and its ETag. */
@@ -526,18 +553,25 @@ export async function sharedAudio(
   }
   const shared = await findSharedRecording(db, handle, link)
   if (!shared) return apiError(404, 'not_found')
-  return recordingPartAudio(media, request, shared.row.share.userId, shared.row.recording)
+  const { share, recording } = shared.row
+  return recordingPartAudio(
+    media,
+    request,
+    share.userId,
+    recording.id,
+    sharedPart(toRecording(recording))
+  )
 }
 
-/** The part of a Recording a link serves, as a WAV of its own (`sharedPart`, `cachedAudio`). */
+/** `part` of a Recording, as a WAV of its own (`cachedAudio`). */
 function recordingPartAudio(
   media: R2Bucket,
   request: Request,
   userId: string,
-  row: RecordingRow
+  recordingId: string,
+  part: Trim
 ): Promise<Response> {
-  const key = audioKey(userId, 'recordings', row.id)
-  const part = sharedPart(toRecording(row))
+  const key = audioKey(userId, 'recordings', recordingId)
   return cachedAudio(request, sharedAudioCacheKey(request, key, part), async () => {
     const cut = await cutWav(media, key, part)
     return cut && { body: cut.bytes, size: cut.bytes.byteLength, etag: cut.etag }
@@ -549,9 +583,10 @@ const FART_PLACE = /^\d{1,3}$/
 
 /**
  * `GET /@<handle>/t/<link>/farts/<place>/audio/`: one fart a shared Toot plays, by its place in
- * `tootRecordingIds`, for anyone with the Toot's link. As a Recording's link serves it: only the
- * part it plays. The Toot's share is checked in D1 first, so it stops with the link, and a
- * Recording since deleted answers 404, though the Toot's own audio still plays it.
+ * `tootRecordingIds`, for anyone with the Toot's link. Only the fart, never the rest of its take
+ * (`tootFartPart`). The Toot's share is checked in D1 first, so it stops with the link. A Recording
+ * since deleted answers 404, though the Toot's own audio still plays it, and so does one whose fart
+ * analysis hasn't found.
  */
 export async function sharedFartAudio(
   { db, media }: Stores,
@@ -568,7 +603,9 @@ export async function sharedFartAudio(
   if (id === undefined) return notFound()
   const [row] = await liveRecordingsOf(db, share.userId, [id])
   if (!row) return notFound()
-  return recordingPartAudio(media, request, share.userId, row)
+  const part = tootFartPart(toRecording(row))
+  if (!part) return notFound()
+  return recordingPartAudio(media, request, share.userId, row.id, part)
 }
 
 /**

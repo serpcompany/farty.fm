@@ -40,8 +40,9 @@ export default function PrivacyPage() {
           handle and the Recording&apos;s name, note, length, waveform, when you recorded it and the
           city you recorded it in. A Toot&apos;s page shows its name, Song, length, waveform and
           notes, and the name, note, length, waveform, recording time and city of each Recording it
-          plays, each of which anyone on the page can play on its own. Nothing else about you: never
-          your email or your other Recordings and Toots.
+          plays. Anyone on the page can play each of those farts on its own, but not the rest of the
+          recording around it. Nothing else about you: never your email or your other Recordings and
+          Toots.
         </li>
         <li>
           When a Recording first uploads within an hour of recording it, Farty keeps the city,
