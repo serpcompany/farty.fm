@@ -241,6 +241,7 @@ describe('the email about a sale', () => {
 
   afterEach(() => {
     vi.useRealTimers()
+    vi.restoreAllMocks()
   })
 
   it('says the product, the price and where Stripe shows the payment', () => {
@@ -336,6 +337,46 @@ describe('the email about a sale', () => {
     finish(new Error('late'))
     await vi.advanceTimersByTimeAsync(0)
     expect(lines).toEqual(['email_failed send_timeout', 'email_failed send_error'])
+  })
+
+  it('says in its log lines that they’re about a sale, and never who or what', async () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const failing = {
+      async send() {
+        throw new Error(`devin@serp.co ${subject}`)
+      }
+    }
+    await createEmailSender({ kind: 'send', binding: sendBinding, from }).sendSale('pi_live_1')
+    await createEmailSender({ kind: 'send', binding: failing, from }).sendSale('pi_live_1')
+    await createEmailSender({ kind: 'capture', mailbox: memoryStore(), from }).sendSale('pi_live_1')
+    await createEmailSender({ kind: 'off', reason: 'not_production' }).sendSale('pi_live_1')
+    expect(info.mock.calls).toEqual([
+      ['email_sent {"kind":"sale"}'],
+      ['email_captured {"kind":"sale"}'],
+      ['email_skipped {"kind":"sale","reason":"not_production"}']
+    ])
+    expect(error.mock.calls).toEqual([['email_failed {"kind":"sale","reason":"send_error"}']])
+  })
+
+  it('leaves a sign-in email’s log lines as they were', async () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const failing = {
+      async send() {
+        throw new Error('fan@example.com 048213')
+      }
+    }
+    const sending = (config: EmailConfig) =>
+      createEmailSender(config).sendSignInCode('fan@example.com', '048213')
+    await sending({ kind: 'send', binding: sendBinding, from })
+    await sending({ kind: 'send', binding: failing, from })
+    await sending({ kind: 'off', reason: 'email_not_configured' })
+    expect(info.mock.calls).toEqual([
+      ['email_sent {}'],
+      ['email_skipped {"reason":"email_not_configured"}']
+    ])
+    expect(error.mock.calls).toEqual([['email_failed {"reason":"send_error"}']])
   })
 
   it('leaves no timer behind once it’s sent', async () => {

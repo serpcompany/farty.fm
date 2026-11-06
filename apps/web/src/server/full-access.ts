@@ -104,8 +104,8 @@ function returnUrl(request: Request, songId: string | null, tootId: string, done
 /**
  * Records the account's purchase paid, and tells the owner if that's what made it paid: every way a
  * purchase gets paid comes through here, and the payment is in D1 before the email starts. The email
- * is awaited so the Worker doesn't drop it, and `sendSale` neither throws nor waits long. True when
- * the account has Full Access now.
+ * goes after the answer, so neither Stripe nor the buyer waits on it: `waitUntil` keeps the Worker
+ * going for it, and `sendSale` never throws. True when the account has Full Access now.
  */
 async function recordFullAccessPaid(
   { db }: Pick<Stores, 'db'>,
@@ -116,8 +116,9 @@ async function recordFullAccessPaid(
 ): Promise<boolean> {
   const paid = await markFullAccessPaid(db, userId, checkoutSessionId, paymentIntent)
   if (paid.firstPaid) {
-    const config = saleEmailConfig(getCloudflareContext().env, request.headers.get('host'))
-    await createEmailSender(config).sendSale(paymentIntent)
+    const { env, ctx } = getCloudflareContext()
+    const config = saleEmailConfig(env, request.headers.get('host'))
+    ctx.waitUntil(createEmailSender(config).sendSale(paymentIntent))
   }
   return paid.active
 }

@@ -5,7 +5,14 @@ import * as devCheckoutRoute from '@/app/api/dev/checkout/route'
 import * as checkoutRoute from '@/app/api/full-access/checkout/route'
 import * as accessRoute from '@/app/api/full-access/route'
 import * as webhookRoute from '@/app/api/stripe/webhook/route'
-import { fullAccessPurchase, startFullAccess, tootPayment } from '@/db/payments'
+import {
+  fullAccessPurchase,
+  hasFullAccess,
+  markFullAccessPaid,
+  refundFullAccess,
+  startFullAccess,
+  tootPayment
+} from '@/db/payments'
 import { handles, stepCounts } from '@/db/schema'
 import { FULL_ACCESS_PRICE, FULL_ACCESS_PRICE_LABEL } from '@/lib/pricing'
 import { listCapturedEmails } from '@/server/dev-mailbox'
@@ -35,10 +42,18 @@ import {
 
 /** What the Worker's env has on top of wrangler.jsonc's, as each test sets it. */
 const extraEnv = vi.hoisted(() => ({}) as Record<string, unknown>)
+/** What's running after the answer, as the Worker's `ctx.waitUntil` keeps it. */
+const afterAnswer = vi.hoisted(() => [] as Promise<unknown>[])
 vi.mock('@opennextjs/cloudflare', async () => {
   const { env } = await import('cloudflare:test')
-  return { getCloudflareContext: () => ({ env: { ...env, ...extraEnv } }) }
+  const ctx = { waitUntil: (work: Promise<unknown>) => void afterAnswer.push(work) }
+  return { getCloudflareContext: () => ({ env: { ...env, ...extraEnv }, ctx }) }
 })
+
+/** Lets everything running after the answer finish. */
+async function workAfterAnswer() {
+  while (afterAnswer.length > 0) await Promise.all(afterAnswer.splice(0))
+}
 
 // Made-up values in Stripe's formats, never real keys.
 const TEST_KEY = 'sk_test_madeUpForTheTests'
@@ -56,7 +71,8 @@ beforeEach(() => {
   for (const key of Object.keys(extraEnv)) delete extraEnv[key]
 })
 
-afterEach(() => {
+afterEach(async () => {
+  await workAfterAnswer()
   vi.restoreAllMocks()
 })
 
@@ -1425,7 +1441,8 @@ describe('the email to the owner about a sale', () => {
       })
       expect(await counted('paid')).toBe(1)
       expect(await hasIt(a)).toBe(true)
-      expect(failed.mock.calls).toEqual([['email_failed {"reason":"send_error"}']])
+      await workAfterAnswer()
+      expect(failed.mock.calls).toEqual([['email_failed {"kind":"sale","reason":"send_error"}']])
 
       expect((await deliver(completed(paidSession(a.id)))).status).toBe(200)
       expect(send).toHaveBeenCalledOnce()
@@ -1448,10 +1465,25 @@ describe('the email to the owner about a sale', () => {
       const a = await buying('A')
       expect((await deliver(completed(paidSession(a.id)))).status).toBe(200)
       expect(await hasIt(a)).toBe(true)
-      expect(skipped.mock.calls).toEqual([['email_skipped {"reason":"email_not_configured"}']])
+      await workAfterAnswer()
+      expect(skipped.mock.calls).toEqual([
+        ['email_skipped {"kind":"sale","reason":"email_not_configured"}']
+      ])
     })
 
-    it('has the payment recorded before a slow send, which the request waits for', async () => {
+    it('sends nothing for a 99¢ session’s Toot', async () => {
+      const send = emailBinding()
+      const a = await signUp('A')
+      await pastPayment(a.id, T1, { paidAt: null })
+      const session = oldSessionFor(a.id, T1, { status: 'complete', payment_status: 'paid' })
+      expect((await deliver(completed({ ...session, livemode: true }))).status).toBe(200)
+      expect((await tootPayment(testDb(), a.id, T1))?.paidAt).toBeInstanceOf(Date)
+      expect(await counted('paid')).toBe(1)
+      expect(afterAnswer).toEqual([])
+      expect(send).not.toHaveBeenCalled()
+    })
+
+    it('answers the webhook before a slow send finishes, with the payment recorded', async () => {
       let finish = () => {}
       const send = emailBinding(
         () =>
@@ -1460,31 +1492,84 @@ describe('the email to the owner about a sale', () => {
           })
       )
       const a = await buying('A')
-      let answered = false
-      const received = deliver(completed(paidSession(a.id))).then(response => {
-        answered = true
-        return response
-      })
-      await vi.waitFor(() => expect(send).toHaveBeenCalledOnce())
+      const answer = await deliver(completed(paidSession(a.id)))
+      expect(answer.status).toBe(200)
+      expect(await answer.json()).toEqual({ received: true })
+      expect(send).toHaveBeenCalledOnce()
       expect((await fullAccessPurchase(testDb(), a.id))?.paidAt).toBeInstanceOf(Date)
-      expect(answered).toBe(false)
+      expect(afterAnswer).toHaveLength(1)
       finish()
-      expect((await received).status).toBe(200)
+      await workAfterAnswer()
+      expect(send).toHaveBeenCalledOnce()
     })
 
-    it('answers the webhook when a send never finishes', async () => {
+    it('answers without waiting for a send that never finishes, and logs it after the limit', async () => {
       const failed = vi.spyOn(console, 'error').mockImplementation(() => {})
       const send = emailBinding(() => new Promise(() => {}))
       const a = await buying('A')
+      // No time passes before the answers: waiting on the send would never answer.
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
-      const received = deliver(completed(paidSession(a.id)))
-      await vi.waitFor(() => expect(send).toHaveBeenCalledOnce())
-      await vi.advanceTimersByTimeAsync(SALE_EMAIL_LIMIT_MS)
-      const answer = await received
+      const answer = await deliver(completed(paidSession(a.id)))
       expect(answer.status).toBe(200)
       expect(await answer.json()).toEqual({ received: true })
+      expect(send).toHaveBeenCalledOnce()
       expect((await fullAccessPurchase(testDb(), a.id))?.paidAt).toBeInstanceOf(Date)
-      expect(failed.mock.calls).toEqual([['email_failed {"reason":"send_timeout"}']])
+      expect(failed).not.toHaveBeenCalled()
+
+      await vi.advanceTimersByTimeAsync(SALE_EMAIL_LIMIT_MS - 1)
+      expect(failed).not.toHaveBeenCalled()
+      await vi.advanceTimersByTimeAsync(1)
+      await workAfterAnswer()
+      expect(failed.mock.calls).toEqual([['email_failed {"kind":"sale","reason":"send_timeout"}']])
+    })
+
+    it('answers the return from Checkout without waiting for a send that never finishes', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      emailBinding(() => new Promise(() => {}))
+      const a = await buying('A')
+      stubStripe(paidSession(a.id))
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      expect(await hasIt(a)).toBe(true)
+      await vi.advanceTimersByTimeAsync(SALE_EMAIL_LIMIT_MS)
+    })
+
+    it('has the email go even if D1 can’t be read after the first UPDATE', async () => {
+      const a = await buying('A')
+      const db = testDb()
+      const read = vi.spyOn(db, 'select').mockImplementation(() => {
+        throw new Error('D1 is down')
+      })
+      expect(await markFullAccessPaid(db, a.id, 'cs_live_first', 'pi_live_first')).toEqual({
+        active: true,
+        firstPaid: true
+      })
+      expect(read).not.toHaveBeenCalled()
+      // A repeat still reads, and may fail: no email hangs on it, since it isn’t the first.
+      await expect(markFullAccessPaid(db, a.id, 'cs_live_first', 'pi_live_first')).rejects.toThrow(
+        'D1 is down'
+      )
+      expect(await counted('paid')).toBe(1)
+    })
+
+    it('never has a refund on an unpaid purchase, so its first payment gives Full Access', async () => {
+      const a = await buying('A')
+      const db = testDb()
+      await markFullAccessPaid(db, a.id, 'cs_live_first', 'pi_live_first')
+      await refundFullAccess(db, 'pi_live_first')
+      expect((await fullAccessPurchase(db, a.id))?.refundedAt).toBeInstanceOf(Date)
+
+      await startFullAccess(db, a.id, 'cs_live_second', FULL_ACCESS_PRICE)
+      const unpaid = { paidAt: null, refundedAt: null, paymentIntent: null }
+      expect(await fullAccessPurchase(db, a.id)).toMatchObject(unpaid)
+      // The old payment's refund, sent again, has nothing to match on the new purchase.
+      await refundFullAccess(db, 'pi_live_first')
+      expect(await fullAccessPurchase(db, a.id)).toMatchObject(unpaid)
+
+      expect(await markFullAccessPaid(db, a.id, 'cs_live_second', 'pi_live_second')).toEqual({
+        active: true,
+        firstPaid: true
+      })
+      expect(await hasFullAccess(db, a.id)).toBe(true)
     })
   })
 
@@ -1508,10 +1593,11 @@ describe('the email to the owner about a sale', () => {
       stubStripe(paidSessionFor(b.id, T1, { id: 'cs_test_second' }))
       expect(await hasIt(b)).toBe(true)
 
+      await workAfterAnswer()
       expect(send).not.toHaveBeenCalled()
       expect(skipped.mock.calls).toEqual([
-        ['email_skipped {"reason":"not_production"}'],
-        ['email_skipped {"reason":"not_production"}']
+        ['email_skipped {"kind":"sale","reason":"not_production"}'],
+        ['email_skipped {"kind":"sale","reason":"not_production"}']
       ])
     })
   })
@@ -1525,6 +1611,7 @@ describe('the email to the owner about a sale', () => {
       expect(await listCapturedEmails(mailbox())).toEqual([])
       expect((await payDev(T1, a)).status).toBe(303)
       expect((await payDev(T1, a)).status).toBe(303)
+      await workAfterAnswer()
       expect(await listCapturedEmails(mailbox())).toEqual([
         expect.objectContaining({
           from: 'Farty <support@farty.fm>',
@@ -1540,6 +1627,7 @@ describe('the email to the owner about a sale', () => {
       const a = await signUp('A')
       await checkout(T1, a)
       expect((await payDev(T1, a)).status).toBe(303)
+      await workAfterAnswer()
       expect(send).not.toHaveBeenCalled()
       expect(await listCapturedEmails(mailbox())).toHaveLength(1)
     })
