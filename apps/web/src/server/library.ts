@@ -320,8 +320,8 @@ export async function putItem(
   if (kind === 'recordings') {
     const recording = parseRecording(upload.metadata, id, wav.sampleRate)
     if (recording) {
-      add = async audioBytes => {
-        const place = await placeOfUpload(db, user.id, recording.createdAt)
+      add = audioBytes => {
+        const place = placeOfUpload(recording.createdAt)
         return insertRecording(db, user.id, { ...recording, place, audioBytes }, maxItems)
       }
     }

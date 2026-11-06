@@ -406,7 +406,7 @@ function AccountSection() {
           </label>
         </li>
         <li>
-          {/* The city on what they share (#444). Off forgets it, on links already sent too. */}
+          {/* The city on what they share (#444). Off forgets every city kept. */}
           <label htmlFor="pedos-fart-places" className={row}>
             Show where I farted
             <Switch

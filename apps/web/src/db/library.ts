@@ -122,7 +122,8 @@ export async function itemStatus(
 
 /**
  * Adds the Recording unless the user already has a row with its id or already has `limit` live
- * Recordings. One statement, so two uploads at once can't both pass the limit. True if added.
+ * Recordings. One statement, so two uploads at once can't both pass the limit, and one can't keep a
+ * place just as Show where I farted goes off. True if added.
  */
 export async function insertRecording(
   db: Database,
@@ -139,7 +140,9 @@ export async function insertRecording(
       ${JSON.stringify(r.waveform)}, ${analysis}, ${r.placedPitch},
       ${r.trim?.startSeconds ?? null}, ${r.trim?.endSeconds ?? null},
       ${r.trim?.fart.startSeconds ?? null}, ${r.trim?.fart.endSeconds ?? null}, ${r.name},
-      ${json(r.place ?? null)}, ${r.audioBytes}, ${d1Now}
+      case when (select show_fart_places from "user" where id = ${userId})
+        then ${json(r.place ?? null)} end,
+      ${r.audioBytes}, ${d1Now}
     where (select count(*) from recordings where user_id = ${userId} and deleted_at is null)
       < ${limit}
     on conflict do nothing
