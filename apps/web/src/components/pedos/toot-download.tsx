@@ -157,7 +157,8 @@ export function useTootDownload(toot: Toot, backFromCheckout = false): TootDownl
     }
     running.current = true
     setBusy(true)
-    const file = (await checkAccess(accountId, returning)) ? await readFile() : null
+    // On the return, a tap waits for the payment too: this address says it's paid, so no sheet here.
+    const file = (await checkAccess(accountId, backFromCheckout)) ? await readFile() : null
     running.current = false
     setBusy(false)
     setReturnDone(true)
@@ -210,7 +211,7 @@ export function useTootDownload(toot: Toot, backFromCheckout = false): TootDownl
   }, [returning, accountId, signedOut])
 
   /** What a return says, which outlasts a note: someone who just paid is looking for a sign of it. */
-  const returnNote = !returning
+  const returnNote = !(returning || (backFromCheckout && busy))
     ? null
     : account.status === 'unreachable'
       ? UNREACHABLE

@@ -526,12 +526,27 @@ describe('Back from Checkout for a Download', () => {
     // Only the file ends the return, so a reload would check again.
     expect(window.location.search).toContain('checkout=done')
 
+    let answer: (access: string | null) => void = () => {}
+    calls.waitForFullAccess.mockReturnValue(new Promise(resolve => (answer = resolve)))
     await tapDownload()
-    expect(calls.waitForFullAccess).toHaveBeenCalledOnce()
-    expect(calls.hasFullAccess).toHaveBeenCalledWith('account-1')
+    expect(note()).toBe('Confirming payment…')
+    await act(async () => answer('save'))
+    await settle()
+    expect(calls.waitForFullAccess).toHaveBeenCalledTimes(2)
     expect(handedFile().name).toBe(FILE_NAME)
     expect(window.location.search).toBe('?id=toot-1')
   }, 10_000)
+
+  it('never offers to pay again here, however long the payment takes', async () => {
+    calls.waitForFullAccess.mockResolvedValue(null)
+    await showToot()
+    await tapDownload()
+    expect(calls.waitForFullAccess).toHaveBeenCalledTimes(2)
+    expect(calls.hasFullAccess).not.toHaveBeenCalled()
+    expect(document.querySelector('[data-testid="full-access-sheet"]')).toBeNull()
+    expect(note()).toBe("Your payment hasn't come through yet. Tap Download to check again.")
+    expect(window.location.search).toContain('checkout=done')
+  })
 
   it('says it’s confirming while the account is read, then waits for the payment', async () => {
     page.account = { status: 'checking' }
