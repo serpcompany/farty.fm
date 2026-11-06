@@ -1,5 +1,5 @@
 import { type APIRequestContext, expect, type Locator, type Page, test } from '@playwright/test'
-import { codeFor, newEmail, ownClient, signInByApi } from './account'
+import { codeFor, longEmail, newEmail, ownClient, signInByApi } from './account'
 import {
   fakeMicrophone,
   fartAndRecord,
@@ -347,7 +347,7 @@ test.describe('on Welcome', () => {
     page
   }, testInfo) => {
     await page.goto('/')
-    await signInByApi(page, newEmail(testInfo, `welcome-fit-${'long'.repeat(8)}`))
+    await signInByApi(page, longEmail(testInfo))
     await page.reload()
     await expect(welcomeOffer(page)).toBeVisible()
     for (const screen of SCREENS) {
@@ -535,7 +535,7 @@ test.describe('at the first Result', () => {
 
   test('the sheet fits each phone, down to the smallest', async ({ page }, testInfo) => {
     await aNewPhone(page)
-    await signInByApi(page, newEmail(testInfo, `result-fit-${'long'.repeat(8)}`))
+    await signInByApi(page, longEmail(testInfo))
     await page.reload()
     await recordAResult(page)
     await page.getByRole('button', { name: 'Done' }).click()
