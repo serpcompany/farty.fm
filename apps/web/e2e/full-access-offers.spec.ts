@@ -19,8 +19,8 @@ test.use({ permissions: ['microphone'], serviceWorkers: 'block' })
 let seen: { stacked: boolean; sheet: boolean }
 
 test.beforeEach(async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'phone', 'Welcome, the first offer, is phone-only')
   seen = { stacked: false, sheet: false }
+  test.skip(testInfo.project.name !== 'phone', 'Welcome, the first offer, is phone-only')
   await page.exposeFunction('sawOnScreen', (what: 'stacked' | 'sheet') => {
     seen[what] = true
   })
@@ -483,7 +483,9 @@ test.describe('at the first Result', () => {
     await payOnTheOffer(page, '/')
     await expect(page.getByText(PAID)).toBeVisible({ timeout: 30_000 })
     await expect(page).toHaveURL(/\/$/)
-    await expect(page.getByTestId('record-button')).toBeVisible()
+    // The note stays clear of the record button, and it can be tapped at once.
+    await page.getByTestId('record-button').click({ timeout: 2_000 })
+    await expect(page.getByTestId('stop-button')).toBeVisible()
   })
 
   test('someone with Full Access goes on with no sheet', async ({ page }, testInfo) => {
@@ -588,9 +590,18 @@ test.describe('back from Checkout', () => {
     await expect(page.getByText('Farty will check again when you save.')).toBeVisible({
       timeout: 60_000
     })
-    // Pay isn't offered, and a reload checks again.
     await expect(page).toHaveURL(/\?offer=done$/)
     await expect(welcomeOffer(page)).toHaveCount(0)
+
+    // A reload checks again, and still doesn't offer Pay.
+    await page.reload()
+    await expect(page).toHaveURL(/\?offer=done$/)
+    await expect(page.getByText('Confirming payment…')).toBeVisible()
+    await expect(page.getByText('Farty will check again when you save.')).toBeVisible({
+      timeout: 60_000
+    })
+    await expect(welcomeOffer(page)).toHaveCount(0)
+    expect(seen.sheet, 'a reload offered Pay to someone who just paid').toBe(false)
 
     await page.getByRole('button', { name: 'Not now' }).click()
     await tab(page, 'Profile').click()
@@ -618,6 +629,59 @@ test.describe('back from Checkout', () => {
     expect(await page.evaluate(() => localStorage.getItem('pedos.fullAccess.paymentPending'))).toBe(
       null
     )
+  })
+
+  test('with a payment on its way, the first Result doesn’t offer Pay', async ({
+    page
+  }, testInfo) => {
+    const sent = offerStepsFrom(page)
+    await page.goto('/')
+    await signInByApi(page, newEmail(testInfo, 'slow-result'))
+    await page.reload()
+    await welcomeOffer(page).click()
+    await expect(sheet(page)).toBeVisible()
+    await page.route(
+      url => url.pathname === '/api/full-access/',
+      route => route.fulfill({ json: { active: false, limitReached: false } })
+    )
+    await payOnTheOffer(page, '/')
+    await expect(page.getByText('Confirming payment…')).toBeVisible()
+    seen.sheet = false
+
+    await allow(page).click()
+    await recordAResult(page)
+    await page.getByRole('button', { name: 'Record another' }).click()
+    await expect(page.getByTestId('record-button')).toBeVisible()
+    await aMoment(page)
+    expect(seen.sheet, 'the first Result offered Pay to someone who just paid').toBe(false)
+    expect(sent).toEqual(['offer-welcome-shown', 'offer-welcome-tapped'])
+  })
+
+  test('from a Song’s page, it comes back to that Song, confirmed', async ({ page }, testInfo) => {
+    await aNewPhone(page)
+    await signInByApi(page, newEmail(testInfo, 'return-song'))
+    await page.reload()
+    const song = '/compose/mary/'
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem('pedos.account')))
+      .not.toBeNull()
+    const started = await page.evaluate(async path => {
+      const response = await fetch('/api/full-access/checkout/', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-pedos-library': localStorage.getItem('pedos.account') as string
+        },
+        body: JSON.stringify({ returnTo: 'page', path })
+      })
+      return response.ok
+    }, song)
+    expect(started).toBe(true)
+    await page.goto(`/dev/checkout/?return=page&path=${encodeURIComponent(song)}`)
+    await page.getByRole('button', { name: 'Pay $4.99' }).click()
+
+    await expect(page.getByText(PAID)).toBeVisible({ timeout: 30_000 })
+    await expect(page).toHaveURL(/\/compose\/mary\/$/)
   })
 })
 

@@ -526,7 +526,7 @@ describe('on a local run, with the dev checkout', () => {
       expect((await checkoutFromOffer('/', a)).status).toBe(200)
     })
 
-    it('still takes a Save’s or a Download’s checkout, with their own checks', async () => {
+    it('still refuses a checkout that says neither a Toot nor a page', async () => {
       const a = await signUp('A')
       expect((await checkoutRoute.POST(checkoutRequest(a, {}), noParams)).status).toBe(400)
       expect(

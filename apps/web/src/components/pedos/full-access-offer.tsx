@@ -268,7 +268,6 @@ export function useFirstResultOffer(finish: (href: string) => void) {
  * account to reach, and Not now leaves it for the next sign-in. The sale's email is the server's.
  */
 export function FullAccessReturn() {
-  const { showsWelcome } = usePedos()
   const { account, stepOpen, openStep } = useAccount()
   const accountId = account.status === 'signedIn' ? account.id : null
   const [stage, setStage] = useState<'waiting' | 'paid' | 'notPaid' | null>(null)
@@ -325,7 +324,8 @@ export function FullAccessReturn() {
             : accountId || account.status === 'checking'
               ? 'Confirming payment…'
               : null
+  // On top, and tapped through: it can stay up for half a minute, over whatever they go on to.
   return note ? (
-    <NotePill className={showsWelcome ? NOTE_ON_TOP : undefined}>{note}</NotePill>
+    <NotePill className={cn(NOTE_ON_TOP, 'pointer-events-none')}>{note}</NotePill>
   ) : null
 }
