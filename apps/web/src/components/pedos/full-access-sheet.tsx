@@ -14,8 +14,9 @@ import { Spinner } from '@/components/ui/spinner'
 import { FULL_ACCESS_PRICE_LABEL, MAX_SAVED_TOOTS, MONEY_BACK_DAYS } from '@/lib/pricing'
 
 /**
- * What Save asks of an account without Full Access (ADR 0022): the price, what it covers and the
- * money-back line, with Pay and Not now. Pay stays busy while the page goes to Checkout.
+ * What Save, or a saved Toot's Download, asks of an account without Full Access (ADR 0022): the
+ * price, what it covers and the money-back line, with Pay and Not now. Pay stays busy while the page
+ * goes to Checkout.
  */
 export function FullAccessSheet({
   open,
@@ -40,7 +41,7 @@ export function FullAccessSheet({
           <SheetTitle className="text-xl font-semibold">Full Access</SheetTitle>
           <SheetDescription className="text-base">
             {FULL_ACCESS_PRICE_LABEL}, once. Save up to {MAX_SAVED_TOOTS} Toots, from Songs and the
-            Sound Pad.
+            Sound Pad, and download them.
           </SheetDescription>
         </SheetHeader>
         <p className="px-5 pb-2 text-sm text-muted-foreground">

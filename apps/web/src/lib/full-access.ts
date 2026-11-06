@@ -5,6 +5,7 @@ import { builtFor, savingIsPaid } from './pricing'
 // Performance (ADR 0017), asks whether the account has it (`/api/full-access/`). Without it, the
 // browser goes to pay (`/api/full-access/checkout/`), and Stripe sends it back to the screen it came
 // from with the Toot's id, which makes the same Toot again and saves it once the account has it.
+// A saved Toot's Download asks too (#408), and comes back to the Toot's screen to hand over its file.
 
 /** Whether this build's Save to Toots asks for Full Access first: the environment it's built for. */
 export function saveAsksForPayment(): boolean {
@@ -33,15 +34,30 @@ function isCheckoutPage(url: string): boolean {
  * Starts paying for Full Access as `accountId`, coming back to the Toot `tootId` of `songId`, or of
  * a Sound Pad Performance with a null `songId`.
  */
-export async function startCheckout(
+export function startCheckout(
   tootId: string,
   songId: string | null,
+  accountId: string
+): Promise<Checkout> {
+  return askForCheckout({ tootId, songId }, accountId)
+}
+
+/**
+ * Starts paying for Full Access from a saved Toot's Download (#408), coming back to the Toot's
+ * screen with `?checkout=done`.
+ */
+export function startDownloadCheckout(tootId: string, accountId: string): Promise<Checkout> {
+  return askForCheckout({ tootId, returnTo: 'toot' }, accountId)
+}
+
+async function askForCheckout(
+  body: { tootId: string; songId: string | null } | { tootId: string; returnTo: 'toot' },
   accountId: string
 ): Promise<Checkout> {
   const response = await send('/api/full-access/checkout/', accountId, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ tootId, songId })
+    body: JSON.stringify(body)
   })
   if (response?.ok) {
     const body = (await response.json().catch(() => null)) as {
@@ -100,6 +116,12 @@ export async function saveCheck(
 export async function canSaveFromStored(accountId: string): Promise<boolean | null> {
   const state = await askFullAccess('/api/full-access/?check=stored', accountId)
   return state ? state.active && !state.limitReached : null
+}
+
+/** Whether the account has Full Access, whatever its Toots: null when Farty couldn't say. */
+export async function hasFullAccess(accountId: string): Promise<boolean | null> {
+  const state = await askFullAccess('/api/full-access/', accountId)
+  return state ? state.active : null
 }
 
 /** How long the return from Checkout waits for the payment: Stripe usually says in a second. */

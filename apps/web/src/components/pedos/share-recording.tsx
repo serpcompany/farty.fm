@@ -143,6 +143,18 @@ function failure(kind: ShareKind, error: Exclude<Shared, { url: string }>['error
   }[error]
 }
 
+/** A short note above the tabs, for what a control just did. */
+export function NotePill({ children }: { children: ReactNode }) {
+  return (
+    <output
+      aria-live="polite"
+      className="fixed inset-x-0 bottom-24 z-50 mx-auto w-fit max-w-[calc(100%-2rem)] rounded-full bg-foreground px-4 py-2 text-center text-sm text-background shadow-lg md:top-20 md:bottom-auto"
+    >
+      {children}
+    </output>
+  )
+}
+
 /** One item's Share, as `useShare` gives it: its link, and what each control does. */
 export type ShareFlow = {
   /** Its link, while it's shared. */
@@ -304,14 +316,7 @@ export function useShare({ kind, id, name }: { kind: ShareKind; id: string; name
         </AlertDialogContent>
       </AlertDialog>
 
-      {note && (
-        <output
-          aria-live="polite"
-          className="fixed inset-x-0 bottom-24 z-50 mx-auto w-fit max-w-[calc(100%-2rem)] rounded-full bg-foreground px-4 py-2 text-center text-sm text-background shadow-lg md:top-20 md:bottom-auto"
-        >
-          {note}
-        </output>
-      )}
+      {note && <NotePill>{note}</NotePill>}
     </>
   )
 

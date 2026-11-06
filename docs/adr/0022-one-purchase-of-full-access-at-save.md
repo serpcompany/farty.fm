@@ -14,6 +14,7 @@ $4.99 is a starting price from what comparable apps charge, not a tested one. #4
 - **The money back lasts 14 days.** Someone asks Support from their account's email, and it's refunded by hand in Stripe's Dashboard, found by that email, which Checkout is given rather than asking for it. `MONEY_BACK_DAYS` in `apps/web/src/lib/pricing.ts` is what the app says; nothing enforces it.
 - **A full refund ends Full Access.** Stripe's `charge.refunded` event, whose charge says `refunded: true`, marks the row refunded. A partial refund changes nothing. Saved Toots stay, and Save offers Full Access again. If the event isn't turned on, everything else still works and a refunded account keeps Full Access until it is.
 - **The server decides.** `PUT /api/toots/{id}/` answers 402 `payment_required` for a new Toot on an account without Full Access. It no longer asks about that one Toot. A deleted Toot still can't be saved again while its tombstone lasts (410 `deleted`), and Checkout refuses it the same way, so nobody pays for a Save that would be refused.
+- **A saved Toot downloads as a file (#408).** Download, in the More menu on a saved Toot's row and its screen, gives the phone the Toot's own WAV, the exact bytes saved. It's an ordinary download, except in a Home Screen app on iPhone, which has no downloads of its own, where it goes through the share sheet and its Save to Files. Without Full Access, Download offers the same sheet as Save.
 - **The owner hears about each sale (#422).** The first time a purchase is recorded as paid, Production emails the owner the product, the price and the payment's Stripe Dashboard link, and nothing about the buyer. It goes after the answer, so neither Stripe nor the buyer waits on it. Staging sends none, and a send that fails is logged and not tried again. A purchase after a refund is another sale.
 
 The price is `FULL_ACCESS_PRICE` in `apps/web/src/lib/pricing.ts`, the one place it is set.
@@ -25,6 +26,8 @@ The price is `FULL_ACCESS_PRICE` in `apps/web/src/lib/pricing.ts`, the one place
 ## How a Toot gets back from Checkout
 
 Checkout still goes back to the Toot whose Save asked for it, with its id, and saves it. Stripe fixes a session's return address when it's made, so an open session for the same Toot is reused, and one for another Toot is ended first (`/expire`) so that one payment is ever open. Taps and tabs one after another can't pay twice. If ending it fails because it was just paid, the next tap finds that.
+
+Paying from a saved Toot's Download goes back to that Toot's screen instead (`returnTo: 'toot'`), and the file follows once the payment comes through. Safari asks before it keeps a file whether a tap started it or not. The share sheet in a Home Screen app does want a fresh tap, so there it asks for one. It keeps nothing new, so the 300 Toots don't stop it.
 
 The Sound Pad keeps a take across Checkout as before (ADR 0017). On its next open, a take that started a Checkout and never got back is made again and saved if the account has Full Access by then, newest first and one per open. A kept take that couldn't be made again costs nothing now, as the purchase isn't tied to it, so the Pad says to record it again instead of reporting a refund, and the `pad-paid-take-lost` report is gone.
 
@@ -55,6 +58,7 @@ At Stripe's standard US card rate of 2.9% + 30¢, $4.99 pays about 44¢ and nets
 - A 99¢ payment refunded by hand before this ships still counts as a past buyer, since no refund was recorded then. It's left.
 - A chargeback doesn't end Full Access: no dispute event is handled, and a lost dispute doesn't say `refunded: true`.
 - Save asks the server, so an account with Full Access can't save offline. It says to try again, and nothing is lost.
+- Download asks the server too, so it can't run offline either, and says so. The check is the app's and not the audio route's, which Play needs on any account, so a person who's determined can fetch their own Toot's WAV without Full Access. It's their own audio, so it's left.
 - A Toot's delete lasts as its tombstone does. With `saved_at` no longer blocking a save, once a tombstone is purged (30 days), a stale browser's outbox can bring a deleted Toot back on an account with Full Access, as it can a Recording. It's accepted.
 - Deleting an account deletes its `full_access` row. Stripe keeps its own record.
 - ADR 0010's table of where saving is paid, and its Stripe keys, still hold.

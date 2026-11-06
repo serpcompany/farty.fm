@@ -325,6 +325,8 @@ type Pedos = {
   toggleTootPlayback(toot: TootDraft | Toot, note?: number, notes?: Song, from?: number): void
   /** The saved Toot whose audio couldn't be read on its last play, until the next play. */
   tootPlayFailed: string | null
+  /** A saved Toot's audio turned out to be gone, as Play finds it: it's `isAudioMissing` now. */
+  markAudioMissing(id: string): void
   /** Gives a Toot a new title, trimmed. An empty title changes nothing. */
   renameToot(id: string, title: string): void
   /** Deletes a Toot and its audio, and stops it if it's playing. */
@@ -1153,6 +1155,7 @@ export function PedosProvider({ children }: { children: ReactNode }) {
     saveToot,
     toggleTootPlayback,
     tootPlayFailed,
+    markAudioMissing,
     renameToot,
     deleteToot,
     forgetToot,
