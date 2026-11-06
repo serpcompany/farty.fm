@@ -1,3 +1,5 @@
+import { FULL_ACCESS_PRICE_LABEL } from '@/lib/pricing'
+
 import { captureEmail, type MailboxStore } from './dev-mailbox'
 import { type DeploymentEnv, deployment, isLocalHost } from './environment'
 
@@ -11,12 +13,26 @@ import { type DeploymentEnv, deployment, isLocalHost } from './environment'
  *    in the dev mailbox (`/dev/mail/`) instead. A local run never sends.
  * 3. Anything else sends nothing, for a fixed reason.
  *
+ * An email to the owner about a sale goes the same way, except that Staging sends none
+ * (`saleEmailConfig`).
+ *
  * Logs say only what happened (`email_sent`, `email_captured`, `email_skipped`, `email_failed`)
- * and a fixed reason: never a recipient, a subject or a code.
+ * and a fixed reason: never a recipient, a subject or a code. A line about a sale's email also says
+ * `"kind":"sale"`, so a lost one can be found in the Worker's logs.
  */
 
 /** The one address Farty sends from and receives at (Email Routing forwards it). */
 export const SUPPORT_EMAIL = 'support@farty.fm'
+
+/** Where the owner hears about each sale: the address the Support page shows. */
+export const SALES_EMAIL = 'devin@serp.co'
+
+/**
+ * How long an email about a sale runs before it's logged as `send_timeout`. It runs after the answer,
+ * so it holds up no request. Cloudflare allows `waitUntil` work about 30 seconds after the answer,
+ * and this limit ends first, so a hung send says so in the logs instead of being cut off silently.
+ */
+export const SALE_EMAIL_LIMIT_MS = 20_000
 
 /**
  * A sign-in code: its digits, how long it works and how many guesses it allows. Defined once, for
@@ -40,6 +56,7 @@ export type EmailOffReason =
   | 'email_not_configured'
   | 'email_from_invalid'
   | 'dev_mailbox_unavailable'
+  | 'not_production'
 
 export type EmailConfig =
   | { kind: 'send'; binding: SendEmailBinding; from: EmailAddress }
@@ -61,6 +78,19 @@ export function emailConfig(env: EmailEnv, host: string | null): EmailConfig {
   const mailbox = devMailboxStore(env, host)
   if (!mailbox) return { kind: 'off', reason: 'dev_mailbox_unavailable' }
   return { kind: 'capture', mailbox, from: { name: 'Farty', email: SUPPORT_EMAIL } }
+}
+
+/**
+ * Where an email about a sale goes for a request to `host`: as `emailConfig` says, except that
+ * Staging sends none. Its test payments aren't sales, and its binding could reach the owner, who is
+ * one of its test recipients (wrangler.jsonc).
+ */
+export function saleEmailConfig(env: EmailEnv, host: string | null): EmailConfig {
+  const target = deployment(env)
+  if (target.kind === 'deployed' && target.name !== 'production') {
+    return { kind: 'off', reason: 'not_production' }
+  }
+  return emailConfig(env, host)
 }
 
 /**
@@ -114,6 +144,21 @@ export function signInCodeEmail(code: string): { subject: string; text: string; 
   }
 }
 
+/**
+ * The owner's email about one sale of Full Access: the product, the price and, when its id is known,
+ * the payment in Stripe's Dashboard. Plain text, and nothing about the buyer.
+ */
+export function saleEmail(paymentIntent: string | null): { subject: string; text: string } {
+  return {
+    subject: `Farty sale: Full Access, ${FULL_ACCESS_PRICE_LABEL}`,
+    text: [
+      'Product: Full Access',
+      `Price: ${FULL_ACCESS_PRICE_LABEL}`,
+      ...(paymentIntent ? [`Stripe: https://dashboard.stripe.com/payments/${paymentIntent}`] : [])
+    ].join('\n')
+  }
+}
+
 /** What became of one email. */
 export type EmailOutcome = 'sent' | 'captured' | 'skipped' | 'failed'
 
@@ -122,9 +167,18 @@ export type EmailSender = {
   readonly available: boolean
   /** Sends one sign-in code. It never throws: it answers how it went. */
   sendSignInCode(to: string, code: string): Promise<EmailOutcome>
+  /**
+   * Tells the owner about one sale, once: a failed send isn't tried again. It's meant to run after
+   * the answer, in `waitUntil`, so it never throws, and it answers how it went. A send still going
+   * after `SALE_EMAIL_LIMIT_MS` is logged as `send_timeout`, though it may yet arrive.
+   */
+  sendSale(paymentIntent: string | null): Promise<EmailOutcome>
 }
 
-export type EmailLog = (event: `email_${EmailOutcome}`, reason?: string) => void
+/** Marks a log line as being about a sale's email. Sign-in's lines have none. */
+type EmailKind = 'sale'
+
+export type EmailLog = (event: `email_${EmailOutcome}`, reason?: string, kind?: EmailKind) => void
 
 /** Email Sending's error codes, such as `E_SENDER_NOT_VERIFIED`; anything else is `send_error`. */
 const ERROR_CODE = /^E_[A-Z0-9_]{1,64}$/
@@ -133,31 +187,50 @@ export function createEmailSender(
   config: EmailConfig,
   { log = consoleLog, now = () => new Date() }: { log?: EmailLog; now?: () => Date } = {}
 ): EmailSender {
-  function outcome(result: EmailOutcome, reason?: string): EmailOutcome {
-    log(`email_${result}`, reason)
+  function outcome(result: EmailOutcome, reason?: string, kind?: EmailKind): EmailOutcome {
+    log(`email_${result}`, reason, kind)
     return result
   }
 
-  async function sendSignInCode(to: string, code: string): Promise<EmailOutcome> {
-    if (config.kind === 'off') return outcome('skipped', config.reason)
-    const message = { from: config.from, to, ...signInCodeEmail(code) }
+  /** Sends one email by `config`. It never throws, and what it logs never says who or what. */
+  async function deliver(
+    message: { to: string; subject: string; text: string; html?: string },
+    kind?: EmailKind
+  ): Promise<EmailOutcome> {
+    if (config.kind === 'off') return outcome('skipped', config.reason, kind)
     if (config.kind === 'capture') {
       try {
-        await captureEmail(config.mailbox, message, now())
+        await captureEmail(config.mailbox, { html: '', ...message, from: config.from }, now())
       } catch {
-        return outcome('failed', 'dev_mailbox_error')
+        return outcome('failed', 'dev_mailbox_error', kind)
       }
-      return outcome('captured')
+      return outcome('captured', undefined, kind)
     }
     try {
-      await config.binding.send(message)
+      await config.binding.send({ ...message, from: config.from })
     } catch (error) {
-      return outcome('failed', errorCode(error))
+      return outcome('failed', errorCode(error), kind)
     }
-    return outcome('sent')
+    return outcome('sent', undefined, kind)
   }
 
-  return { available: config.kind !== 'off', sendSignInCode }
+  const sendSignInCode = (to: string, code: string) => deliver({ to, ...signInCodeEmail(code) })
+
+  async function sendSale(paymentIntent: string | null): Promise<EmailOutcome> {
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const tooSlow = new Promise<EmailOutcome>(resolve => {
+      timer = setTimeout(
+        () => resolve(outcome('failed', 'send_timeout', 'sale')),
+        SALE_EMAIL_LIMIT_MS
+      )
+    })
+    const sent = deliver({ to: SALES_EMAIL, ...saleEmail(paymentIntent) }, 'sale')
+    const result = await Promise.race([sent, tooSlow])
+    clearTimeout(timer)
+    return result
+  }
+
+  return { available: config.kind !== 'off', sendSignInCode, sendSale }
 }
 
 function errorCode(error: unknown): string {
@@ -165,8 +238,8 @@ function errorCode(error: unknown): string {
   return typeof code === 'string' && ERROR_CODE.test(code) ? code : 'send_error'
 }
 
-function consoleLog(event: `email_${EmailOutcome}`, reason?: string): void {
-  const line = `${event} ${JSON.stringify(reason === undefined ? {} : { reason })}`
+function consoleLog(event: `email_${EmailOutcome}`, reason?: string, kind?: EmailKind): void {
+  const line = `${event} ${JSON.stringify({ kind, reason })}`
   if (event === 'email_failed') console.error(line)
   else console.info(line)
 }

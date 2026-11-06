@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+
+import { FULL_ACCESS_PRICE_LABEL } from '@/lib/pricing'
 
 import { captureEmail, listCapturedEmails, type MailboxStore } from './dev-mailbox'
 import {
@@ -7,7 +9,10 @@ import {
   type EmailConfig,
   type EmailEnv,
   emailConfig,
-  parseSender
+  parseSender,
+  SALE_EMAIL_LIMIT_MS,
+  saleEmail,
+  saleEmailConfig
 } from './email'
 
 /** A KV namespace in memory, as much of one as the dev mailbox uses. */
@@ -219,5 +224,186 @@ describe('sending a code', () => {
     expect(email.available).toBe(false)
     expect(await email.sendSignInCode('fan@example.com', '048213')).toBe('skipped')
     expect(lines).toEqual(['email_skipped email_not_configured'])
+  })
+})
+
+describe('the email about a sale', () => {
+  const from = { name: 'Farty', email: 'support@farty.fm' }
+  const subject = `Farty sale: Full Access, ${FULL_ACCESS_PRICE_LABEL}`
+
+  function sender(config: EmailConfig) {
+    const lines: string[] = []
+    const email = createEmailSender(config, {
+      log: (event, reason) => lines.push(reason ? `${event} ${reason}` : event)
+    })
+    return { email, lines }
+  }
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  it('says the product, the price and where Stripe shows the payment', () => {
+    expect(saleEmail('pi_live_1')).toEqual({
+      subject,
+      text: [
+        'Product: Full Access',
+        `Price: ${FULL_ACCESS_PRICE_LABEL}`,
+        'Stripe: https://dashboard.stripe.com/payments/pi_live_1'
+      ].join('\n')
+    })
+  })
+
+  it('leaves the Stripe line out when the payment’s id isn’t known', () => {
+    expect(saleEmail(null).text).toBe(
+      ['Product: Full Access', `Price: ${FULL_ACCESS_PRICE_LABEL}`].join('\n')
+    )
+  })
+
+  it('goes out from Production and to a local run’s mailbox, and never from Staging', () => {
+    const bound = { EMAIL: sendBinding, EMAIL_FROM: 'Farty <support@farty.fm>' }
+    expect(saleEmailConfig({ ...bound, SITE_ENV: 'production' }, 'farty.fm')).toMatchObject({
+      kind: 'send',
+      from
+    })
+    expect(saleEmailConfig({ DEV_MAILBOX: memoryStore() }, 'localhost:3115')).toMatchObject({
+      kind: 'capture'
+    })
+    expect(saleEmailConfig({ ...bound, SITE_ENV: 'staging' }, 'staging.farty.fm')).toEqual({
+      kind: 'off',
+      reason: 'not_production'
+    })
+    // Sign-in's email on Staging is as it was.
+    expect(emailConfig({ ...bound, SITE_ENV: 'staging' }, 'staging.farty.fm')).toMatchObject({
+      kind: 'send'
+    })
+  })
+
+  it('goes nowhere, for email’s own reasons, on anything else', () => {
+    const reasons = [
+      saleEmailConfig({ SITE_ENV: 'preview', EMAIL: sendBinding }, 'farty.fm'),
+      saleEmailConfig({ SITE_ENV: 'production' }, 'farty.fm'),
+      saleEmailConfig({ DEV_MAILBOX: memoryStore() }, 'farty.fm')
+    ].map(config => (config.kind === 'off' ? config.reason : config.kind))
+    expect(reasons).toEqual([
+      'deployment_not_configured',
+      'email_not_configured',
+      'dev_mailbox_unavailable'
+    ])
+  })
+
+  it('goes to the owner as plain text, and logs what happened and never who or what', async () => {
+    const sent: EmailMessageBuilder[] = []
+    const binding = {
+      async send(message: EmailMessageBuilder) {
+        sent.push(message)
+      }
+    }
+    const { email, lines } = sender({ kind: 'send', binding, from })
+    expect(await email.sendSale('pi_live_1')).toBe('sent')
+    expect(sent).toEqual([{ from, to: 'devin@serp.co', ...saleEmail('pi_live_1') }])
+    expect(lines).toEqual(['email_sent'])
+  })
+
+  it('answers a failed send with a fixed reason, and never throws', async () => {
+    const binding = {
+      async send() {
+        throw new Error(`devin@serp.co ${subject}`)
+      }
+    }
+    const { email, lines } = sender({ kind: 'send', binding, from })
+    expect(await email.sendSale('pi_live_1')).toBe('failed')
+    expect(lines).toEqual(['email_failed send_error'])
+  })
+
+  it('gives up on a slow send, and never waits on it again', async () => {
+    vi.useFakeTimers()
+    let finish = (_error: Error) => {}
+    const binding = {
+      send: () =>
+        new Promise((_resolve, reject) => {
+          finish = reject
+        })
+    }
+    const { email, lines } = sender({ kind: 'send', binding, from })
+    const sending = email.sendSale('pi_live_1')
+    await vi.advanceTimersByTimeAsync(SALE_EMAIL_LIMIT_MS - 1)
+    expect(lines).toEqual([])
+    await vi.advanceTimersByTimeAsync(1)
+    expect(await sending).toBe('failed')
+    expect(lines).toEqual(['email_failed send_timeout'])
+    // Should it fail after that, nothing is left unhandled, and nothing tries again.
+    finish(new Error('late'))
+    await vi.advanceTimersByTimeAsync(0)
+    expect(lines).toEqual(['email_failed send_timeout', 'email_failed send_error'])
+  })
+
+  it('says in its log lines that they’re about a sale, and never who or what', async () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const failing = {
+      async send() {
+        throw new Error(`devin@serp.co ${subject}`)
+      }
+    }
+    await createEmailSender({ kind: 'send', binding: sendBinding, from }).sendSale('pi_live_1')
+    await createEmailSender({ kind: 'send', binding: failing, from }).sendSale('pi_live_1')
+    await createEmailSender({ kind: 'capture', mailbox: memoryStore(), from }).sendSale('pi_live_1')
+    await createEmailSender({ kind: 'off', reason: 'not_production' }).sendSale('pi_live_1')
+    expect(info.mock.calls).toEqual([
+      ['email_sent {"kind":"sale"}'],
+      ['email_captured {"kind":"sale"}'],
+      ['email_skipped {"kind":"sale","reason":"not_production"}']
+    ])
+    expect(error.mock.calls).toEqual([['email_failed {"kind":"sale","reason":"send_error"}']])
+  })
+
+  it('leaves a sign-in email’s log lines as they were', async () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const failing = {
+      async send() {
+        throw new Error('fan@example.com 048213')
+      }
+    }
+    const sending = (config: EmailConfig) =>
+      createEmailSender(config).sendSignInCode('fan@example.com', '048213')
+    await sending({ kind: 'send', binding: sendBinding, from })
+    await sending({ kind: 'send', binding: failing, from })
+    await sending({ kind: 'off', reason: 'email_not_configured' })
+    expect(info.mock.calls).toEqual([
+      ['email_sent {}'],
+      ['email_skipped {"reason":"email_not_configured"}']
+    ])
+    expect(error.mock.calls).toEqual([['email_failed {"reason":"send_error"}']])
+  })
+
+  it('leaves no timer behind once it’s sent', async () => {
+    vi.useFakeTimers()
+    const { email } = sender({ kind: 'send', binding: sendBinding, from })
+    expect(await email.sendSale('pi_live_1')).toBe('sent')
+    expect(vi.getTimerCount()).toBe(0)
+  })
+
+  it('is kept in the mailbox on a local run, as plain text', async () => {
+    const store = memoryStore()
+    const { email, lines } = sender({ kind: 'capture', mailbox: store, from })
+    expect(await email.sendSale(null)).toBe('captured')
+    expect(lines).toEqual(['email_captured'])
+    expect(await listCapturedEmails(store)).toEqual([
+      expect.objectContaining({
+        from: 'Farty <support@farty.fm>',
+        to: 'devin@serp.co',
+        html: '',
+        ...saleEmail(null)
+      })
+    ])
+  })
+
+  it('skips, for a fixed reason, when Staging has it off', async () => {
+    const { email, lines } = sender({ kind: 'off', reason: 'not_production' })
+    expect(await email.sendSale('pi_test_1')).toBe('skipped')
+    expect(lines).toEqual(['email_skipped not_production'])
   })
 })
