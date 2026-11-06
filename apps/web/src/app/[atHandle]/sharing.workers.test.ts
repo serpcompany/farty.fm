@@ -6,7 +6,7 @@ import * as shareRecordingRoute from '@/app/api/share/recordings/[id]/route'
 import * as sharesRoute from '@/app/api/share/route'
 import * as shareTootRoute from '@/app/api/share/toots/[id]/route'
 import type { Kind } from '@/db/library'
-import { handles, rateLimit, shareReports, shares } from '@/db/schema'
+import { handles, rateLimit, shareReports, shares, toots } from '@/db/schema'
 import { encodeWav } from '@/lib/wav'
 import {
   findSharedRecording,
@@ -291,8 +291,8 @@ describe('Sharing a Recording', () => {
 
   it('makes a link anyone can play, and the same link again', async () => {
     const alice = await sharer('alice')
-    expect(alice.url).toMatch(new RegExp(`^${ORIGIN}/@alice/r/[0-9a-hjkmnp-tv-z]{12}/$`))
-    // The link names a share of its own, never the Recording's id.
+    expect(alice.url).toBe(`${ORIGIN}/@alice/r/recording-1/`)
+    // The link is named for the Recording, never its id.
     expect(alice.url).not.toContain(R1)
 
     const again = await share.put(R1, alice)
@@ -447,13 +447,14 @@ describe('Sharing a Recording', () => {
     const alice = await sharer('alice')
     const { handle, id } = linkParts(alice.url)
     const shared = await findSharedRecording(testDb(), handle, id)
-    expect(shared).toMatchObject({ handle: 'alice', shareId: id, recording: { id, number: 1 } })
+    expect(shared).toMatchObject({ handle: 'alice', slug: id, recording: { id, number: 1 } })
     expect(shared?.recording).not.toHaveProperty('audioBytes')
     // The Handle in the link is matched as lowercase, and must be the owner's.
     expect(await findSharedRecording(testDb(), 'ALICE', id)).not.toBeNull()
+    const [{ id: alicesShare }] = await testDb().select().from(shares)
     await sharer('bob')
-    expect(await findSharedRecording(testDb(), 'bob', id)).toBeNull()
-    expect((await share.audio(alice.url.replace('/@alice/', '/@bob/'))).status).toBe(404)
+    expect(await findSharedRecording(testDb(), 'bob', alicesShare)).toBeNull()
+    expect((await share.audio(`${ORIGIN}/@bob/r/${alicesShare}/`)).status).toBe(404)
   })
 
   it("opens only under its owner's @Handle, its @ escaped or not (#382)", async () => {
@@ -479,7 +480,7 @@ describe('Sharing a Recording', () => {
     expect(await (await share.list(bob)).json()).toEqual({ handle: 'bob', shares: [] })
   })
 
-  it('stops working when its owner stops sharing it, and a new share is a new link', async () => {
+  it('stops working when its owner stops sharing it, and sharing again brings it back', async () => {
     const alice = await sharer('alice')
     expect((await share.stop(R1, { ...alice, origin: 'https://evil.example' })).status).toBe(403)
     expect((await share.audio(alice.url)).status).toBe(200)
@@ -494,9 +495,8 @@ describe('Sharing a Recording', () => {
     const again = await share.put(R1, alice)
     expect(again.status).toBe(201)
     const { url } = (await again.json()) as { url: string }
-    expect(url).not.toBe(alice.url)
+    expect(url).toBe(alice.url)
     expect((await share.audio(url)).status).toBe(200)
-    expect((await share.audio(alice.url)).status).toBe(404)
   })
 
   it('stops working when the Recording is deleted', async () => {
@@ -545,7 +545,7 @@ describe('Reporting a shared Recording', () => {
     const rows = await testDb().select().from(shareReports)
     expect(rows).toEqual([
       expect.objectContaining({
-        shareId: linkParts(alice.url).id,
+        shareId: (await testDb().select().from(shares))[0].id,
         userId: alice.id,
         kind: 'recordings',
         itemId: R1
@@ -574,15 +574,14 @@ describe('Reporting a shared Recording', () => {
     expect(await slotsLike('share-reporter|%')).toEqual([1, 1, 1, 1, 1])
   })
 
-  it("doesn't start a Recording's reports over when it's shared again under a new link", async () => {
+  it("doesn't start a Recording's reports over when it's shared again", async () => {
     const alice = await sharer('alice')
     for (let i = 0; i < 5; i++) {
       expect((await share.report(alice.url, ORIGIN, `203.0.113.${i}`)).status).toBe(204)
     }
-    // Stop sharing, then Share again: a new link, as a script churning links would make.
+    // Stop sharing, then Share again: a new share, as a script churning them would make.
     expect((await share.stop(R1, alice)).status).toBe(204)
     const again = (await (await share.put(R1, alice)).json()) as { url: string }
-    expect(again.url).not.toBe(alice.url)
     expect((await share.report(again.url, ORIGIN, '198.51.100.1')).status).toBe(429)
     expect(await testDb().select().from(shareReports)).toHaveLength(5)
     expect(await slots('share_report')).toBe(5)
@@ -684,8 +683,8 @@ describe('Sharing a saved Toot', () => {
 
   it('makes a link anyone can play: the saved WAV, whole and as stored', async () => {
     const alice = await tootSharer('alice')
-    expect(alice.url).toMatch(new RegExp(`^${ORIGIN}/@alice/t/[0-9a-hjkmnp-tv-z]{12}/$`))
-    // The link names a share of its own, never the Toot's id.
+    expect(alice.url).toBe(`${ORIGIN}/@alice/t/twinkle-twinkle-little-star/`)
+    // The link is named for the Song, never the Toot's id.
     expect(alice.url).not.toContain(T1)
 
     const again = await share.put(T1, alice, 'toots')
@@ -758,7 +757,7 @@ describe('Sharing a saved Toot', () => {
     const { row: _, ...shown } = shared
     expect(shown).toEqual({
       handle: 'alice',
-      shareId: id,
+      slug: id,
       title: 'Twinkle Twinkle Little Star',
       songId: 'twinkle',
       seconds: 0.1
@@ -769,9 +768,10 @@ describe('Sharing a saved Toot', () => {
     }
     // The Handle in the link is matched as lowercase, and must be the owner's.
     expect(await findSharedToot(testDb(), 'ALICE', id)).not.toBeNull()
+    const [{ id: alicesShare }] = await testDb().select().from(shares)
     await tootSharer('bob')
-    expect(await findSharedToot(testDb(), 'bob', id)).toBeNull()
-    expect((await share.audio(alice.url.replace('/@alice/', '/@bob/'))).status).toBe(404)
+    expect(await findSharedToot(testDb(), 'bob', alicesShare)).toBeNull()
+    expect((await share.audio(`${ORIGIN}/@bob/t/${alicesShare}/`)).status).toBe(404)
   })
 
   it("opens only under its owner's @Handle (#382)", async () => {
@@ -813,7 +813,7 @@ describe('Sharing a saved Toot', () => {
     expect(await testDb().select().from(shares)).toHaveLength(1)
   })
 
-  it('stops working when its owner stops sharing it, and a new share is a new link', async () => {
+  it('stops working when its owner stops sharing it, and sharing again brings it back', async () => {
     const alice = await tootSharer('alice')
     const elsewhere = { ...alice, origin: 'https://evil.example' }
     expect((await share.stop(T1, elsewhere, 'toots')).status).toBe(403)
@@ -829,9 +829,8 @@ describe('Sharing a saved Toot', () => {
     const again = await share.put(T1, alice, 'toots')
     expect(again.status).toBe(201)
     const { url } = (await again.json()) as { url: string }
-    expect(url).not.toBe(alice.url)
+    expect(url).toBe(alice.url)
     expect((await share.audio(url)).status).toBe(200)
-    expect((await share.audio(alice.url)).status).toBe(404)
   })
 
   it('stops working when the Toot is deleted', async () => {
@@ -954,7 +953,7 @@ describe('Reporting a shared Toot', () => {
     expect((await share.report(alice.url)).status).toBe(204)
     expect(await testDb().select().from(shareReports)).toEqual([
       expect.objectContaining({
-        shareId: linkParts(alice.url).id,
+        shareId: (await testDb().select().from(shares))[0].id,
         userId: alice.id,
         kind: 'toots',
         itemId: T1
@@ -970,7 +969,7 @@ describe('Reporting a shared Toot', () => {
     expect(await testDb().select().from(shareReports)).toEqual([])
   })
 
-  it("keeps a few reports a day per Toot, and doesn't start over under a new link", async () => {
+  it("keeps a few reports a day per Toot, and doesn't start over when it's shared again", async () => {
     const alice = await tootSharer('alice')
     for (let i = 0; i < 5; i++) {
       expect((await share.report(alice.url, ORIGIN, `203.0.113.${i}`)).status).toBe(204)
@@ -979,7 +978,6 @@ describe('Reporting a shared Toot', () => {
 
     expect((await share.stop(T1, alice, 'toots')).status).toBe(204)
     const again = (await (await share.put(T1, alice, 'toots')).json()) as { url: string }
-    expect(again.url).not.toBe(alice.url)
     expect((await share.report(again.url, ORIGIN, '198.51.100.1')).status).toBe(429)
     expect(await testDb().select().from(shareReports)).toHaveLength(5)
     expect(await slots('share_report')).toBe(5)
@@ -1029,5 +1027,108 @@ describe('The frames a shared Trim covers', () => {
     expect(frames(0.5, 0.5)).toEqual({ start: 4000, end: 4001 })
     expect(frames(0.5, 0.25)).toEqual({ start: 4000, end: 4001 })
     expect(frames(1, 1)).toEqual({ start: 7999, end: 8000 })
+  })
+})
+
+describe('A link named for what it shares (#441)', () => {
+  const urlOf = async (response: Response) => ((await response.json()) as { url: string }).url
+  /** A share made before #441: its random id is its only name. */
+  const fromBefore = async (kind: 'recordings' | 'toots') => {
+    const [row] = await testDb().select().from(shares).where(eq(shares.kind, kind))
+    await testDb().update(shares).set({ slug: null }).where(eq(shares.id, row.id))
+    return row.id
+  }
+
+  it('takes the next number when the same Song is shared twice', async () => {
+    const alice = await tootSharer('alice')
+    await saveToot(T2, alice)
+    const second = await urlOf(await share.put(T2, alice, 'toots'))
+    expect(second).toBe(`${ORIGIN}/@alice/t/twinkle-twinkle-little-star-2/`)
+    expect((await share.audio(alice.url)).status).toBe(200)
+    expect((await share.audio(second)).status).toBe(200)
+  })
+
+  it('lets a Recording and a Toot have the same name, in their own kinds', async () => {
+    const alice = await sharer('alice')
+    await saveToot(T1, alice, tootWav(), tootMetadata(T1, { title: 'Recording 1', songId: 'gone' }))
+    const toot = await urlOf(await share.put(T1, alice, 'toots'))
+    expect(toot).toBe(`${ORIGIN}/@alice/t/recording-1/`)
+    expect(alice.url).toBe(`${ORIGIN}/@alice/r/recording-1/`)
+    expect((await findSharedToot(testDb(), 'alice', 'recording-1'))?.title).toBe('Recording 1')
+    expect((await findSharedRecording(testDb(), 'alice', 'recording-1'))?.recording.number).toBe(1)
+  })
+
+  it('lets two people use the same name', async () => {
+    const alice = await sharer('alice')
+    const bob = await sharer('bob')
+    expect(new URL(alice.url).pathname).toBe('/@alice/r/recording-1/')
+    expect(new URL(bob.url).pathname).toBe('/@bob/r/recording-1/')
+    expect((await findSharedRecording(testDb(), 'bob', 'recording-1'))?.handle).toBe('bob')
+  })
+
+  it('names a share from before it, and still finds it by its random id', async () => {
+    await sharer('alice')
+    const old = await fromBefore('recordings')
+    expect(await findSharedRecording(testDb(), 'alice', 'recording-1')).toBeNull()
+
+    // Found by its random id, which names it, so its page sends the old link on to the new one.
+    expect((await findSharedRecording(testDb(), 'alice', old))?.slug).toBe('recording-1')
+    expect((await findSharedRecording(testDb(), 'alice', 'recording-1'))?.slug).toBe('recording-1')
+    expect((await findSharedRecording(testDb(), 'alice', old))?.slug).toBe('recording-1')
+    expect((await share.audio(`${ORIGIN}/@alice/r/${old}/`)).status).toBe(200)
+  })
+
+  it('finds a link with its name in capitals, and its image, audio and report answer', async () => {
+    const alice = await sharer('alice')
+    await saveToot(T1, alice)
+    expect((await share.put(T1, alice, 'toots')).status).toBe(201)
+    const recording = `${ORIGIN}/@alice/r/Recording-1/`
+    const toot = `${ORIGIN}/@alice/t/TWINKLE-Twinkle-Little-Star/`
+
+    // Its own slug, not the capitals, so the page sends this link on to the lowercase one.
+    expect((await findSharedRecording(testDb(), 'alice', 'Recording-1'))?.slug).toBe('recording-1')
+    expect((await findSharedToot(testDb(), 'alice', 'TWINKLE-Twinkle-Little-Star'))?.slug).toBe(
+      'twinkle-twinkle-little-star'
+    )
+    for (const url of [recording, toot]) {
+      expect((await share.audio(url)).status).toBe(200)
+      expect((await share.report(url)).status).toBe(204)
+    }
+    // A Toot's image reads the request's host, which only the journey has (e2e/share.spec.ts).
+    expect((await share.image(recording)).status).toBe(200)
+
+    // A random id from before it, in capitals too.
+    const old = await fromBefore('recordings')
+    expect((await findSharedRecording(testDb(), 'alice', old.toUpperCase()))?.slug).toBe(
+      'recording-1'
+    )
+    expect((await share.audio(`${ORIGIN}/@alice/r/${old.toUpperCase()}/`)).status).toBe(200)
+  })
+
+  it('names a share from before it when its owner lists their links', async () => {
+    const alice = await sharer('alice')
+    await fromBefore('recordings')
+    const { shares: listed } = (await (await share.list(alice)).json()) as {
+      shares: { url: string }[]
+    }
+    expect(listed.map(({ url }) => url)).toEqual([alice.url])
+  })
+
+  it('keeps its link when the Toot is renamed', async () => {
+    const alice = await tootSharer('alice')
+    await testDb().update(toots).set({ title: 'For Mum' }).where(eq(toots.id, T1))
+    expect(await urlOf(await share.put(T1, alice, 'toots'))).toBe(alice.url)
+    expect((await findSharedToot(testDb(), 'alice', linkParts(alice.url).id))?.title).toBe(
+      'For Mum'
+    )
+  })
+
+  it("doesn't give a taken-down link's name to anything else", async () => {
+    const alice = await tootSharer('alice')
+    await testDb().update(shares).set({ takenDownAt: new Date() })
+    await saveToot(T2, alice)
+    const second = await urlOf(await share.put(T2, alice, 'toots'))
+    expect(second).toBe(`${ORIGIN}/@alice/t/twinkle-twinkle-little-star-2/`)
+    expect((await share.audio(alice.url)).status).toBe(404)
   })
 })

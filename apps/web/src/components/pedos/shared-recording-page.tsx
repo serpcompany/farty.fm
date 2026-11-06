@@ -1,7 +1,6 @@
 'use client'
 
 import { Check, ChevronRight, Flag, Link2Off, Play, Square } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
 import {
@@ -21,12 +20,16 @@ import type { Trim } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { useStartGetFarty } from './get-farty'
+import { SiteHeader } from './site-chrome'
 import { ReplayWaveform } from './waveform'
 
-// A shared Recording's page, `/@<handle>/r/<id>/`, and a shared Toot's, `/@<handle>/t/<id>/`
+// A shared Recording's page, `/@<handle>/r/<slug>/`, and a shared Toot's, `/@<handle>/t/<slug>/`
 // (ADR 0020): what anyone with the link sees, signed in or not, in any browser. The fart comes
 // first: who shared it, its name and its note or Song, a big waveform and Play. Get Farty sits
-// under the player and in the top bar. The prototype's option A.
+// under the player and in the site's header. The prototype's option A.
+
+/** A `/@<handle>/` page's column, under the site's header, which is wider. */
+export const handlePageColumn = 'mx-auto flex w-full max-w-md flex-1 flex-col md:max-w-2xl md:pt-4'
 
 /** Farty's brand button, behind white text, as the lander's. */
 const brand = 'bg-brand-strong text-white hover:bg-brand-strong/90'
@@ -66,34 +69,20 @@ function GetFartyButton({ friend, className }: { friend: string | null; classNam
 }
 
 /**
- * The page's own top bar: Farty, and Get Farty, offering `friend`. The app's tabs aren't here.
+ * The site's header on a `/@<handle>/` page: Farty, the lander's sections on a computer, whose
+ * lander has them, and Get Farty, offering `friend`.
  */
 export function SharedTopBar({ friend = null }: { friend?: string | null }) {
   return (
-    <header className="flex min-h-14 items-center justify-between gap-3 px-4 py-1.5">
-      <Link
-        href="/"
-        className="flex h-11 items-center gap-2.5 rounded-md text-lg font-bold tracking-tight outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-      >
-        <Image
-          src="/icons/icon-192.png"
-          alt=""
-          width={32}
-          height={32}
-          // A small static PNG; Workers has no image optimizer configured.
-          unoptimized
-          className="rounded-lg"
-        />
-        Farty
-      </Link>
+    <SiteHeader home="/" sectionsOn="/" sectionsClassName="hidden desktop:flex">
       <GetFarty friend={friend} />
-    </header>
+    </SiteHeader>
   )
 }
 
 export type SharedRecordingProps = {
   handle: string
-  shareId: string
+  slug: string
   name: string
   note: string | null
   length: string
@@ -102,19 +91,12 @@ export type SharedRecordingProps = {
 }
 
 /** The shared Recording: who shared it, its name and note, the waveform, Play, Get Farty, Report. */
-export function SharedRecordingPage({
-  handle,
-  shareId,
-  name,
-  note,
-  ...player
-}: SharedRecordingProps) {
+export function SharedRecordingPage({ handle, slug, name, note, ...player }: SharedRecordingProps) {
   return (
     <SharedItemPage
       what="Recording"
       handle={handle}
-      shareId={shareId}
-      base={`${profilePath(handle)}r/${shareId}/`}
+      base={`${profilePath(handle)}r/${slug}/`}
       name={name}
       {...player}
     >
@@ -134,7 +116,7 @@ export function SharedRecordingPage({
 
 export type SharedTootProps = {
   handle: string
-  shareId: string
+  slug: string
   title: string
   /** The Song it plays, or "Sound Pad", or null for a Song that isn't in Farty any more. */
   song: string | null
@@ -147,7 +129,7 @@ export type SharedTootProps = {
 /** The shared Toot: who shared it, its title and Song, the waveform, Play, Get Farty, Report. */
 export function SharedTootPage({
   handle,
-  shareId,
+  slug,
   title,
   song,
   length,
@@ -158,14 +140,13 @@ export function SharedTootPage({
     <SharedItemPage
       what="Toot"
       handle={handle}
-      shareId={shareId}
-      base={`${profilePath(handle)}t/${shareId}/`}
+      base={`${profilePath(handle)}t/${slug}/`}
       name={title}
       length={length}
       part={{ startSeconds: 0, endSeconds: seconds }}
       levels={levels}
     >
-      {song && (
+      {song && song !== title && (
         <p className="mt-1.5 text-[15px] text-muted-foreground" data-testid="shared-song">
           {song}
         </p>
@@ -182,7 +163,6 @@ export function SharedTootPage({
 function SharedItemPage({
   what,
   handle,
-  shareId,
   base,
   name,
   length,
@@ -192,7 +172,6 @@ function SharedItemPage({
 }: {
   what: 'Recording' | 'Toot'
   handle: string
-  shareId: string
   base: string
   name: string
   length: string
@@ -213,7 +192,7 @@ function SharedItemPage({
       setPlaying(segment)
       setUnplayable(false)
       void play(
-        `shared:${shareId}`,
+        `shared:${base}`,
         async () => {
           const response = await fetch(`${base}audio/`)
           if (!response.ok) {
@@ -226,7 +205,7 @@ function SharedItemPage({
         () => setPlaying(current => (current === segment ? null : current))
       )
     },
-    [base, part.endSeconds, shareId]
+    [base, part.endSeconds]
   )
 
   const toggle = () => {
@@ -238,7 +217,7 @@ function SharedItemPage({
   return (
     <div className="flex flex-1 flex-col">
       <SharedTopBar friend={handle} />
-      <div className="flex flex-1 flex-col px-4 pb-6">
+      <div className={cn(handlePageColumn, 'px-4 pb-6')}>
         <p className="pt-3 text-[15px] text-muted-foreground">
           <Link
             href={profilePath(handle)}
@@ -383,7 +362,7 @@ export function SharedLinkGone() {
   return (
     <div className="flex flex-1 flex-col">
       <SharedTopBar />
-      <div className="grid justify-items-center gap-3 px-6 pt-28 text-center">
+      <div className="grid justify-items-center gap-3 px-6 pt-28 pb-16 text-center">
         <span className="flex size-16 items-center justify-center rounded-full bg-muted text-muted-foreground">
           <Link2Off className="size-7" aria-hidden />
         </span>

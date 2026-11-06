@@ -143,13 +143,21 @@ describe('A profile page', () => {
     expect(Object.keys(newest).sort()).toEqual(ITEM_KEYS)
     expect(newest.kind).toBe('recordings')
     expect(newest.detail).toBe('E3')
-    expect(newest.shareId).not.toBe(R3)
-    expect(newest.path).toBe(`/@alice/r/${newest.shareId}/`)
+    expect(newest.path).toBe('/@alice/r/recording-3/')
     expect(newest.sharedAt).toBe(Date.UTC(2026, 10, 1, 9, 2))
   })
 
+  it('names a share from before links had names, so its row opens by name (#441)', async () => {
+    await sharer('alice', [R1])
+    await testDb().update(shares).set({ slug: null })
+    const profile = await findProfile(testDb(), 'alice')
+    expect(profile?.items.map(item => item.path)).toEqual(['/@alice/r/recording-1/'])
+    const [row] = await testDb().select().from(shares)
+    expect(row.slug).toBe('recording-1')
+  })
+
   /** Each item's fields, which are all the page gets. */
-  const ITEM_KEYS = ['detail', 'kind', 'name', 'path', 'shareId', 'sharedAt']
+  const ITEM_KEYS = ['detail', 'kind', 'name', 'path', 'sharedAt']
 
   it('leaves out what was stopped, taken down or deleted, and what others share', async () => {
     const alice = await sharer('alice', [R1, R2, R3])
@@ -191,13 +199,12 @@ describe('A profile page', () => {
     expect(rows.slice(4)).toEqual(
       expect.arrayContaining([
         ['recordings', 'Recording 2', 'E3'],
-        ['toots', 'Sound Pad', 'Sound Pad']
+        ['toots', 'Sound Pad', null]
       ])
     )
-    expect(items[4].shareId > items[5].shareId).toBe(true)
     for (const item of items) {
       const segment = item.kind === 'toots' ? 't' : 'r'
-      expect(item.path).toBe(`/@alice/${segment}/${item.shareId}/`)
+      expect(item.path).toMatch(new RegExp(`^/@alice/${segment}/[a-z0-9-]+/$`))
       // A Toot's row has a Recording's fields and no more: never its Arrangement or Performance.
       expect(Object.keys(item).sort()).toEqual(ITEM_KEYS)
     }

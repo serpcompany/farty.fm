@@ -1,7 +1,6 @@
 'use client'
 
 import { ArrowRight, AudioLines, Ear, Music2, UserRound } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
@@ -20,6 +19,7 @@ import { FULL_ACCESS_PRICE_LABEL, MAX_SAVED_TOOTS, MONEY_BACK_DAYS } from '@/lib
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { usePedos } from './pedos-provider'
+import { SiteFooter, SiteHeader } from './site-chrome'
 
 /** The app's `main` (`app-shell.tsx`), where focus goes once the lander hides. */
 export const appMain = 'app'
@@ -54,38 +54,15 @@ export function Lander({ atHome, qrCode }: { atHome: boolean; qrCode: ReactNode 
 
   return (
     <div id="top" className={cn('hidden desktop:block', atHome && 'md:unwelcomed:block')}>
-      <header className="sticky top-0 z-40 px-4 pt-4">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 rounded-2xl border bg-background/80 pr-2.5 pl-4 shadow-sm backdrop-blur">
-          <a
-            href="#top"
-            className="flex h-11 items-center gap-2.5 rounded-md text-lg font-bold tracking-tight outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-          >
-            <Image
-              src="/icons/icon-192.png"
-              alt=""
-              width={32}
-              height={32}
-              unoptimized
-              className="rounded-lg"
-            />
-            Farty
-          </a>
-          <nav aria-label="Sections" className="flex">
-            <SectionLink href="#features">Features</SectionLink>
-            <SectionLink href="#how-it-works">How it works</SectionLink>
-            <SectionLink href="#faq">FAQ</SectionLink>
-          </nav>
-          <div className="flex gap-1.5">
-            <Button variant="ghost" className="h-11 px-4 text-sm desktop:hidden" onClick={signUp}>
-              Sign in
-            </Button>
-            <Button className={cn(brand, 'h-11 px-5 text-sm desktop:hidden')} onClick={openFarty}>
-              Open Farty
-            </Button>
-            <DownloadApp qrCode={qrCode} className="h-11 px-5 text-sm" />
-          </div>
-        </div>
-      </header>
+      <SiteHeader home="#top">
+        <Button variant="ghost" className="h-11 px-4 text-sm desktop:hidden" onClick={signUp}>
+          Sign in
+        </Button>
+        <Button className={cn(brand, 'h-11 px-5 text-sm desktop:hidden')} onClick={openFarty}>
+          Open Farty
+        </Button>
+        <DownloadApp qrCode={qrCode} className="h-11 px-5 text-sm" />
+      </SiteHeader>
 
       <section className="relative isolate overflow-hidden">
         <div
@@ -227,28 +204,7 @@ export function Lander({ atHome, qrCode }: { atHome: boolean; qrCode: ReactNode 
         </div>
       </section>
 
-      <footer className="border-t">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-6 px-6 py-10">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/icons/icon-192.png"
-              alt=""
-              width={28}
-              height={28}
-              unoptimized
-              className="rounded-md"
-            />
-            <span className="font-semibold">Farty</span>
-            <span className="text-sm text-muted-foreground">
-              Record your farts. Turn them into songs.
-            </span>
-          </div>
-          <nav aria-label="Footer" className="flex gap-2 text-sm">
-            <FooterLink href="/privacy/">Privacy</FooterLink>
-            <FooterLink href="/support/">Support</FooterLink>
-          </nav>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }
@@ -410,25 +366,3 @@ export function ScanToOpen({ qrCode }: { qrCode: ReactNode }) {
 
 /** A transparent pixel. */
 const blank = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-
-function SectionLink({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <a
-      href={href}
-      className="inline-flex h-11 items-center rounded-md px-3 text-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
-    >
-      {children}
-    </a>
-  )
-}
-
-function FooterLink({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex h-11 items-center rounded-md px-3 text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
-    >
-      {children}
-    </Link>
-  )
-}

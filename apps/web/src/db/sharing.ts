@@ -1,5 +1,6 @@
-import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
+import { and, eq, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm'
 
+import { freeSlug } from '@/lib/slug'
 import type { Database } from './database'
 import type { Kind, RecordingRow, TootRow } from './library'
 import { handles, recordings, shareReports, shares, toots, user } from './schema'
@@ -72,8 +73,8 @@ export async function shareOf(
 }
 
 /**
- * Shares the item with a new link `id`, or keeps the link it already has. Returns the share,
- * and whether this call made it.
+ * Shares the item as a new share `id`, or keeps the one it already has. Returns the share, and
+ * whether this call made it. A new one has no slug until `giveSlug`.
  */
 export async function addShare(
   db: Database,
@@ -87,8 +88,8 @@ export async function addShare(
 }
 
 /**
- * Stops sharing the item: deletes its share, so its link stops working and sharing it again makes
- * a new one. A share Farty took down stays, so the item stays down. True if a share was deleted.
+ * Stops sharing the item: deletes its share, so its link stops working until it's shared again. A
+ * share Farty took down stays, so the item stays down. True if a share was deleted.
  */
 export async function removeShare(
   db: Database,
@@ -101,6 +102,59 @@ export async function removeShare(
     .where(and(whereItem(userId, kind, itemId), isNull(shares.takenDownAt)))
     .returning({ id: shares.id })
   return removed.length > 0
+}
+
+/** The slugs the user has for a kind of item, a share taken down's too, which keeps its link. */
+async function usedSlugs(db: Database, userId: string, kind: Kind): Promise<Set<string>> {
+  const rows = await db
+    .select({ slug: shares.slug })
+    .from(shares)
+    .where(and(eq(shares.userId, userId), eq(shares.kind, kind), isNotNull(shares.slug)))
+  return new Set(rows.flatMap(row => row.slug ?? []))
+}
+
+/**
+ * Gives a share with no slug `base`, or `base-2` and on when the user has that one. `or ignore`,
+ * so a share given it first by another request only sends this one around again.
+ */
+export async function giveSlug(
+  db: Database,
+  share: Pick<ShareRow, 'id' | 'userId' | 'kind'>,
+  base: string
+): Promise<void> {
+  for (let tries = 0; tries < 5; tries += 1) {
+    const slug = freeSlug(base, await usedSlugs(db, share.userId, share.kind))
+    await db.run(
+      sql`update or ignore shares set slug = ${slug} where id = ${share.id} and slug is null`
+    )
+    const rows = await db.select({ slug: shares.slug }).from(shares).where(eq(shares.id, share.id))
+    if (rows[0]?.slug !== null) return
+  }
+  throw new Error('No slug was free')
+}
+
+/** The user's shares with no slug yet, oldest first, each with what its link is named after. */
+export async function sharesWithNoSlug(db: Database, userId: string) {
+  const noSlug = (kind: Kind) =>
+    and(eq(shares.userId, userId), eq(shares.kind, kind), isNull(shares.slug))
+  const [recordingRows, tootRows] = await Promise.all([
+    db
+      .select({ share: shares, number: recordings.number, name: recordings.name })
+      .from(shares)
+      .innerJoin(
+        recordings,
+        and(eq(recordings.userId, shares.userId), eq(recordings.id, shares.itemId))
+      )
+      .where(noSlug('recordings'))
+      .orderBy(shares.createdAt, shares.id),
+    db
+      .select({ share: shares, title: toots.title, songId: toots.songId })
+      .from(shares)
+      .innerJoin(toots, and(eq(toots.userId, shares.userId), eq(toots.id, shares.itemId)))
+      .where(noSlug('toots'))
+      .orderBy(shares.createdAt, shares.id)
+  ])
+  return { recordings: recordingRows, toots: tootRows }
 }
 
 /** D1 binds at most 100 values a statement; one is the user id. */
@@ -177,9 +231,9 @@ export async function tootsPlayingTakenDown(
 export async function liveShares(
   db: Database,
   userId: string
-): Promise<{ kind: Kind; itemId: string; id: string }[]> {
+): Promise<{ kind: Kind; itemId: string; id: string; slug: string | null }[]> {
   const live = await db
-    .select({ kind: shares.kind, itemId: shares.itemId, id: shares.id })
+    .select({ kind: shares.kind, itemId: shares.itemId, id: shares.id, slug: shares.slug })
     .from(shares)
     .where(and(eq(shares.userId, userId), isNull(shares.takenDownAt)))
   const tootIds = live.filter(share => share.kind === 'toots').map(share => share.itemId)
@@ -193,14 +247,21 @@ export async function liveShares(
 /** A shared Recording, as anyone with its link finds it. */
 export type SharedRecordingRow = { share: ShareRow; handle: string; recording: RecordingRow }
 
+/** The share a link names: by its slug, or its random id, as links were before #441. */
+const namedBy = (link: string) => or(eq(shares.slug, link), eq(shares.id, link))
+
+/** The row a link names, its slug's before another share's random id, however unlikely. */
+const bySlugFirst = <Row extends { share: ShareRow }>(rows: Row[], link: string) =>
+  rows.find(row => row.share.slug === link) ?? rows[0]
+
 /**
- * The Recording shared at `/@<handle>/r/<shareId>/`: only while it's shared under that Handle,
- * not taken down, and not deleted. Anything else is not found, the same way.
+ * The Recording shared at `/@<handle>/r/<link>/`: only while it's shared under that Handle, not
+ * taken down, and not deleted. Anything else is not found, the same way.
  */
 export async function sharedRecording(
   db: Database,
   handle: string,
-  shareId: string
+  link: string
 ): Promise<SharedRecordingRow | null> {
   const rows = await db
     .select({ share: shares, handle: handles.handle, recording: recordings })
@@ -212,28 +273,28 @@ export async function sharedRecording(
     )
     .where(
       and(
-        eq(shares.id, shareId),
+        namedBy(link),
         eq(shares.kind, 'recordings'),
         isNull(shares.takenDownAt),
         eq(handles.handle, handle),
         isNull(recordings.deletedAt)
       )
     )
-  return rows[0] ?? null
+  return bySlugFirst(rows, link) ?? null
 }
 
 /** A shared Toot, as anyone with its link finds it. */
 export type SharedTootRow = { share: ShareRow; handle: string; toot: TootRow }
 
 /**
- * The saved Toot shared at `/@<handle>/t/<shareId>/`, as `sharedRecording` finds a Recording: only
+ * The saved Toot shared at `/@<handle>/t/<link>/`, as `sharedRecording` finds a Recording: only
  * while it's shared under that Handle, not taken down, and not deleted, and while no Recording it
  * plays is taken down. A Toot is in `toots` only once it's saved, so an unsaved one is never found.
  */
 export async function sharedToot(
   db: Database,
   handle: string,
-  shareId: string
+  link: string
 ): Promise<SharedTootRow | null> {
   const rows = await db
     .select({ share: shares, handle: handles.handle, toot: toots })
@@ -242,14 +303,14 @@ export async function sharedToot(
     .innerJoin(toots, and(eq(toots.userId, shares.userId), eq(toots.id, shares.itemId)))
     .where(
       and(
-        eq(shares.id, shareId),
+        namedBy(link),
         eq(shares.kind, 'toots'),
         isNull(shares.takenDownAt),
         eq(handles.handle, handle),
         isNull(toots.deletedAt)
       )
     )
-  const row = rows[0]
+  const row = bySlugFirst(rows, link)
   if (!row) return null
   return playsAny(row.toot, await takenDownRecordings(db, row.share.userId)) ? null : row
 }

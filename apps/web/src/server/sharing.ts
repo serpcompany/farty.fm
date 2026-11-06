@@ -5,6 +5,7 @@ import {
   addShare,
   claimHandle,
   emailOf,
+  giveSlug,
   handleOf,
   handleTaken,
   liveShares,
@@ -15,12 +16,14 @@ import {
   sharedRecording,
   sharedToot,
   shareOf,
+  sharesWithNoSlug,
   tootPlaysTakenDown
 } from '@/db/sharing'
 import { songIndex } from '@/lib/catalog/song-index.generated'
 import { handleProblem, normalizeHandle, profilePath, suggestHandle } from '@/lib/handle'
-import type { Recording, Trim } from '@/lib/recordings'
+import { type Recording, recordingName, type Trim } from '@/lib/recordings'
 import { servedOrigin } from '@/lib/site'
+import { slugify } from '@/lib/slug'
 import { PAD_TOOT_TITLE } from '@/lib/toot'
 import { wavHeader } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
@@ -41,10 +44,16 @@ import { HEADER_BYTES, readWavHeader, wavHeaderOf } from './wav-header'
 const notFound = () => apiError(404, 'not_found')
 
 /**
- * A link's id: 12 random characters of Crockford's lowercase base 32 (60 bits), so a link can't
- * be guessed from another, and says nothing about the Recording's own id.
+ * What a link ends in: a slug, or a share's random id, as links did until #441. Either has this
+ * shape. Longer than `slugify`'s longest, for its `-2`.
  */
-const SHARE_ID = /^[0-9a-hjkmnp-tv-z]{12}$/
+const LINK = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+const MAX_LINK = 90
+
+/**
+ * A share's own id, kept from when links ended in it: 12 random characters of Crockford's lowercase
+ * base 32 (60 bits), which says nothing about the item's own id.
+ */
 const ALPHABET = '0123456789abcdefghjkmnpqrstvwxyz'
 
 export function newShareId(): string {
@@ -56,11 +65,11 @@ export function newShareId(): string {
 const LINK_SEGMENT: Record<Kind, string> = { recordings: 'r', toots: 't' }
 
 /**
- * A shared item's page, under its owner's (#382): `/@<handle>/r/<id>/` for a Recording, or
- * `/@<handle>/t/<id>/`.
+ * A shared item's page, under its owner's (#382): `/@<handle>/r/recording-3/` for a Recording, or
+ * `/@<handle>/t/i-saw-three-ships/`.
  */
-export function sharePath(kind: Kind, handle: string, shareId: string): string {
-  return `${profilePath(handle)}${LINK_SEGMENT[kind]}/${shareId}/`
+export function sharePath(kind: Kind, handle: string, slug: string): string {
+  return `${profilePath(handle)}${LINK_SEGMENT[kind]}/${slug}/`
 }
 
 /**
@@ -72,12 +81,46 @@ export function tootSongTitle(songId: string | null): string | null {
 }
 
 /**
- * The Handle a link names, lowercased, when the link has the shape of one, or else null. The shape
- * only: a Handle the block list gained since it was picked still finds its links.
+ * What a Toot's link is named after (#441): its Song, or its own title for a Sound Pad Toot or a
+ * Song that isn't in Farty any more. Never the title of a Song's Toot, which only its owner chose.
  */
-function linkHandle(handle: string, shareId: string): string | null {
-  const lower = handle.toLowerCase()
-  return /^[a-z0-9_]{3,20}$/.test(lower) && SHARE_ID.test(shareId) ? lower : null
+const tootSlug = ({ songId, title }: { songId: string | null; title: string }) =>
+  slugify((songId !== null && tootSongTitle(songId)) || title, 'toot')
+
+/**
+ * Names the links of the user's shares that have no slug: a new one, or one from before #441,
+ * which no migration could name since the Songs' titles are here, in the catalog. Oldest first, so
+ * the first of a Song keeps its plain name.
+ */
+export async function giveSlugs(db: Database, userId: string): Promise<void> {
+  const unnamed = await sharesWithNoSlug(db, userId)
+  for (const { share, number, name } of unnamed.recordings) {
+    await giveSlug(db, share, slugify(recordingName({ number, name }), 'recording'))
+  }
+  for (const { share, songId, title } of unnamed.toots) {
+    await giveSlug(db, share, tootSlug({ songId, title }))
+  }
+}
+
+/** A share's slug, naming the user's shares that have none when it's one of them. */
+async function slugOf(db: Database, share: ShareRow): Promise<string> {
+  if (share.slug !== null) return share.slug
+  await giveSlugs(db, share.userId)
+  return (await shareOf(db, share.userId, share.kind, share.itemId))?.slug ?? share.id
+}
+
+/**
+ * The Handle and the name a link names, each lowercased, as every Handle, slug and random id is,
+ * when the link has the shape of one, or else null. The shape only: a Handle the block list gained
+ * since it was picked still finds its links.
+ */
+function linkNames(handle: string, link: string): { handle: string; link: string } | null {
+  const lower = { handle: handle.toLowerCase(), link: link.toLowerCase() }
+  return /^[a-z0-9_]{3,20}$/.test(lower.handle) &&
+    lower.link.length <= MAX_LINK &&
+    LINK.test(lower.link)
+    ? lower
+    : null
 }
 
 /**
@@ -126,14 +169,18 @@ export async function putHandle(db: Database, user: SessionUser, request: Reques
 /** `GET /api/share/`: the user's shared items that work, each with its link. */
 export async function listShares(db: Database, user: SessionUser, request: Request) {
   const handle = await handleOf(db, user.id)
-  const shares = handle === null ? [] : await liveShares(db, user.id)
+  let shares = handle === null ? [] : await liveShares(db, user.id)
+  if (shares.some(share => share.slug === null)) {
+    await giveSlugs(db, user.id)
+    shares = await liveShares(db, user.id)
+  }
   const origin = servedOrigin(request)
   return Response.json({
     handle,
     shares: shares.map(share => ({
       kind: share.kind,
       itemId: share.itemId,
-      url: `${origin}${sharePath(share.kind, handle as string, share.id)}`
+      url: `${origin}${sharePath(share.kind, handle as string, share.slug ?? share.id)}`
     }))
   })
 }
@@ -174,7 +221,7 @@ export async function shareItem(
         itemId: id,
         createdAt: new Date()
       })
-  const url = `${servedOrigin(request)}${sharePath(kind, handle, share.id)}`
+  const url = `${servedOrigin(request)}${sharePath(kind, handle, await slugOf(db, share))}`
   return Response.json({ url }, { status: created ? 201 : 200 })
 }
 
@@ -197,34 +244,37 @@ export async function unshareItem(
   return new Response(null, { status: 204 })
 }
 
-/** A shared Recording, as its page shows it: no account id, and its link's id for its own. */
+/** A shared Recording, as its page shows it: no account id, and its link's slug for its own. */
 export type SharedRecording = {
   handle: string
-  shareId: string
+  /** What its link ends in. */
+  slug: string
   recording: Recording
 }
 
 /**
- * The Recording shared at `/@<handle>/r/<shareId>/`, or null: not shared, stopped, taken down,
- * deleted, or the account deleted all look the same.
+ * The Recording shared at `/@<handle>/r/<link>/`, by its slug or its old random id, or null: not
+ * shared, stopped, taken down, deleted, or the account deleted all look the same.
  */
 export async function findSharedRecording(
   db: Database,
   handle: string,
-  shareId: string
+  link: string
 ): Promise<(SharedRecording & { row: SharedRecordingRow }) | null> {
-  const lower = linkHandle(handle, shareId)
-  if (lower === null) return null
-  const row = await sharedRecording(db, lower, shareId)
+  const names = linkNames(handle, link)
+  if (names === null) return null
+  const row = await sharedRecording(db, names.handle, names.link)
   if (!row) return null
   const { audioBytes: _, ...recording } = toRecording(row.recording)
-  return { handle: row.handle, shareId, recording: { ...recording, id: shareId }, row }
+  const slug = await slugOf(db, row.share)
+  return { handle: row.handle, slug, recording: { ...recording, id: slug }, row }
 }
 
 /** A shared Toot, as its page shows it: its title, Song and length, and nothing private. */
 export type SharedToot = {
   handle: string
-  shareId: string
+  /** What its link ends in. */
+  slug: string
   title: string
   /** The catalog Song it plays, or null for a Sound Pad Toot (ADR 0017). */
   songId: string | null
@@ -232,20 +282,20 @@ export type SharedToot = {
 }
 
 /**
- * The saved Toot shared at `/@<handle>/t/<shareId>/`, or null, as `findSharedRecording`: not
- * shared, stopped, taken down, never saved, deleted, or the account deleted all look the same.
+ * The saved Toot shared at `/@<handle>/t/<link>/`, or null, as `findSharedRecording`: not shared,
+ * stopped, taken down, never saved, deleted, or the account deleted all look the same.
  */
 export async function findSharedToot(
   db: Database,
   handle: string,
-  shareId: string
+  link: string
 ): Promise<(SharedToot & { row: SharedTootRow }) | null> {
-  const lower = linkHandle(handle, shareId)
-  if (lower === null) return null
-  const row = await sharedToot(db, lower, shareId)
+  const names = linkNames(handle, link)
+  if (names === null) return null
+  const row = await sharedToot(db, names.handle, names.link)
   if (!row) return null
   const { title, songId, seconds } = row.toot
-  return { handle: row.handle, shareId, title, songId, seconds, row }
+  return { handle: row.handle, slug: await slugOf(db, row.share), title, songId, seconds, row }
 }
 
 /** A shared Toot's audio in R2: its saved WAV. */
@@ -342,10 +392,10 @@ export async function sharedAudio(
   { db, media }: Stores,
   request: Request,
   handle: string,
-  shareId: string
+  link: string
 ): Promise<Response> {
   if (kind === 'toots') {
-    const shared = await findSharedToot(db, handle, shareId)
+    const shared = await findSharedToot(db, handle, link)
     if (!shared) return apiError(404, 'not_found')
     const key = sharedTootKey(shared)
     return cachedAudio(request, sharedAudioCacheKey(request, key), async () => {
@@ -353,7 +403,7 @@ export async function sharedAudio(
       return object && { body: object.body, size: object.size, etag: object.httpEtag }
     })
   }
-  const shared = await findSharedRecording(db, handle, shareId)
+  const shared = await findSharedRecording(db, handle, link)
   if (!shared) return apiError(404, 'not_found')
   const key = audioKey(shared.row.share.userId, 'recordings', shared.row.recording.id)
   const part = sharedPart(shared.recording)
@@ -443,7 +493,7 @@ export async function sharedTootLevels(
 /**
  * How many reports Farty keeps, each a row in `rate_limit` (`consumeSlots`), for Recordings and
  * Toots alike: a few per reporter an hour, so one client can't spend the site's; a few per item a
- * day, since one is enough for Farty to look, and sharing it again under a new link doesn't start
+ * day, since one is enough for Farty to look, and stopping and sharing it again doesn't start
  * them over; and a cap for the whole site, so a script can't fill D1. A report spends a slot of
  * each only when all three have one, so a refused report never spends a link's.
  */
@@ -474,13 +524,13 @@ export async function reportShare(
   { db }: Stores,
   request: Request,
   handle: string,
-  shareId: string,
+  link: string,
   secret: string
 ): Promise<Response> {
   if (request.headers.get('origin') !== servedOrigin(request)) {
     return apiError(403, 'cross_origin')
   }
-  const share = await liveShare(kind, db, handle, shareId)
+  const share = await liveShare(kind, db, handle, link)
   if (!share) return apiError(404, 'not_found')
   const now = Date.now()
   const allowed = await consumeSlots(
@@ -497,7 +547,7 @@ export async function reportShare(
   )
   if (!allowed) return apiError(429, 'too_many_reports')
   await addReport(db, share, crypto.randomUUID(), new Date(now))
-  console.warn(JSON.stringify({ event: 'share_reported', shareId, kind }))
+  console.warn(JSON.stringify({ event: 'share_reported', shareId: share.id, kind }))
   return new Response(null, { status: 204 })
 }
 
@@ -506,11 +556,11 @@ async function liveShare(
   kind: Kind,
   db: Database,
   handle: string,
-  shareId: string
+  link: string
 ): Promise<ShareRow | null> {
   const shared =
     kind === 'toots'
-      ? await findSharedToot(db, handle, shareId)
-      : await findSharedRecording(db, handle, shareId)
+      ? await findSharedToot(db, handle, link)
+      : await findSharedRecording(db, handle, link)
   return shared?.row.share ?? null
 }

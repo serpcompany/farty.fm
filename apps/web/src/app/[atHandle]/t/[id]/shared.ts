@@ -9,7 +9,8 @@ import { findSharedToot, sharedTootKey, sharedTootLevels, tootSongTitle } from '
 /** What a shared Toot's page, and its link image, show of it: nothing private. */
 export type SharedTootView = {
   handle: string
-  shareId: string
+  /** What its link ends in. */
+  slug: string
   title: string
   /**
    * The Song it plays, "Twinkle, Twinkle, Little Star", or "Sound Pad" for a Sound Pad Toot, as
@@ -26,8 +27,9 @@ export type SharedTootView = {
 }
 
 /**
- * The saved Toot shared at `/@<handle>/t/<id>/`, or null when that link doesn't work: never
- * shared, stopped, taken down, never saved, or its Toot or account deleted. Once per request.
+ * The saved Toot shared at `/@<handle>/t/<id>/`, by its slug or its old random id, or null when
+ * that link doesn't work: never shared, stopped, taken down, never saved, or its Toot or account
+ * deleted. Once per request.
  */
 export const sharedTootView = cache(
   async (handle: string, id: string): Promise<SharedTootView | null> => {
@@ -38,7 +40,7 @@ export const sharedTootView = cache(
     const origin = (await pageOrigin()) ?? 'http://localhost'
     return {
       handle: shared.handle,
-      shareId: shared.shareId,
+      slug: shared.slug,
       title: shared.title,
       song,
       isSong: shared.songId !== null,

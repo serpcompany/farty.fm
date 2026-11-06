@@ -3,7 +3,8 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { type BrowserContext, expect, type Page, test } from '@playwright/test'
 import { songs } from '../src/lib/catalog/songs.generated'
-import { codeFor, newEmail, ownClient, signInByApi } from './account'
+import { slugify } from '../src/lib/slug'
+import { codeFor, fromTheLocalDatabase, newEmail, ownClient, signInByApi } from './account'
 import { payToSave } from './pay'
 import { recordAndSave, skipWelcome, withFakeMicrophone } from './record'
 import { onPhone } from './screens'
@@ -175,7 +176,7 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
     const shared = await page.evaluate(() => window.__shared[0])
     expect(shared.title).toBe(`Recording 1 by @${handle}`)
     link = new URL(shared.url ?? '').pathname
-    expect(link).toMatch(new RegExp(`^/@${handle}/r/[0-9a-z]{12}/$`))
+    expect(link).toMatch(new RegExp(`^/@${handle}/r/recording-\\d+/$`))
     await expect(page.getByTestId('recording-shared')).toHaveText('Shared')
   })
 
@@ -216,7 +217,11 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
     // Signed out, Get Farty starts Get Farty here (#318), so it's a button, not a link to `/`.
     await expect(other.getByRole('button', { name: 'Get Farty' }).first()).toBeVisible()
     await expect(other.getByRole('link', { name: 'Get Farty' })).toHaveCount(0)
-    await expect(other.getByRole('navigation', { name: 'Tabs' })).toHaveCount(0)
+    // The site's own footer and tabs, as anywhere else on Farty (#441).
+    await expect(other.getByRole('navigation', { name: 'Footer' })).toBeVisible()
+    if (onPhone({ viewport: other.viewportSize() })) {
+      await expect(other.getByRole('navigation', { name: 'Tabs' })).toBeVisible()
+    }
 
     // Unlisted, with a link preview.
     const meta = (property: string) =>
@@ -268,13 +273,12 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
     await gone(`/@${handle}/r/000000000000/`)
   })
 
-  await test.step('shared again, the new link is gone once the Recording is deleted', async () => {
+  await test.step('shared again, the link is back, and gone once the Recording is deleted', async () => {
     await page.getByRole('button', { name: 'Share Recording 1' }).click()
-    // This page's own share sheet, since it loaded /recordings/: the new link only.
+    // This page's own share sheet, since it loaded /recordings/: this share only.
     await expect.poll(() => page.evaluate(() => window.__shared.length)).toBe(1)
     const again = new URL((await page.evaluate(() => window.__shared[0].url)) ?? '').pathname
-    expect(again).toMatch(new RegExp(`^/@${handle}/r/[0-9a-z]{12}/$`))
-    expect(again).not.toBe(link)
+    expect(again).toBe(link)
     expect((await other.goto(again))?.status()).toBe(200)
     expect((await other.request.get(imageOf(again))).status()).toBe(200)
 
@@ -355,7 +359,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect.poll(shareSheet).toHaveLength(1)
     expect(await page.evaluate(() => window.__shared[0].title)).toBe(`${title} by @${handle}`)
     link = new URL((await shareSheet())[0]).pathname
-    expect(link).toMatch(new RegExp(`^/@${handle}/t/[0-9a-z]{12}/$`))
+    expect(link).toBe(`/@${handle}/t/${slugify(twinkle, 'toot')}/`)
   })
 
   await test.step("the Toot's screen says it's shared, and its header's Share offers the same link", async () => {
@@ -395,8 +399,8 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     expect(pageCache).toContain('no-cache')
     await expect(other.getByText(`@${handle} shared a Toot`)).toBeVisible()
     await expect(other.getByRole('heading', { name: title })).toBeVisible()
-    await expect(other.getByTestId('shared-song')).toHaveText(twinkle)
-    await expect(other.getByRole('navigation', { name: 'Tabs' })).toHaveCount(0)
+    // Named for its Song, so the Song isn't said twice.
+    await expect(other.getByTestId('shared-song')).toHaveCount(0)
     await shot(other, 'toot-shared-page')
 
     // Nothing private: not the Toot's id nor its owner's email, in the HTML or its page data.
@@ -455,6 +459,34 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(other.getByText('Reported. Thanks.')).toBeVisible()
   })
 
+  await test.step('an old random-id link, or one in capitals, answers a 308 to the named link, with its query (#441)', async () => {
+    const [{ id }] = fromTheLocalDatabase<{ id: string }>(
+      `SELECT s.id FROM shares s JOIN handles h ON h.user_id = s.user_id
+       WHERE h.handle = '${handle}' AND s.kind = 'toots'`
+    )
+    const slug = link.split('/').at(-2) ?? ''
+    expect(id).not.toBe(slug)
+    const query = '?from=mail&tag=a&tag=b'
+    for (const name of [id, slug.toUpperCase()]) {
+      const old = `/@${handle}/t/${name}/`
+      const redirect = await other.request.get(`${old}${query}`, { maxRedirects: 0 })
+      expect(redirect.status()).toBe(308)
+      const to = new URL(redirect.headers().location ?? '', baseURL)
+      expect(to.pathname + to.search).toBe(`${link}${query}`)
+      // A browser never keeps it: the name can go to the next thing shared by it.
+      const redirectCache = redirect.headers()['cache-control'] ?? ''
+      expect(redirectCache).toContain('private')
+      expect(redirectCache).toContain('no-cache')
+
+      expect((await other.request.get(`${old}audio/`)).status()).toBe(200)
+      expect((await other.request.get(`${old}image/`)).status()).toBe(200)
+    }
+
+    await other.goto(`/@${handle}/t/${id}/${query}`)
+    await expect(other).toHaveURL(new URL(`${link}${query}`, baseURL).href)
+    await expect(other.getByRole('heading', { name: title })).toBeVisible()
+  })
+
   await test.step('the owner shares a Recording too, and their page lists both, newest first, and plays the Toot (#346)', async () => {
     // In a second tab, so the first stays on the Toot's screen for the steps after.
     const tab = await context.newPage()
@@ -467,7 +499,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     const tabSheet = () => tab.evaluate(() => window.__shared.map(shared => shared.url ?? ''))
     await expect.poll(tabSheet).toHaveLength(1)
     const recordingLink = new URL((await tabSheet())[0]).pathname
-    expect(recordingLink).toMatch(new RegExp(`^/@${handle}/r/[0-9a-z]{12}/$`))
+    expect(recordingLink).toMatch(new RegExp(`^/@${handle}/r/recording-\\d+/$`))
     await tab.close()
 
     const response = await other.goto(`/@${handle}/`)
@@ -479,7 +511,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     const toot = rows.nth(1).getByRole('link')
     await expect(toot).toHaveAttribute('href', link)
     await expect(toot).toContainText(title)
-    await expect(toot).toContainText(`Toot · ${twinkle} · Today`)
+    await expect(toot).toContainText('Toot · Today')
     await shot(other, 'toot-profile')
 
     // Nothing private: not the Toot's id nor its owner's email, in the HTML or its page data.
@@ -521,13 +553,12 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(other.locator(`a[href="${link}"]`)).toHaveCount(0)
   })
 
-  await test.step('shared again, the new link is gone once the Toot is deleted', async () => {
+  await test.step('shared again, the link is back, and gone once the Toot is deleted', async () => {
     const before = (await shareSheet()).length
     await page.getByRole('button', { name: `Share ${title}` }).click()
     await expect.poll(shareSheet).toHaveLength(before + 1)
     const again = new URL((await shareSheet())[before]).pathname
-    expect(again).toMatch(new RegExp(`^/@${handle}/t/[0-9a-z]{12}/$`))
-    expect(again).not.toBe(link)
+    expect(again).toBe(link)
     expect((await other.goto(again))?.status()).toBe(200)
     expect((await other.request.get(imageOf(again))).status()).toBe(200)
 
@@ -601,7 +632,7 @@ test("a guest records, reviews and saves, then shares from Result once they've m
     await expect.poll(() => page.evaluate(() => window.__shared.length)).toBe(1)
     const shared = await page.evaluate(() => window.__shared[0])
     expect(shared.title).toBe(`Morning toot by @${handle}`)
-    expect(new URL(shared.url ?? '').pathname).toMatch(new RegExp(`^/@${handle}/r/[0-9a-z]{12}/$`))
+    expect(new URL(shared.url ?? '').pathname).toBe(`/@${handle}/r/morning-toot/`)
     await expect(page.getByTestId('result-note')).toHaveText('G3')
   })
 

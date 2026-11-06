@@ -10,7 +10,8 @@ import { findSharedRecording, sharedPart } from '@/server/sharing'
 /** What a shared Recording's page, and its link image, show of it: nothing private. */
 export type SharedView = {
   handle: string
-  shareId: string
+  /** What its link ends in. */
+  slug: string
   /** "Recording 8". */
   name: string
   /** The note Songs use it for, "E3", or null for a Noise-like one. */
@@ -27,8 +28,9 @@ export type SharedView = {
 }
 
 /**
- * The shared Recording at `/@<handle>/r/<id>/`, or null when that link doesn't work: never
- * shared, stopped, taken down, or its Recording or account deleted. Once per request.
+ * The shared Recording at `/@<handle>/r/<id>/`, by its slug or its old random id, or null when that
+ * link doesn't work: never shared, stopped, taken down, or its Recording or account deleted. Once
+ * per request.
  */
 export const sharedView = cache(async (handle: string, id: string): Promise<SharedView | null> => {
   const shared = await findSharedRecording(getDb(), handle, id)
@@ -38,7 +40,7 @@ export const sharedView = cache(async (handle: string, id: string): Promise<Shar
   const part = sharedPart(recording)
   return {
     handle: shared.handle,
-    shareId: shared.shareId,
+    slug: shared.slug,
     name: recordingName(recording),
     note: pitch === null ? null : noteName(pitch),
     length: formattedFartLength(recording),

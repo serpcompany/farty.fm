@@ -161,11 +161,25 @@ SELECT r.created_at, r.kind, r.item_id, r.share_id,
   '/@' || h.handle || CASE r.kind WHEN 'toots' THEN '/t/' ELSE '/r/' END || r.share_id || '/' AS link
   FROM share_reports r JOIN handles h ON h.user_id = r.user_id
   ORDER BY r.created_at DESC LIMIT 20;
--- Take one down: its page, image, audio and Report answer 404 from the next request.
-UPDATE shares SET taken_down_at = unixepoch() * 1000 WHERE id = '<share_id>';
 ```
 
-The link to open is `/@<handle>/r/<share_id>/` for a `recordings` report and `/@<handle>/t/<share_id>/` for a `toots` one.
+The link to open is `/@<handle>/r/<share_id>/` for a `recordings` report and `/@<handle>/t/<share_id>/` for a `toots` one. It redirects to the link's name (#441).
+
+**To take one down,** start from the link. It ends in the share's name or, on an older link, its random id, and either can be in capitals: `/r/` is kind `recordings` and `/t/` is `toots`.
+
+```sql
+-- 1. Find the share. It must return exactly one row. No row means no share has that name.
+SELECT s.id, s.kind, s.slug, s.item_id, s.taken_down_at FROM shares s
+  JOIN handles h ON h.user_id = s.user_id
+  WHERE h.handle = lower('<handle>') AND s.kind = '<kind>'
+    AND (s.slug = lower('<name or id>') OR s.id = lower('<name or id>'));
+-- 2. Take it down, by the `id` that returned: its page, image, audio and Report answer 404 from
+-- the next request. This must return exactly one row too. No row means nothing was taken down.
+UPDATE shares SET taken_down_at = unixepoch() * 1000 WHERE id = '<id from step 1>'
+  RETURNING id, kind, slug, taken_down_at;
+```
+
+If step 1 returns two rows, one share's name is another's random id. The link plays the row whose `slug` matches, so take that one down.
 
 **What a take-down covers.** The item behind that one share. A link taken down stays down: its row is kept, so the owner can't share that Recording or Toot again (403 `taken_down`), and neither Stop sharing nor deleting it removes it. Taking down a Recording also takes down every Toot that plays it (in its Arrangement or its Sound Pad Performance): those Toots' links answer 404 at once, they drop out of the owner's shares, and sharing one again answers 403 `taken_down`, so no Toot carries the Recording's audio back out. Taking down a Toot covers only that Toot, not the Recordings it plays. To put a link back, set `taken_down_at` to `NULL`; the Toots that play a Recording come back with it. Deleting the account removes it, with the reports.
 

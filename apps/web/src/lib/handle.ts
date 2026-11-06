@@ -26,8 +26,8 @@ export function segmentHandle(segment: string): string | null {
 }
 
 /**
- * Whether `pathname` is a profile page or a shared link's page under one, which have no tabs. Its
- * `@` may come escaped, as `%40`.
+ * Whether `pathname` is a profile page or a shared link's page under one, which have the site's
+ * header and footer rather than the app's top bar. Its `@` may come escaped, as `%40`.
  */
 export function isHandlePage(pathname: string): boolean {
   return /^\/(?:@|%40)/i.test(pathname)

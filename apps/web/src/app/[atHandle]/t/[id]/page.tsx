@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
-import { linkParams } from '@/app/[atHandle]/link-params'
+import { notFound, permanentRedirect } from 'next/navigation'
+import { linkParams, withQuery } from '@/app/[atHandle]/link-params'
 import { SharedTootPage } from '@/components/pedos/shared-recording-page'
 import { linkPreviewMetadata } from '@/server/link-preview'
 import { sharePath } from '@/server/sharing'
@@ -23,20 +23,27 @@ export async function generateMetadata({
     view && {
       title: `${view.title} by @${view.handle}`,
       description: tootDescription(view),
-      path: sharePath('toots', view.handle, view.shareId),
+      path: sharePath('toots', view.handle, view.slug),
       imageAlt: 'A fart song on Farty'
     }
   )
 }
 
-export default async function SharedToot({ params }: PageProps<'/[atHandle]/t/[id]'>) {
+export default async function SharedToot({
+  params,
+  searchParams
+}: PageProps<'/[atHandle]/t/[id]'>) {
   const { handle, id } = await linkParams(params)
   const view = await sharedTootView(handle, id)
   if (!view) notFound()
+  // A link from before #441, by its random id, keeps working, and a name in capitals finds it.
+  if (view.slug !== id) {
+    permanentRedirect(await withQuery(sharePath('toots', view.handle, view.slug), searchParams))
+  }
   return (
     <SharedTootPage
       handle={view.handle}
-      shareId={view.shareId}
+      slug={view.slug}
       title={view.title}
       song={view.song}
       length={view.length}

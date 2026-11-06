@@ -121,11 +121,11 @@ _Avoid_: Sequence, pattern, loop, beat, track
 ## Sharing
 
 **Handle**:
-The name a user's links carry, as in `farty.fm/@<handle>/r/<id>`. The user picks it the first time they share: 3 to 20 lowercase letters, numbers or `_`, unique, and not on Farty's block list. It is the only thing about the user a Shared Recording shows. Only a user with an account has one (ADR 0020).
+The name a user's links carry, as in `farty.fm/@<handle>/r/<name>`. The user picks it the first time they share: 3 to 20 lowercase letters, numbers or `_`, unique, and not on Farty's block list. It is the only thing about the user a Shared Recording shows. Only a user with an account has one (ADR 0020).
 _Avoid_: Username, display name, screen name
 
 **Shared Recording**:
-A Recording its owner has shared by link, which anyone with the link can open and play, signed in or not, without the link being listed anywhere. The page shows the Handle, the Recording's name, note, length and waveform, and plays the part of the fart its row plays. Stop sharing, deleting the Recording, deleting the account, or Farty taking it down after a Report ends the link for everyone; sharing it again makes a new link (ADR 0020). A Shared Toot works the same way, for a saved Toot.
+A Recording its owner has shared by link, which anyone with the link can open and play, signed in or not, without the link being listed anywhere. The page shows the Handle, the Recording's name, note, length and waveform, and plays the part of the fart its row plays. Stop sharing, deleting the Recording, deleting the account, or Farty taking it down after a Report ends the link for everyone. Sharing it again brings the link back if nothing else has taken its name, and whatever is shared by that name next takes the link (ADR 0020). A Shared Toot works the same way, for a saved Toot.
 _Avoid_: Public Recording, post, upload, published Recording
 
 **Friend**:
