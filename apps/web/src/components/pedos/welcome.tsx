@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { askForMicrophone } from '@/lib/audio/recorder'
 import { wide } from '@/lib/desktop'
 import { reachStep } from '@/lib/telemetry/steps'
+import { useWelcomeOffer } from './full-access-offer'
 import { usePedos } from './pedos-provider'
 
 /**
@@ -16,6 +17,7 @@ import { usePedos } from './pedos-provider'
  */
 export function Welcome() {
   const pedos = usePedos()
+  const fullAccess = useWelcomeOffer()
 
   // Welcome shows only on a phone: wider, this stays mounted behind the lander.
   useEffect(() => {
@@ -35,7 +37,10 @@ export function Welcome() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background p-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] md:hidden">
+    <div
+      data-testid="welcome"
+      className="fixed inset-0 z-50 flex flex-col bg-background p-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] md:hidden"
+    >
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
         <div className="flex-1" />
         <Image
@@ -52,7 +57,7 @@ export function Welcome() {
         <p className="mt-1 text-xl text-muted-foreground">
           Record your farts. Turn them into songs.
         </p>
-        <ul className="mt-9 space-y-5 text-base">
+        <ul className="mt-9 space-y-5 text-base [@media(max-height:600px)]:mt-5 [@media(max-height:600px)]:space-y-3">
           <li className="flex items-center gap-3">
             <Mic className="size-5 text-muted-foreground" aria-hidden />
             One fart per Recording
@@ -71,6 +76,7 @@ export function Welcome() {
           <Button size="lg" className="h-12 w-full text-base" onClick={allowMicrophone}>
             Allow microphone
           </Button>
+          {fullAccess.button}
           <Button
             size="lg"
             variant="ghost"
@@ -81,6 +87,7 @@ export function Welcome() {
           </Button>
         </div>
       </div>
+      {fullAccess.dialogs}
     </div>
   )
 }

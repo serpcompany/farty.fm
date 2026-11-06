@@ -12,6 +12,7 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { hasFullAccess, startDownloadCheckout, waitForFullAccess } from '@/lib/full-access'
+import { paymentPending } from '@/lib/full-access-offers'
 import { runsOnIPhoneOrIPad } from '@/lib/install'
 import { reportError } from '@/lib/telemetry/errors'
 import type { Toot } from '@/lib/toot'
@@ -98,7 +99,8 @@ export function useTootDownload(toot: Toot, backFromCheckout = false): TootDownl
 
   /** Whether the account has Full Access. If not, says why, or offers it. */
   const checkAccess = async (accountId: string, afterPaying: boolean): Promise<boolean> => {
-    if (afterPaying) {
+    // Paid at an offer, and not through yet, counts too: another Checkout could charge twice.
+    if (afterPaying || paymentPending(accountId)) {
       if ((await waitForFullAccess(accountId)) !== null) return true
       setNote(NOT_PAID_YET)
       return false

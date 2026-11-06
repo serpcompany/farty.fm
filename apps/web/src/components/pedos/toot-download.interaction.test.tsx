@@ -1,6 +1,7 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { clearPaymentPending, notePaymentPending } from '@/lib/full-access-offers'
 import type { Toot } from '@/lib/toot'
 
 // A saved Toot's Download (#408), from its row's More menu and its screen's: the account decides,
@@ -206,6 +207,22 @@ describe('Download on a saved Toot', () => {
     await showToots()
     await openMenu()
     expect(menuItems()).toEqual(['Rename', 'Delete'])
+  })
+
+  it('waits on a payment made at an offer, and never opens the sheet that starts another', async () => {
+    notePaymentPending('account-1')
+    calls.waitForFullAccess.mockResolvedValueOnce(null)
+    await showToots()
+    await tapDownload()
+    expect(calls.hasFullAccess).not.toHaveBeenCalled()
+    expect(sheet()).toBeNull()
+    expect(note()).toBe("Your payment hasn't come through yet. Tap Download to check again.")
+
+    // It's through: the same tap hands over the file.
+    await tapDownload()
+    expect(sheet()).toBeNull()
+    expect(handedFile().name).toBe(FILE_NAME)
+    clearPaymentPending()
   })
 
   it('asks nothing of the server until it’s tapped', async () => {

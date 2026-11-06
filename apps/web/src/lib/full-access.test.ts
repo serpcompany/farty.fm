@@ -7,8 +7,11 @@ import {
   saveCheck,
   startCheckout,
   startDownloadCheckout,
+  startOfferCheckout,
   waitForFullAccess
 } from './full-access'
+import { notePaymentPending, paymentPending } from './full-access-offers'
+import { memoryStorage } from './test-storage'
 
 const TOOT = '33333333-3333-4333-8333-333333333333'
 
@@ -108,6 +111,46 @@ describe('startDownloadCheckout', () => {
       kind: 'failed',
       problem: 'failed'
     })
+  })
+})
+
+describe('startOfferCheckout', () => {
+  it('asks for Checkout to come back to the page, with no Toot', async () => {
+    const fetch = answering(Response.json({ url: 'https://checkout.stripe.com/c/pay/cs_test_a' }))
+    expect(await startOfferCheckout('/recordings/', 'userA')).toEqual({
+      kind: 'pay',
+      url: 'https://checkout.stripe.com/c/pay/cs_test_a'
+    })
+    const [path, init] = fetch.mock.calls[0]
+    expect(path).toBe('/api/full-access/checkout/')
+    expect(JSON.parse(String(init?.body))).toEqual({ returnTo: 'page', path: '/recordings/' })
+  })
+
+  it('goes nowhere but Stripe’s page or this site’s dev checkout', async () => {
+    answering(Response.json({ url: 'https://evil.example/pay' }))
+    expect(await startOfferCheckout('/', 'userA')).toEqual({ kind: 'failed', problem: 'failed' })
+  })
+})
+
+describe('a payment on its way', () => {
+  beforeEach(() => {
+    vi.stubGlobal('localStorage', memoryStorage())
+    notePaymentPending('userA')
+  })
+
+  it('is over once the account has Full Access', async () => {
+    answering(Response.json({ active: true, limitReached: false }))
+    expect(await hasFullAccess('userA')).toBe(true)
+    expect(paymentPending('userA')).toBe(false)
+  })
+
+  it('is still on its way when the server says no, or can’t be reached', async () => {
+    answering(Response.json({ active: false, limitReached: false }))
+    expect(await hasFullAccess('userA')).toBe(false)
+    expect(paymentPending('userA')).toBe(true)
+    answering(new Error('offline'))
+    expect(await hasFullAccess('userA')).toBe(null)
+    expect(paymentPending('userA')).toBe(true)
   })
 })
 

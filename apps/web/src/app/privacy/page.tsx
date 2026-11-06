@@ -122,11 +122,12 @@ export default function PrivacyPage() {
       <p>
         To see where new visitors stop, Farty counts how many browsers reach a few steps for the
         first time: opening Farty, allowing the microphone, saving a first Recording, signing in,
-        playing a Song and tapping Save. Your browser keeps a note of which steps it has counted, so
-        it counts each one once, and sends only the step&apos;s name, without cookies. Farty adds
-        one to that step&apos;s count for the day. The count holds nothing else: no account, IP
-        address or ID that could tell one person from another. It keeps those totals with no end
-        date. Like every request, the send itself is in Cloudflare&apos;s request log, below.
+        playing a Song, tapping Save, and seeing or tapping an offer of Full Access. Your browser
+        keeps a note of which steps it has counted, so it counts each one once, and sends only the
+        step&apos;s name, without cookies. Farty adds one to that step&apos;s count for the day. The
+        count holds nothing else: no account, IP address or ID that could tell one person from
+        another. It keeps those totals with no end date. Like every request, the send itself is in
+        Cloudflare&apos;s request log, below.
       </p>
       <p>
         The same switch and Global Privacy Control stop these counts from your browser. Farty&apos;s

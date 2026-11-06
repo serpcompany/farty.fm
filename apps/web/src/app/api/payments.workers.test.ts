@@ -20,6 +20,7 @@ import { SALE_EMAIL_LIMIT_MS } from '@/server/email'
 import {
   devCheckoutServes,
   getFullAccess,
+  offerPage,
   PAYMENT_LIMITS,
   receiveStripeEvent,
   startCheckout
@@ -450,6 +451,99 @@ describe('on a local run, with the dev checkout', () => {
     })
   })
 
+  describe('from an offer before Save (#407)', () => {
+    /** Checkout as an offer asks for it, with no Toot. */
+    const checkoutFromOffer = (path: unknown, as: As) =>
+      checkoutRoute.POST(checkoutRequest(as, { returnTo: 'page', path }), noParams)
+    const payDevFromOffer = (path: string, as: As) =>
+      devCheckoutRoute.POST(
+        new Request(`${ORIGIN}/api/dev/checkout/`, {
+          method: 'POST',
+          headers: headersFor('POST', as, { 'content-type': 'application/x-www-form-urlencoded' }),
+          body: new URLSearchParams({ return: 'page', path })
+        }),
+        noParams
+      )
+
+    it('comes back to the page once paid, with Full Access and no Toot', async () => {
+      const a = await signUp('A')
+      const started = await checkoutFromOffer('/recordings/', a)
+      expect(await started.json()).toEqual({
+        url: `${ORIGIN}/dev/checkout/?return=page&path=%2Frecordings%2F`
+      })
+      expect(await hasIt(a)).toBe(false)
+      expect(await counted('checkout-started')).toBe(1)
+      const paying = await payDevFromOffer('/recordings/', a)
+      expect(paying.status).toBe(303)
+      expect(paying.headers.get('location')).toBe(`${ORIGIN}/recordings/?offer=done`)
+      expect(await hasIt(a)).toBe(true)
+      expect(await counted('paid')).toBe(1)
+      // Nothing more to pay, and Save saves.
+      expect(await (await checkoutFromOffer('/recordings/', a)).json()).toEqual({ active: true })
+      expect((await save(T1, a)).status).toBe(201)
+    })
+
+    it('comes back to any of the app’s own pages, and anywhere else to Record', async () => {
+      for (const page of [
+        '/',
+        '/recordings/',
+        '/compose/',
+        '/compose/pad/',
+        '/compose/twinkle/',
+        '/toots/',
+        '/profile/'
+      ]) {
+        expect(offerPage(page)).toBe(page)
+      }
+      for (const elsewhere of [
+        '/compose/not-a-song/',
+        '//evil.example/',
+        'https://evil.example/',
+        '/\\evil.example/',
+        '/recordings/?a=1',
+        '/recordings',
+        '/dev/mail/',
+        '',
+        42,
+        null,
+        undefined
+      ]) {
+        expect(offerPage(elsewhere)).toBe('/')
+      }
+    })
+
+    it('never sends a buyer to an address the request made up', async () => {
+      const a = await signUp('A')
+      const started = await checkoutFromOffer('//evil.example/', a)
+      expect(await started.json()).toEqual({ url: `${ORIGIN}/dev/checkout/?return=page&path=%2F` })
+      const paying = await payDevFromOffer('//evil.example/', a)
+      expect(paying.headers.get('location')).toBe(`${ORIGIN}/?offer=done`)
+    })
+
+    it('needs no room for a Toot, as nothing is being saved', async () => {
+      const a = await signUp('A')
+      await fillToots(a.id, 300)
+      expect((await checkoutFromOffer('/', a)).status).toBe(200)
+    })
+
+    it('still takes a Save’s or a Download’s checkout, with their own checks', async () => {
+      const a = await signUp('A')
+      expect((await checkoutRoute.POST(checkoutRequest(a, {}), noParams)).status).toBe(400)
+      expect(
+        (await checkoutRoute.POST(checkoutRequest(a, { returnTo: 'other' }), noParams)).status
+      ).toBe(400)
+    })
+
+    it('never pays for another account', async () => {
+      const a = await signUp('A')
+      const b = await signUp('B')
+      await checkoutFromOffer('/', a)
+      expect((await payDevFromOffer('/', b)).status).not.toBe(303)
+      expect(await hasIt(a)).toBe(false)
+      expect(await hasIt(b)).toBe(false)
+    })
+  })
+
   it('says when an account with Full Access is at the Toot limit, as Save has to say it', async () => {
     const a = await signUp('A')
     await fillToots(a.id, 299)
@@ -679,6 +773,99 @@ describe('with Stripe Checkout in test mode', () => {
     expect(sent.get('metadata[toot_id]')).toBe(T1)
     expect(sent.get('success_url')).toBe(`${ORIGIN}/toots/toot/?id=${T1}&checkout=done`)
     expect(sent.get('cancel_url')).toBe(`${ORIGIN}/toots/toot/?id=${T1}`)
+  })
+
+  describe('from an offer before Save (#407)', () => {
+    const fromOffer = (path: string, as: As) =>
+      checkoutRoute.POST(checkoutRequest(as, { returnTo: 'page', path }), noParams)
+    /** A session an offer started, as Stripe holds it: with the page it returns to, and no Toot. */
+    const offerSession = (userId: string, page: string, fields: Partial<CheckoutSession> = {}) =>
+      sessionFor(userId, T1, {
+        metadata: { purchase: 'full_access', user_id: userId, return_page: page },
+        ...fields
+      })
+    const paidOfferSession = (userId: string, page: string) =>
+      offerSession(userId, page, {
+        status: 'complete',
+        payment_status: 'paid',
+        payment_intent: 'pi_test_first'
+      })
+
+    it('starts one $4.99 session, back to the page, with no Toot', async () => {
+      const a = await signUp('A')
+      const stripe = stubStripe(offerSession(a.id, '/recordings/'))
+      expect(await (await fromOffer('/recordings/', a)).json()).toEqual({
+        url: 'https://checkout.stripe.com/c/pay/cs_test_first'
+      })
+      const [, init] = stripe.mock.calls[0]
+      expect(new Headers(init?.headers).get('idempotency-key')).toBe(
+        `full-access/${a.id}/page:/recordings//first`
+      )
+      const sent = init?.body as URLSearchParams
+      expect(sent.get('line_items[0][price_data][unit_amount]')).toBe('499')
+      expect(sent.get('metadata[purchase]')).toBe('full_access')
+      expect(sent.get('metadata[user_id]')).toBe(a.id)
+      expect(sent.get('metadata[return_page]')).toBe('/recordings/')
+      expect(sent.has('metadata[toot_id]')).toBe(false)
+      expect(sent.get('success_url')).toBe(`${ORIGIN}/recordings/?offer=done`)
+      expect(sent.get('cancel_url')).toBe(`${ORIGIN}/recordings/`)
+    })
+
+    it('reuses an open session for the same page, so two taps can’t pay twice', async () => {
+      const a = await signUp('A')
+      const stripe = stubStripe(offerSession(a.id, '/'), offerSession(a.id, '/'))
+      await fromOffer('/', a)
+      expect(await (await fromOffer('/', a)).json()).toEqual({
+        url: 'https://checkout.stripe.com/c/pay/cs_test_first'
+      })
+      expect(stripe.mock.calls.map(([url]) => String(url))).toEqual([
+        'https://api.stripe.com/v1/checkout/sessions',
+        'https://api.stripe.com/v1/checkout/sessions/cs_test_first'
+      ])
+    })
+
+    it('ends an open session for another page or a Toot first, so only one can be paid', async () => {
+      const a = await signUp('A')
+      const next = offerSession(a.id, '/', {
+        id: 'cs_test_second',
+        url: 'https://checkout.stripe.com/c/pay/cs_test_second'
+      })
+      const stripe = stubStripe(
+        sessionFor(a.id, T1),
+        sessionFor(a.id, T1),
+        sessionFor(a.id, T1, { status: 'expired', url: null }),
+        next
+      )
+      await checkout(T1, a)
+      expect(await (await fromOffer('/', a)).json()).toEqual({ url: next.url })
+      expect(stripe.mock.calls.map(([url]) => String(url))).toEqual([
+        'https://api.stripe.com/v1/checkout/sessions',
+        'https://api.stripe.com/v1/checkout/sessions/cs_test_first',
+        'https://api.stripe.com/v1/checkout/sessions/cs_test_first/expire',
+        'https://api.stripe.com/v1/checkout/sessions'
+      ])
+    })
+
+    it('finds a session already paid, and starts no other', async () => {
+      const a = await signUp('A')
+      const stripe = stubStripe(offerSession(a.id, '/'), paidOfferSession(a.id, '/'))
+      await fromOffer('/', a)
+      expect(await (await fromOffer('/', a)).json()).toEqual({ active: true })
+      expect(stripe.mock.calls).toHaveLength(2)
+      expect(await hasIt(a)).toBe(true)
+    })
+
+    it('gives Full Access from the signed paid event, with no Toot in it', async () => {
+      const a = await signUp('A')
+      stubStripe(offerSession(a.id, '/'))
+      await fromOffer('/', a)
+      vi.restoreAllMocks()
+      const stripe = vi.spyOn(globalThis, 'fetch')
+      expect((await deliver(completed(paidOfferSession(a.id, '/')))).status).toBe(200)
+      expect(stripe).not.toHaveBeenCalled()
+      expect(await hasIt(a)).toBe(true)
+      expect(await counted('paid')).toBe(1)
+    })
   })
 
   it('reuses an open session for the same Toot, so two taps can’t pay twice', async () => {

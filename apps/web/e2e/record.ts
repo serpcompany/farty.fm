@@ -3,11 +3,13 @@ import { expect, type Page, test } from '@playwright/test'
 
 /**
  * An init script: skips Welcome and, unless `offersAccount`, the account step, which offers itself
- * once, after the first Result (`account.spec.ts`).
+ * once, after the first Result (`account.spec.ts`). Unless `offersFullAccess`, the first Result's
+ * offer of Full Access is out of the way too (`full-access-offers.spec.ts`).
  */
-export function skipWelcome({ offersAccount = false } = {}): void {
+export function skipWelcome({ offersAccount = false, offersFullAccess = false } = {}): void {
   localStorage.setItem('pedos.welcomed', '1')
   if (!offersAccount) localStorage.setItem('pedos.accountStep', 'done')
+  if (!offersFullAccess) localStorage.setItem('pedos.fullAccessOffer.result', '1')
 }
 
 /**

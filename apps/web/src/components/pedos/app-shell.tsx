@@ -18,6 +18,7 @@ import { type Tab, tabOf, tabs } from '@/lib/tabs'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { AccountStep } from './account-step'
+import { FullAccessReturn } from './full-access-offer'
 import { appMain, Lander } from './lander'
 import { usePedos } from './pedos-provider'
 import { useTrackPages } from './previous-page'
@@ -184,9 +185,11 @@ export function AppShell({ children, qrCode }: { children: ReactNode; qrCode: Re
           </nav>
         )}
         <RecordFlow />
-        <AccountStep />
         {/* Only on the tabs, so the privacy, support and 404 pages are always readable. */}
         {pedos.showsWelcome && tab !== null && <Welcome />}
+        {/* After Welcome, as its Full Access offer opens the account step over it. */}
+        <AccountStep />
+        <FullAccessReturn />
       </div>
     </>
   )
