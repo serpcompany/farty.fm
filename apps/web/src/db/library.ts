@@ -474,18 +474,27 @@ export async function libraryChanges(
   }
 }
 
-/** Turns one of the account's switches on or off. False if the user has no row. */
+/**
+ * Turns one of the account's switches on or off. False if the user has no row. Turning off Show
+ * where I farted forgets every place kept too: they said not to show them, and keeping them would
+ * put old cities back on every link the day they turn it on for one new fart.
+ */
 export async function setAccountSwitch(
   db: Database,
   userId: string,
   name: AccountSwitch,
   on: boolean
 ): Promise<boolean> {
-  const updated = await db
+  const update = db
     .update(user)
     .set({ [name]: on, updatedAt: new Date() })
     .where(eq(user.id, userId))
     .returning({ id: user.id })
+  if (name !== 'showFartPlaces' || on) return (await update).length === 1
+  const [updated] = await db.batch([
+    update,
+    db.update(recordings).set({ place: null }).where(eq(recordings.userId, userId))
+  ])
   return updated.length === 1
 }
 

@@ -456,9 +456,10 @@ export async function patchRecording(
 const ACCOUNT_SWITCHES: AccountSwitch[] = ['marketingEmail', 'showFartPlaces']
 
 /**
- * `PATCH /api/account/` with one of `{ marketingEmail }` (Farty news by email) and
- * `{ showFartPlaces }` (saying where each shared fart was made): turns it on or off. 409 when
- * `LIBRARY_HEADER` names another account (`wrong_account`).
+ * `PATCH /api/account/` with exactly one of `{ marketingEmail }` (Farty news by email) and
+ * `{ showFartPlaces }` (saying where each shared fart was made): turns it on or off. 400 for both,
+ * so a request never answers 200 having left one as it was. 409 when `LIBRARY_HEADER` names another
+ * account (`wrong_account`).
  */
 export async function patchAccount(
   { db }: Stores,
@@ -470,9 +471,9 @@ export async function patchAccount(
   const body = await readJson(request)
   if (body instanceof Response) return body
   const sent = body.json as Partial<Record<AccountSwitch, unknown>> | null
-  const name = ACCOUNT_SWITCHES.find(each => typeof sent?.[each] === 'boolean')
-  if (!name) return apiError(400, 'invalid_request')
-  const on = sent?.[name] === true
+  const [name, ...others] = ACCOUNT_SWITCHES.filter(each => sent?.[each] !== undefined)
+  const on = name && sent?.[name]
+  if (typeof on !== 'boolean' || others.length > 0) return apiError(400, 'invalid_request')
   if (!(await setAccountSwitch(db, user.id, name, on))) return notFound()
   return Response.json({ [name]: on })
 }

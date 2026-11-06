@@ -5,6 +5,7 @@
 /** What's kept of where a Recording was first uploaded from. Never an address or a position. */
 export type RecordedPlace = {
   city: string | null
+  /** The state, in the US. Elsewhere a page names the country instead, so none is kept. */
   region: string | null
   /** "US": never null, since a place with no country isn't kept. */
   country: string
@@ -37,7 +38,12 @@ export function recordedPlaceOf(cf: unknown): RecordedPlace | null {
   const { city, region, country, timezone } = cf as Record<string, unknown>
   const code = textOf(country)
   if (code === null || NO_COUNTRY.has(code)) return null
-  return { city: textOf(city), region: textOf(region), country: code, timeZone: textOf(timezone) }
+  return {
+    city: textOf(city),
+    region: code === 'US' ? textOf(region) : null,
+    country: code,
+    timeZone: textOf(timezone)
+  }
 }
 
 /** "France" for "FR", or null for a code this runtime can't name. */
@@ -52,7 +58,7 @@ function countryName(code: string): string | null {
 /** "Austin, Texas" in the US, "Paris, France" elsewhere, or as much of either as is known. */
 export function recordedInOf(place: RecordedPlace | null): RecordedIn {
   if (!place) return NOT_SAID
-  const wider = (place.country === 'US' ? place.region : null) ?? countryName(place.country)
+  const wider = place.region ?? countryName(place.country)
   // "Singapore", not "Singapore, Singapore".
   const name = place.city && place.city !== wider ? [place.city, wider] : [wider]
   const recordedIn = name.filter(Boolean).join(', ')

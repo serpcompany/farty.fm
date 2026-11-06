@@ -1142,14 +1142,14 @@ describe('Where a shared fart was made (#444)', () => {
     expect(await placeKept(R1, alice.id)).toEqual(KEPT)
   })
 
-  it('keeps none for a take recorded more than a day before it uploads', async () => {
-    const alice = await fromAustin({ createdAt: Date.now() - 25 * 60 * 60 * 1000 })
+  it('keeps none for a take recorded more than an hour before it uploads', async () => {
+    const alice = await fromAustin({ createdAt: Date.now() - 61 * 60 * 1000 })
     expect(await placeKept(R1, alice.id)).toBeNull()
     expect(await viewOf(await urlOf(await share.put(R1, alice)))).toMatchObject(NOT_SAID)
   })
 
-  it('keeps one for a take up to a day old', async () => {
-    const alice = await fromAustin({ createdAt: Date.now() - 23 * 60 * 60 * 1000 })
+  it('keeps one for a take up to an hour old', async () => {
+    const alice = await fromAustin({ createdAt: Date.now() - 59 * 60 * 1000 })
     expect(await placeKept(R1, alice.id)).toEqual(KEPT)
   })
 
@@ -1175,7 +1175,7 @@ describe('Where a shared fart was made (#444)', () => {
     expect(library).not.toContain('America/Chicago')
   })
 
-  it('leaves it out of links already sent as soon as the switch is off, and back on brings it back', async () => {
+  it('forgets it as soon as the switch is off, on links already sent too, and on again says it only of new ones', async () => {
     const alice = await fromAustin()
     const { recording, toot } = await shareBoth(alice)
 
@@ -1193,9 +1193,30 @@ describe('Where a shared fart was made (#444)', () => {
       expect(data).not.toContain('America/Chicago')
     }
 
+    expect(await placeKept(R1, alice.id)).toBeNull()
+
     expect((await api.patchAccount({ showFartPlaces: true }, alice)).status).toBe(200)
-    expect(await viewOf(recording)).toMatchObject(SAID)
-    expect((await partsOf(toot)).rows[0].fart).toMatchObject(SAID)
+    expect(await viewOf(recording)).toMatchObject(NOT_SAID)
+    expect((await partsOf(toot)).rows[0].fart).toMatchObject(NOT_SAID)
+
+    const metadata = recordingMetadata(R2, {
+      number: 2,
+      seconds: 1,
+      sampleRate: RATE,
+      createdAt: Date.now()
+    })
+    expect((await api.put('recordings', R2, uploadBody(metadata, take()), alice)).status).toBe(201)
+    expect(await placeKept(R2, alice.id)).toEqual(KEPT)
+  })
+
+  it("forgets only that owner's, and only for that switch", async () => {
+    const alice = await fromAustin()
+    expect((await api.patchAccount({ marketingEmail: false }, alice)).status).toBe(200)
+    expect(await placeKept(R1, alice.id)).toEqual(KEPT)
+
+    const bob = await signUp('bob')
+    expect((await api.patchAccount({ showFartPlaces: false }, bob)).status).toBe(200)
+    expect(await placeKept(R1, alice.id)).toEqual(KEPT)
   })
 
   it('keeps none for a Recording uploaded with the switch off', async () => {
@@ -1228,8 +1249,14 @@ describe('Where a shared fart was made (#444)', () => {
       return row
     }
     expect(await switches()).toEqual({ news: true, places: true })
-    expect((await api.patchAccount({ showFartPlaces: 'no' }, alice)).status).toBe(400)
-    expect(await switches()).toEqual({ news: true, places: true })
+    for (const bad of [
+      { showFartPlaces: 'no' },
+      { marketingEmail: false, showFartPlaces: false },
+      { marketingEmail: 'no', showFartPlaces: false }
+    ]) {
+      expect((await api.patchAccount(bad, alice)).status).toBe(400)
+      expect(await switches()).toEqual({ news: true, places: true })
+    }
     expect((await api.patchAccount({ showFartPlaces: false }, alice)).status).toBe(200)
     expect(await switches()).toEqual({ news: true, places: false })
   })

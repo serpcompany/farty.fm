@@ -36,6 +36,15 @@ describe('recordedPlaceOf', () => {
     }
   })
 
+  it('keeps no region outside the US, where a page names the country', () => {
+    expect(recordedPlaceOf({ city: 'Paris', region: 'Ile-de-France', country: 'FR' })).toEqual({
+      city: 'Paris',
+      region: null,
+      country: 'FR',
+      timeZone: null
+    })
+  })
+
   it('keeps a country with no city', () => {
     expect(recordedPlaceOf({ country: 'FR', city: '', region: 7 })).toEqual({
       city: null,
@@ -54,20 +63,24 @@ describe('recordedInOf', () => {
       recordedIn: 'Austin, Texas',
       timeZone: 'America/Chicago'
     })
-    expect(said({ city: 'Paris', region: 'Ile-de-France', country: 'FR' })).toBe('Paris, France')
+    expect(said({ city: 'Paris', region: null as never, country: 'FR' })).toBe('Paris, France')
   })
 
   it('says as much as it knows', () => {
     expect(said({ city: null as never })).toBe('Texas')
     expect(said({ city: null as never, region: null as never })).toBe('United States')
     expect(said({ city: 'Lyon', region: null as never, country: 'FR' })).toBe('Lyon, France')
-    expect(said({ city: 'Singapore', country: 'SG' })).toBe('Singapore')
-    expect(said({ city: 'Somewhere', country: 'not a code' })).toBe('Somewhere')
+    expect(said({ city: 'Singapore', region: null as never, country: 'SG' })).toBe('Singapore')
+    expect(said({ city: 'Somewhere', region: null as never, country: 'not a code' })).toBe(
+      'Somewhere'
+    )
   })
 
   it('says nothing with no place, or none it can name', () => {
     expect(recordedInOf(null)).toEqual(NOT_SAID)
-    expect(recordedInOf({ ...AUSTIN, city: null, country: 'not a code' })).toEqual(NOT_SAID)
+    expect(recordedInOf({ ...AUSTIN, city: null, region: null, country: 'not a code' })).toEqual(
+      NOT_SAID
+    )
   })
 })
 

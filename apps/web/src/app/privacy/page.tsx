@@ -22,8 +22,9 @@ export default function PrivacyPage() {
       <h2>With an account</h2>
       <ul>
         <li>
-          Your email, Recordings and Toots (audio included) are stored on Cloudflare, in your
-          account, so you can use them on any phone or tablet you sign in on.
+          Your email, Recordings and Toots (audio included), and the city each Recording was first
+          uploaded from, are stored on Cloudflare, in your account, so you can use them on any phone
+          or tablet you sign in on.
         </li>
         <li>
           Your email is used for sign-in codes and for Farty news, which is on by default. You can
@@ -43,13 +44,15 @@ export default function PrivacyPage() {
           your email or your other Recordings and Toots.
         </li>
         <li>
-          When a Recording first uploads within a day of recording it, Farty keeps the city, region,
-          country and time zone Cloudflare works out from your connection, and shows them only if
-          you share it. It doesn&apos;t ask your phone for its location, and never keeps your IP
-          address or an exact position for this, so a VPN shows the VPN&apos;s city. With Show where
-          I farted off on Profile, new Recordings keep none, and what you&apos;ve already shared
-          stops showing it at once, links already sent included. Deleting a Recording deletes its
-          place.
+          When a Recording first uploads within an hour of recording it, Farty keeps the city,
+          country and time zone Cloudflare works out from your connection, and the state in the US.
+          It shows them only if you share that Recording or a Toot that plays it. It doesn&apos;t
+          ask your phone for its location, and never keeps your IP address or an exact position for
+          this, so a VPN shows the VPN&apos;s city, and a Recording that waited for a connection can
+          show where it uploaded rather than where you made it. Turning off Show where I farted on
+          Profile deletes every place Farty kept, so what you&apos;ve already shared stops showing
+          one at once, links already sent included, and new Recordings keep none. Turning it back on
+          only affects new Recordings. Deleting a Recording deletes its place.
         </li>
         <li>
           What you share is listed on your page, farty.fm/@yourhandle, which anyone can open. Search

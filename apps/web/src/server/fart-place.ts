@@ -5,13 +5,17 @@ import type { Database } from '@/db/database'
 import { showsFartPlaces } from '@/db/sharing'
 import { type RecordedPlace, recordedPlaceOf } from '@/lib/fart-place'
 
-/** How old a take can be when it uploads and still be said to come from where it uploaded from. */
-const FRESH_MS = 24 * 60 * 60 * 1000
+/**
+ * How old a take can be when it uploads and still be said to come from where it uploaded from. A
+ * take uploads once it's saved, so an older one waited for a connection, maybe until its owner got
+ * home, and saying so would name their home as where a fart made elsewhere was made.
+ */
+const FRESH_MS = 60 * 60 * 1000
 
 /**
  * What to keep of where a Recording made at `createdAt` is being uploaded from (#444, ADR 0020).
- * Nothing for a take older than a day, since it may have been made anywhere since, nor with the
- * owner's switch off.
+ * Nothing for a take older than an hour, since it may have been made anywhere, nor with the owner's
+ * switch off.
  */
 export async function placeOfUpload(
   db: Database,

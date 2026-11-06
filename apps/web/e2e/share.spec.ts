@@ -322,9 +322,11 @@ test('a signed-in user shares a Recording, someone signed out plays it, and Stop
     await expect(recorded).toHaveText(/^Recorded .*\d{4}/)
     expect(await other.content()).not.toContain('Testville')
 
+    // Off forgets it, so on again doesn't put it back on a link already sent.
     await showWhereIFarted(context, true)
     await other.goto(link)
-    await expect(recorded).toContainText('Testville, Texas')
+    await expect(recorded).toHaveText(/^Recorded .*\d{4}/)
+    expect(await other.content()).not.toContain('Testville')
   })
 
   await test.step('the owner stops sharing, and the link is gone', async () => {
