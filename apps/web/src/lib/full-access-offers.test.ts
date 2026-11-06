@@ -8,7 +8,8 @@ import {
   offerWasSeen,
   PAYMENT_PENDING_MS,
   paymentPending,
-  readOfferReturn
+  readOfferReturn,
+  readPaidReturn
 } from './full-access-offers'
 import { blockedStorage, memoryStorage } from './test-storage'
 
@@ -76,6 +77,17 @@ describe('the return from Checkout', () => {
     expect(readOfferReturn('')).toBe(false)
     expect(readOfferReturn('?offer=later')).toBe(false)
     expect(readOfferReturn('?toot=x&checkout=done')).toBe(false)
+  })
+
+  it('from paying anywhere is an offer’s, Save’s or Download’s, and never a cancelled one', () => {
+    expect(readPaidReturn('?offer=done')).toBe(true)
+    expect(readPaidReturn('?toot=x&checkout=done')).toBe(true)
+    expect(readPaidReturn('?id=x&checkout=done')).toBe(true)
+    expect(readPaidReturn('')).toBe(false)
+    expect(readPaidReturn('?toot=x')).toBe(false)
+    expect(readPaidReturn('?id=x')).toBe(false)
+    expect(readPaidReturn('?checkout=later')).toBe(false)
+    expect(readPaidReturn('?offer=later')).toBe(false)
   })
 
   it('comes off the address, leaving the rest', () => {

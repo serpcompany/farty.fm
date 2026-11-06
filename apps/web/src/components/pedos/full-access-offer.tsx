@@ -17,7 +17,8 @@ import {
   type OfferPlace,
   offerWasSeen,
   paymentPending,
-  readOfferReturn
+  readOfferReturn,
+  readPaidReturn
 } from '@/lib/full-access-offers'
 import { FULL_ACCESS_PRICE_LABEL } from '@/lib/pricing'
 import { reachStep } from '@/lib/telemetry/steps'
@@ -266,6 +267,8 @@ export function useFirstResultOffer(finish: (href: string) => void) {
  * then that it's paid. Until it's paid the address keeps the return, so a reload checks again, and
  * `paymentPending` stops anything offering Pay. Signed out, its step opens, once: a payment needs an
  * account to reach, and Not now leaves it for the next sign-in. The sale's email is the server's.
+ * Back from paying at Save or Download, those screens say all that themselves, and this only keeps the
+ * note of the payment, wherever they go next (#433).
  */
 export function FullAccessReturn() {
   const { account, stepOpen, openStep } = useAccount()
@@ -273,13 +276,24 @@ export function FullAccessReturn() {
   const [stage, setStage] = useState<'waiting' | 'paid' | 'notPaid' | null>(null)
   const askedForAccount = useRef(false)
   const waited = useRef(false)
+  // Read as it first renders, before any screen takes the return off the address. Nothing shows it, so
+  // it can't differ from the server's.
+  const [paidReturn] = useState(
+    () => typeof window !== 'undefined' && saveAsksForPayment() && readPaidReturn()
+  )
+  const noted = useRef(false)
+
+  useEffect(() => {
+    if (!paidReturn || !accountId || noted.current) return
+    noted.current = true
+    notePaymentPending(accountId)
+  }, [paidReturn, accountId])
 
   useEffect(() => {
     if (saveAsksForPayment() && readOfferReturn()) setStage('waiting')
   }, [])
 
   const wait = useEffectEvent(async (accountId: string) => {
-    notePaymentPending(accountId)
     if ((await waitForFullAccess(accountId)) === null) {
       setStage('notPaid')
       return

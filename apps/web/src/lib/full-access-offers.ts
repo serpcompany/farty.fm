@@ -1,6 +1,7 @@
 // What this browser remembers about the two offers of Full Access before Save (#407, ADR 0022): on
-// Welcome and at the first Result. Each gets one go in a browser, and a payment made from one is
-// remembered until the account has it, so nothing offers Pay again while it's on its way.
+// Welcome and at the first Result. Each gets one go in a browser. A payment, made from one of them or
+// from Save's or Download's own sheet (#433), is remembered until the account has it, so nothing offers
+// Pay again while it's on its way.
 
 export type OfferPlace = 'welcome' | 'result'
 
@@ -28,6 +29,12 @@ export function readOfferReturn(search = window.location.search): boolean {
   return new URLSearchParams(search).get('offer') === 'done'
 }
 
+/** Whether this address is Checkout's return from paying anywhere: an offer, Save or Download. */
+export function readPaidReturn(search = window.location.search): boolean {
+  const params = new URLSearchParams(search)
+  return params.get('offer') === 'done' || params.get('checkout') === 'done'
+}
+
 /** Takes the return off the address, so a reload doesn't wait for a payment again. */
 export function clearOfferReturn(): void {
   const address = new URL(window.location.href)
@@ -42,7 +49,7 @@ const pendingKey = 'pedos.fullAccess.paymentPending'
  */
 export const PAYMENT_PENDING_MS = 60 * 60 * 1000
 
-/** `accountId` came back from an offer's Checkout: from now until it has Full Access, no Pay. */
+/** `accountId` came back from paying at Checkout: from now until it has Full Access, no Pay. */
 export function notePaymentPending(accountId: string, now = Date.now()): void {
   try {
     localStorage.setItem(pendingKey, JSON.stringify({ accountId, at: now }))
@@ -51,7 +58,7 @@ export function notePaymentPending(accountId: string, now = Date.now()): void {
   }
 }
 
-/** Whether `accountId` paid at an offer and it hasn't come through yet. */
+/** Whether `accountId` paid and it hasn't come through yet. */
 export function paymentPending(accountId: string, now = Date.now()): boolean {
   try {
     const pending = JSON.parse(localStorage.getItem(pendingKey) ?? 'null') as {
