@@ -693,9 +693,9 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(rows).toHaveCount(1)
     await expect(rows.getByTestId('profile-shared-link')).toHaveAttribute('href', link)
     await expect(rows.getByTestId('profile-shared-link')).toHaveText(title)
-    // Laid out as SoundCloud's track row with no artwork (#451): the Handle over its name, as its
-    // uploader, the day at the right, and its length on its waveform.
-    await expect(rows.getByTestId('profile-shared-byline')).toHaveText(`@${handle}`)
+    // Laid out as SoundCloud's track row with no artwork (#451), with no Handle on it (#454): the
+    // day at the right, and its length on its waveform.
+    await expect(rows.getByTestId('profile-shared-byline')).toHaveCount(0)
     await expect(rows.getByTestId('profile-shared-date')).toHaveText('Today')
     await expect(rows.getByTestId('profile-shared-length')).toHaveText(/^\d+:\d\d$/)
     expect((await drawn).status()).toBe(200)
@@ -710,7 +710,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(rows).toHaveCount(1)
     await expect(rows.getByTestId('profile-shared-link')).toHaveAttribute('href', recordingLink)
     await expect(rows.getByTestId('profile-shared-link')).toContainText('Recording ')
-    await expect(rows.getByTestId('profile-shared-byline')).toHaveText(`@${handle}`)
+    await expect(rows.getByTestId('profile-shared-byline')).toHaveCount(0)
     await expect(rows).not.toContainText('Testville')
     // Its length is its fart's, the figure its own page prints, not the take's with its silence.
     const rowLength = await rows.getByTestId('profile-shared-length').textContent()
