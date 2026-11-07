@@ -49,7 +49,8 @@ const fart = (place: number, name: string): SharedFartRow['fart'] => ({
   name,
   length: '0:01',
   levels: [0.2, 0.8],
-  recordedAt: Date.UTC(2026, 10, 6, 15, 12),
+  // 9:12 PM on Nov 6 in Chicago, where it was made: already the 7th in UTC.
+  recordedAt: Date.UTC(2026, 10, 7, 3, 12),
   playable: true,
   recordedIn: 'Austin, Texas',
   timeZone: 'America/Chicago'
@@ -88,7 +89,6 @@ async function render(toot: SharedTootParts = parts) {
         song="Song"
         length="0:04"
         seconds={4}
-        levels={[0.5]}
         parts={toot}
       />
     )
@@ -173,11 +173,19 @@ describe("A shared Toot's farts", () => {
     expect(fartRows()[0].querySelector('button')).toBeNull()
   })
 
-  it('says where each fart was made, in the time there', async () => {
+  it('says the day and where each fart was made, the day there, on one line (#451)', async () => {
     await render()
-    expect(fartRows()[0].textContent).toContain('Austin, Texas')
-    // 15:12 UTC, in Chicago that November.
-    expect(fartRows()[0].textContent).toMatch(/\b0?9:12/)
+    const day = new Date(Date.UTC(2026, 10, 7, 3, 12)).toLocaleDateString(undefined, {
+      dateStyle: 'medium',
+      timeZone: 'America/Chicago'
+    })
+    expect(day).toContain('6')
+    const when = [...fartRows()[0].querySelectorAll('span')].find(
+      span => span.childElementCount === 0 && span.textContent?.includes('Austin')
+    )
+    expect(when?.textContent).toBe(`${day} · Austin, Texas`)
+    // No time, and cut short rather than wrapping at a phone's width.
+    expect(when?.classList.contains('truncate')).toBe(true)
   })
 
   it('says nothing of where for a fart with no place', async () => {
@@ -209,6 +217,69 @@ describe("A shared Toot's farts", () => {
       rows: [{ plays: null, pitch: 60, colorIndex: 0, fart: fart(0, 'Big one') }]
     })
     expect(fartRows()[0].textContent).not.toContain('plays')
+  })
+})
+
+describe("A shared Toot's page is the screen it was made on (#451)", () => {
+  it("has Song Creator's Play, state and line, then the whole roll, then Recordings used", async () => {
+    await render()
+    expect(byTestId('shared-toot-state')[0].textContent).toBe('Ready')
+    expect(container.textContent).toContain("0:04 · 2 of @alice's Recordings, one per note")
+    const play = byTestId('shared-toot-play')[0]
+    const roll = byTestId('note-view')[0]
+    const used = container.querySelector('#recordings-used')
+    expect(used?.textContent).toBe('Recordings used')
+    // Play, then the roll, then Recordings used, as Song Creator has them.
+    expect(play.compareDocumentPosition(roll) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(
+      roll.compareDocumentPosition(used as Node) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+    // The roll stands for the Toot: no waveform of the whole Toot to scrub.
+    expect(container.querySelector('[aria-label="Play Song from a spot"]')).toBeNull()
+
+    await click(byTestId('shared-toot-play')[0])
+    expect(byTestId('shared-toot-state')[0].textContent).toBe('Playing')
+    expect(byTestId('shared-toot-play')[0].getAttribute('aria-label')).toBe('Stop Song')
+  })
+
+  it("counts a Sound Pad Toot's taps, as the Sound Pad's own screen does", async () => {
+    const taps = [
+      { start: 0, dur: 1, pitch: 0 },
+      { start: 1, dur: 1, pitch: 1 },
+      { start: 2, dur: 1, pitch: 0 }
+    ]
+    await render({
+      ...parts,
+      lanes: true,
+      song: { bpm: 60, length_beats: 4, notes: taps, pitches: [0, 1] },
+      rows: rows.map((row, lane) => ({ ...row, plays: null, pitch: lane }))
+    })
+    expect(container.textContent).toContain("0:04 · 3 taps of @alice's 2 Recordings")
+    expect(container.textContent).not.toContain('one per note')
+  })
+
+  it("says so when the Toot's own audio won't play, and leaves the rest as it was", async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
+      async () => new Response(null, { status: 404 })
+    )
+    await render()
+    await click(byTestId('shared-toot-play')[0])
+    const toot = heard.plays.at(-1)
+    expect(toot?.key).toBe(`shared:${BASE}audio/`)
+    await act(async () => {
+      await expect(toot?.wav()).rejects.toThrow('audio 404')
+      // As the player does when its audio won't load.
+      toot?.onEnded()
+    })
+    expect(byTestId('shared-toot-state')[0].textContent).toBe("Couldn't play")
+    const alerts = [...container.querySelectorAll('[role="alert"]')]
+    expect(alerts.map(alert => alert.textContent)).toEqual(['Check your connection and try again.'])
+    expect(byTestId('shared-toot-play')[0].getAttribute('aria-label')).toBe('Play Song')
+    // The roll and each fart are still there, and a fart still plays.
+    expect(byTestId('note-view')).toHaveLength(1)
+    expect(fartRows()).toHaveLength(2)
+    await click(fartButton(0))
+    expect(heard.plays.at(-1)?.key).toBe(`shared:${BASE}farts/0/audio/`)
   })
 })
 

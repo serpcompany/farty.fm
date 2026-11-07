@@ -2,11 +2,10 @@ import { linkParams } from '@/app/[atHandle]/link-params'
 import { requestStores } from '@/server/library'
 import { sharedTootRow } from '@/server/sharing'
 
-// Public, outside `src/app/api/`: anyone with a shared Toot's link sees its waveform and notes
-// (ADR 0020).
+// Public, outside `src/app/api/`: anyone with a shared Toot's link sees its waveform (ADR 0020).
 export const dynamic = 'force-dynamic'
 
-/** What the shared Toot's profile page row draws (#448): its bars and roll, while its link works. */
+/** What the shared Toot's profile page row draws (#448): its bars, while its link works. */
 export async function GET(
   request: Request,
   { params }: RouteContext<'/[atHandle]/t/[id]/row'>

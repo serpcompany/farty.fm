@@ -40,7 +40,7 @@ import {
   tootRollOf
 } from '@/lib/toot'
 import { wavHeader } from '@/lib/wav'
-import { waveformLevels } from '@/lib/waveform'
+import { finerBars, waveformLevels } from '@/lib/waveform'
 
 import { consumeSlots, reporterLimitKey, requestClient, type SlotRule } from './auth-config'
 import { type Stores, toRecording, wrongLibrary } from './library'
@@ -331,8 +331,9 @@ export function sharedPart(recording: Recording): Trim {
 
 /**
  * What a shared Toot's row, and a shared Recording's profile page row (#448), plays and draws:
- * only the fart. That's the fart between its Trim's handles, or what analysis found. The rest of a take is whatever else the microphone heard, and
- * sharing a Toot doesn't share that. Null before analysis has found it, when there's nothing to play.
+ * only the fart. That's the fart between its Trim's handles, or what analysis found. The rest of
+ * a take is whatever else the microphone heard, and sharing a Toot doesn't share that. Null
+ * before analysis has found it, when there's nothing to play.
  */
 export function tootFartPart({ trim, analysis }: Recording): Trim | null {
   const fart = trim
@@ -349,6 +350,34 @@ export function tootFartPart({ trim, analysis }: Recording): Trim | null {
   return endSeconds > startSeconds ? { startSeconds, endSeconds } : null
 }
 
+/** A shared Recording's fart, as its profile page row plays it and its own page prints it. */
+export type RecordingFart = {
+  /** The fart, in seconds of the whole take. */
+  inTake: Trim
+  /** The fart, in seconds of the audio its link serves, which starts at `sharedPart`'s start. */
+  part: Trim
+  /** "1.1 s": how long `part` lasts, rounded down as fart lengths are (`formattedFartSeconds`). */
+  length: string
+}
+
+/**
+ * A shared Recording's fart (#450): `tootFartPart` inside what its link serves, or all of that
+ * when analysis hasn't found a fart between its Trim's handles. Its length is that span's, so its
+ * profile page row never prints one length and plays another, and its own page prints the same.
+ */
+export function recordingFart(recording: Recording): RecordingFart {
+  const served = sharedPart(recording)
+  const inTake = tootFartPart(recording) ?? served
+  return {
+    inTake,
+    part: {
+      startSeconds: inTake.startSeconds - served.startSeconds,
+      endSeconds: inTake.endSeconds - served.startSeconds
+    },
+    length: formattedFartSeconds(inTake.endSeconds - inTake.startSeconds)
+  }
+}
+
 /** The bars of a whole take's `waveform` that fall in `part`. */
 export function partBars(waveform: number[], seconds: number, part: Trim): number[] {
   if (waveform.length === 0 || seconds <= 0) return waveform
@@ -358,7 +387,10 @@ export function partBars(waveform: number[], seconds: number, part: Trim): numbe
   return bars.length > 0 ? bars : waveform
 }
 
-/** How many loudness bars a fart's row draws, as Song Creator's do. */
+/**
+ * How many loudness bars a fart's row draws, as Song Creator's do, however short the fart: a few
+ * stored bars across its 72 px would draw as round blobs (#451).
+ */
 const FART_ROW_BARS = 16
 
 /** `levels` in at most `count` bars, each the loudest it covers. */
@@ -401,7 +433,10 @@ export async function sharedTootParts(
       name: recordingName(recording),
       length: part ? formattedFartSeconds(part.endSeconds - part.startSeconds) : '',
       levels: part
-        ? fewerBars(partBars(recording.waveform, recording.seconds, part), FART_ROW_BARS)
+        ? finerBars(
+            fewerBars(partBars(recording.waveform, recording.seconds, part), FART_ROW_BARS),
+            FART_ROW_BARS
+          )
         : [],
       recordedAt: recording.createdAt,
       playable: part !== null
@@ -705,15 +740,14 @@ export async function sharedTootLevels(
   return levels
 }
 
-/** A shared Toot's row on its owner's profile page (#448): its waveform's bars and its note roll. */
-export type ProfileTootRow = { levels: number[]; roll: TootRoll }
+/** A shared Toot's row on its owner's profile page (#448, #451): its waveform's bars. */
+export type ProfileTootRow = { levels: number[] }
 
 /**
  * `GET /@<handle>/t/<id>/row/`: what a shared Toot's row on its owner's profile page draws (#448),
- * for anyone with the link: its loudness bars (`sharedTootLevels`) and its note roll, as its own
- * page draws them. Each row fetches its own once it's on screen, so the page never reads every
- * Toot's WAV or notes. The share is checked in D1 first, as its audio's is, and nothing between
- * keeps it, so a link taken down is down at once.
+ * for anyone with the link: its loudness bars (`sharedTootLevels`). Each row fetches its own once
+ * it's on screen, so the page never reads every Toot's WAV. The share is checked in D1 first, as
+ * its audio's is, and nothing between keeps it, so a link taken down is down at once.
  */
 export async function sharedTootRow(
   { db, media }: Stores,
@@ -723,11 +757,8 @@ export async function sharedTootRow(
 ): Promise<Response> {
   const shared = await findSharedToot(db, handle, link)
   if (!shared) return apiError(404, 'not_found')
-  const [levels, roll] = await Promise.all([
-    sharedTootLevels(media, sharedTootKey(shared), servedOrigin(request)),
-    sharedTootRoll(db, shared)
-  ])
-  const drawn: ProfileTootRow = { levels, roll }
+  const levels = await sharedTootLevels(media, sharedTootKey(shared), servedOrigin(request))
+  const drawn: ProfileTootRow = { levels }
   return Response.json(drawn, { headers: { 'Cache-Control': 'private, no-cache' } })
 }
 

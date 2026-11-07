@@ -104,6 +104,23 @@ describe('recordedWhenAndWhere', () => {
     expect(recordedWhenAndWhere(at, NOT_SAID)).toBe(own)
   })
 
+  it('says only the day, where it was made, without `time` (#451)', () => {
+    // 9:12 PM on Nov 6 in UTC is the 7th in Tokyo.
+    const day = recordedWhenAndWhere(
+      at,
+      { recordedIn: 'Tokyo, Japan', timeZone: 'Asia/Tokyo' },
+      { time: false }
+    )
+    expect(day).toBe(
+      `${new Date(at).toLocaleDateString(undefined, { dateStyle: 'medium', timeZone: 'Asia/Tokyo' })} · Tokyo, Japan`
+    )
+    expect(day).not.toContain(':')
+    expect(day).toContain('7')
+    expect(recordedWhenAndWhere(at, NOT_SAID, { time: false })).toBe(
+      new Date(at).toLocaleDateString(undefined, { dateStyle: 'medium' })
+    )
+  })
+
   it("falls back to the viewer's own time for a time zone it doesn't know", () => {
     const own = new Date(at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
     expect(recordedWhenAndWhere(at, { recordedIn: 'Austin, Texas', timeZone: 'Not/AZone' })).toBe(

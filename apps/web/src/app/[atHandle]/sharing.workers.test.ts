@@ -9,6 +9,7 @@ import type { Kind } from '@/db/library'
 import { handles, rateLimit, recordings, shareReports, shares, toots, user } from '@/db/schema'
 import { NOT_SAID } from '@/lib/fart-place'
 import { noteName } from '@/lib/pitch'
+import { formattedFartLength } from '@/lib/pitch-coverage'
 import { encodeWav } from '@/lib/wav'
 import { findProfile } from '@/server/profiles'
 import {
@@ -111,7 +112,6 @@ const share = {
       params({ atHandle, id, place: String(place) })
     )
   },
-  /** A shared Toot's bars and roll for its profile page row (#448), as anyone fetches them. */
   /** A shared Toot's `row/`, as its profile page row fetches it. Only a Toot's link has one. */
   row: (url: string) => {
     const { segment, atHandle, id } = linkParts(url)
@@ -487,6 +487,62 @@ describe('Sharing a Recording', () => {
         fart: { startSeconds: 0.375, endSeconds: 0.625 }
       })
       expect(await framesOf(await share.audio(alice.url))).toEqual(range(2000, 6000))
+      const { row, page } = await rowAndPage('alice', alice.url)
+      expect(page?.length).toBe('0.2 s')
+      expect(row).toMatchObject({
+        length: page?.length,
+        part: { startSeconds: 0.125, endSeconds: 0.375 }
+      })
+    })
+
+    it("prints the length of what its row plays when its Trim's fart lies outside the handles (#450)", async () => {
+      // Stored before the API checked a Trim's fart: handles 0.25 s to 0.75 s.
+      const alice = await trimmedSharer({
+        startSeconds: 0.25,
+        endSeconds: 0.75,
+        fart: { startSeconds: 0.375, endSeconds: 0.625 }
+      })
+      const moveFart = (startSeconds: number, endSeconds: number) =>
+        testDb()
+          .update(recordings)
+          .set({ trimFartStartSeconds: startSeconds, trimFartEndSeconds: endSeconds })
+          .where(eq(recordings.id, R1))
+
+      // Half out: 0.5 s to 0.95 s is a 0.45 s fart, but the link serves only 0.5 s to 0.75 s of it.
+      await moveFart(0.5, 0.95)
+      const halfOut = await rowAndPage('alice', alice.url)
+      expect(halfOut.page?.length).toBe('0.2 s')
+      expect(halfOut.row).toMatchObject({
+        length: halfOut.page?.length,
+        part: { startSeconds: 0.25, endSeconds: 0.5 }
+      })
+
+      // All out: 0.8 s to 0.95 s is past the end handle, so the row plays all the link serves.
+      await moveFart(0.8, 0.95)
+      const allOut = await rowAndPage('alice', alice.url)
+      expect(allOut.page?.length).toBe('0.5 s')
+      expect(allOut.row).toMatchObject({
+        length: allOut.page?.length,
+        part: { startSeconds: 0, endSeconds: 0.5 }
+      })
+    })
+
+    it("prints its Trim's fart length before analysis, not the whole take's as its Recordings tab does (#450)", async () => {
+      // Not yet analyzed, with handles 0.25 s to 0.75 s and a fart 0.375 s to 0.625 s between them.
+      const alice = await uploadedSharer('alice', {
+        analysis: { state: 'notAnalyzed' },
+        trim: {
+          startSeconds: 0.25,
+          endSeconds: 0.75,
+          fart: { startSeconds: 0.375, endSeconds: 0.625 }
+        }
+      })
+      const { handle, id } = linkParts(alice.url)
+      const shared = await findSharedRecording(testDb(), handle, id)
+      if (!shared) throw new Error('Not shared')
+      // Its Recordings tab counts the whole take until analysis finds the fart.
+      expect(formattedFartLength(shared.recording)).toBe('1.0 s')
+      // Its page and row print the fart its row plays, from its Trim.
       const { row, page } = await rowAndPage('alice', alice.url)
       expect(page?.length).toBe('0.2 s')
       expect(row).toMatchObject({
@@ -1043,7 +1099,7 @@ describe('Sharing a saved Toot', () => {
     expect(gone).toEqual(Array(SHARED_TOOT_BARS).fill(0.05))
   })
 
-  it('serves its bars and roll at `row/` for its profile page row, only while its link works (#448)', async () => {
+  it('serves its bars at `row/` for its profile page row, only while its link works (#448, #451)', async () => {
     const dora = await signUp('dora')
     await share.pick('dora', dora)
     const samples = Float32Array.from({ length: 6000 }, (_, i) => (i < 3000 ? 0.5 : 0))
@@ -1054,15 +1110,10 @@ describe('Sharing a saved Toot', () => {
     const served = await share.row(url)
     expect(served.status).toBe(200)
     expect(served.headers.get('cache-control')).toBe('private, no-cache')
-    // Its roll as its own page draws it: saved before #254, so its Song's notes, which the page
-    // fetches, and the one pitch a fart plays. Nothing of its farts, so never where one was made.
+    // Only its bars: its row has no picture, so no roll (#451), and nothing of its farts, so
+    // never where one was made.
     expect(await served.json()).toEqual({
-      levels: [...Array(30).fill(1), ...Array(30).fill(0.05)],
-      roll: {
-        song: null,
-        catalogSong: expect.objectContaining({ id: 'twinkle' }),
-        played: [60]
-      }
+      levels: [...Array(30).fill(1), ...Array(30).fill(0.05)]
     })
 
     expect((await share.stop(T2, dora, 'toots')).status).toBe(204)
@@ -1475,7 +1526,12 @@ describe("What a shared Toot shows of what it's made of (#443)", () => {
     expect(await framesOf(await share.fart(url, 0))).toEqual(range(2000, 4000))
 
     const [row] = (await partsOf(url)).rows
-    expect(row.fart).toMatchObject({ length: '0.2 s', levels: [0.2], playable: true })
+    // Its one stored bar drawn as Song Creator draws a fart, in 16 thin bars (#451).
+    expect(row.fart).toMatchObject({
+      length: '0.2 s',
+      levels: Array(16).fill(0.2),
+      playable: true
+    })
   })
 
   it("has nothing to play of a fart analysis hasn't found, with no Trim", async () => {
@@ -1532,7 +1588,7 @@ describe("What a shared Toot shows of what it's made of (#443)", () => {
     expect(parts.rows.map(row => row.fart?.place)).toEqual([0, 1])
     expect(parts.rows.map(row => row.fart?.name)).toEqual(['Recording 1', 'Recording 2'])
     expect(parts.rows[0].fart?.recordedAt).toBe(Date.UTC(2026, 9, 21))
-    expect(parts.rows[0].fart?.levels.length).toBeLessThanOrEqual(16)
+    expect(parts.rows.map(row => row.fart?.levels.length)).toEqual([16, 16])
 
     const data = JSON.stringify(parts)
     for (const secret of [R1, R2, T1]) expect(data).not.toContain(secret)

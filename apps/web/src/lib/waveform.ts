@@ -19,3 +19,20 @@ export function waveformLevels(samples: ArrayLike<number>, count: number, step =
   if (loudest <= 0) return flat
   return peaks.map(peak => Math.max(peak / loudest, 0.05))
 }
+
+/**
+ * `levels` as `count` thinner bars, each the level where it falls between the two it lies
+ * between: the same shape in more bars, so a short fart or a wide row doesn't draw a few fat
+ * ones. One level fills them all. Never fewer than it has.
+ */
+export function finerBars(levels: number[], count: number): number[] {
+  if (levels.length === 0 || count <= levels.length) return levels
+  if (levels.length === 1) return Array<number>(count).fill(levels[0])
+  const last = levels.length - 1
+  return Array.from({ length: count }, (_, i) => {
+    const at = Math.min(Math.max(((i + 0.5) * levels.length) / count - 0.5, 0), last)
+    const below = Math.floor(at)
+    const above = Math.min(below + 1, last)
+    return levels[below] + (levels[above] - levels[below]) * (at - below)
+  })
+}

@@ -1,6 +1,5 @@
 'use client'
 
-import { CircleAlert, Play, Square } from 'lucide-react'
 import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
@@ -33,6 +32,7 @@ import { TootError } from '@/lib/toot-renderer'
 import { cn } from '@/lib/utils'
 import { useAccount } from './account-provider'
 import { tootPlayback, usePedos } from './pedos-provider'
+import { TootPlay } from './toot-play'
 
 // The Sound Pad's take (#278, ADR 0017): Record, play the Pads, Stop, and the taps become a
 // Performance, made into a Toot in the render worker. Hearing it is free; Save to Toots saves it
@@ -459,46 +459,24 @@ export function PadTootLayout({
   const { taps, recordings } = toot.performance
 
   return (
-    <div className="flex items-start gap-4">
-      <button
-        type="button"
-        aria-label={isAudioMissing ? 'Audio missing' : isPlaying ? 'Stop' : 'Play'}
-        data-testid="pad-toot-play"
-        disabled={isAudioMissing}
-        className={cn(
-          'flex size-14 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
-          isAudioMissing
-            ? 'bg-muted text-muted-foreground'
-            : isPlaying
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-primary/10 text-primary'
-        )}
-        onClick={() => pedos.toggleTootPlayback(toot)}
-      >
-        {isAudioMissing ? (
-          <CircleAlert className="size-6" />
-        ) : isPlaying ? (
-          <Square className="size-5 fill-current" />
-        ) : (
-          <Play className="size-6 fill-current" />
-        )}
-      </button>
-      <div className="min-w-0">
-        <p className="font-semibold" data-testid="pad-toot-state">
-          {isAudioMissing
-            ? 'Audio missing'
-            : isPlaying
-              ? 'Playing'
-              : pedos.tootPlayFailed === toot.id
-                ? "Couldn't play"
-                : 'Ready'}
-        </p>
-        <p className="text-sm text-muted-foreground tabular-nums">
-          {formattedTootLength(toot.seconds)} · {plural(taps.length, 'tap')} of{' '}
-          {plural(recordings.length, 'Recording')}
-        </p>
-        {children}
-      </div>
-    </div>
+    <TootPlay
+      shows={isAudioMissing ? 'missing' : isPlaying ? 'stop' : 'play'}
+      label={isAudioMissing ? 'Audio missing' : isPlaying ? 'Stop' : 'Play'}
+      disabled={isAudioMissing}
+      onPress={() => pedos.toggleTootPlayback(toot)}
+      state={
+        isAudioMissing
+          ? 'Audio missing'
+          : isPlaying
+            ? 'Playing'
+            : pedos.tootPlayFailed === toot.id
+              ? "Couldn't play"
+              : 'Ready'
+      }
+      line={`${formattedTootLength(toot.seconds)} · ${plural(taps.length, 'tap')} of ${plural(recordings.length, 'Recording')}`}
+      testId="pad-toot"
+    >
+      {children}
+    </TootPlay>
   )
 }

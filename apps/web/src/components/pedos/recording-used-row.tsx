@@ -5,13 +5,26 @@ import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { Waveform } from './waveform'
 
-// A row of "Recordings used": what a Toot's screen and a shared Toot's page both draw.
+// "Recordings used" and its rows: what a Toot's screen and a shared Toot's page both draw.
+
+/** "Recordings used", under a Toot's note roll: its rows, then `footer`. */
+export function RecordingsUsed({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
+  return (
+    <section aria-labelledby="recordings-used">
+      <h2 id="recordings-used" className="px-4 pb-1.5 text-xs font-normal text-muted-foreground">
+        Recordings used
+      </h2>
+      <ul className="divide-y overflow-hidden rounded-xl bg-muted/60">{children}</ul>
+      {footer}
+    </section>
+  )
+}
 
 /**
  * A Recording the Toot uses: the color of its notes, play, its name, its waveform and its fart's
- * length, `when` it was recorded on a shared page, "Your pick" when the user swapped it in (#360),
- * and the note it plays in the Song. As the iPhone app's `RecordingRow` in Song Creator, which
- * shows the whole take's length.
+ * length, `when` it was recorded on a shared page (one line, cut short), "Your pick" when the
+ * user swapped it in (#360), and the note it plays in the Song. As the iPhone app's
+ * `RecordingRow` in Song Creator, which shows the whole take's length.
  */
 export function RecordingUsedRowView({
   name,
@@ -86,7 +99,9 @@ export function RecordingUsedRowView({
             />
             <span className="text-sm text-muted-foreground">{length}</span>
           </span>
-          {when && <span className="text-sm text-muted-foreground tabular-nums">{when}</span>}
+          {when && (
+            <span className="truncate text-xs text-muted-foreground tabular-nums">{when}</span>
+          )}
           {isYourPick && <span className="text-sm font-semibold text-brand-strong">Your pick</span>}
         </span>
       </button>

@@ -2,7 +2,7 @@
 
 import { Check, ChevronRight, Flag, Link2Off, Play, Square } from 'lucide-react'
 import Link from 'next/link'
-import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +14,7 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { Button, buttonVariants } from '@/components/ui/button'
-import { play, playbackPosition, type Segment, stopPlayback } from '@/lib/audio/player'
+import { playbackPosition, stopPlayback } from '@/lib/audio/player'
 import { type RecordedIn, recordedWhenAndWhere } from '@/lib/fart-place'
 import { profilePath } from '@/lib/handle'
 import type { Trim } from '@/lib/recordings'
@@ -25,12 +25,14 @@ import { useAccount } from './account-provider'
 import { useStartGetFarty } from './get-farty'
 import { SharedTootParts } from './shared-toot-parts'
 import { SiteHeader } from './site-chrome'
+import { useSharedPlayer } from './use-shared-player'
 import { ReplayWaveform } from './waveform'
 
 // A shared Recording's page, `/@<handle>/r/<slug>/`, and a shared Toot's, `/@<handle>/t/<slug>/`
 // (ADR 0020): what anyone with the link sees, signed in or not, in any browser. The fart comes
-// first: who shared it, its name and its note or Song, a big waveform and Play. Get Farty sits
-// under the player and in the site's header. The prototype's option A.
+// first: who shared it, its name and its note or Song, then a Recording's big waveform and Play,
+// or the screen a Toot was made on (#451). Get Farty sits under the player and in the site's
+// header. The prototype's option A.
 
 /** A `/@<handle>/` page's column, under the site's header, which is wider. */
 export const handlePageColumn = 'mx-auto flex w-full max-w-md flex-1 flex-col md:max-w-2xl md:pt-4'
@@ -97,8 +99,8 @@ export type SharedRecordingProps = {
 } & RecordedIn
 
 /**
- * The shared Recording: who shared it, its name and note, when and where it was recorded, the waveform, Play,
- * Get Farty, Report.
+ * The shared Recording: who shared it, its name and note, when and where it was recorded, the
+ * waveform, Play, Get Farty, Report.
  */
 export function SharedRecordingPage({
   handle,
@@ -111,32 +113,95 @@ export function SharedRecordingPage({
   ...player
 }: SharedRecordingProps) {
   const inBrowser = useInBrowser()
+  const base = `${profilePath(handle)}r/${slug}/`
   return (
     <SharedItemPage
       what="Recording"
       handle={handle}
-      base={`${profilePath(handle)}r/${slug}/`}
+      base={base}
       name={name}
-      {...player}
-    >
-      {note && (
-        <p className="mt-2.5">
-          <span
-            className="inline-block rounded-full bg-muted px-3 py-1 font-semibold tabular-nums"
-            data-testid="shared-note"
+      details={
+        <>
+          {note && (
+            <p className="mt-2.5">
+              <span
+                className="inline-block rounded-full bg-muted px-3 py-1 font-semibold tabular-nums"
+                data-testid="shared-note"
+              >
+                {note}
+              </span>
+            </p>
+          )}
+          {/* Held at its size until the browser can say it in the viewer's own words. */}
+          <p
+            className="mt-2 min-h-5 text-sm text-muted-foreground tabular-nums"
+            data-testid="shared-recorded-at"
           >
-            {note}
+            {inBrowser && `Recorded ${recordedWhenAndWhere(recordedAt, { recordedIn, timeZone })}`}
+          </p>
+        </>
+      }
+    >
+      <RecordingPlayer base={base} name={name} {...player} />
+    </SharedItemPage>
+  )
+}
+
+/** A shared Recording's big waveform, which can be tapped to play from a spot, and its Play. */
+function RecordingPlayer({
+  base,
+  name,
+  length,
+  part,
+  levels
+}: {
+  base: string
+  name: string
+  length: string
+  part: Trim
+  levels: number[]
+}) {
+  const { playFrom, sound, unplayable } = useSharedPlayer(base, part)
+  const playing = sound?.of === 'item' ? sound.segment : null
+  const PlayIcon = playing ? Square : Play
+
+  return (
+    <div className="mt-5 grid gap-4 rounded-3xl bg-muted/60 px-4 pt-5 pb-4">
+      <ReplayWaveform
+        levels={levels}
+        view={part}
+        playing={playing}
+        position={playbackPosition}
+        label={`Play ${name} from a spot`}
+        onScrubStart={stopPlayback}
+        onPlayFrom={seconds => {
+          if (part.endSeconds - seconds >= 0.02) playFrom(seconds)
+        }}
+        className="h-[92px]"
+      />
+      <div className="flex items-center gap-3.5">
+        <button
+          type="button"
+          aria-label={playing ? `Stop ${name}` : `Play ${name}`}
+          aria-pressed={playing !== null}
+          onClick={() => (playing ? stopPlayback() : playFrom(part.startSeconds))}
+          className="flex size-16 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          <PlayIcon className="size-6 fill-current" aria-hidden />
+        </button>
+        <div aria-hidden>
+          <b className="block font-semibold">{playing ? 'Playing' : 'Play'}</b>
+          <span className="text-sm text-muted-foreground tabular-nums" data-testid="shared-length">
+            {length}
           </span>
+        </div>
+      </div>
+      {unplayable === 'item' && (
+        <p role="alert" className="text-sm text-destructive">
+          Couldn't play it. Check your connection and try again.
         </p>
       )}
-      {/* Held at its size until the browser can say it in the viewer's own words. */}
-      <p
-        className="mt-2 min-h-5 text-sm text-muted-foreground tabular-nums"
-        data-testid="shared-recorded-at"
-      >
-        {inBrowser && `Recorded ${recordedWhenAndWhere(recordedAt, { recordedIn, timeZone })}`}
-      </p>
-    </SharedItemPage>
+    </div>
   )
 }
 
@@ -149,14 +214,13 @@ export type SharedTootProps = {
   /** "0:18". */
   length: string
   seconds: number
-  levels: number[]
   /** What it's made of: its note roll, and each fart it plays. */
   parts: Parts
 }
 
 /**
- * The shared Toot: who shared it, its title and Song, the waveform, Play, its roll and each fart,
- * Get Farty, Report.
+ * The shared Toot: who shared it, its title and Song, then the screen it was made on (#451): Play,
+ * its note roll and each fart. Then Get Farty, Report.
  */
 export function SharedTootPage({
   handle,
@@ -165,143 +229,57 @@ export function SharedTootPage({
   song,
   length,
   seconds,
-  levels,
   parts
 }: SharedTootProps) {
+  const base = `${profilePath(handle)}t/${slug}/`
   return (
     <SharedItemPage
       what="Toot"
       handle={handle}
-      base={`${profilePath(handle)}t/${slug}/`}
+      base={base}
       name={title}
-      length={length}
-      part={{ startSeconds: 0, endSeconds: seconds }}
-      levels={levels}
-      below={player => <SharedTootParts parts={parts} player={player} />}
+      details={
+        song &&
+        song !== title && (
+          <p className="mt-1.5 text-[15px] text-muted-foreground" data-testid="shared-song">
+            {song}
+          </p>
+        )
+      }
     >
-      {song && song !== title && (
-        <p className="mt-1.5 text-[15px] text-muted-foreground" data-testid="shared-song">
-          {song}
-        </p>
-      )}
+      <SharedTootParts
+        handle={handle}
+        base={base}
+        title={title}
+        length={length}
+        seconds={seconds}
+        parts={parts}
+      />
     </SharedItemPage>
   )
 }
 
-/** What's playing on a shared page: the item's own audio, whole or one note, or one of its farts. */
-type Sound = { of: 'item'; segment: Trim; note: number | null } | { of: 'fart'; place: number }
-
 /**
- * A shared page's playing, one sound at a time: its own audio from a spot or one note of it, or
- * one fart of a Toot. `base` is the page's own path, which the audio is under.
- */
-function useSharedPlayer(base: string, part: Trim) {
-  const [sound, setSound] = useState<Sound | null>(null)
-  const [started, setStarted] = useState<{ sound: Sound; at: number } | null>(null)
-  const [unplayable, setUnplayable] = useState<Sound['of'] | null>(null)
-  const latest = useRef<Sound | null>(null)
-
-  // Leaving the page stops it, as a tab change does in the app.
-  useEffect(() => stopPlayback, [])
-
-  const start = useCallback(
-    (next: Sound, path: string, segment: Segment | null, from: number) => {
-      latest.current = next
-      setSound(next)
-      setUnplayable(null)
-      const url = `${base}${path}`
-      void play(
-        `shared:${url}`,
-        async () => {
-          const response = await fetch(url)
-          if (!response.ok) {
-            setUnplayable(next.of)
-            throw new Error(`audio ${response.status}`)
-          }
-          return response.arrayBuffer()
-        },
-        segment,
-        () => setSound(current => (current === next ? null : current))
-      ).then(() => {
-        // The playhead's 0 is the item's start, before `from`.
-        if (latest.current === next)
-          setStarted({ sound: next, at: performance.now() - from * 1000 })
-      })
-    },
-    [base]
-  )
-
-  const playFrom = useCallback(
-    (from: number) =>
-      start(
-        { of: 'item', segment: { startSeconds: from, endSeconds: part.endSeconds }, note: null },
-        'audio/',
-        { start: from, end: part.endSeconds },
-        from
-      ),
-    [part.endSeconds, start]
-  )
-
-  return {
-    sound,
-    /** When the whole item started playing (`performance.now()`), for a roll's playhead. */
-    startedAt:
-      sound?.of === 'item' && sound.note === null && started?.sound === sound ? started.at : null,
-    unplayable,
-    playFrom,
-    /** Plays one note of the item's own audio, from `from` to `to` seconds. */
-    playNote: (note: number, from: number, to: number) =>
-      start(
-        { of: 'item', segment: { startSeconds: from, endSeconds: to }, note },
-        'audio/',
-        { start: from, end: to },
-        from
-      ),
-    /** Plays one of a Toot's farts, on its own. */
-    playFart: (place: number) => start({ of: 'fart', place }, `farts/${place}/audio/`, null, 0),
-    stop: stopPlayback
-  }
-}
-
-export type SharedPlayer = ReturnType<typeof useSharedPlayer>
-
-/**
- * A shared item's page: who shared it, its name and `children` (a Recording's note, a Toot's Song),
- * the waveform and Play, `below` it what a Toot is made of, Get Farty, and Report. `base` is the
- * page's own path, which its audio and Report are under.
+ * A shared item's page: who shared it, its name and `details` (a Recording's note, a Toot's Song),
+ * then `children`, its player, then Get Farty and Report. `base` is the page's own path, which its
+ * Report is under.
  */
 function SharedItemPage({
   what,
   handle,
   base,
   name,
-  length,
-  part,
-  levels,
-  below,
+  details,
   children
 }: {
   what: 'Recording' | 'Toot'
   handle: string
   base: string
   name: string
-  length: string
-  part: Trim
-  levels: number[]
-  below?: (player: SharedPlayer) => ReactNode
-  children?: ReactNode
+  details?: ReactNode
+  children: ReactNode
 }) {
   const { account } = useAccount()
-  const player = useSharedPlayer(base, part)
-  const { playFrom } = player
-  const playing = player.sound?.of === 'item' ? player.sound.segment : null
-
-  const toggle = () => {
-    if (playing) stopPlayback()
-    else playFrom(part.startSeconds)
-  }
-
-  const PlayIcon = playing ? Square : Play
   return (
     <div className="flex flex-1 flex-col">
       <SharedTopBar friend={handle} />
@@ -316,49 +294,9 @@ function SharedItemPage({
           shared a {what}
         </p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight">{name}</h1>
+        {details}
+
         {children}
-
-        <div className="mt-5 grid gap-4 rounded-3xl bg-muted/60 px-4 pt-5 pb-4">
-          <ReplayWaveform
-            levels={levels}
-            view={part}
-            playing={playing}
-            position={playbackPosition}
-            label={`Play ${name} from a spot`}
-            onScrubStart={stopPlayback}
-            onPlayFrom={seconds => {
-              if (part.endSeconds - seconds >= 0.02) playFrom(seconds)
-            }}
-            className="h-[92px]"
-          />
-          <div className="flex items-center gap-3.5">
-            <button
-              type="button"
-              aria-label={playing ? `Stop ${name}` : `Play ${name}`}
-              aria-pressed={playing !== null}
-              onClick={toggle}
-              className="flex size-16 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              <PlayIcon className="size-6 fill-current" aria-hidden />
-            </button>
-            <div aria-hidden>
-              <b className="block font-semibold">{playing ? 'Playing' : 'Play'}</b>
-              <span
-                className="text-sm text-muted-foreground tabular-nums"
-                data-testid="shared-length"
-              >
-                {length}
-              </span>
-            </div>
-          </div>
-          {player.unplayable === 'item' && (
-            <p role="alert" className="text-sm text-destructive">
-              Couldn't play it. Check your connection and try again.
-            </p>
-          )}
-        </div>
-
-        {below?.(player)}
 
         {account.status !== 'signedIn' && (
           <div className="mt-5 grid gap-2 text-center">

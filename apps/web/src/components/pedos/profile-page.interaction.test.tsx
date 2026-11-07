@@ -55,8 +55,7 @@ const toot: ProfileShare = {
   sharedAt: now,
   length: '0:18',
   part: { startSeconds: 0, endSeconds: 18 },
-  levels: [],
-  farts: ['Recording 1', 'Recording 2']
+  levels: []
 }
 
 const recording: ProfileShare = {
@@ -67,8 +66,7 @@ const recording: ProfileShare = {
   sharedAt: now,
   length: '1.1 s',
   part: { startSeconds: 0, endSeconds: 1.1 },
-  levels: [0.2, 1, 0.5],
-  farts: []
+  levels: [0.2, 1, 0.5]
 }
 
 /** The roll of `toot`: three notes, of which the fart at 62 was left out. */
@@ -89,7 +87,7 @@ const hero: HeroRoll = {
 }
 
 /**
- * The routes: the friend state, each Toot's bars and roll (`toot`'s, `hero`'s), and any audio.
+ * The routes: the friend state, each Toot's bars (`toot`'s, `hero`'s), and any audio.
  * Each fetch is kept in `fetched`.
  */
 function server(friend: Response | 'offline' = Response.json({ state: 'none' })) {
@@ -103,10 +101,7 @@ function server(friend: Response | 'offline' = Response.json({ state: 'none' }))
       if (next === 'offline') throw new TypeError('Failed to fetch')
       return next
     }
-    if (url.endsWith('/row/')) {
-      const { path: _, ...roll } = hero
-      return Response.json({ levels: [0.1, 0.9, 0.4, 0.7], roll })
-    }
+    if (url.endsWith('/row/')) return Response.json({ levels: [0.1, 0.9, 0.4, 0.7] })
     return new Response(new ArrayBuffer(8))
   })
   return fetched
@@ -299,7 +294,7 @@ describe('The tabs (#448)', () => {
 })
 
 describe('A row (#346, #448)', () => {
-  it('a Toot’s: its farts over its name, its day and Song, its length, its own page and its own audio, from a spot too', async () => {
+  it('a Toot’s: the Handle over its name, as SoundCloud’s uploader, its day and Song, its length, its own page and its own audio, from a spot too', async () => {
     const fetched = server()
     await render({ items: [toot, recording], hero })
     const [row] = rows()
@@ -307,7 +302,7 @@ describe('A row (#346, #448)', () => {
     // Its own shared page, with its whole roll and each fart (#445). Next's Link drops the
     // trailing slash here, outside a build with `trailingSlash`.
     expect(row.querySelector('a')?.getAttribute('href')).toBe('/@alice/t/tttttttttttt')
-    expect(rowText('profile-shared-byline')).toEqual(['Farts: Recording 1, Recording 2'])
+    expect(rowText('profile-shared-byline')).toEqual(['@alice'])
     expect(rowText('profile-shared-date')).toEqual(['Today'])
     expect(rowText('profile-shared-tag')).toEqual(['Sound Pad'])
     expect(rowText('profile-shared-length')).toEqual(['0:18'])
@@ -329,13 +324,15 @@ describe('A row (#346, #448)', () => {
     expect(heard.plays.at(-1)?.segment).toEqual({ start: 1.5, end: 18 })
   })
 
-  it('a Recording’s: its note big as its picture and as its tag, the Handle, its day, length and own bars', async () => {
+  it('a Recording’s: Play at its left, no picture, its note as its tag, the Handle, its day, length and own bars', async () => {
     server()
     await render({ items: [recording] })
     await act(async () => (tab('Recordings') as HTMLElement).click())
     const [row] = rows()
     expect(row.querySelector('a')?.textContent).toBe('Recording 1')
-    expect(row.querySelector('[data-testid="profile-shared-art"]')?.textContent).toBe('E3')
+    // No square picture (the owner, #451): Play comes first in the row.
+    expect(row.querySelector('[data-testid="profile-shared-art"]')).toBeNull()
+    expect(row.firstElementChild?.getAttribute('aria-label')).toBe('Play Recording 1')
     expect(rowText('profile-shared-byline')).toEqual(['@alice'])
     expect(rowText('profile-shared-date')).toEqual(['Today'])
     expect(rowText('profile-shared-tag')).toEqual(['E3'])
@@ -343,14 +340,12 @@ describe('A row (#346, #448)', () => {
     const bars = [...(row.querySelector('[data-testid="replay-waveform"] span')?.children ?? [])]
     expect(bars.map(bar => (bar as HTMLElement).style.height)).toEqual(['20%', '100%', '50%'])
 
-    // A Noise-like Recording plays no note: no tag, and its picture is its kind's icon.
+    // A Noise-like Recording plays no note: no tag.
     await render({ items: [{ ...recording, detail: null }] })
     expect(rowText('profile-shared-tag')).toEqual([null])
-    expect(row.querySelector('[data-testid="profile-shared-art"] svg')).not.toBeNull()
-    expect(row.querySelector('[data-testid="profile-shared-art"]')?.textContent).toBe('')
   })
 
-  it('a Toot’s picture is its note roll, fetched with its bars once its row is on screen', async () => {
+  it('a Toot’s bars are fetched once its row is on screen, and it has no picture', async () => {
     laidOut(60, 60)
     // On screen at once.
     vi.stubGlobal(
@@ -372,10 +367,16 @@ describe('A row (#346, #448)', () => {
     await render({ items: [{ ...toot, path: '/@alice/t/vvvvvvvvvvvv/' }] })
     await settle()
     expect(fetched).toContain('/@alice/t/vvvvvvvvvvvv/row/')
-    const notes = [...(rows()[0].querySelectorAll('[data-testid="profile-shared-art"] rect') ?? [])]
-    expect(notes).toHaveLength(3)
-    // The note no fart plays is hollow, as in the banner and on the Toot's own page.
-    expect(notes.map(note => note.getAttribute('fill') === 'none')).toEqual([false, true, false])
+    // Its 4 bars, drawn one to each 4 px of its 60 px waveform: 15, from the quietest to the
+    // loudest.
+    const bars = [
+      ...(rows()[0].querySelector('[data-testid="replay-waveform"] span')?.children ?? [])
+    ].map(bar => Number.parseFloat((bar as HTMLElement).style.height))
+    expect(bars).toHaveLength(15)
+    expect(Math.min(...bars)).toBeCloseTo(10)
+    expect(Math.max(...bars)).toBeGreaterThan(80)
+    expect(rows()[0].querySelector('[data-testid="profile-shared-art"]')).toBeNull()
+    expect(rows()[0].querySelector('rect')).toBeNull()
   })
 
   it('while it plays: the bars it has played in Farty’s pink, and where it is at the bottom left', async () => {
@@ -478,9 +479,9 @@ describe('A row (#346, #448)', () => {
     ])
   })
 
-  it('draws thinner bars of the same shape on a wide row, about one to 6 pixels', async () => {
-    // happy-dom lays nothing out: a computer's row, 36 pixels wide for 6 bars.
-    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(36)
+  it('draws thinner bars of the same shape on a wide row, about one to 4 pixels', async () => {
+    // happy-dom lays nothing out: a computer's row, 24 pixels wide for 6 bars.
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(24)
     server()
     await render({ items: [recording] })
     await act(async () => (tab('Recordings') as HTMLElement).click())
@@ -491,11 +492,6 @@ describe('A row (#346, #448)', () => {
     expect(heights.map(height => Math.round(height * 10) / 10)).toEqual([
       20, 40, 80, 87.5, 62.5, 50
     ])
-
-    const { finerBars } = await import('./profile-share-row')
-    expect(finerBars([0, 1], 4)).toEqual([0, 0.25, 0.75, 1])
-    // Never fewer bars than it has.
-    expect(finerBars([0.2, 1, 0.5], 2)).toEqual([0.2, 1, 0.5])
   })
 
   it('never says where a fart was made: only the day, as the shared page says it with a town', async () => {
@@ -505,9 +501,8 @@ describe('A row (#346, #448)', () => {
     await act(async () => (tab('Recordings') as HTMLElement).click())
     shown.push(...rows().map(row => row.textContent))
     expect(shown).toEqual([
-      'Farts: Recording 1, Recording 2Twinkle for MumTodaySound Pad0:18Copy link',
-      // Its picture's note first.
-      'E3@aliceRecording 1TodayE31.1 sCopy link'
+      '@aliceTwinkle for MumTodaySound Pad0:18Copy link',
+      '@aliceRecording 1TodayE31.1 sCopy link'
     ])
   })
 
