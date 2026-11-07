@@ -721,12 +721,10 @@ describe('A row’s notes over its waveform (#459)', () => {
     // A second of 18 in 180 px, a 2 px gap after the second, the last to the end.
     expect(drawnNotes().map(note => note.style.width)).toEqual(['10px', '28px', '58px'])
 
-    // Only a picture, over the bars and under the playhead, so a tap still reaches the waveform.
+    // Only a picture: a screen reader skips it. That a tap goes through it to the waveform, the
+    // e2e checks where the browser lays it out (share.spec.ts).
     const layer = rows()[0].querySelector('[data-testid="profile-shared-notes"]')
     expect(layer?.getAttribute('aria-hidden')).toBe('true')
-    expect(layer?.className.split(' ')).toEqual(
-      expect.arrayContaining(['pointer-events-none', 'absolute', 'inset-0', 'z-[2]'])
-    )
     // Nothing of a fart but its color, and no text.
     expect(rows()[0].textContent).toBe('@aliceTwinkle for MumTodaySound Pad3 farts0:18Copy link')
   })
@@ -741,22 +739,12 @@ describe('A row’s notes over its waveform (#459)', () => {
     heard.position = 7
     await act(async () => rows()[0].querySelector('button')?.click())
     await frame()
+    // The ring's and the tint's colors, the e2e checks as the browser computes them.
     expect(states()).toEqual(['heard', 'now', 'ahead'])
-    const classes = (index: number) => drawnNotes()[index].className.split(' ')
-    expect(classes(1)).toEqual(
-      expect.arrayContaining([
-        'bg-(--c)',
-        'shadow-[0_0_0_1.5px_var(--background),0_0_0_3.5px_var(--c)]'
-      ])
-    )
-    // Its tint is declared on the note that sets `--c`, where `var(--c)` resolves.
-    expect(classes(2)).toEqual(
-      expect.arrayContaining([
-        'bg-(--dim)',
-        '[--dim:color-mix(in_srgb,var(--c)_42%,var(--background))]'
-      ])
-    )
-    expect(classes(0)).toContain('bg-(--c)')
+    // A frame later, still in the second note.
+    heard.position = 7.5
+    await frame()
+    expect(states()).toEqual(['heard', 'now', 'ahead'])
     // The bars it has played fill in under the notes, as before.
     const bars = [
       ...(rows()[0].querySelector('[data-testid="replay-waveform"] span')?.children ?? [])
@@ -769,7 +757,7 @@ describe('A row’s notes over its waveform (#459)', () => {
     expect(playhead()?.style.left).toBe(drawnNotes()[2].style.left)
     expect(states()).toEqual(['heard', 'heard', 'now'])
 
-    // A tap on the waveform still plays from a spot: the arrow keys, a twelfth on.
+    // The waveform still plays from a spot under its notes: the arrow keys, a twelfth on.
     const waveform = rows()[0].querySelector<HTMLElement>('[data-testid="replay-waveform"]')
     await act(async () =>
       waveform?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
@@ -798,6 +786,52 @@ describe('A row’s notes over its waveform (#459)', () => {
     expect(drawnNotes().map(note => note.style.getPropertyValue('--c'))).toEqual(
       [0, 2].map(pitchColor)
     )
+  })
+
+  it('never draws past its waveform: a short last tap ends at its edge, and notes after its audio’s end aren’t drawn', async () => {
+    laidOut(180, 64)
+    onScreen()
+    // A Sound Pad Toot's last tap, a tenth of a second before its 18 s end: 1 px of 180, so it'd
+    // be drawn 10 px wide, as tall as it is, and stick out.
+    server(undefined, {
+      levels: [0.1, 0.9, 0.4, 0.7],
+      notes: [
+        { start: 0, length: 1, pitch: 60, color: 0 },
+        { start: 17.9, length: 0.1, pitch: 62, color: 1 }
+      ],
+      catalog: null
+    })
+    await render({ items: [{ ...toot, path: '/@alice/t/eeeeeeeeeeee/' }] })
+    await settle()
+    expect(drawnNotes().map(note => note.style.left)).toEqual(['0.000%', '99.444%'])
+    expect(drawnNotes().map(note => note.style.width)).toEqual(['10px', '1px'])
+    const right = (note: HTMLElement) =>
+      (Number.parseFloat(note.style.left) / 100) * 180 + Number.parseFloat(note.style.width)
+    for (const note of drawnNotes()) expect(right(note)).toBeLessThanOrEqual(180 + 1e-6)
+  })
+
+  it('a Toot saved before #254 whose Song has grown longer than its audio: only what fits', async () => {
+    laidOut(180, 64)
+    onScreen()
+    // Its audio is 1.5 s; its Song now runs 2.5 s at 120 bpm: notes at 0 s, 1 s and 2 s.
+    server(undefined, {
+      levels: [0.1, 0.9, 0.4, 0.7],
+      notes: null,
+      catalog: { song: TWINKLE, played: [60, 62, 67] }
+    })
+    const short = {
+      ...toot,
+      path: '/@alice/t/llllllllllll/',
+      length: '0:01',
+      part: { startSeconds: 0, endSeconds: 1.5 }
+    }
+    await render({ items: [short] })
+    await settle()
+    await settle()
+    // The note at 2 s starts after the audio ends, so it isn't drawn; the one at 1 s, a second
+    // long, stops at the edge, 60 px from its left at 120 px.
+    expect(drawnNotes().map(note => note.style.left)).toEqual(['0.000%', '66.667%'])
+    expect(drawnNotes().map(note => note.style.width)).toEqual(['60px', '60px'])
   })
 
   it('a Toot with no notes to draw: only its waveform', async () => {

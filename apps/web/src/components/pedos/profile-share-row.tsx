@@ -5,6 +5,7 @@ import Link from 'next/link'
 import {
   type CSSProperties,
   type MouseEvent,
+  memo,
   type RefObject,
   useCallback,
   useEffect,
@@ -352,6 +353,28 @@ const NOTE_STATE: Record<NoteState, string> = {
   now: 'z-[1] bg-(--c) shadow-[0_0_0_1.5px_var(--background),0_0_0_3.5px_var(--c)]'
 }
 
+/** A state as one letter, so a row's states are one string to compare frame to frame. */
+const STATE_LETTER: Record<NoteState, string> = { heard: 'h', now: 'n', ahead: 'a' }
+const LETTER_STATE: Record<string, NoteState> = { h: 'heard', n: 'now', a: 'ahead' }
+
+/**
+ * Each note's state with the playhead at `at`, as the same array until one of them changes: the
+ * clock moves every frame, but a note's state only a few times a second, so a frame that changes
+ * none redraws no note.
+ */
+function useNoteStates(notes: readonly RowNote[] | null, at: number | null): readonly NoteState[] {
+  const letters = (notes ?? []).map(note => STATE_LETTER[noteState(note, at)]).join('')
+  return useMemo(() => [...letters].map(letter => LETTER_STATE[letter]), [letters])
+}
+
+/**
+ * The notes a row draws: only those that start before its audio ends. A Toot saved before #254
+ * draws its Song's notes as they are now, and the Song may have grown since.
+ */
+function notesInPart(notes: readonly RowNote[] | null, part: Trim): RowNote[] | null {
+  return notes ? notes.filter(note => note.start < part.endSeconds) : null
+}
+
 /**
  * A Toot's notes as a roll of seconds, a beat to each, so the Toot page's `Layout` places them
  * on its row's timeline: pitch up, the lowest and highest the row draws one note from its edges.
@@ -369,27 +392,65 @@ function secondsRoll(notes: readonly RowNote[], part: Trim): RollSong {
   }
 }
 
+/** One note over the waveform, redrawn only when its state or place changes. */
+const RowNoteMark = memo(function RowNoteMark({
+  color,
+  left,
+  top,
+  width,
+  height,
+  state
+}: {
+  color: number
+  left: string
+  top: string
+  width: string
+  height: string
+  state: NoteState
+}) {
+  return (
+    <span
+      className={cn('absolute rounded-full', NOTE_DIM, NOTE_STATE[state])}
+      style={{ '--c': pitchColor(color), left, top, width, height } as CSSProperties}
+      data-state={state}
+      data-testid="profile-shared-note"
+    />
+  )
+})
+
 /**
  * A Toot's notes over its waveform, the full height of it, each where it's heard (#459): its
  * left edge where the playhead is as it plays, both from `timelineAt`, and sized and colored as on
- * the Toot's own page (`Layout`, `pitchColor`). While it plays, the notes the playhead has passed
- * are in full color, the one playing has a ring, and the ones ahead are dimmed; stopped, all are
- * in full color. Only a picture: taps go through to the waveform.
+ * the Toot's own page (`Layout`, `pitchColor`), never past the waveform's right edge. While it
+ * plays, the notes the playhead has passed are in full color, the one playing has a ring, and the
+ * ones ahead are dimmed; stopped, all are in full color. Only a picture: taps go through to the
+ * waveform. `notes` are `notesInPart`'s, and `states` `useNoteStates`'s, one to each.
  */
-function RowNotes({
+const RowNotes = memo(function RowNotes({
   notes,
   part,
   size,
-  at
+  states
 }: {
   notes: RowNote[]
   part: Trim
   size: { width: number; height: number }
-  at: number | null
+  states: readonly NoteState[]
 }) {
-  const { layout, placed } = useMemo(() => {
+  const places = useMemo(() => {
     const roll = secondsRoll(notes, part)
-    return { layout: new Layout(roll, size.width, size.height), placed: roll.notes }
+    const layout = new Layout(roll, size.width, size.height)
+    return notes.map((note, index) => {
+      const { y, width, height } = layout.rect(roll.notes[index])
+      const x = timelineAt(note.start, part)
+      return {
+        left: `${(x * 100).toFixed(3)}%`,
+        top: `${y.toFixed(2)}px`,
+        // A short note near the end is still at least as wide as it's tall: never past the edge.
+        width: `${Math.min(width, size.width * (1 - x)).toFixed(2)}px`,
+        height: `${height.toFixed(2)}px`
+      }
+    })
   }, [notes, part, size.width, size.height])
   return (
     <div
@@ -397,32 +458,19 @@ function RowNotes({
       className="pointer-events-none absolute inset-0 z-[2]"
       data-testid="profile-shared-notes"
     >
-      {notes.map((note, index) => {
-        const { y, width, height } = layout.rect(placed[index])
-        const state = noteState(note, at)
-        return (
-          <span
-            // A Toot's notes are fixed, and two can start together.
-            // biome-ignore lint/suspicious/noArrayIndexKey: a Toot's notes never reorder
-            key={index}
-            className={cn('absolute rounded-full', NOTE_DIM, NOTE_STATE[state])}
-            style={
-              {
-                '--c': pitchColor(note.color),
-                left: `${(timelineAt(note.start, part) * 100).toFixed(3)}%`,
-                top: `${y.toFixed(2)}px`,
-                width: `${width.toFixed(2)}px`,
-                height: `${height.toFixed(2)}px`
-              } as CSSProperties
-            }
-            data-state={state}
-            data-testid="profile-shared-note"
-          />
-        )
-      })}
+      {notes.map((note, index) => (
+        <RowNoteMark
+          // A Toot's notes are fixed, and two can start together.
+          // biome-ignore lint/suspicious/noArrayIndexKey: a Toot's notes never reorder
+          key={index}
+          color={note.color}
+          {...places[index]}
+          state={states[index] ?? 'heard'}
+        />
+      ))}
     </div>
   )
-}
+})
 
 /**
  * A Recording's one note as a line across its waveform (#459), in its fart's color as its dot:
@@ -494,7 +542,7 @@ function ShareRow({
   const seen = useSeen(row)
   const fetched = useTootRow(share.path, isToot && seen)
   const levels = isToot ? (fetched?.levels ?? null) : share.levels
-  const notes = useRowNotes(isToot ? fetched : null)
+  const fetchedNotes = useRowNotes(isToot ? fetched : null)
   const size = useSize(wave)
   const drawn = finerBars(
     levels && levels.length > 0 ? levels : LOADING_BARS,
@@ -502,10 +550,12 @@ function ShareRow({
   )
   const playing = player.playing?.path === share.path ? player.playing.part : null
   const at = usePlayingSeconds(playing !== null)
+  const { part } = share
+  const notes = useMemo(() => notesInPart(fetchedNotes, part), [fetchedNotes, part])
+  const states = useNoteStates(notes, at)
   const PlayIcon = playing ? Square : Play
   // Only in the browser, so it's the viewer's own day.
   const date = inBrowser ? formattedTootDate(share.sharedAt) : null
-  const { part } = share
   // From the fart's start, and never past its end, so it reads the length at its end.
   const clock = (seconds: number) => {
     const here = Math.min(
@@ -590,7 +640,7 @@ function ShareRow({
           notes &&
           notes.length > 0 &&
           size.width > 0 &&
-          size.height > 0 && <RowNotes notes={notes} part={part} size={size} at={at} />
+          size.height > 0 && <RowNotes notes={notes} part={part} size={size} states={states} />
         ) : (
           <RecordingLine pitch={share.pitch} part={part} at={at} />
         )}

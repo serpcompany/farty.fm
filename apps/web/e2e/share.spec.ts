@@ -35,6 +35,8 @@ declare global {
     __shared: ShareData[]
     /** Each sound the page starts: its length and loudest sample. */
     __sounds: { duration: number; peak: number }[]
+    /** Where in its audio each of `__sounds` starts, in seconds. */
+    __soundsFrom: number[]
   }
 }
 
@@ -156,16 +158,18 @@ async function fakeShareSheet(context: BrowserContext) {
   })
 }
 
-/** Counts each sound the page starts, with its length and loudest sample. */
+/** Counts each sound the page starts, with its length, loudest sample and where it starts. */
 async function listenToSounds(context: BrowserContext) {
   await context.addInitScript(() => {
     window.__sounds = []
+    window.__soundsFrom = []
     const start = AudioBufferSourceNode.prototype.start
     AudioBufferSourceNode.prototype.start = function (this: AudioBufferSourceNode, ...args) {
       let peak = 0
       for (const sample of this.buffer?.getChannelData(0) ?? [])
         peak = Math.max(peak, Math.abs(sample))
       window.__sounds.push({ duration: this.buffer?.duration ?? 0, peak })
+      window.__soundsFrom.push(typeof args[1] === 'number' ? args[1] : 0)
       return start.apply(this, args)
     }
   })
@@ -863,8 +867,73 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
       expect(fill).not.toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
       expect(heardFills).not.toContain(fill)
     }
+    // The note playing now has a ring in its own color, as the browser draws it.
+    const ringed = rows.locator('[data-testid="profile-shared-note"][data-state="now"]')
+    await expect.poll(() => ringed.count(), { timeout: 15_000 }).toBeGreaterThan(0)
+    const ring = await ringed.first().evaluate(note => {
+      const style = getComputedStyle(note)
+      return {
+        c: style.getPropertyValue('--c'),
+        boxShadow: style.boxShadow,
+        backgroundColor: style.backgroundColor
+      }
+    })
+    // Its own color, `--c` (a hex), as the browser writes a color.
+    const hex = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(ring.c.trim())
+    expect(hex).not.toBeNull()
+    const own = `rgb(${(hex ?? [])
+      .slice(1)
+      .map(part => Number.parseInt(part, 16))
+      .join(', ')})`
+    expect(ring.backgroundColor).toBe(own)
+    // Outside the thin edge in the page's color, a 3.5 px ring in its own.
+    expect(ring.boxShadow).toContain(`${own} 0px 0px 0px 3.5px`)
     await shot(other, 'toot-profile-playing')
     await phoneShot(other, 'toot-profile-playing')
+
+    // A tap on a note goes through it to the waveform, and plays from there (#459).
+    const wave = rows.getByTestId('replay-waveform')
+    const allNotes = rows.getByTestId('profile-shared-note')
+    // One in the middle, wherever the playhead is now.
+    const target = allNotes.nth(Math.floor((await allNotes.count()) / 2))
+    const box = await target.boundingBox()
+    const waveBox = await wave.boundingBox()
+    if (!box || !waveBox) throw new Error('no note or waveform to tap')
+    const x = box.x + box.width / 2
+    const y = box.y + box.height / 2
+    // What the browser finds at the note's centre is the waveform, or something in it.
+    const hit = await other.evaluate(
+      ([px, py]) =>
+        document.elementFromPoint(px, py)?.closest('[data-testid="replay-waveform"]') !== null,
+      [x, y]
+    )
+    expect(hit).toBe(true)
+    const played = (await sounds()).length
+    const length = (await sounds())[1].duration
+    // Where on the timeline the tap is, in seconds of the Toot's audio.
+    const tapped = ((x - waveBox.x) / waveBox.width) * length
+    const noteStart = ((box.x - waveBox.x) / waveBox.width) * length
+    const noteEnd = ((box.x + box.width - waveBox.x) / waveBox.width) * length
+    await other.mouse.click(x, y)
+    await expect.poll(async () => (await sounds()).length).toBe(played + 1)
+    const from = (await other.evaluate(() => window.__soundsFrom))[played]
+    // Within a couple of pixels of the tap, and inside the note tapped.
+    expect(Math.abs(from - tapped)).toBeLessThan(0.15)
+    expect(from).toBeGreaterThanOrEqual(noteStart - 0.05)
+    expect(from).toBeLessThanOrEqual(noteEnd + 0.05)
+    // And the row says it's there: its time, m:ss, from that note on.
+    const shownAt = async () => {
+      const shown = (await rows.getByTestId('profile-shared-time').textContent()) ?? ''
+      const [minutes, seconds] = shown.split(':').map(Number)
+      return minutes * 60 + seconds
+    }
+    await expect
+      .poll(async () => {
+        const shown = await shownAt()
+        return shown >= Math.floor(from) && shown <= Math.floor(from) + 1
+      })
+      .toBe(true)
+    await rows.getByRole('button', { name: `Stop ${title}` }).click()
   })
 
   await test.step("the owner stops sharing from the Toot's screen, and the link is gone", async () => {
