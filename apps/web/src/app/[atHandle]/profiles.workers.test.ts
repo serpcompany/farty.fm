@@ -6,9 +6,11 @@ import * as handleRoute from '@/app/api/handle/route'
 import * as shareRecordingRoute from '@/app/api/share/recordings/[id]/route'
 import * as shareTootRoute from '@/app/api/share/toots/[id]/route'
 import { createDatabase } from '@/db/database'
-import { profileReports, rateLimit, shares } from '@/db/schema'
+import { profileReports, rateLimit, recordings, shares } from '@/db/schema'
+import { sharedToot } from '@/db/sharing'
 import { songs } from '@/lib/catalog/songs.generated'
-import { findProfile } from '@/server/profiles'
+import { findProfile, type ProfileItem, ROW_DOTS } from '@/server/profiles'
+import { sharedTootParts } from '@/server/sharing'
 import {
   type As,
   api,
@@ -157,7 +159,18 @@ describe('A profile page', () => {
   })
 
   /** Each item's fields, which are all the page gets. */
-  const ITEM_KEYS = ['detail', 'kind', 'length', 'levels', 'name', 'part', 'path', 'sharedAt']
+  const ITEM_KEYS = [
+    'detail',
+    'fartColors',
+    'farts',
+    'kind',
+    'length',
+    'levels',
+    'name',
+    'part',
+    'path',
+    'sharedAt'
+  ]
 
   it('leaves out what was stopped, taken down or deleted, and what others share', async () => {
     const alice = await sharer('alice', [R1, R2, R3])
@@ -257,18 +270,24 @@ describe('A profile page', () => {
     const page = async () =>
       (await findProfile(createDatabase(watched), 'alice'))?.items.map(item => item.name)
     // A Performance whole, rather than only its Recordings: its taps can run to thousands. Only
-    // the banner's one Toot is loaded whole, by its link, as its own page loads it (#448).
+    // the banner's one Toot is loaded whole, by its link, as its own page loads it (#448). Nor a
+    // score whole, rather than its pitches for its dots' colors (#457).
     const wholePerformances = () =>
       statements.filter(sql =>
         /"performance"/.test(
           sql.replaceAll(`json_extract("toots"."performance", '$.recordings')`, '')
         )
       )
+    const wholeScores = () =>
+      statements.filter(sql =>
+        /"score"/.test(sql.replaceAll(`json_each("toots"."score", '$.notes')`, ''))
+      )
 
     expect(await page()).toEqual(['Song with R1', 'Pad with R1', 'Recording 1'])
     const [banner, ...more] = wholePerformances()
     expect(more).toEqual([])
     expect(banner).toMatch(/"shares"\."slug" = \?/)
+    expect(wholeScores()).toEqual([banner])
 
     // With Alice's own R1 taken down, the Toots that play it are dropped, still without their taps,
     // and with no Toot left there's no banner to load.
@@ -376,6 +395,137 @@ describe('A profile page', () => {
       part: { startSeconds: 0.01, endSeconds: 0.09 },
       levels: [0, 0.5, 1]
     })
+  })
+
+  /** The colors of the Toot at `item`'s "Recordings used" rows, as its own page has them. */
+  async function usedColors(item: ProfileItem | undefined) {
+    const slug = item?.path.split('/').at(-2) ?? ''
+    const row = await sharedToot(testDb(), 'alice', slug)
+    if (!row) throw new Error(`no Toot at ${item?.path}`)
+    return (await sharedTootParts(testDb(), { row })).rows.map(fart => fart.colorIndex)
+  }
+
+  it('gives each row its farts as its own page colors them, a deleted one’s too, and how many (#457)', async () => {
+    // R1 at 9:00, R2 at 9:01.
+    const alice = await sharer('alice', [R1, R2])
+    // Its saved notes' pitches, lowest first, color its farts: 64 is the second, 67 the third.
+    const notes = [
+      { start: 0, dur: 1, pitch: 67 },
+      { start: 1, dur: 1, pitch: 60 },
+      { start: 2, dur: 2, pitch: 64 }
+    ]
+    const score = { bpm: 90, bar_lines: [0, 4], length_beats: 4, notes }
+    const scored = { transposition: 0, recordingForPitch: { 67: R2, 64: R1 } }
+    await savedToot(alice, tootMetadata(T1, { title: 'Scored', arrangement: scored, score }), {
+      minute: 5
+    })
+    // One from before #254, which saved no notes: its catalog Song's pitches color it.
+    const pitches = songs.find(song => song.id === 'twinkle')?.pitches ?? []
+    const [, second, , fourth] = pitches
+    const catalog = { transposition: 0, recordingForPitch: { [fourth]: R1, [second]: R2 } }
+    await savedToot(alice, tootMetadata(T2, { title: 'Catalog', arrangement: catalog }), {
+      minute: 4
+    })
+    // A Sound Pad Toot of 40 farts: a lane each.
+    const forty = Array.from(
+      { length: 40 },
+      (_, i) => `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`
+    )
+    // Each Recording a Performance names is tapped.
+    const performance = { recordings: forty, taps: forty.map((_, lane) => [lane / 100, lane]) }
+    await savedToot(alice, padTootMetadata(T3, { title: 'Forty', performance }), { minute: 3 })
+
+    const profile = await findProfile(testDb(), 'alice')
+    const item = (name: string) => profile?.items.find(each => each.name === name)
+    expect(item('Scored')).toMatchObject({ farts: 2, fartColors: [1, 2] })
+    expect(item('Catalog')).toMatchObject({ farts: 2, fartColors: [1, 3] })
+    expect(item('Forty')?.farts).toBe(40)
+    expect(item('Forty')?.fartColors).toEqual(Array.from({ length: ROW_DOTS }, (_, i) => i))
+    expect(ROW_DOTS).toBe(16)
+    // A Recording's row is its one fart, in the first color.
+    expect(item('Recording 1')).toMatchObject({ farts: 1, fartColors: [0] })
+    // The same as each Toot's own page colors its "Recordings used" rows.
+    for (const name of ['Scored', 'Catalog']) {
+      expect(item(name)?.fartColors).toEqual(await usedColors(item(name)))
+    }
+    expect(item('Forty')?.fartColors).toEqual((await usedColors(item('Forty'))).slice(0, ROW_DOTS))
+
+    // R1 deleted, its Toots still count its fart, as their pages keep its row.
+    expect((await api.delete('recordings', R1, alice)).status).toBe(204)
+    const after = await findProfile(testDb(), 'alice')
+    expect(after?.items.find(each => each.name === 'Scored')).toMatchObject({
+      farts: 2,
+      fartColors: [1, 2]
+    })
+    expect(after?.items.find(each => each.name === 'Catalog')?.farts).toBe(2)
+    expect(after?.items.some(each => each.name === 'Recording 1')).toBe(false)
+  })
+
+  it('sends no fart’s name, where it was made or Recording id for its dots (ADR 0020, #457)', async () => {
+    const alice = await sharer('alice', [R1])
+    // R2 and R3 aren't shared on their own, only played in a Toot, with names and a made-up town.
+    for (const [i, id] of [R2, R3].entries()) {
+      const metadata = recordingMetadata(id, { number: i + 2 })
+      expect((await api.put('recordings', id, uploadBody(metadata, wav()), alice)).status).toBe(201)
+    }
+    const place = { city: 'Testville', region: 'Texas', country: 'US', timeZone: 'America/Denver' }
+    await testDb()
+      .update(recordings)
+      .set({ name: 'Porch thunder', place })
+      .where(eq(recordings.id, R2))
+    await testDb()
+      .update(recordings)
+      .set({ name: 'Squeaky door', place })
+      .where(eq(recordings.id, R3))
+    const arrangement = { transposition: 0, recordingForPitch: { 60: R2, 64: R3 } }
+    await savedToot(alice, tootMetadata(T1, { title: 'Song', arrangement }), { minute: 3 })
+    await savedToot(
+      alice,
+      padTootMetadata(T2, {
+        title: 'Pad',
+        performance: {
+          recordings: [R3, R2],
+          taps: [
+            [0, 0],
+            [0.05, 1]
+          ]
+        }
+      }),
+      { minute: 2 }
+    )
+
+    const profile = await findProfile(testDb(), 'alice')
+    expect(profile?.items.map(item => [item.name, item.farts])).toEqual([
+      ['Song', 2],
+      ['Pad', 2],
+      ['Recording 1', 1]
+    ])
+    // Its own page names them and says where (ADR 0020): the profile page's data does neither.
+    const slug = profile?.items[0].path.split('/').at(-2) ?? ''
+    const row = await sharedToot(testDb(), 'alice', slug)
+    if (!row) throw new Error('no Toot')
+    const own = JSON.stringify(await sharedTootParts(testDb(), { row }))
+    expect(own).toContain('Porch thunder')
+    expect(own).toContain('Testville')
+    const page = JSON.stringify(profile)
+    for (const secret of [
+      'Porch thunder',
+      'Squeaky door',
+      'Testville',
+      'Texas',
+      'America/Denver',
+      R1,
+      R2,
+      R3,
+      T1,
+      T2
+    ]) {
+      expect(page).not.toContain(secret)
+    }
+    // Each row's dots are only places among its pitches.
+    for (const item of profile?.items ?? []) {
+      expect(item.fartColors.every(color => Number.isInteger(color))).toBe(true)
+    }
   })
 
   it('puts the newest Toot’s roll in its banner, with only the pitches its farts play (#448)', async () => {

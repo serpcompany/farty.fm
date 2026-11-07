@@ -25,13 +25,27 @@ export async function profileUser(
 /** A shared Recording or saved Toot on its owner's page. */
 export type ProfileShareRow = { shareId: string; slug: string | null; sharedAt: Date } & (
   | { kind: 'recordings'; recording: RecordingRow }
-  | { kind: 'toots'; toot: Pick<TootRow, 'title' | 'songId' | 'seconds'> & TootPlays }
+  | {
+      kind: 'toots'
+      toot: Pick<TootRow, 'title' | 'songId' | 'seconds'> &
+        TootPlays & {
+          /**
+           * The distinct pitches of the notes it saved, lowest first, as `rollOfScore` gives them,
+           * for its farts' colors (#457). Null when it saved none.
+           */
+          scorePitches: number[] | null
+        }
+    }
 )
 
 /** Newest share first, and by link id when two were shared at once, as D1 would order them. */
 const newestFirst = (a: ProfileShareRow, b: ProfileShareRow) =>
   b.sharedAt.getTime() - a.sharedAt.getTime() ||
   (a.shareId < b.shareId ? 1 : a.shareId > b.shareId ? -1 : 0)
+
+/** Distinct pitches, lowest first, or null for none: a Toot that saved no notes. */
+const lowestFirst = (pitches: number[]) =>
+  pitches.length === 0 ? null : [...pitches].sort((a, b) => a - b)
 
 /** The Recordings and Toots `userId` shares that work, newest share first. */
 export async function profileShares(db: Database, userId: string): Promise<ProfileShareRow[]> {
@@ -63,7 +77,9 @@ export async function profileShares(db: Database, userId: string): Promise<Profi
         seconds: toots.seconds,
         arrangement: toots.arrangement,
         // A Sound Pad Toot's Recordings only, never its taps, which can run to thousands.
-        padRecordings: sql<string | null>`json_extract(${toots.performance}, '$.recordings')`
+        padRecordings: sql<string | null>`json_extract(${toots.performance}, '$.recordings')`,
+        // Its saved notes' pitches only, never the notes, for its farts' colors (#457).
+        scorePitches: sql<string>`(select json_group_array(distinct json_extract(note.value, '$.pitch')) from json_each(${toots.score}, '$.notes') as note)`
       })
       .from(shares)
       .innerJoin(toots, and(eq(toots.userId, shares.userId), eq(toots.id, shares.itemId)))
@@ -73,7 +89,7 @@ export async function profileShares(db: Database, userId: string): Promise<Profi
   return [
     ...recordingRows.map(row => ({ kind: 'recordings' as const, ...row })),
     ...tootRows
-      .map(({ shareId, slug, sharedAt, padRecordings, ...toot }) => ({
+      .map(({ shareId, slug, sharedAt, padRecordings, scorePitches, ...toot }) => ({
         kind: 'toots' as const,
         shareId,
         slug,
@@ -81,7 +97,8 @@ export async function profileShares(db: Database, userId: string): Promise<Profi
         toot: {
           ...toot,
           performance:
-            padRecordings === null ? null : { recordings: JSON.parse(padRecordings) as string[] }
+            padRecordings === null ? null : { recordings: JSON.parse(padRecordings) as string[] },
+          scorePitches: lowestFirst(JSON.parse(scorePitches ?? '[]') as number[])
         }
       }))
       .filter(row => !playsAny(row.toot, takenDown))
