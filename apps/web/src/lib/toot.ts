@@ -72,6 +72,20 @@ export type SharedTootParts = {
   rows: SharedFartRow[]
 }
 
+/**
+ * A shared Toot's note roll as its owner's profile page draws it (#448), in its banner and its
+ * row's square: only its notes, and which pitches a fart plays, nothing of its farts.
+ */
+export type TootRoll = Pick<SharedTootParts, 'song' | 'catalogSong'> & {
+  /** The pitches a fart plays. A note of any other was left out of the Toot, and draws hollow. */
+  played: number[]
+}
+
+/** The roll of what a shared Toot is made of, as `TootRoll`. */
+export function tootRollOf({ song, catalogSong, rows }: SharedTootParts): TootRoll {
+  return { song, catalogSong, played: rows.map(row => row.pitch) }
+}
+
 /** The distinct pitches of `notes`, lowest first. */
 const pitchesOf = (notes: readonly SongNote[]) =>
   [...new Set(notes.map(note => note.pitch))].sort((a, b) => a - b)

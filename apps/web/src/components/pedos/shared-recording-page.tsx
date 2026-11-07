@@ -343,7 +343,12 @@ function SharedItemPage({
             </button>
             <div aria-hidden>
               <b className="block font-semibold">{playing ? 'Playing' : 'Play'}</b>
-              <span className="text-sm text-muted-foreground tabular-nums">{length}</span>
+              <span
+                className="text-sm text-muted-foreground tabular-nums"
+                data-testid="shared-length"
+              >
+                {length}
+              </span>
             </div>
           </div>
           {player.unplayable === 'item' && (

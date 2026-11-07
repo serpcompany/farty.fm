@@ -184,8 +184,14 @@ export async function liveRecordingsOf(
   return rows
 }
 
+/** What says which Recordings a Toot plays: its Arrangement, or its Performance's Recordings. */
+export type TootPlays = {
+  arrangement: TootRow['arrangement']
+  performance: Pick<NonNullable<TootRow['performance']>, 'recordings'> | null
+}
+
 /** The Recordings a Toot plays: its Arrangement's, or its Sound Pad Performance's. */
-export function tootRecordingIds(toot: Pick<TootRow, 'arrangement' | 'performance'>): string[] {
+export function tootRecordingIds(toot: TootPlays): string[] {
   return [
     ...new Set([
       ...Object.values(toot.arrangement?.recordingForPitch ?? {}),
@@ -205,7 +211,8 @@ export async function takenDownRecordings(db: Database, userId: string): Promise
   return new Set(rows.map(row => row.itemId))
 }
 
-const playsAny = (toot: Pick<TootRow, 'arrangement' | 'performance'>, ids: Set<string>) =>
+/** Whether the Toot plays any Recording of `ids`. */
+export const playsAny = (toot: TootPlays, ids: Set<string>) =>
   ids.size > 0 && tootRecordingIds(toot).some(id => ids.has(id))
 
 /**

@@ -133,7 +133,7 @@ Another user, found by their Handle, who has accepted a friend request from the 
 _Avoid_: Follower, contact, connection
 
 **Profile Page**:
-A user's page, `farty.fm/@<handle>`, which anyone can open: their Handle, Add friend, and what they share now, newest first. No counts and no feed. Not Profile, the tab that is the user's own account and settings (ADR 0021).
+A user's page, `farty.fm/@<handle>`, which anyone can open. It has a banner of their newest shared Toot, their Handle and Add friend, then what they share now under a Toots tab and a Recordings tab, newest first. No counts and no feed. Not Profile, the tab that is the user's own account and settings (ADR 0021).
 _Avoid_: Profile (for this page), wall, timeline
 
 ## Testing

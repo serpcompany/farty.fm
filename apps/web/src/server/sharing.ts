@@ -35,7 +35,9 @@ import {
   rollOfScore,
   type SharedFart,
   type SharedFartRow,
-  type SharedTootParts
+  type SharedTootParts,
+  type TootRoll,
+  tootRollOf
 } from '@/lib/toot'
 import { wavHeader } from '@/lib/wav'
 import { waveformLevels } from '@/lib/waveform'
@@ -328,8 +330,8 @@ export function sharedPart(recording: Recording): Trim {
 }
 
 /**
- * What a shared Toot's row plays and draws: only the fart. That's the fart between its Trim's
- * handles, or what analysis found. The rest of a take is whatever else the microphone heard, and
+ * What a shared Toot's row, and a shared Recording's profile page row (#448), plays and draws:
+ * only the fart. That's the fart between its Trim's handles, or what analysis found. The rest of a take is whatever else the microphone heard, and
  * sharing a Toot doesn't share that. Null before analysis has found it, when there's nothing to play.
  */
 export function tootFartPart({ trim, analysis }: Recording): Trim | null {
@@ -441,11 +443,7 @@ export async function sharedTootParts(
     transposition: 0,
     recordingForPitch: {}
   }
-  const song = toot.score ? rollOfScore(toot.score) : null
-  const catalogSong = song ? null : (songIndex.find(s => s.id === toot.songId) ?? null)
-  const played = Object.keys(recordingForPitch)
-    .map(Number)
-    .sort((a, b) => a - b)
+  const { song, catalogSong, played } = arrangedRoll(toot)
   const pitches = song?.pitches ?? catalogSong?.pitches ?? played
   const rows: SharedFartRow[] = played.map(pitch => ({
     plays: noteName(pitch + transposition),
@@ -454,6 +452,28 @@ export async function sharedTootParts(
     fart: fartOf(recordingForPitch[pitch])
   }))
   return { song, catalogSong, transposition, lanes: false, rows }
+}
+
+/** A Song Toot's roll: its score or catalog Song, and the pitches it plays. No lookup needed. */
+function arrangedRoll(toot: SharedTootRow['toot']): TootRoll {
+  const song = toot.score ? rollOfScore(toot.score) : null
+  const catalogSong = song ? null : (songIndex.find(s => s.id === toot.songId) ?? null)
+  const played = Object.keys(toot.arrangement?.recordingForPitch ?? {})
+    .map(Number)
+    .sort((a, b) => a - b)
+  return { song, catalogSong, played }
+}
+
+/**
+ * A shared Toot's roll, as `tootRollOf(sharedTootParts(…))`, without its farts' lookups for a Song
+ * Toot. A Sound Pad Toot's notes last as long as its farts, so it still looks them up.
+ */
+export async function sharedTootRoll(
+  db: Database,
+  shared: { row: SharedTootRow }
+): Promise<TootRoll> {
+  const { toot } = shared.row
+  return toot.performance ? tootRollOf(await sharedTootParts(db, shared)) : arrangedRoll(toot)
 }
 
 /**
@@ -683,6 +703,32 @@ export async function sharedTootLevels(
     Response.json(levels, { headers: { 'Cache-Control': 'public, max-age=86400' } })
   )
   return levels
+}
+
+/** A shared Toot's row on its owner's profile page (#448): its waveform's bars and its note roll. */
+export type ProfileTootRow = { levels: number[]; roll: TootRoll }
+
+/**
+ * `GET /@<handle>/t/<id>/row/`: what a shared Toot's row on its owner's profile page draws (#448),
+ * for anyone with the link: its loudness bars (`sharedTootLevels`) and its note roll, as its own
+ * page draws them. Each row fetches its own once it's on screen, so the page never reads every
+ * Toot's WAV or notes. The share is checked in D1 first, as its audio's is, and nothing between
+ * keeps it, so a link taken down is down at once.
+ */
+export async function sharedTootRow(
+  { db, media }: Stores,
+  request: Request,
+  handle: string,
+  link: string
+): Promise<Response> {
+  const shared = await findSharedToot(db, handle, link)
+  if (!shared) return apiError(404, 'not_found')
+  const [levels, roll] = await Promise.all([
+    sharedTootLevels(media, sharedTootKey(shared), servedOrigin(request)),
+    sharedTootRoll(db, shared)
+  ])
+  const drawn: ProfileTootRow = { levels, roll }
+  return Response.json(drawn, { headers: { 'Cache-Control': 'private, no-cache' } })
 }
 
 /**

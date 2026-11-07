@@ -95,6 +95,7 @@ export function ReplayWaveform({
   onPlayFrom,
   onScrubStart,
   trim,
+  playedClassName = 'bg-primary',
   className
 }: {
   levels: number[]
@@ -110,6 +111,8 @@ export function ReplayWaveform({
   /** A press became a scrub: playback stops while it scrubs. */
   onScrubStart?: () => void
   trim?: { part: Trim; onChange: (part: Trim, done: boolean) => void }
+  /** The color of the bars it has played: the main button's, or a profile row's accent (#448). */
+  playedClassName?: string
   className?: string
 }) {
   const box = useRef<HTMLDivElement>(null)
@@ -197,7 +200,11 @@ export function ReplayWaveform({
               key={i}
               className={cn(
                 'min-w-0 flex-1 rounded-full min-h-[2px]',
-                played ? 'bg-primary' : dimmed ? 'bg-muted-foreground/30' : 'bg-muted-foreground/60'
+                played
+                  ? playedClassName
+                  : dimmed
+                    ? 'bg-muted-foreground/30'
+                    : 'bg-muted-foreground/60'
               )}
               style={{ height: `${Math.max(level, 0.05) * 100}%` }}
             />

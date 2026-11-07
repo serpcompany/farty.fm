@@ -10,6 +10,7 @@ import { handles, rateLimit, recordings, shareReports, shares, toots, user } fro
 import { NOT_SAID } from '@/lib/fart-place'
 import { noteName } from '@/lib/pitch'
 import { encodeWav } from '@/lib/wav'
+import { findProfile } from '@/server/profiles'
 import {
   findSharedRecording,
   findSharedToot,
@@ -46,6 +47,7 @@ import * as tootAudioRoute from './t/[id]/audio/route'
 import * as tootFartAudioRoute from './t/[id]/farts/[place]/audio/route'
 import * as tootImageRoute from './t/[id]/image/route'
 import * as tootReportRoute from './t/[id]/report/route'
+import * as tootRowRoute from './t/[id]/row/route'
 
 // Sharing (ADR 0020) in workerd, with a real D1 and R2: Handles, sharing and stopping sharing a
 // Recording or a saved Toot, its public audio and Report, and that a link works only while its
@@ -76,7 +78,7 @@ const shareRoutes = { recordings: shareRecordingRoute, toots: shareTootRoute }
 /** Each kind of link's public routes, by its segment: `r` for a Recording, `t` for a Toot. */
 const linkRoutes = {
   r: { audio: audioRoute, image: imageRoute, report: reportRoute },
-  t: { audio: tootAudioRoute, image: tootImageRoute, report: tootReportRoute }
+  t: { audio: tootAudioRoute, image: tootImageRoute, report: tootReportRoute, row: tootRowRoute }
 }
 
 const share = {
@@ -108,6 +110,13 @@ const share = {
       new Request(`${url}farts/${place}/audio/`, { ...init, method: 'GET' }),
       params({ atHandle, id, place: String(place) })
     )
+  },
+  /** A shared Toot's bars and roll for its profile page row (#448), as anyone fetches them. */
+  /** A shared Toot's `row/`, as its profile page row fetches it. Only a Toot's link has one. */
+  row: (url: string) => {
+    const { segment, atHandle, id } = linkParts(url)
+    if (segment !== 't') throw new Error(`Only a Toot's link has a row/: ${url}`)
+    return linkRoutes.t.row.GET(new Request(`${url}row/`), params({ atHandle, id }))
   },
   /** The shared item's link image, as a link preview fetches it. */
   image: (url: string) => {
@@ -163,6 +172,14 @@ function linkParts(url: string): {
     handle: decodeURIComponent(match[1]).replace(/^@/, ''),
     id: match[3]
   }
+}
+
+/** That a shared Toot's `row/` is gone: a bare 404 that says nothing of the Toot or its farts. */
+async function expectRowGone(url: string) {
+  const response = await share.row(url)
+  expect(response.status).toBe(404)
+  expect(response.headers.get('content-type')).toContain('application/json')
+  expect(await response.text()).toBe(JSON.stringify({ error: 'not_found' }))
 }
 
 async function upload(id: string, cookie: string) {
@@ -433,6 +450,51 @@ describe('Sharing a Recording', () => {
       expect(await framesOf(await share.audio(melodic.url))).toEqual(range(4000, 5000))
     })
 
+    /** Its row on `handle`'s profile page, and what its own page at `url` shows. */
+    async function rowAndPage(handle: string, url: string) {
+      const { id } = linkParts(url)
+      const [row] = (await findProfile(testDb(), handle))?.items ?? []
+      const page = await sharedView(handle, id)
+      return { row, page }
+    }
+
+    it("lists it on its profile page at its own page's length, its fart's, and plays and draws only the fart (#448)", async () => {
+      // A second of take whose fart comes after 0.3 s of lead-in silence: 0.575 s, so "0.5 s".
+      const { analysis } = recordingMetadata(R1) as { analysis: { analysis: object } }
+      const alice = await uploadedSharer('alice', {
+        waveform: [0, 0, 0, 0.5, 1, 0.5, 0.2, 0],
+        analysis: {
+          state: 'analyzed',
+          analysis: { ...analysis.analysis, gestureStartSeconds: 0.3, gestureEndSeconds: 0.875 }
+        }
+      })
+      // Its link still serves the whole take; the row plays only the fart in it.
+      expect(await framesOf(await share.audio(alice.url))).toEqual(range(0, RATE))
+      const untrimmed = await rowAndPage('alice', alice.url)
+      expect(untrimmed.page?.length).toBe('0.5 s')
+      expect(untrimmed.row).toMatchObject({
+        length: untrimmed.page?.length,
+        part: { startSeconds: 0.3, endSeconds: 0.875 },
+        levels: [0, 0.5, 1, 0.5, 0.2]
+      })
+    })
+
+    it("times a trimmed one's fart from where its link's audio starts (#448)", async () => {
+      // Its link serves 0.25 s to 0.75 s; the fart between the handles is 0.375 s to 0.625 s.
+      const alice = await trimmedSharer({
+        startSeconds: 0.25,
+        endSeconds: 0.75,
+        fart: { startSeconds: 0.375, endSeconds: 0.625 }
+      })
+      expect(await framesOf(await share.audio(alice.url))).toEqual(range(2000, 6000))
+      const { row, page } = await rowAndPage('alice', alice.url)
+      expect(page?.length).toBe('0.2 s')
+      expect(row).toMatchObject({
+        length: page?.length,
+        part: { startSeconds: 0.125, endSeconds: 0.375 }
+      })
+    })
+
     it('serves the whole take of a Recording with no stored Trim', async () => {
       const alice = await uploadedSharer('alice', { analysis: { state: 'notAnalyzed' } })
       expect(await framesOf(await share.audio(alice.url))).toEqual(range(0, RATE))
@@ -521,10 +583,23 @@ describe('Sharing a Recording', () => {
     expect((await share.put(R1, alice)).status).toBe(410)
   })
 
-  it('stops working when the account is deleted', async () => {
+  it('stops working when the account is deleted, and so do the rows of Toots playing it', async () => {
     const alice = await sharer('alice')
+    // A Toot playing R1, shared too: its profile row's `row/` works until the account goes.
+    await saveToot(
+      T1,
+      alice,
+      tootWav(),
+      tootMetadata(T1, {
+        arrangement: { transposition: 0, recordingForPitch: { 60: R1 } }
+      })
+    )
+    const toot = (await (await share.put(T1, alice, 'toots')).json()) as { url: string }
+    expect((await share.row(toot.url)).status).toBe(200)
+
     expect((await api.deleteAccount(alice)).status).toBe(204)
     expect((await share.audio(alice.url)).status).toBe(404)
+    await expectRowGone(toot.url)
     expect(await testDb().select().from(shares)).toEqual([])
   })
 
@@ -849,17 +924,21 @@ describe('Sharing a saved Toot', () => {
 
   it('stops working when the Toot is deleted', async () => {
     const alice = await tootSharer('alice')
+    expect((await share.row(alice.url)).status).toBe(200)
     expect((await api.delete('toots', T1, alice)).status).toBe(204)
     expect((await share.audio(alice.url)).status).toBe(404)
     expect((await share.report(alice.url)).status).toBe(404)
+    await expectRowGone(alice.url)
     expect(await testDb().select().from(shares)).toEqual([])
     expect((await share.put(T1, alice, 'toots')).status).toBe(410)
   })
 
   it('stops working when the account is deleted', async () => {
     const alice = await tootSharer('alice')
+    expect((await share.row(alice.url)).status).toBe(200)
     expect((await api.deleteAccount(alice)).status).toBe(204)
     expect((await share.audio(alice.url)).status).toBe(404)
+    await expectRowGone(alice.url)
     expect(await testDb().select().from(shares)).toEqual([])
   })
 
@@ -868,6 +947,7 @@ describe('Sharing a saved Toot', () => {
     await testDb().update(shares).set({ takenDownAt: new Date() })
     expect((await share.audio(alice.url)).status).toBe(404)
     expect((await share.report(alice.url)).status).toBe(404)
+    await expectRowGone(alice.url)
 
     const again = await share.put(T1, alice, 'toots')
     expect(again.status).toBe(403)
@@ -890,12 +970,14 @@ describe('Sharing a saved Toot', () => {
     expect(response.status).toBe(201)
     const { url } = (await response.json()) as { url: string }
     expect((await share.audio(url)).status).toBe(200)
+    expect((await share.row(url)).status).toBe(200)
 
     // Farty takes down R1's own link after a report.
     await testDb().update(shares).set({ takenDownAt: new Date() }).where(eq(shares.itemId, R1))
 
     expect((await share.audio(url)).status).toBe(404)
     expect((await share.report(url)).status).toBe(404)
+    await expectRowGone(url)
     const { handle, id } = linkParts(url)
     expect(await findSharedToot(testDb(), handle, id)).toBeNull()
     expect(await (await share.list(alice)).json()).toEqual({ handle: 'alice', shares: [] })
@@ -907,6 +989,7 @@ describe('Sharing a saved Toot', () => {
     // Deleting R1 keeps its take-down, so the Toots stay down.
     expect((await api.delete('recordings', R1, alice)).status).toBe(204)
     expect((await share.audio(url)).status).toBe(404)
+    await expectRowGone(url)
     expect((await share.put(T2, alice, 'toots')).status).toBe(403)
   })
 
@@ -958,6 +1041,34 @@ describe('Sharing a saved Toot', () => {
     // Flat for audio that's gone and was never drawn.
     const gone = await sharedTootLevels(media(), `users/${dora.id}/toots/${T1}.wav`, ORIGIN)
     expect(gone).toEqual(Array(SHARED_TOOT_BARS).fill(0.05))
+  })
+
+  it('serves its bars and roll at `row/` for its profile page row, only while its link works (#448)', async () => {
+    const dora = await signUp('dora')
+    await share.pick('dora', dora)
+    const samples = Float32Array.from({ length: 6000 }, (_, i) => (i < 3000 ? 0.5 : 0))
+    await saveToot(T2, dora, new Uint8Array(encodeWav({ samples, sampleRate: 8000 })))
+    const { url } = (await (await share.put(T2, dora, 'toots')).json()) as { url: string }
+    const { id } = linkParts(url)
+
+    const served = await share.row(url)
+    expect(served.status).toBe(200)
+    expect(served.headers.get('cache-control')).toBe('private, no-cache')
+    // Its roll as its own page draws it: saved before #254, so its Song's notes, which the page
+    // fetches, and the one pitch a fart plays. Nothing of its farts, so never where one was made.
+    expect(await served.json()).toEqual({
+      levels: [...Array(30).fill(1), ...Array(30).fill(0.05)],
+      roll: {
+        song: null,
+        catalogSong: expect.objectContaining({ id: 'twinkle' }),
+        played: [60]
+      }
+    })
+
+    expect((await share.stop(T2, dora, 'toots')).status).toBe(204)
+    await expectRowGone(url)
+    // And never for another Handle's link.
+    await expectRowGone(`${ORIGIN}/@alice/t/${id}/`)
   })
 })
 
@@ -1165,6 +1276,20 @@ describe('Where a shared fart was made (#444)', () => {
     })
     expect((await api.put('recordings', R1, uploadBody(metadata, take()), alice)).status).toBe(201)
     expect(await placeKept(R1, alice.id)).toBeNull()
+  })
+
+  it('never sends it to the profile page, whose rows and banner say only the day (#448)', async () => {
+    const alice = await fromAustin()
+    const { recording } = await shareBoth(alice)
+    // Its own page says it.
+    expect(await viewOf(recording)).toMatchObject(SAID)
+    const profile = await findProfile(testDb(), 'alice')
+    expect(profile?.items).toHaveLength(2)
+    expect(profile?.hero).not.toBeNull()
+    const page = JSON.stringify(profile)
+    expect(page).not.toContain('Austin')
+    expect(page).not.toContain('Texas')
+    expect(page).not.toContain('America/Chicago')
   })
 
   it("never sends it to the owner's library", async () => {
