@@ -1,25 +1,25 @@
 'use client'
 
-import { AudioLines, ListMusic, Play, Square } from 'lucide-react'
+import { Play, Square } from 'lucide-react'
 import Link from 'next/link'
 import { type MouseEvent, type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { play, playbackPosition, stopPlayback } from '@/lib/audio/player'
 import { formattedFartSeconds } from '@/lib/pitch-coverage'
 import type { Trim } from '@/lib/recordings'
-import { formattedTootDate, formattedTootLength, type TootRoll } from '@/lib/toot'
+import { formattedTootDate, formattedTootLength } from '@/lib/toot'
 import { useInBrowser } from '@/lib/use-in-browser'
 import { cn } from '@/lib/utils'
 import { finerBars } from '@/lib/waveform'
 import { useWidth } from './note-view'
-import { RollArt, usePlayingSeconds, useRollSong } from './profile-hero'
+import { usePlayingSeconds } from './profile-hero'
 import { ReplayWaveform } from './waveform'
 
 // A profile page's list of what its user shares (#448, #451), each row laid out as SoundCloud's
-// track row: a square picture (a Recording's note, a Toot's note roll), Play, the Handle over the
-// name, as SoundCloud's uploader, the day and a pill at the top right, then a waveform across the row drawn as SoundCloud's,
-// which shows how far it has played, its length and, while it plays, where it is, and plays from a
-// tap. Each plays only that share's own audio. Under it, Copy link.
+// track row without its artwork: Play at the left, the Handle over the name, as SoundCloud's
+// uploader, the day and a pill at the top right, then a waveform drawn as SoundCloud's, which shows
+// how far it has played, its length and, while it plays, where it is, and plays from a tap. Each
+// plays only that share's own audio. Under it, Copy link.
 
 /** A Recording or Toot its user shares, as their page lists it. Never where it was made. */
 export type ProfileShare = {
@@ -102,8 +102,8 @@ const LOADING_BARS = Array<number>(60).fill(0.05)
 /** One bar to this many pixels of a row's waveform, however wide the row: SoundCloud's thin bars. */
 const BAR_PIXELS = 4
 
-/** What a shared Toot's row draws, from its `row/`: its loudness bars and its note roll. */
-export type TootRowArt = { levels: number[]; roll: TootRoll }
+/** What a shared Toot's row draws, from its `row/`: its loudness bars. */
+export type TootRowArt = { levels: number[] }
 
 /** Each shared Toot's, fetched once a page load. */
 const tootRows = new Map<string, Promise<TootRowArt>>()
@@ -111,20 +111,12 @@ const tootRows = new Map<string, Promise<TootRowArt>>()
 const isLevels = (value: unknown): value is number[] =>
   Array.isArray(value) && value.every(level => typeof level === 'number')
 
-const isTootRowArt = (value: unknown): value is TootRowArt => {
-  if (typeof value !== 'object' || value === null) return false
-  const { levels, roll } = value as { levels?: unknown; roll?: unknown }
-  return (
-    isLevels(levels) &&
-    typeof roll === 'object' &&
-    roll !== null &&
-    isLevels((roll as { played?: unknown }).played)
-  )
-}
+const isTootRowArt = (value: unknown): value is TootRowArt =>
+  typeof value === 'object' && value !== null && isLevels((value as { levels?: unknown }).levels)
 
 /**
- * A shared Toot's bars and roll from its `row/`, once `wanted`; null until then, or when they
- * can't be had. The page never reads its Toots' audio or notes for them (ProfileItem's `levels`).
+ * A shared Toot's bars from its `row/`, once `wanted`; null until then, or when they can't be
+ * had. The page never reads its Toots' audio for them (ProfileItem's `levels`).
  */
 export function useTootRow(path: string, wanted: boolean): TootRowArt | null {
   const [loaded, setLoaded] = useState<{ path: string; art: TootRowArt } | null>(null)
@@ -206,11 +198,11 @@ const onWaveform =
   'pointer-events-none absolute bottom-[calc(30%+2px)] z-[4] rounded-sm bg-foreground/85 px-1 text-xs leading-4 font-medium text-background tabular-nums'
 
 /**
- * A share's row, as SoundCloud's track row: its square picture at the left; Play, and over its
- * name (a link to its own page) the Handle, as SoundCloud's uploader; at the top right, the day
- * it was shared and a Recording's note (a Toot's Song, when that isn't its name) as a pill; then
- * its waveform across the row, as SoundCloud draws one, with its length at the right; then Copy
- * link.
+ * A share's row, as SoundCloud's track row with no artwork (the owner, #451): Play at its left
+ * edge, and over its name (a link to its own page) the Handle, as SoundCloud's uploader; at the
+ * top right, the day it was shared and a Recording's note (a Toot's Song, when that isn't its
+ * name) as a pill; then its waveform, as SoundCloud draws one, with its length at the right; then
+ * Copy link.
  */
 function ShareRow({
   share,
@@ -251,20 +243,19 @@ function ShareRow({
   return (
     <li
       ref={row}
-      className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-x-3 gap-y-3 md:grid-cols-[10rem_minmax(0,1fr)] md:gap-x-5"
+      className="grid grid-cols-[2.75rem_minmax(0,1fr)] gap-x-3 gap-y-3"
       data-testid="profile-shared-item"
     >
-      <ShareArt share={share} roll={fetched?.roll ?? null} playing={playing !== null} />
+      <button
+        type="button"
+        aria-label={playing ? `Stop ${share.name}` : `Play ${share.name}`}
+        aria-pressed={playing !== null}
+        onClick={() => player.toggle(share, 'row')}
+        className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      >
+        <PlayIcon className="size-5 fill-current" aria-hidden />
+      </button>
       <div className="flex min-w-0 items-start gap-3">
-        <button
-          type="button"
-          aria-label={playing ? `Stop ${share.name}` : `Play ${share.name}`}
-          aria-pressed={playing !== null}
-          onClick={() => player.toggle(share, 'row')}
-          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-        >
-          <PlayIcon className="size-5 fill-current" aria-hidden />
-        </button>
         <div className="grid min-w-0 flex-1 gap-0.5">
           <p className="truncate text-sm text-muted-foreground" data-testid="profile-shared-byline">
             @{handle}
@@ -329,49 +320,6 @@ function ShareRow({
         <CopyLink path={share.path} />
       </div>
     </li>
-  )
-}
-
-/**
- * A share's square picture, as a track's artwork: a Recording's note, big, or a Toot's note roll
- * once its row has it, lighting each note as it plays. A Noise-like Recording, which plays no
- * note, and a Toot with no roll (its Song isn't in Farty any more) show their kind's icon.
- */
-function ShareArt({
-  share,
-  roll,
-  playing
-}: {
-  share: ProfileShare
-  roll: TootRoll | null
-  playing: boolean
-}) {
-  const song = useRollSong(roll)
-  const noRoll = roll !== null && roll.song === null && roll.catalogSong === null
-  return (
-    <div
-      aria-hidden
-      className="relative size-[5.5rem] overflow-hidden rounded-md bg-muted md:row-span-3 md:size-40"
-      data-testid="profile-shared-art"
-    >
-      {share.kind === 'recordings' ? (
-        share.detail ? (
-          <span className="absolute inset-0 grid place-items-center text-3xl font-bold tracking-tight text-brand-strong tabular-nums md:text-5xl dark:text-brand">
-            {share.detail}
-          </span>
-        ) : (
-          <AudioLines className="absolute inset-0 m-auto size-8 text-muted-foreground md:size-12" />
-        )
-      ) : song ? (
-        <div className="absolute inset-2.5 md:inset-4">
-          <RollArt song={song} played={roll?.played ?? []} playing={playing} />
-        </div>
-      ) : (
-        noRoll && (
-          <ListMusic className="absolute inset-0 m-auto size-8 text-muted-foreground md:size-12" />
-        )
-      )}
-    </div>
   )
 }
 

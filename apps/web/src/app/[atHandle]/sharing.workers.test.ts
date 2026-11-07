@@ -1074,7 +1074,7 @@ describe('Sharing a saved Toot', () => {
     expect(gone).toEqual(Array(SHARED_TOOT_BARS).fill(0.05))
   })
 
-  it('serves its bars and roll at `row/` for its profile page row, only while its link works (#448)', async () => {
+  it('serves its bars at `row/` for its profile page row, only while its link works (#448, #451)', async () => {
     const dora = await signUp('dora')
     await share.pick('dora', dora)
     const samples = Float32Array.from({ length: 6000 }, (_, i) => (i < 3000 ? 0.5 : 0))
@@ -1085,15 +1085,10 @@ describe('Sharing a saved Toot', () => {
     const served = await share.row(url)
     expect(served.status).toBe(200)
     expect(served.headers.get('cache-control')).toBe('private, no-cache')
-    // Its roll as its own page draws it: saved before #254, so its Song's notes, which the page
-    // fetches, and the one pitch a fart plays. Nothing of its farts, so never where one was made.
+    // Only its bars: its row has no picture, so no roll (#451), and nothing of its farts, so
+    // never where one was made.
     expect(await served.json()).toEqual({
-      levels: [...Array(30).fill(1), ...Array(30).fill(0.05)],
-      roll: {
-        song: null,
-        catalogSong: expect.objectContaining({ id: 'twinkle' }),
-        played: [60]
-      }
+      levels: [...Array(30).fill(1), ...Array(30).fill(0.05)]
     })
 
     expect((await share.stop(T2, dora, 'toots')).status).toBe(204)

@@ -54,7 +54,7 @@ export type ProfileItem = {
   part: Trim
   /**
    * A Recording's loudness bars, each 0…1, of its fart, from its upload. Empty for a Toot, whose
-   * bars are drawn from its saved WAV: its row fetches them with its roll (`row/`), so the page
+   * bars are drawn from its saved WAV: its row fetches them (`row/`), so the page
    * never reads every Toot's audio.
    */
   levels: number[]

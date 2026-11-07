@@ -740,14 +740,13 @@ export async function sharedTootLevels(
   return levels
 }
 
-/** A shared Toot's row on its owner's profile page (#448): its waveform's bars and its note roll. */
-export type ProfileTootRow = { levels: number[]; roll: TootRoll }
+/** A shared Toot's row on its owner's profile page (#448, #451): its waveform's bars. */
+export type ProfileTootRow = { levels: number[] }
 
 /**
  * `GET /@<handle>/t/<id>/row/`: what a shared Toot's row on its owner's profile page draws (#448),
- * for anyone with the link: its loudness bars (`sharedTootLevels`) and its note roll, as its own
- * page draws them. Each row fetches its own once it's on screen, so the page never reads every
- * Toot's WAV or notes. The share is checked in D1 first, as its audio's is, and nothing between
+ * for anyone with the link: its loudness bars (`sharedTootLevels`). Each row fetches its own once
+ * it's on screen, so the page never reads every Toot's WAV. The share is checked in D1 first, as its audio's is, and nothing between
  * keeps it, so a link taken down is down at once.
  */
 export async function sharedTootRow(
@@ -758,11 +757,8 @@ export async function sharedTootRow(
 ): Promise<Response> {
   const shared = await findSharedToot(db, handle, link)
   if (!shared) return apiError(404, 'not_found')
-  const [levels, roll] = await Promise.all([
-    sharedTootLevels(media, sharedTootKey(shared), servedOrigin(request)),
-    sharedTootRoll(db, shared)
-  ])
-  const drawn: ProfileTootRow = { levels, roll }
+  const levels = await sharedTootLevels(media, sharedTootKey(shared), servedOrigin(request))
+  const drawn: ProfileTootRow = { levels }
   return Response.json(drawn, { headers: { 'Cache-Control': 'private, no-cache' } })
 }
 

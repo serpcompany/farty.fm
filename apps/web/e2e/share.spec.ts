@@ -79,10 +79,11 @@ async function sidewaysAt375(on: Page): Promise<number> {
 }
 
 /**
- * At a computer's 1280 px, each share row is laid out as SoundCloud's (#448, #451): its 160 px
- * picture down the left; the day at the top right, over the end of its waveform; the waveform,
- * with its length at its right, and Copy link in the column right of the picture; and the page no
- * wider than `max-w-6xl`. Then back to `on`'s own size.
+ * At a computer's 1280 px, each share row is laid out as SoundCloud's with no artwork (#448,
+ * #451): Play at the row's left edge, with nothing left of it; the Handle and name beside it; the
+ * day at the top right, over the end of its waveform; the waveform, with its length at its right,
+ * and Copy link lined up with the name; and the page no wider than `max-w-6xl`. Then back to
+ * `on`'s own size.
  */
 async function expectComputerRows(on: Page) {
   const size = on.viewportSize()
@@ -90,19 +91,21 @@ async function expectComputerRows(on: Page) {
   const rows = on.getByTestId('profile-shared-item')
   await expect(rows.first()).toBeVisible()
   for (const row of await rows.all()) {
-    const art = await row.getByTestId('profile-shared-art').boundingBox()
+    await expect(row.getByTestId('profile-shared-art')).toHaveCount(0)
+    const box = await row.boundingBox()
+    const play = await row.getByRole('button', { name: /^(Play|Stop) / }).boundingBox()
+    const name = await row.getByTestId('profile-shared-link').boundingBox()
     const wave = await row.getByTestId('replay-waveform').boundingBox()
     const copy = await row.getByTestId('profile-copy-link').boundingBox()
     const date = await row.getByTestId('profile-shared-date').boundingBox()
     const length = await row.getByTestId('profile-shared-length').boundingBox()
-    if (!art || !wave || !copy || !date || !length)
-      throw new Error('A row is missing its picture, waveform, day, length or Copy link')
-    expect(Math.round(art.width)).toBe(160)
-    expect(Math.round(art.height)).toBe(160)
-    expect(wave.x).toBeGreaterThanOrEqual(art.x + art.width)
-    expect(copy.x).toBeGreaterThanOrEqual(art.x + art.width)
-    // On a phone, the waveform spans the whole row under the picture instead.
-    expect(wave.y).toBeLessThan(art.y + art.height)
+    if (!box || !play || !name || !wave || !copy || !date || !length)
+      throw new Error('A row is missing its Play, name, waveform, day, length or Copy link')
+    expect(Math.abs(play.x - box.x)).toBeLessThan(1)
+    expect(name.x).toBeGreaterThanOrEqual(play.x + play.width)
+    // On a phone, the waveform spans the whole row under Play instead.
+    expect(Math.abs(wave.x - name.x)).toBeLessThan(2)
+    expect(Math.abs(copy.x - name.x)).toBeLessThan(2)
     expect(date.y + date.height).toBeLessThanOrEqual(wave.y)
     expect(Math.abs(date.x + date.width - (wave.x + wave.width))).toBeLessThan(2)
     expect(Math.abs(length.x + length.width - (wave.x + wave.width))).toBeLessThan(2)
@@ -674,7 +677,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     expect(recordingLink).toMatch(new RegExp(`^/@${handle}/r/recording-\\d+/$`))
     await tab.close()
 
-    // Its row draws the Toot's own bars and note roll, fetched once it's on screen (#448).
+    // Its row draws the Toot's own bars, fetched once it's on screen (#448).
     const drawn = other.waitForResponse(r => new URL(r.url()).pathname === `${link}row/`)
     // Its farts were made in Testville, and the owner shows where: still, no row says so.
     madeInTestville(handle)
@@ -690,13 +693,13 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(rows).toHaveCount(1)
     await expect(rows.getByTestId('profile-shared-link')).toHaveAttribute('href', link)
     await expect(rows.getByTestId('profile-shared-link')).toHaveText(title)
-    // Laid out as SoundCloud's track row: the Handle over its name, as its uploader, the day at
-    // the right, its length on its waveform, and its note roll as its picture.
+    // Laid out as SoundCloud's track row with no artwork (#451): the Handle over its name, as its
+    // uploader, the day at the right, and its length on its waveform.
     await expect(rows.getByTestId('profile-shared-byline')).toHaveText(`@${handle}`)
     await expect(rows.getByTestId('profile-shared-date')).toHaveText('Today')
     await expect(rows.getByTestId('profile-shared-length')).toHaveText(/^\d+:\d\d$/)
     expect((await drawn).status()).toBe(200)
-    await expect(rows.getByTestId('profile-shared-art').locator('rect').first()).toBeVisible()
+    await expect(rows.getByTestId('profile-shared-art')).toHaveCount(0)
     await shot(other, 'toot-profile')
     await computerShot(other, 'toot-profile')
     await expectComputerRows(other)
@@ -744,12 +747,10 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     const rows = other.getByTestId('profile-shared-item')
     const heroPlay = other.getByTestId('profile-hero-play')
     const playhead = other.getByTestId('profile-banner').getByTestId('profile-banner-playhead')
-    // The row's picture is the same roll, with a playhead of its own while it plays (#451).
-    const rowPlayhead = rows
-      .getByTestId('profile-shared-art')
-      .getByTestId('profile-banner-playhead')
+    // The bars the row has played, in Farty's pink (#451).
+    const rowPlayed = rows.getByTestId('replay-waveform').locator('span.bg-brand-strong')
     await expect(playhead).toHaveCount(0)
-    await expect(rowPlayhead).toHaveCount(0)
+    await expect(rowPlayed).toHaveCount(0)
 
     // From its own link's audio, with the banner's playhead moving over its notes.
     const audio = other.waitForResponse(r => new URL(r.url()).pathname === `${link}audio/`)
@@ -778,9 +779,9 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(heroPlay).toHaveAccessibleName(`Stop ${title}`)
     // Where it is shows at the waveform's bottom left while it plays, as on SoundCloud.
     await expect(rows.getByTestId('profile-shared-time')).toHaveText(/^0:0\d$/)
-    const rowAt = async () => Number(await rowPlayhead.getAttribute('x'))
-    const rowFirst = await rowAt()
-    await expect.poll(rowAt).toBeGreaterThan(rowFirst)
+    // Its waveform fills pink as it plays.
+    const rowFirst = await rowPlayed.count()
+    await expect.poll(() => rowPlayed.count()).toBeGreaterThan(rowFirst)
     await shot(other, 'toot-profile-playing')
   })
 
