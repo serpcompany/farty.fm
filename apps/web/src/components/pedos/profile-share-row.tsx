@@ -17,9 +17,9 @@ import { ReplayWaveform } from './waveform'
 
 // A profile page's list of what its user shares (#448, #451), each row laid out as SoundCloud's
 // track row without its artwork: Play at the left, the name beside it, the day and a pill at the
-// right (the Handle is only in the banner, #454), then a waveform drawn as SoundCloud's, which shows
-// how far it has played, its length and, while it plays, where it is, and plays from a tap. Each
-// plays only that share's own audio. Under it, Copy link.
+// right (the Handle is only in the banner, #454), then a waveform drawn as SoundCloud's, which
+// shows how far it has played, its length and, while it plays, where it is, and plays from a tap.
+// Each plays only that share's own audio. Under it, Copy link.
 
 /** A Recording or Toot its user shares, as their page lists it. Never where it was made. */
 export type ProfileShare = {
@@ -194,9 +194,10 @@ const onWaveform =
 
 /**
  * A share's row, as SoundCloud's track row with no artwork (the owner, #451): Play at its left
- * edge, and beside it its name (a link to its own page), level with Play; at the right, the day it was shared and a Recording's note (a Toot's Song, when that isn't its
- * name) as a pill; then its waveform, as SoundCloud draws one, with its length at the right; then
- * Copy link.
+ * edge, and beside it its name (a link to its own page); at the right, the day it was shared and
+ * a Recording's note (a Toot's Song, when that isn't its name) as a pill; then its waveform, as
+ * SoundCloud draws one, with its length at the right; then Copy link. A one-line name, and the day
+ * with its pill, sit level with Play; a longer name grows down, and the day stays at the top.
  */
 function ShareRow({ share, player }: { share: ProfileShare; player: ProfilePlayer }) {
   const row = useRef<HTMLLIElement>(null)
@@ -241,17 +242,17 @@ function ShareRow({ share, player }: { share: ProfileShare; player: ProfilePlaye
       >
         <PlayIcon className="size-5 fill-current" aria-hidden />
       </button>
-      <div className="flex min-h-11 min-w-0 items-center gap-3">
-        <div className="grid min-w-0 flex-1">
+      <div className="flex min-w-0 items-start gap-3">
+        <div className="flex min-h-11 min-w-0 flex-1 items-center">
           <Link
             href={share.path}
-            className="line-clamp-3 rounded-sm leading-snug font-semibold outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 md:line-clamp-2"
+            className="line-clamp-3 min-w-0 rounded-sm leading-snug font-semibold outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 md:line-clamp-2"
             data-testid="profile-shared-link"
           >
             {share.name}
           </Link>
         </div>
-        <div className="flex max-w-[40%] shrink-0 flex-col items-end gap-1.5">
+        <div className="flex min-h-11 max-w-[40%] shrink-0 flex-col items-end justify-center gap-1.5">
           {/* Held at its size until the browser can say the day in the viewer's own time. */}
           <span
             className="min-h-5 text-xs leading-5 whitespace-nowrap text-muted-foreground"

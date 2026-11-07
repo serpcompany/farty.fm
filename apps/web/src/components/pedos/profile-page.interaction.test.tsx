@@ -294,7 +294,7 @@ describe('The tabs (#448)', () => {
 })
 
 describe('A row (#346, #448)', () => {
-  it('a Toot’s: the Handle over its name, as SoundCloud’s uploader, its day and Song, its length, its own page and its own audio, from a spot too', async () => {
+  it('a Toot’s: its name with no Handle over it (#454), its day and Song, its length, its own page and its own audio, from a spot too', async () => {
     const fetched = server()
     await render({ items: [toot, recording], hero })
     const [row] = rows()
@@ -324,7 +324,7 @@ describe('A row (#346, #448)', () => {
     expect(heard.plays.at(-1)?.segment).toEqual({ start: 1.5, end: 18 })
   })
 
-  it('a Recording’s: Play at its left, no picture, its note as its tag, the Handle, its day, length and own bars', async () => {
+  it('a Recording’s: Play at its left, no picture, its note as its tag, no Handle, its day, length and own bars', async () => {
     server()
     await render({ items: [recording] })
     await act(async () => (tab('Recordings') as HTMLElement).click())
@@ -343,6 +343,32 @@ describe('A row (#346, #448)', () => {
     // A Noise-like Recording plays no note: no tag.
     await render({ items: [{ ...recording, detail: null }] })
     expect(rowText('profile-shared-tag')).toEqual([null])
+  })
+
+  it('a long name grows down from the top, and the day and its pill stay level with Play (#454)', async () => {
+    server()
+    const name = 'Recording 1, taken on the back porch just after the big family dinner on Sunday'
+    await render({ items: [{ ...recording, name }] })
+    await act(async () => (tab('Recordings') as HTMLElement).click())
+    const [row] = rows()
+    const title = row.querySelector('[data-testid="profile-shared-link"]')
+    expect(title?.textContent).toBe(name)
+    expect(title?.className.split(' ')).toEqual(expect.arrayContaining(['line-clamp-3']))
+    expect(rowText('profile-shared-tag')).toEqual(['E3'])
+    // The name and the day each take a column as tall as Play, its content centred in it, and
+    // both columns start at the top: a one-line name and the day sit level with Play, and a
+    // longer name grows down while the day and pill stay where they were.
+    const nameColumn = title?.parentElement
+    const dayColumn = row.querySelector('[data-testid="profile-shared-date"]')?.parentElement
+    expect(nameColumn?.parentElement).toBe(dayColumn?.parentElement)
+    expect(nameColumn?.parentElement?.className.split(' ')).toContain('items-start')
+    expect(nameColumn?.className.split(' ')).toEqual(
+      expect.arrayContaining(['min-h-11', 'items-center'])
+    )
+    expect(dayColumn?.className.split(' ')).toEqual(
+      expect.arrayContaining(['min-h-11', 'flex-col', 'justify-center'])
+    )
+    expect(row.querySelector('button')?.className.split(' ')).toContain('size-11')
   })
 
   it('a Toot’s bars are fetched once its row is on screen, and it has no picture', async () => {
