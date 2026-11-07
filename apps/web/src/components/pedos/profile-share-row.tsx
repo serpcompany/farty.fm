@@ -16,8 +16,8 @@ import { usePlayingSeconds } from './profile-hero'
 import { ReplayWaveform } from './waveform'
 
 // A profile page's list of what its user shares (#448, #451), each row laid out as SoundCloud's
-// track row without its artwork: Play at the left, the Handle over the name, as SoundCloud's
-// uploader, the day and a pill at the top right, then a waveform drawn as SoundCloud's, which shows
+// track row without its artwork: Play at the left, the name beside it, the day and a pill at the
+// right (the Handle is only in the banner, #454), then a waveform drawn as SoundCloud's, which shows
 // how far it has played, its length and, while it plays, where it is, and plays from a tap. Each
 // plays only that share's own audio. Under it, Copy link.
 
@@ -174,20 +174,12 @@ function useSeen(element: RefObject<HTMLElement | null>): boolean {
   return seen
 }
 
-/** One tab's list, newest first, its rows apart as SoundCloud's are. `handle`: whose page. */
-export function ShareList({
-  shares,
-  handle,
-  player
-}: {
-  shares: ProfileShare[]
-  handle: string
-  player: ProfilePlayer
-}) {
+/** One tab's list, newest first, its rows apart as SoundCloud's are. */
+export function ShareList({ shares, player }: { shares: ProfileShare[]; player: ProfilePlayer }) {
   return (
     <ul className="flex flex-col gap-8 md:gap-10">
       {shares.map(share => (
-        <ShareRow key={share.path} share={share} handle={handle} player={player} />
+        <ShareRow key={share.path} share={share} player={player} />
       ))}
     </ul>
   )
@@ -202,20 +194,11 @@ const onWaveform =
 
 /**
  * A share's row, as SoundCloud's track row with no artwork (the owner, #451): Play at its left
- * edge, and over its name (a link to its own page) the Handle, as SoundCloud's uploader; at the
- * top right, the day it was shared and a Recording's note (a Toot's Song, when that isn't its
+ * edge, and beside it its name (a link to its own page), level with Play; at the right, the day it was shared and a Recording's note (a Toot's Song, when that isn't its
  * name) as a pill; then its waveform, as SoundCloud draws one, with its length at the right; then
  * Copy link.
  */
-function ShareRow({
-  share,
-  handle,
-  player
-}: {
-  share: ProfileShare
-  handle: string
-  player: ProfilePlayer
-}) {
+function ShareRow({ share, player }: { share: ProfileShare; player: ProfilePlayer }) {
   const row = useRef<HTMLLIElement>(null)
   const wave = useRef<HTMLDivElement>(null)
   const inBrowser = useInBrowser()
@@ -258,11 +241,8 @@ function ShareRow({
       >
         <PlayIcon className="size-5 fill-current" aria-hidden />
       </button>
-      <div className="flex min-w-0 items-start gap-3">
-        <div className="grid min-w-0 flex-1 gap-0.5">
-          <p className="truncate text-sm text-muted-foreground" data-testid="profile-shared-byline">
-            @{handle}
-          </p>
+      <div className="flex min-h-11 min-w-0 items-center gap-3">
+        <div className="grid min-w-0 flex-1">
           <Link
             href={share.path}
             className="line-clamp-3 rounded-sm leading-snug font-semibold outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 md:line-clamp-2"

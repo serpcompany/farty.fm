@@ -302,7 +302,7 @@ describe('A row (#346, #448)', () => {
     // Its own shared page, with its whole roll and each fart (#445). Next's Link drops the
     // trailing slash here, outside a build with `trailingSlash`.
     expect(row.querySelector('a')?.getAttribute('href')).toBe('/@alice/t/tttttttttttt')
-    expect(rowText('profile-shared-byline')).toEqual(['@alice'])
+    expect(row.querySelector('[data-testid="profile-shared-byline"]')).toBeNull()
     expect(rowText('profile-shared-date')).toEqual(['Today'])
     expect(rowText('profile-shared-tag')).toEqual(['Sound Pad'])
     expect(rowText('profile-shared-length')).toEqual(['0:18'])
@@ -333,7 +333,7 @@ describe('A row (#346, #448)', () => {
     // No square picture (the owner, #451): Play comes first in the row.
     expect(row.querySelector('[data-testid="profile-shared-art"]')).toBeNull()
     expect(row.firstElementChild?.getAttribute('aria-label')).toBe('Play Recording 1')
-    expect(rowText('profile-shared-byline')).toEqual(['@alice'])
+    expect(row.querySelector('[data-testid="profile-shared-byline"]')).toBeNull()
     expect(rowText('profile-shared-date')).toEqual(['Today'])
     expect(rowText('profile-shared-tag')).toEqual(['E3'])
     expect(rowText('profile-shared-length')).toEqual(['1.1 s'])
@@ -501,8 +501,8 @@ describe('A row (#346, #448)', () => {
     await act(async () => (tab('Recordings') as HTMLElement).click())
     shown.push(...rows().map(row => row.textContent))
     expect(shown).toEqual([
-      '@aliceTwinkle for MumTodaySound Pad0:18Copy link',
-      '@aliceRecording 1TodayE31.1 sCopy link'
+      'Twinkle for MumTodaySound Pad0:18Copy link',
+      'Recording 1TodayE31.1 sCopy link'
     ])
   })
 
