@@ -79,6 +79,8 @@ export async function profileShares(db: Database, userId: string): Promise<Profi
         // A Sound Pad Toot's Recordings only, never its taps, which can run to thousands.
         padRecordings: sql<string | null>`json_extract(${toots.performance}, '$.recordings')`,
         // Its saved notes' pitches only, never the notes, for its farts' colors (#457).
+        // This repeats `pitchesOf()` in src/lib/toot.ts, which picks them for the Toot's own page:
+        // the two must agree on which pitches color a Toot's farts, so change both together.
         scorePitches: sql<string>`(select json_group_array(distinct json_extract(note.value, '$.pitch')) from json_each(${toots.score}, '$.notes') as note)`
       })
       .from(shares)

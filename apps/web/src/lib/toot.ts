@@ -86,7 +86,11 @@ export function tootRollOf({ song, catalogSong, rows }: SharedTootParts): TootRo
   return { song, catalogSong, played: rows.map(row => row.pitch) }
 }
 
-/** The distinct pitches of `notes`, lowest first. */
+/**
+ * The distinct pitches of `notes`, lowest first.
+ * `profileShares()` in src/db/profiles.ts repeats this rule in SQL for a Profile Page row's dots:
+ * the two must agree on which pitches color a Toot's farts, so change both together.
+ */
 const pitchesOf = (notes: readonly SongNote[]) =>
   [...new Set(notes.map(note => note.pitch))].sort((a, b) => a - b)
 
