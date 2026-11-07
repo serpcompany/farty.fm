@@ -111,7 +111,6 @@ const share = {
       params({ atHandle, id, place: String(place) })
     )
   },
-  /** A shared Toot's bars and roll for its profile page row (#448), as anyone fetches them. */
   /** A shared Toot's `row/`, as its profile page row fetches it. Only a Toot's link has one. */
   row: (url: string) => {
     const { segment, atHandle, id } = linkParts(url)
@@ -492,6 +491,38 @@ describe('Sharing a Recording', () => {
       expect(row).toMatchObject({
         length: page?.length,
         part: { startSeconds: 0.125, endSeconds: 0.375 }
+      })
+    })
+
+    it("prints the length of what its row plays when its Trim's fart lies outside the handles (#450)", async () => {
+      // Stored before the API checked a Trim's fart: handles 0.25 s to 0.75 s.
+      const alice = await trimmedSharer({
+        startSeconds: 0.25,
+        endSeconds: 0.75,
+        fart: { startSeconds: 0.375, endSeconds: 0.625 }
+      })
+      const moveFart = (startSeconds: number, endSeconds: number) =>
+        testDb()
+          .update(recordings)
+          .set({ trimFartStartSeconds: startSeconds, trimFartEndSeconds: endSeconds })
+          .where(eq(recordings.id, R1))
+
+      // Half out: 0.5 s to 0.95 s is a 0.45 s fart, but the link serves only 0.5 s to 0.75 s of it.
+      await moveFart(0.5, 0.95)
+      const halfOut = await rowAndPage('alice', alice.url)
+      expect(halfOut.page?.length).toBe('0.2 s')
+      expect(halfOut.row).toMatchObject({
+        length: halfOut.page?.length,
+        part: { startSeconds: 0.25, endSeconds: 0.5 }
+      })
+
+      // All out: 0.8 s to 0.95 s is past the end handle, so the row plays all the link serves.
+      await moveFart(0.8, 0.95)
+      const allOut = await rowAndPage('alice', alice.url)
+      expect(allOut.page?.length).toBe('0.5 s')
+      expect(allOut.row).toMatchObject({
+        length: allOut.page?.length,
+        part: { startSeconds: 0, endSeconds: 0.5 }
       })
     })
 

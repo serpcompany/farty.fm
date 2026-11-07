@@ -5,7 +5,20 @@ import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { Waveform } from './waveform'
 
-// A row of "Recordings used": what a Toot's screen and a shared Toot's page both draw.
+// "Recordings used" and its rows: what a Toot's screen and a shared Toot's page both draw.
+
+/** "Recordings used", under a Toot's note roll: its rows, then `footer`. */
+export function RecordingsUsed({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
+  return (
+    <section aria-labelledby="recordings-used">
+      <h2 id="recordings-used" className="px-4 pb-1.5 text-xs font-normal text-muted-foreground">
+        Recordings used
+      </h2>
+      <ul className="divide-y overflow-hidden rounded-xl bg-muted/60">{children}</ul>
+      {footer}
+    </section>
+  )
+}
 
 /**
  * A Recording the Toot uses: the color of its notes, play, its name, its waveform and its fart's

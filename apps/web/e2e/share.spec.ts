@@ -79,9 +79,10 @@ async function sidewaysAt375(on: Page): Promise<number> {
 }
 
 /**
- * At a computer's 1280 px, each share row is laid out as SoundCloud's (#448): its 140 px picture
- * down the left, its waveform and Copy link in the column right of it, and the page no wider than
- * `max-w-6xl`. Then back to `on`'s own size.
+ * At a computer's 1280 px, each share row is laid out as SoundCloud's (#448, #451): its 160 px
+ * picture down the left; the day at the top right, over the end of its waveform; the waveform,
+ * with its length at its right, and Copy link in the column right of the picture; and the page no
+ * wider than `max-w-6xl`. Then back to `on`'s own size.
  */
 async function expectComputerRows(on: Page) {
   const size = on.viewportSize()
@@ -92,14 +93,20 @@ async function expectComputerRows(on: Page) {
     const art = await row.getByTestId('profile-shared-art').boundingBox()
     const wave = await row.getByTestId('replay-waveform').boundingBox()
     const copy = await row.getByTestId('profile-copy-link').boundingBox()
-    if (!art || !wave || !copy)
-      throw new Error('A row is missing its picture, waveform or Copy link')
-    expect(Math.round(art.width)).toBe(140)
-    expect(Math.round(art.height)).toBe(140)
+    const date = await row.getByTestId('profile-shared-date').boundingBox()
+    const length = await row.getByTestId('profile-shared-length').boundingBox()
+    if (!art || !wave || !copy || !date || !length)
+      throw new Error('A row is missing its picture, waveform, day, length or Copy link')
+    expect(Math.round(art.width)).toBe(160)
+    expect(Math.round(art.height)).toBe(160)
     expect(wave.x).toBeGreaterThanOrEqual(art.x + art.width)
     expect(copy.x).toBeGreaterThanOrEqual(art.x + art.width)
     // On a phone, the waveform spans the whole row under the picture instead.
     expect(wave.y).toBeLessThan(art.y + art.height)
+    expect(date.y + date.height).toBeLessThanOrEqual(wave.y)
+    expect(Math.abs(date.x + date.width - (wave.x + wave.width))).toBeLessThan(2)
+    expect(Math.abs(length.x + length.width - (wave.x + wave.width))).toBeLessThan(2)
+    expect(length.y).toBeGreaterThan(wave.y)
   }
   const list = await on.locator('ul', { has: rows.first() }).boundingBox()
   expect(list?.width ?? 0).toBeLessThanOrEqual(1152)
@@ -574,6 +581,9 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     const roll = other.getByTestId('note-view')
     await expect(roll).toBeVisible()
     await expect(roll.getByTestId('playhead')).toBeVisible()
+    // The screen it was made on (#451): Song Creator's Play and roll, then Recordings used.
+    await expect(other.getByTestId('shared-toot-state')).toHaveText('Playing')
+    await expect(other.getByRole('heading', { name: 'Recordings used' })).toBeVisible()
     await other.getByRole('button', { name: `Stop ${title}` }).click()
 
     const farts = other.getByTestId('recording-used')
@@ -733,8 +743,13 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     const sounds = () => other.evaluate(() => window.__sounds)
     const rows = other.getByTestId('profile-shared-item')
     const heroPlay = other.getByTestId('profile-hero-play')
-    const playhead = other.getByTestId('profile-banner-playhead')
+    const playhead = other.getByTestId('profile-banner').getByTestId('profile-banner-playhead')
+    // The row's picture is the same roll, with a playhead of its own while it plays (#451).
+    const rowPlayhead = rows
+      .getByTestId('profile-shared-art')
+      .getByTestId('profile-banner-playhead')
     await expect(playhead).toHaveCount(0)
+    await expect(rowPlayhead).toHaveCount(0)
 
     // From its own link's audio, with the banner's playhead moving over its notes.
     const audio = other.waitForResponse(r => new URL(r.url()).pathname === `${link}audio/`)
@@ -763,6 +778,9 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(heroPlay).toHaveAccessibleName(`Stop ${title}`)
     // Where it is shows at the waveform's bottom left while it plays, as on SoundCloud.
     await expect(rows.getByTestId('profile-shared-time')).toHaveText(/^0:0\d$/)
+    const rowAt = async () => Number(await rowPlayhead.getAttribute('x'))
+    const rowFirst = await rowAt()
+    await expect.poll(rowAt).toBeGreaterThan(rowFirst)
     await shot(other, 'toot-profile-playing')
   })
 

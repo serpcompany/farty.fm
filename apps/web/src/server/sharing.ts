@@ -331,8 +331,9 @@ export function sharedPart(recording: Recording): Trim {
 
 /**
  * What a shared Toot's row, and a shared Recording's profile page row (#448), plays and draws:
- * only the fart. That's the fart between its Trim's handles, or what analysis found. The rest of a take is whatever else the microphone heard, and
- * sharing a Toot doesn't share that. Null before analysis has found it, when there's nothing to play.
+ * only the fart. That's the fart between its Trim's handles, or what analysis found. The rest of
+ * a take is whatever else the microphone heard, and sharing a Toot doesn't share that. Null
+ * before analysis has found it, when there's nothing to play.
  */
 export function tootFartPart({ trim, analysis }: Recording): Trim | null {
   const fart = trim
@@ -347,6 +348,34 @@ export function tootFartPart({ trim, analysis }: Recording): Trim | null {
   const startSeconds = Math.max(fart.startSeconds, trim?.startSeconds ?? 0)
   const endSeconds = Math.min(fart.endSeconds, trim?.endSeconds ?? Number.POSITIVE_INFINITY)
   return endSeconds > startSeconds ? { startSeconds, endSeconds } : null
+}
+
+/** A shared Recording's fart, as its profile page row plays it and its own page prints it. */
+export type RecordingFart = {
+  /** The fart, in seconds of the whole take. */
+  inTake: Trim
+  /** The fart, in seconds of the audio its link serves, which starts at `sharedPart`'s start. */
+  part: Trim
+  /** "1.1 s": how long `part` lasts, rounded down as fart lengths are (`formattedFartSeconds`). */
+  length: string
+}
+
+/**
+ * A shared Recording's fart (#450): `tootFartPart` inside what its link serves, or all of that
+ * when analysis hasn't found a fart between its Trim's handles. Its length is that span's, so its
+ * profile page row never prints one length and plays another, and its own page prints the same.
+ */
+export function recordingFart(recording: Recording): RecordingFart {
+  const served = sharedPart(recording)
+  const inTake = tootFartPart(recording) ?? served
+  return {
+    inTake,
+    part: {
+      startSeconds: inTake.startSeconds - served.startSeconds,
+      endSeconds: inTake.endSeconds - served.startSeconds
+    },
+    length: formattedFartSeconds(inTake.endSeconds - inTake.startSeconds)
+  }
 }
 
 /** The bars of a whole take's `waveform` that fall in `part`. */

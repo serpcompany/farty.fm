@@ -3,7 +3,6 @@ import type { Kind } from '@/db/library'
 import { addProfileReport, type ProfileShareRow, profileShares, profileUser } from '@/db/profiles'
 import { liveRecordingsOf, sharedToot, tootRecordingIds } from '@/db/sharing'
 import { noteName } from '@/lib/pitch'
-import { formattedFartLength } from '@/lib/pitch-coverage'
 import { recordingName, songPitch, type Trim } from '@/lib/recordings'
 import { servedOrigin } from '@/lib/site'
 import { formattedTootLength, type TootRoll } from '@/lib/toot'
@@ -15,11 +14,10 @@ import {
   giveSlugs,
   partBars,
   REPORT_LIMITS,
+  recordingFart,
   SITE_REPORTS_KEY,
-  sharedPart,
   sharedTootRoll,
   sharePath,
-  tootFartPart,
   tootSongTitle
 } from './sharing'
 
@@ -43,8 +41,9 @@ export type ProfileItem = {
   /** When it was shared, in ms, for the page to say "Today" in the viewer's own time zone. */
   sharedAt: number
   /**
-   * "1.1 s", a Recording's fart's length, as its own page and the Recordings tab print it (ADR
-   * 0011, ADR 0019), or "0:18", a Toot's. The time its row shows while it plays never passes it.
+   * "1.1 s", a Recording's fart's length, the span its row plays, as its own page prints it
+   * (`recordingFart`, #450), or "0:18", a Toot's. The time its row shows while it plays never
+   * passes it.
    */
   length: string
   /**
@@ -112,18 +111,13 @@ function itemSound(
     }
   }
   const recording = toRecording(row.recording)
-  const served = sharedPart(recording)
-  // Its fart, as a shared Toot's row plays it, inside what its link serves: before analysis has
-  // found it, all of that. The waveform, Play and the time on it cover only this, so they agree
-  // with its length.
-  const fart = tootFartPart(recording) ?? served
+  // Its fart inside what its link serves. The waveform, Play and the time on it cover only this,
+  // and its length is this span's, as its own page prints it (#450).
+  const { inTake, part, length } = recordingFart(recording)
   return {
-    length: formattedFartLength(recording),
-    part: {
-      startSeconds: fart.startSeconds - served.startSeconds,
-      endSeconds: fart.endSeconds - served.startSeconds
-    },
-    levels: partBars(recording.waveform, recording.seconds, fart),
+    length,
+    part,
+    levels: partBars(recording.waveform, recording.seconds, inTake),
     farts: []
   }
 }

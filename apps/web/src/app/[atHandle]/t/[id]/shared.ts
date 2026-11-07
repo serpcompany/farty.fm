@@ -28,7 +28,7 @@ export type SharedTootView = {
   /** "0:18", as its row shows it. */
   length: string
   seconds: number
-  /** The loudness bars of its saved audio, each 0…1. */
+  /** The loudness bars of its saved audio, each 0…1, which its link image draws. */
   levels: number[]
 }
 

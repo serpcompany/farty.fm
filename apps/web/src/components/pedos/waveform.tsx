@@ -96,6 +96,7 @@ export function ReplayWaveform({
   onScrubStart,
   trim,
   playedClassName = 'bg-primary',
+  reflected = false,
   className
 }: {
   levels: number[]
@@ -113,6 +114,11 @@ export function ReplayWaveform({
   trim?: { part: Trim; onChange: (part: Trim, done: boolean) => void }
   /** The color of the bars it has played: the main button's, or a profile row's accent (#448). */
   playedClassName?: string
+  /**
+   * As SoundCloud draws a track (#451): the bars rise from a line 70% of the way down, with a faint
+   * reflection under it, instead of standing on the middle.
+   */
+  reflected?: boolean
   className?: string
 }) {
   const box = useRef<HTMLDivElement>(null)
@@ -183,34 +189,49 @@ export function ReplayWaveform({
   }
 
   const bar = span / Math.max(1, levels.length)
+  /** The bars, in `place` within the waveform, each shaped as `shape`. */
+  const barsIn = (place: string, shape: string) => (
+    <span className={cn('pointer-events-none absolute flex', place)}>
+      {levels.map((level, i) => {
+        const mid = view.startSeconds + (i + 0.5) * bar
+        const dimmed = dim && (mid < dim.startSeconds || mid > dim.endSeconds)
+        const played =
+          scrubAt === null && from !== null && now !== null
+            ? mid + bar / 2 >= from && mid - bar / 2 <= now
+            : false
+        return (
+          <span
+            // Bars never reorder, so the index is a stable key.
+            // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length, static list
+            key={i}
+            className={cn(
+              'min-h-[2px] min-w-0 flex-1',
+              shape,
+              played
+                ? playedClassName
+                : dimmed
+                  ? 'bg-muted-foreground/30'
+                  : 'bg-muted-foreground/60'
+            )}
+            style={{ height: `${Math.max(level, 0.05) * 100}%` }}
+          />
+        )
+      })}
+    </span>
+  )
   const drawn = (
     <>
-      <span className="pointer-events-none absolute inset-0 flex items-center gap-[2px]">
-        {levels.map((level, i) => {
-          const mid = view.startSeconds + (i + 0.5) * bar
-          const dimmed = dim && (mid < dim.startSeconds || mid > dim.endSeconds)
-          const played =
-            scrubAt === null && from !== null && now !== null
-              ? mid + bar / 2 >= from && mid - bar / 2 <= now
-              : false
-          return (
-            <span
-              // Bars never reorder, so the index is a stable key.
-              // biome-ignore lint/suspicious/noArrayIndexKey: fixed-length, static list
-              key={i}
-              className={cn(
-                'min-w-0 flex-1 rounded-full min-h-[2px]',
-                played
-                  ? playedClassName
-                  : dimmed
-                    ? 'bg-muted-foreground/30'
-                    : 'bg-muted-foreground/60'
-              )}
-              style={{ height: `${Math.max(level, 0.05) * 100}%` }}
-            />
-          )
-        })}
-      </span>
+      {reflected ? (
+        <>
+          {barsIn('inset-x-0 top-0 bottom-[30%] items-end gap-px', 'rounded-t-[1px]')}
+          {barsIn(
+            'inset-x-0 top-[70%] bottom-0 mt-px items-start gap-px opacity-40',
+            'rounded-b-[1px]'
+          )}
+        </>
+      ) : (
+        barsIn('inset-0 items-center gap-[2px]', 'rounded-full')
+      )}
       {x !== null && x >= 0 && x <= 1 && (
         <span
           className="pointer-events-none absolute z-[3] -top-[5px] -bottom-[5px] -ml-px w-[2px] rounded-full bg-brand-strong dark:bg-brand"

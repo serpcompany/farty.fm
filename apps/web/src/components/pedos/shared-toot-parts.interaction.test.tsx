@@ -88,7 +88,6 @@ async function render(toot: SharedTootParts = parts) {
         song="Song"
         length="0:04"
         seconds={4}
-        levels={[0.5]}
         parts={toot}
       />
     )
@@ -209,6 +208,32 @@ describe("A shared Toot's farts", () => {
       rows: [{ plays: null, pitch: 60, colorIndex: 0, fart: fart(0, 'Big one') }]
     })
     expect(fartRows()[0].textContent).not.toContain('plays')
+  })
+})
+
+describe("A shared Toot's page is the screen it was made on (#451)", () => {
+  it("has Song Creator's Play, state and line, then the whole roll, then Recordings used", async () => {
+    await render()
+    expect(byTestId('shared-toot-state')[0].textContent).toBe('Ready')
+    expect(container.textContent).toContain("0:04 · 2 of @alice's Recordings, one per note")
+    const roll = byTestId('note-view')[0]
+    const used = container.querySelector('#recordings-used')
+    expect(used?.textContent).toBe('Recordings used')
+    expect(
+      roll.compareDocumentPosition(used as Node) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+    // The roll stands for the Toot: no waveform of the whole Toot to scrub.
+    expect(container.querySelector('[aria-label="Play Song from a spot"]')).toBeNull()
+
+    await click(byTestId('shared-toot-play')[0])
+    expect(byTestId('shared-toot-state')[0].textContent).toBe('Playing')
+    expect(byTestId('shared-toot-play')[0].getAttribute('aria-label')).toBe('Stop Song')
+  })
+
+  it("leaves out 'one per note' for a Sound Pad Toot, whose farts aren't one per note", async () => {
+    await render({ ...parts, lanes: true })
+    expect(container.textContent).toContain("0:04 · 2 of @alice's Recordings")
+    expect(container.textContent).not.toContain('one per note')
   })
 })
 

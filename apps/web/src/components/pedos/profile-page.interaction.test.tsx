@@ -478,9 +478,9 @@ describe('A row (#346, #448)', () => {
     ])
   })
 
-  it('draws thinner bars of the same shape on a wide row, about one to 6 pixels', async () => {
-    // happy-dom lays nothing out: a computer's row, 36 pixels wide for 6 bars.
-    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(36)
+  it('draws thinner bars of the same shape on a wide row, about one to 4 pixels', async () => {
+    // happy-dom lays nothing out: a computer's row, 24 pixels wide for 6 bars.
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(24)
     server()
     await render({ items: [recording] })
     await act(async () => (tab('Recordings') as HTMLElement).click())

@@ -51,7 +51,6 @@ export default async function SharedToot({
       song={view.song}
       length={view.length}
       seconds={view.seconds}
-      levels={view.levels}
       parts={parts}
     />
   )

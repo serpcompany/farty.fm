@@ -63,7 +63,6 @@ const tootOf = (handle: string, slug: string) => ({
   song: null,
   length: '0:18',
   seconds: 18,
-  levels: [0.5],
   parts: { song: null, catalogSong: null, transposition: 0, lanes: false, rows: [] }
 })
 

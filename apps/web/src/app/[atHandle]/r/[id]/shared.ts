@@ -5,9 +5,8 @@ import { getDb } from '@/db'
 import { showsFartPlaces } from '@/db/sharing'
 import { NOT_SAID, type RecordedIn, recordedInOf } from '@/lib/fart-place'
 import { noteName } from '@/lib/pitch'
-import { formattedFartLength } from '@/lib/pitch-coverage'
 import { recordingName, songPitch, type Trim } from '@/lib/recordings'
-import { findSharedRecording, partBars, sharedPart } from '@/server/sharing'
+import { findSharedRecording, partBars, recordingFart, sharedPart } from '@/server/sharing'
 
 /** What a shared Recording's page, and its link image, show of it: nothing private. */
 export type SharedView = {
@@ -18,7 +17,7 @@ export type SharedView = {
   name: string
   /** The note Songs use it for, "E3", or null for a Noise-like one. */
   note: string | null
-  /** "1.1 s": its fart's length, as its row shows it. */
+  /** "1.1 s": its fart's length, as its profile page row prints and plays it (`recordingFart`). */
   length: string
   /**
    * The audio its link serves, from 0: its stored Trim, or else the whole take, cut on its own
@@ -49,7 +48,7 @@ export const sharedView = cache(async (handle: string, id: string): Promise<Shar
     slug: shared.slug,
     name: recordingName(recording),
     note: pitch === null ? null : noteName(pitch),
-    length: formattedFartLength(recording),
+    length: recordingFart(recording).length,
     part: { startSeconds: 0, endSeconds: part.endSeconds - part.startSeconds },
     levels: partBars(recording.waveform, recording.seconds, part),
     recordedAt: recording.createdAt,

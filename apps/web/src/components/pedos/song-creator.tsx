@@ -1,16 +1,6 @@
 'use client'
 
-import {
-  AudioLines,
-  Ban,
-  Check,
-  ChevronLeft,
-  CircleAlert,
-  Lock,
-  Piano,
-  Play,
-  Square
-} from 'lucide-react'
+import { AudioLines, Ban, Check, ChevronLeft, Lock, Piano } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
@@ -69,8 +59,14 @@ import { PAYMENT_PROBLEMS } from './payment-problems'
 import { tootPlayback, usePedos } from './pedos-provider'
 import { pianoSchedule, stopPiano } from './piano-preview'
 import { previousPage } from './previous-page'
-import { DeletedRecordingRow, PlaysBadge, RecordingUsedRowView } from './recording-used-row'
+import {
+  DeletedRecordingRow,
+  PlaysBadge,
+  RecordingsUsed,
+  RecordingUsedRowView
+} from './recording-used-row'
 import { ReportSong } from './report-song-sheet'
+import { TootPlay } from './toot-play'
 import { changeFartChoices, useFartChoices } from './use-fart-choices'
 import { usePianoPreview } from './use-piano-preview'
 import { useSongNotes } from './use-song-notes'
@@ -773,57 +769,34 @@ export function TootLayout(
   return (
     <div className="flex flex-col gap-6 px-4">
       <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            aria-label={
-              fartsBlocked === 'locked'
-                ? 'Locked'
-                : fartsBlocked === 'making'
-                  ? 'Making your Toot'
-                  : fartsBlocked === 'missing'
-                    ? 'Audio missing'
-                    : shownPlaying
-                      ? 'Stop'
-                      : onPiano
-                        ? 'Play on piano'
-                        : 'Play'
-            }
-            data-testid="song-creator-play"
-            disabled={!canPress}
-            className={cn(
-              'flex size-14 shrink-0 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
-              !canPress
-                ? 'bg-muted text-muted-foreground'
-                : shownPlaying
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-primary/10 text-primary'
-            )}
-            onClick={() => {
-              setFocus(null)
-              if (!onPiano) {
-                if (toot !== null) {
-                  reachStep('song-heard')
-                  pedos.toggleTootPlayback(toot)
-                }
-              } else if (isPianoPlaying) piano.stop()
-              else if (pianoNotes) piano.play('song', pianoNotes)
-            }}
-          >
-            {fartsBlocked === 'locked' ? (
-              <Lock className="size-6" />
-            ) : fartsBlocked === 'making' ? (
-              <Spinner className="size-6" />
-            ) : fartsBlocked === 'missing' ? (
-              <CircleAlert className="size-6" />
-            ) : shownPlaying ? (
-              <Square className="size-5 fill-current" />
-            ) : (
-              <Play className="size-6 fill-current" />
-            )}
-          </button>
-          <div className="flex min-w-0 flex-col gap-1.5">
-            {pianoPreview && (
+        <TootPlay
+          shows={fartsBlocked ?? (shownPlaying ? 'stop' : 'play')}
+          label={
+            fartsBlocked === 'locked'
+              ? 'Locked'
+              : fartsBlocked === 'making'
+                ? 'Making your Toot'
+                : fartsBlocked === 'missing'
+                  ? 'Audio missing'
+                  : shownPlaying
+                    ? 'Stop'
+                    : onPiano
+                      ? 'Play on piano'
+                      : 'Play'
+          }
+          disabled={!canPress}
+          onPress={() => {
+            setFocus(null)
+            if (!onPiano) {
+              if (toot !== null) {
+                reachStep('song-heard')
+                pedos.toggleTootPlayback(toot)
+              }
+            } else if (isPianoPlaying) piano.stop()
+            else if (pianoNotes) piano.play('song', pianoNotes)
+          }}
+          above={
+            pianoPreview && (
               <ToggleGroup
                 variant="outline"
                 size="sm"
@@ -843,36 +816,36 @@ export function TootLayout(
                   Farts
                 </ToggleGroupItem>
               </ToggleGroup>
-            )}
-            <div>
-              <p className="font-semibold" data-testid="song-creator-state">
-                {onPiano
-                  ? isPianoPlaying
-                    ? 'Playing'
-                    : 'Ready'
-                  : fartsBlocked === 'locked'
-                    ? 'Locked'
-                    : fartsBlocked === 'making'
-                      ? 'Making your Toot…'
-                      : fartsBlocked === 'missing'
-                        ? 'Audio missing'
-                        : isPlaying
-                          ? 'Playing'
-                          : pedos.tootPlayFailed === toot?.id
-                            ? "Couldn't play"
-                            : 'Ready'}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {onPiano
-                  ? "The Song's notes on piano"
-                  : fartsBlocked === 'locked' && gaps.length > 0
-                    ? `${andList.format(gaps.map(sounding))} ${gaps.length === 1 ? 'has' : 'have'} no fart, so farts can't play`
-                    : `${song.pitches.length} of your Recordings, one per note`}
-              </p>
-              {children}
-            </div>
-          </div>
-        </div>
+            )
+          }
+          state={
+            onPiano
+              ? isPianoPlaying
+                ? 'Playing'
+                : 'Ready'
+              : fartsBlocked === 'locked'
+                ? 'Locked'
+                : fartsBlocked === 'making'
+                  ? 'Making your Toot…'
+                  : fartsBlocked === 'missing'
+                    ? 'Audio missing'
+                    : isPlaying
+                      ? 'Playing'
+                      : pedos.tootPlayFailed === toot?.id
+                        ? "Couldn't play"
+                        : 'Ready'
+          }
+          line={
+            onPiano
+              ? "The Song's notes on piano"
+              : fartsBlocked === 'locked' && gaps.length > 0
+                ? `${andList.format(gaps.map(sounding))} ${gaps.length === 1 ? 'has' : 'have'} no fart, so farts can't play`
+                : `${song.pitches.length} of your Recordings, one per note`
+          }
+          testId="song-creator"
+        >
+          {children}
+        </TootPlay>
         {changes && (
           <output className="block">
             {changes.line && (
@@ -947,60 +920,55 @@ export function TootLayout(
         notesFallback
       )}
 
-      <section aria-labelledby="recordings-used">
-        <h2 id="recordings-used" className="px-4 pb-1.5 text-xs font-normal text-muted-foreground">
-          Recordings used
-        </h2>
-        <ul className="divide-y overflow-hidden rounded-xl bg-muted/60">
-          {song.pitches.map((pitch, index) => {
-            const recording = recordingFor(pitch)
-            const plays = sounding(pitch)
-            const isHighlighted = highlightedPitch === pitch
-            const badge = (
-              <PlaysBadge
-                key="plays"
-                plays={plays}
-                onChangeFart={changes && (() => changes.onChangeFart(pitch))}
-              />
-            )
-            if (arrangement.recordingForPitch[pitch] === undefined) {
-              const needed = unmade?.missing.find(m => m.midi === soundingPitch(arrangement, pitch))
-              return (
-                <NoFartRow
-                  key={pitch}
-                  color={pitchColor(index)}
-                  needs={needed ? `${plays} (${needed.seconds.toFixed(1)} s)` : plays}
-                  isHighlighted={isHighlighted}
-                  badge={badge}
-                />
-              )
-            }
-            return recording ? (
-              <RecordingUsedRow
-                key={pitch}
-                recording={recording}
-                color={pitchColor(index)}
-                plays={plays}
-                isYourPick={changes?.picks.has(pitch) ?? false}
-                isHighlighted={isHighlighted}
-                badge={badge}
-                onTap={() => {
-                  const stopping = pedos.nowPlaying === recording.id
-                  setFocus(stopping ? null : { pitch })
-                  pedos.togglePlayback(recording)
-                }}
-              />
-            ) : (
-              <DeletedRecordingRow
+      <RecordingsUsed>
+        {song.pitches.map((pitch, index) => {
+          const recording = recordingFor(pitch)
+          const plays = sounding(pitch)
+          const isHighlighted = highlightedPitch === pitch
+          const badge = (
+            <PlaysBadge
+              key="plays"
+              plays={plays}
+              onChangeFart={changes && (() => changes.onChangeFart(pitch))}
+            />
+          )
+          if (arrangement.recordingForPitch[pitch] === undefined) {
+            const needed = unmade?.missing.find(m => m.midi === soundingPitch(arrangement, pitch))
+            return (
+              <NoFartRow
                 key={pitch}
                 color={pitchColor(index)}
+                needs={needed ? `${plays} (${needed.seconds.toFixed(1)} s)` : plays}
                 isHighlighted={isHighlighted}
                 badge={badge}
               />
             )
-          })}
-        </ul>
-      </section>
+          }
+          return recording ? (
+            <RecordingUsedRow
+              key={pitch}
+              recording={recording}
+              color={pitchColor(index)}
+              plays={plays}
+              isYourPick={changes?.picks.has(pitch) ?? false}
+              isHighlighted={isHighlighted}
+              badge={badge}
+              onTap={() => {
+                const stopping = pedos.nowPlaying === recording.id
+                setFocus(stopping ? null : { pitch })
+                pedos.togglePlayback(recording)
+              }}
+            />
+          ) : (
+            <DeletedRecordingRow
+              key={pitch}
+              color={pitchColor(index)}
+              isHighlighted={isHighlighted}
+              badge={badge}
+            />
+          )
+        })}
+      </RecordingsUsed>
     </div>
   )
 }
