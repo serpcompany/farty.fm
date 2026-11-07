@@ -55,7 +55,9 @@ const toot: ProfileShare = {
   sharedAt: now,
   length: '0:18',
   part: { startSeconds: 0, endSeconds: 18 },
-  levels: []
+  levels: [],
+  farts: 3,
+  fartColors: [0, 2, 1]
 }
 
 const recording: ProfileShare = {
@@ -66,7 +68,9 @@ const recording: ProfileShare = {
   sharedAt: now,
   length: '1.1 s',
   part: { startSeconds: 0, endSeconds: 1.1 },
-  levels: [0.2, 1, 0.5]
+  levels: [0.2, 1, 0.5],
+  farts: 1,
+  fartColors: [0]
 }
 
 /** The roll of `toot`: three notes, of which the fart at 62 was left out. */
@@ -294,7 +298,7 @@ describe('The tabs (#448)', () => {
 })
 
 describe('A row (#346, #448)', () => {
-  it('a Toot’s: its name with no Handle over it (#454), its day and Song, its length, its own page and its own audio, from a spot too', async () => {
+  it('a Toot’s: the Handle over its name, as SoundCloud’s uploader, its day and Song, its length, its own page and its own audio, from a spot too', async () => {
     const fetched = server()
     await render({ items: [toot, recording], hero })
     const [row] = rows()
@@ -302,7 +306,8 @@ describe('A row (#346, #448)', () => {
     // Its own shared page, with its whole roll and each fart (#445). Next's Link drops the
     // trailing slash here, outside a build with `trailingSlash`.
     expect(row.querySelector('a')?.getAttribute('href')).toBe('/@alice/t/tttttttttttt')
-    expect(row.querySelector('[data-testid="profile-shared-byline"]')).toBeNull()
+    // Back over its name (#457), after #454 took it off.
+    expect(rowText('profile-shared-byline')).toEqual(['@alice'])
     expect(rowText('profile-shared-date')).toEqual(['Today'])
     expect(rowText('profile-shared-tag')).toEqual(['Sound Pad'])
     expect(rowText('profile-shared-length')).toEqual(['0:18'])
@@ -324,7 +329,7 @@ describe('A row (#346, #448)', () => {
     expect(heard.plays.at(-1)?.segment).toEqual({ start: 1.5, end: 18 })
   })
 
-  it('a Recording’s: Play at its left, no picture, its note as its tag, no Handle, its day, length and own bars', async () => {
+  it('a Recording’s: Play at its left, no picture, its note as its tag, the Handle, its day, length and own bars', async () => {
     server()
     await render({ items: [recording] })
     await act(async () => (tab('Recordings') as HTMLElement).click())
@@ -333,7 +338,7 @@ describe('A row (#346, #448)', () => {
     // No square picture (the owner, #451): Play comes first in the row.
     expect(row.querySelector('[data-testid="profile-shared-art"]')).toBeNull()
     expect(row.firstElementChild?.getAttribute('aria-label')).toBe('Play Recording 1')
-    expect(row.querySelector('[data-testid="profile-shared-byline"]')).toBeNull()
+    expect(rowText('profile-shared-byline')).toEqual(['@alice'])
     expect(rowText('profile-shared-date')).toEqual(['Today'])
     expect(rowText('profile-shared-tag')).toEqual(['E3'])
     expect(rowText('profile-shared-length')).toEqual(['1.1 s'])
@@ -358,17 +363,60 @@ describe('A row (#346, #448)', () => {
     // The name and the day each take a column as tall as Play, its content centred in it, and
     // both columns start at the top: a one-line name and the day sit level with Play, and a
     // longer name grows down while the day and pill stay where they were.
+    // The Handle is over the name in its column (#457).
     const nameColumn = title?.parentElement
     const dayColumn = row.querySelector('[data-testid="profile-shared-date"]')?.parentElement
     expect(nameColumn?.parentElement).toBe(dayColumn?.parentElement)
     expect(nameColumn?.parentElement?.className.split(' ')).toContain('items-start')
     expect(nameColumn?.className.split(' ')).toEqual(
-      expect.arrayContaining(['min-h-11', 'items-center'])
+      expect.arrayContaining(['min-h-11', 'flex-col', 'justify-center'])
     )
+    expect(nameColumn?.firstElementChild?.getAttribute('data-testid')).toBe('profile-shared-byline')
+    // Its farts' dots are under the name and the day both, across the row, so a long name pushes
+    // them down and never the day.
+    const farts = row.querySelector('[data-testid="profile-shared-farts"]')
+    expect(farts?.previousElementSibling).toBe(nameColumn?.parentElement)
     expect(dayColumn?.className.split(' ')).toEqual(
       expect.arrayContaining(['min-h-11', 'flex-col', 'justify-center'])
     )
     expect(row.querySelector('button')?.className.split(' ')).toContain('size-11')
+  })
+
+  it('a Toot’s: a dot for each fart in its own page’s color, then how many; a Recording’s, one (#457)', async () => {
+    server()
+    await render({ items: [toot, recording], hero })
+    const { pitchColor } = await import('./note-view')
+    const dots = () =>
+      [...rows()[0].querySelectorAll<HTMLElement>('[data-testid="profile-shared-dot"]')].map(
+        dot => dot.style.backgroundColor
+      )
+    // As happy-dom keeps a color it's given.
+    const colored = (indices: number[]) =>
+      indices.map(index => {
+        const probe = document.createElement('span')
+        probe.style.backgroundColor = pitchColor(index)
+        return probe.style.backgroundColor
+      })
+    expect(dots()).toEqual(colored([0, 2, 1]))
+    expect(new Set(dots()).size).toBe(3)
+    expect(rowText('profile-shared-fart-count')).toEqual(['3 farts'])
+    // Only a picture: the count is what's said.
+    const line = rows()[0].querySelector('[data-testid="profile-shared-farts"]')
+    expect(line?.firstElementChild?.getAttribute('aria-hidden')).toBe('true')
+    expect(rows()[0].querySelector('[data-testid="profile-shared-dot"]')?.className).toContain(
+      'size-2'
+    )
+
+    await act(async () => (tab('Recordings') as HTMLElement).click())
+    expect(dots()).toEqual(colored([0]))
+    expect(rowText('profile-shared-fart-count')).toEqual(['1 fart'])
+
+    // 40 farts: the 16 dots the page sends, and the count says them all.
+    const many = { ...toot, farts: 40, fartColors: Array.from({ length: 16 }, (_, i) => i % 11) }
+    await render({ items: [many], hero })
+    await act(async () => (tab('Toots') as HTMLElement).click())
+    expect(dots()).toHaveLength(16)
+    expect(rowText('profile-shared-fart-count')).toEqual(['40 farts'])
   })
 
   it('a Toot’s bars are fetched once its row is on screen, and it has no picture', async () => {
@@ -527,8 +575,8 @@ describe('A row (#346, #448)', () => {
     await act(async () => (tab('Recordings') as HTMLElement).click())
     shown.push(...rows().map(row => row.textContent))
     expect(shown).toEqual([
-      'Twinkle for MumTodaySound Pad0:18Copy link',
-      'Recording 1TodayE31.1 sCopy link'
+      '@aliceTwinkle for MumTodaySound Pad3 farts0:18Copy link',
+      '@aliceRecording 1TodayE31 fart1.1 sCopy link'
     ])
   })
 

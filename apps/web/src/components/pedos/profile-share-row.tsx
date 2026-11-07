@@ -11,15 +11,16 @@ import { formattedTootDate, formattedTootLength } from '@/lib/toot'
 import { useInBrowser } from '@/lib/use-in-browser'
 import { cn } from '@/lib/utils'
 import { finerBars } from '@/lib/waveform'
-import { useWidth } from './note-view'
+import { pitchColor, useWidth } from './note-view'
 import { usePlayingSeconds } from './profile-hero'
 import { ReplayWaveform } from './waveform'
 
 // A profile page's list of what its user shares (#448, #451), each row laid out as SoundCloud's
-// track row without its artwork: Play at the left, the name beside it, the day and a pill at the
-// right (the Handle is only in the banner, #454), then a waveform drawn as SoundCloud's, which
-// shows how far it has played, its length and, while it plays, where it is, and plays from a tap.
-// Each plays only that share's own audio. Under it, Copy link.
+// track row without its artwork: Play at the left, the Handle over the name, as SoundCloud's
+// uploader, and under it a dot for each fart in its color, with how many (#457); the day and a
+// pill at the right, then a waveform drawn as SoundCloud's, which shows how far it has played, its
+// length and, while it plays, where it is, and plays from a tap. Each plays only that share's own
+// audio. Under it, Copy link.
 
 /** A Recording or Toot its user shares, as their page lists it. Never where it was made. */
 export type ProfileShare = {
@@ -37,6 +38,13 @@ export type ProfileShare = {
   part: Trim
   /** A Recording's loudness bars, of its fart. Empty for a Toot, whose row fetches them. */
   levels: number[]
+  /** How many farts it plays: a Recording 1, a Toot its "Recordings used" rows. */
+  farts: number
+  /**
+   * Its first 16 farts' colors (`pitchColor`), in its "Recordings used" order: only where each
+   * comes among its pitches, never which fart it is.
+   */
+  fartColors: number[]
 }
 
 /** Where a play began: the banner's Play, or a row. Each says when its own play fails. */
@@ -174,14 +182,55 @@ function useSeen(element: RefObject<HTMLElement | null>): boolean {
   return seen
 }
 
-/** One tab's list, newest first, its rows apart as SoundCloud's are. */
-export function ShareList({ shares, player }: { shares: ProfileShare[]; player: ProfilePlayer }) {
+/** One tab's list, newest first, its rows apart as SoundCloud's are. `handle`: whose page. */
+export function ShareList({
+  shares,
+  handle,
+  player
+}: {
+  shares: ProfileShare[]
+  handle: string
+  player: ProfilePlayer
+}) {
   return (
     <ul className="flex flex-col gap-8 md:gap-10">
       {shares.map(share => (
-        <ShareRow key={share.path} share={share} player={player} />
+        <ShareRow key={share.path} share={share} handle={handle} player={player} />
       ))}
     </ul>
+  )
+}
+
+/** "1 fart", "40 farts". */
+const fartCount = (farts: number) => `${farts} ${farts === 1 ? 'fart' : 'farts'}`
+
+/**
+ * A share's farts at a glance (#457): a dot in each one's color, as its own page colors its
+ * "Recordings used" rows, then how many, which says them all when there are more than its dots.
+ * The dots are only a picture: the count is what a screen reader says.
+ */
+function FartDots({ farts, colors }: { farts: number; colors: number[] }) {
+  return (
+    <p
+      className="flex min-w-0 items-center gap-1.5 text-sm leading-5 text-muted-foreground"
+      data-testid="profile-shared-farts"
+    >
+      <span aria-hidden className="flex shrink-0 items-center gap-[3px]">
+        {colors.map((color, index) => (
+          <span
+            // Two farts can share a color, and a row's never reorder.
+            // biome-ignore lint/suspicious/noArrayIndexKey: a share's farts are fixed
+            key={index}
+            className="size-2 rounded-full"
+            style={{ backgroundColor: pitchColor(color) }}
+            data-testid="profile-shared-dot"
+          />
+        ))}
+      </span>
+      <span className="truncate tabular-nums" data-testid="profile-shared-fart-count">
+        {fartCount(farts)}
+      </span>
+    </p>
   )
 }
 
@@ -194,12 +243,22 @@ const onWaveform =
 
 /**
  * A share's row, as SoundCloud's track row with no artwork (the owner, #451): Play at its left
- * edge, and beside it its name (a link to its own page); at the right, the day it was shared and
- * a Recording's note (a Toot's Song, when that isn't its name) as a pill; then its waveform, as
- * SoundCloud draws one, with its length at the right; then Copy link. A one-line name, and the day
- * with its pill, sit level with Play; a longer name grows down, and the day stays at the top.
+ * edge, and beside it the Handle over its name (a link to its own page), as SoundCloud's uploader;
+ * at the right, the day it was shared and a Recording's note (a Toot's Song, when that isn't its
+ * name) as a pill; under them its farts as dots, with how many (#457); then its waveform, as
+ * SoundCloud draws one, with its length at the right; then Copy link. The Handle and a one-line
+ * name, and the day with its pill, sit level with Play; a longer name grows down, and the day
+ * stays at the top. The dots take the row's width, so 16 of them fit beside a long pill.
  */
-function ShareRow({ share, player }: { share: ProfileShare; player: ProfilePlayer }) {
+function ShareRow({
+  share,
+  handle,
+  player
+}: {
+  share: ProfileShare
+  handle: string
+  player: ProfilePlayer
+}) {
   const row = useRef<HTMLLIElement>(null)
   const wave = useRef<HTMLDivElement>(null)
   const inBrowser = useInBrowser()
@@ -242,34 +301,44 @@ function ShareRow({ share, player }: { share: ProfileShare; player: ProfilePlaye
       >
         <PlayIcon className="size-5 fill-current" aria-hidden />
       </button>
-      <div className="flex min-w-0 items-start gap-3">
-        <div className="flex min-h-11 min-w-0 flex-1 items-center">
-          <Link
-            href={share.path}
-            className="line-clamp-3 min-w-0 rounded-sm leading-snug font-semibold outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 md:line-clamp-2"
-            data-testid="profile-shared-link"
-          >
-            {share.name}
-          </Link>
-        </div>
-        <div className="flex min-h-11 max-w-[40%] shrink-0 flex-col items-end justify-center gap-1.5">
-          {/* Held at its size until the browser can say the day in the viewer's own time. */}
-          <span
-            className="min-h-5 text-xs leading-5 whitespace-nowrap text-muted-foreground"
-            data-testid="profile-shared-date"
-          >
-            {date}
-          </span>
-          {share.detail && (
-            <Badge
-              variant="secondary"
-              className="max-w-full truncate tabular-nums"
-              data-testid="profile-shared-tag"
+      <div className="grid min-w-0 gap-1">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="flex min-h-11 min-w-0 flex-1 flex-col justify-center gap-0.5">
+            <p
+              className="truncate text-sm leading-5 text-muted-foreground"
+              data-testid="profile-shared-byline"
             >
-              {share.detail}
-            </Badge>
-          )}
+              @{handle}
+            </p>
+            <Link
+              href={share.path}
+              className="line-clamp-3 min-w-0 rounded-sm leading-snug font-semibold outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 md:line-clamp-2"
+              data-testid="profile-shared-link"
+            >
+              {share.name}
+            </Link>
+          </div>
+          <div className="flex min-h-11 max-w-[40%] shrink-0 flex-col items-end justify-center gap-1.5">
+            {/* Held at its size until the browser can say the day in the viewer's own time. */}
+            <span
+              className="min-h-5 text-xs leading-5 whitespace-nowrap text-muted-foreground"
+              data-testid="profile-shared-date"
+            >
+              {date}
+            </span>
+            {share.detail && (
+              <Badge
+                variant="secondary"
+                className="max-w-full tabular-nums"
+                data-testid="profile-shared-tag"
+              >
+                {/* Its own box, so a long Song ends in an ellipsis: the Badge centers its text. */}
+                <span className="min-w-0 truncate">{share.detail}</span>
+              </Badge>
+            )}
+          </div>
         </div>
+        <FartDots farts={share.farts} colors={share.fartColors} />
       </div>
       <div ref={wave} className="relative col-span-2 min-w-0 md:col-span-1 md:col-start-2">
         <ReplayWaveform

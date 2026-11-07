@@ -18,6 +18,7 @@ import {
   SITE_REPORTS_KEY,
   sharedTootRoll,
   sharePath,
+  tootFartRows,
   tootSongTitle
 } from './sharing'
 
@@ -58,7 +59,22 @@ export type ProfileItem = {
    * never reads every Toot's audio.
    */
   levels: number[]
+  /**
+   * How many farts it plays, which its row counts (#457): a Toot's "Recordings used" rows, a
+   * deleted Recording's too, or a Recording's 1.
+   */
+  farts: number
+  /**
+   * The colors (`pitchColor`) of its first `ROW_DOTS` farts, in order, which its row draws as
+   * dots: a Toot's "Recordings used" rows', from the one function that colors them
+   * (`tootFartRows`), so they match its own page; a Recording's, the first color. Only a place
+   * among its pitches: never a fart's name, where it was made or a Recording's id (ADR 0020).
+   */
+  fartColors: number[]
 }
+
+/** The most dots a row draws for its farts (#457). Its count still says them all. */
+export const ROW_DOTS = 16
 
 /**
  * The newest shared Toot's note roll, which the page's banner draws and plays (#448), as that
@@ -115,6 +131,13 @@ function itemSound(row: ProfileShareRow): Pick<ProfileItem, 'length' | 'part' | 
   }
 }
 
+/** A share's farts, as its row's dots and count (#457). */
+function itemFarts(row: ProfileShareRow): Pick<ProfileItem, 'farts' | 'fartColors'> {
+  if (row.kind === 'recordings') return { farts: 1, fartColors: [0] }
+  const colors = tootFartRows(row.toot, row.toot.scorePitches).map(fart => fart.colorIndex)
+  return { farts: colors.length, fartColors: colors.slice(0, ROW_DOTS) }
+}
+
 /** The banner's roll: the Toot's at `slug`, as its own page finds and draws it. */
 async function heroOf(db: Database, handle: string, slug: string): Promise<ProfileHero | null> {
   const row = await sharedToot(db, handle, slug)
@@ -145,7 +168,8 @@ export async function findProfile(db: Database, handle: string): Promise<Profile
       path: sharePath(row.kind, owner.handle, row.slug ?? row.shareId),
       ...itemText(row),
       sharedAt: row.sharedAt.getTime(),
-      ...itemSound(row)
+      ...itemSound(row),
+      ...itemFarts(row)
     })),
     hero: newest ? await heroOf(db, owner.handle, newest.slug ?? newest.shareId) : null
   }

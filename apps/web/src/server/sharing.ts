@@ -19,6 +19,7 @@ import {
   shareOf,
   sharesWithNoSlug,
   showsFartPlaces,
+  type TootPlays,
   tootPlaysTakenDown,
   tootRecordingIds
 } from '@/db/sharing'
@@ -465,38 +466,68 @@ export async function sharedTootParts(
       catalogSong: null,
       transposition: 0,
       lanes: true,
-      rows: farts.map((id, lane) => ({
+      rows: tootFartRows(toot, null).map(({ recordingId, ...row }) => ({
         plays: null,
-        pitch: lane,
-        colorIndex: lane,
-        fart: fartOf(id)
+        ...row,
+        fart: fartOf(recordingId)
       }))
     }
   }
 
-  const { transposition, recordingForPitch } = toot.arrangement ?? {
-    transposition: 0,
-    recordingForPitch: {}
-  }
-  const { song, catalogSong, played } = arrangedRoll(toot)
-  const pitches = song?.pitches ?? catalogSong?.pitches ?? played
-  const rows: SharedFartRow[] = played.map(pitch => ({
-    plays: noteName(pitch + transposition),
-    pitch,
-    colorIndex: Math.max(0, pitches.indexOf(pitch)),
-    fart: fartOf(recordingForPitch[pitch])
-  }))
+  const transposition = toot.arrangement?.transposition ?? 0
+  const { song, catalogSong } = arrangedRoll(toot)
+  const rows: SharedFartRow[] = tootFartRows(toot, song?.pitches ?? null).map(
+    ({ recordingId, ...row }) => ({
+      plays: noteName(row.pitch + transposition),
+      ...row,
+      fart: fartOf(recordingId)
+    })
+  )
   return { song, catalogSong, transposition, lanes: false, rows }
 }
+
+/** The pitches a Song Toot's farts play, lowest first. */
+const playedPitches = (toot: TootPlays) =>
+  Object.keys(toot.arrangement?.recordingForPitch ?? {})
+    .map(Number)
+    .sort((a, b) => a - b)
 
 /** A Song Toot's roll: its score or catalog Song, and the pitches it plays. No lookup needed. */
 function arrangedRoll(toot: SharedTootRow['toot']): TootRoll {
   const song = toot.score ? rollOfScore(toot.score) : null
   const catalogSong = song ? null : (songIndex.find(s => s.id === toot.songId) ?? null)
-  const played = Object.keys(toot.arrangement?.recordingForPitch ?? {})
-    .map(Number)
-    .sort((a, b) => a - b)
-  return { song, catalogSong, played }
+  return { song, catalogSong, played: playedPitches(toot) }
+}
+
+/** A row of a Toot's "Recordings used" before its fart is looked up: the Recording it plays. */
+export type TootFartRow = Pick<SharedFartRow, 'pitch' | 'colorIndex'> & { recordingId: string }
+
+/**
+ * A Toot's "Recordings used" rows, in order, a deleted Recording's too: a Sound Pad Toot's one per
+ * lane, colored by its lane; a Song Toot's one per pitch a fart plays, lowest first, colored by
+ * its place among the Song's pitches, lowest first: `scorePitches`, the notes it saved
+ * (`rollOfScore`), else its catalog Song's, else the ones played. Its shared page and its row's
+ * dots on its owner's profile page (#457) both come from this, so their colors match.
+ */
+export function tootFartRows(
+  toot: TootPlays & Pick<SharedTootRow['toot'], 'songId'>,
+  scorePitches: readonly number[] | null
+): TootFartRow[] {
+  if (toot.performance) {
+    return toot.performance.recordings.map((recordingId, lane) => ({
+      pitch: lane,
+      colorIndex: lane,
+      recordingId
+    }))
+  }
+  const recordingForPitch = toot.arrangement?.recordingForPitch ?? {}
+  const played = playedPitches(toot)
+  const pitches = scorePitches ?? songIndex.find(s => s.id === toot.songId)?.pitches ?? played
+  return played.map(pitch => ({
+    pitch,
+    colorIndex: Math.max(0, pitches.indexOf(pitch)),
+    recordingId: recordingForPitch[pitch]
+  }))
 }
 
 /**

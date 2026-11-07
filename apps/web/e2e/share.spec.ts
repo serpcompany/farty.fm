@@ -693,10 +693,30 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(rows).toHaveCount(1)
     await expect(rows.getByTestId('profile-shared-link')).toHaveAttribute('href', link)
     await expect(rows.getByTestId('profile-shared-link')).toHaveText(title)
-    // Laid out as SoundCloud's track row with no artwork (#451), with no Handle on it (#454): the
-    // day at the right, and its length on its waveform.
-    await expect(rows.getByTestId('profile-shared-byline')).toHaveCount(0)
+    // Laid out as SoundCloud's track row with no artwork (#451): the Handle over its name, as its
+    // uploader (back since #457), the day at the right, and its length on its waveform.
+    await expect(rows.getByTestId('profile-shared-byline')).toHaveText(`@${handle}`)
     await expect(rows.getByTestId('profile-shared-date')).toHaveText('Today')
+    // Under its name, a dot for each fart in the color its own page's "Recordings used" gives it,
+    // and how many (#457).
+    const tootPage = await other.context().newPage()
+    await tootPage.goto(link)
+    const used = await tootPage
+      .getByTestId('recording-used')
+      .evaluateAll(farts =>
+        farts.map(
+          fart => getComputedStyle(fart.querySelector('span[aria-hidden]') ?? fart).backgroundColor
+        )
+      )
+    await tootPage.close()
+    expect(used.length).toBeGreaterThan(0)
+    const dots = await rows
+      .getByTestId('profile-shared-dot')
+      .evaluateAll(each => each.map(dot => getComputedStyle(dot).backgroundColor))
+    expect(dots).toEqual(used)
+    await expect(rows.getByTestId('profile-shared-fart-count')).toHaveText(
+      `${used.length} ${used.length === 1 ? 'fart' : 'farts'}`
+    )
     await expect(rows.getByTestId('profile-shared-length')).toHaveText(/^\d+:\d\d$/)
     expect((await drawn).status()).toBe(200)
     await expect(rows.getByTestId('profile-shared-art')).toHaveCount(0)
@@ -710,7 +730,9 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(rows).toHaveCount(1)
     await expect(rows.getByTestId('profile-shared-link')).toHaveAttribute('href', recordingLink)
     await expect(rows.getByTestId('profile-shared-link')).toContainText('Recording ')
-    await expect(rows.getByTestId('profile-shared-byline')).toHaveCount(0)
+    await expect(rows.getByTestId('profile-shared-byline')).toHaveText(`@${handle}`)
+    await expect(rows.getByTestId('profile-shared-dot')).toHaveCount(1)
+    await expect(rows.getByTestId('profile-shared-fart-count')).toHaveText('1 fart')
     await expect(rows).not.toContainText('Testville')
     // Its length is its fart's, the figure its own page prints, not the take's with its silence.
     const rowLength = await rows.getByTestId('profile-shared-length').textContent()

@@ -99,7 +99,7 @@ export function ProfilePage({ handle, items, hero }: ProfilePageProps) {
           </div>
         </header>
 
-        <Shares items={items} player={player} />
+        <Shares items={items} handle={handle} player={player} />
 
         {!own && (
           <div className="mt-7 flex justify-center">
@@ -168,7 +168,15 @@ const TABS: { kind: ProfileShare['kind']; label: string; icon: LucideIcon }[] = 
  * What they share, under a tab each: Toots first and open, then Recordings, as the owner decided
  * (#448). With nothing shared, no tabs.
  */
-function Shares({ items, player }: { items: ProfileShare[]; player: ProfilePlayer }) {
+function Shares({
+  items,
+  handle,
+  player
+}: {
+  items: ProfileShare[]
+  handle: string
+  player: ProfilePlayer
+}) {
   const [tab, setTab] = useState<ProfileShare['kind']>('toots')
   const buttons = useRef<(HTMLButtonElement | null)[]>([])
 
@@ -234,7 +242,7 @@ function Shares({ items, player }: { items: ProfileShare[]; player: ProfilePlaye
             {tab === 'toots' ? 'No Toots shared yet.' : 'No Recordings shared yet.'}
           </p>
         ) : (
-          <ShareList shares={shown} player={player} />
+          <ShareList shares={shown} handle={handle} player={player} />
         )}
       </div>
     </section>
