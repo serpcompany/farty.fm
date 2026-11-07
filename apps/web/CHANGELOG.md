@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.14.0](https://github.com/serpcompany/farty.fm/compare/v1.13.1...v1.14.0) (2026-11-07)
+
+
+### Features
+
+* draw a Toot's notes over its waveform on profile rows, with progress through both ([#459](https://github.com/serpcompany/farty.fm/issues/459)) ([#460](https://github.com/serpcompany/farty.fm/issues/460)) ([101b0f5](https://github.com/serpcompany/farty.fm/commit/101b0f5c63ceba3cd617534042978a34ac809588))
+* lay out the Profile Page as a hero, then Toots and Recordings tabs ([#448](https://github.com/serpcompany/farty.fm/issues/448)) ([#449](https://github.com/serpcompany/farty.fm/issues/449)) ([328d12b](https://github.com/serpcompany/farty.fm/commit/328d12b8b1bb511dd1c3358924671c5102f1782c))
+* name shared links for the Song, and give /@ pages the site's header and footer ([#442](https://github.com/serpcompany/farty.fm/issues/442)) ([cafb3c4](https://github.com/serpcompany/farty.fm/commit/cafb3c45274226282ecd4c73c965547c353c2b58))
+* put the [@handle](https://github.com/handle) back on profile rows, with each Toot's farts as coloured dots ([#457](https://github.com/serpcompany/farty.fm/issues/457)) ([#458](https://github.com/serpcompany/farty.fm/issues/458)) ([8f3463c](https://github.com/serpcompany/farty.fm/commit/8f3463cbad7aa3eb33d5dfd16746c578ee8e624b))
+* redo the Profile Page as SoundCloud's rows, and a Toot's page as Song Creator's ([#451](https://github.com/serpcompany/farty.fm/issues/451)) ([#452](https://github.com/serpcompany/farty.fm/issues/452)) ([30e6411](https://github.com/serpcompany/farty.fm/commit/30e641137adcd8d9e82a5dc3888c11ae94547627)), closes [#450](https://github.com/serpcompany/farty.fm/issues/450)
+* say where each shared fart was made, with a switch to leave it off ([#446](https://github.com/serpcompany/farty.fm/issues/446)) ([de33481](https://github.com/serpcompany/farty.fm/commit/de33481944dfcaff461f477832f39c3c2d2f7263))
+* show a shared Toot's note roll and each fart under its player ([#445](https://github.com/serpcompany/farty.fm/issues/445)) ([2488b69](https://github.com/serpcompany/farty.fm/commit/2488b695212782e400c4d5b0e827ba59ef214df7))
+* take the [@handle](https://github.com/handle) line off the Profile Page's rows ([#454](https://github.com/serpcompany/farty.fm/issues/454)) ([#455](https://github.com/serpcompany/farty.fm/issues/455)) ([525f265](https://github.com/serpcompany/farty.fm/commit/525f2657d9fd210a62c8dde5cdc0fb52c58c7c9a))
+
 ## [1.13.1](https://github.com/serpcompany/farty.fm/compare/v1.13.0...v1.13.1) (2026-11-06)
 
 
