@@ -3,6 +3,7 @@
 import { type KeyboardEvent, type PointerEvent, useEffect, useRef, useState } from 'react'
 import type { Trim } from '@/lib/recordings'
 import { cn } from '@/lib/utils'
+import { timelineAt } from '@/lib/waveform'
 
 /** Loudness bars, 0…1 each, as the iPhone app's `WaveformView`. */
 export function Waveform({
@@ -96,6 +97,7 @@ export function ReplayWaveform({
   onScrubStart,
   trim,
   playedClassName = 'bg-primary',
+  barClassName = 'bg-muted-foreground/60',
   reflected = false,
   className
 }: {
@@ -114,6 +116,8 @@ export function ReplayWaveform({
   trim?: { part: Trim; onChange: (part: Trim, done: boolean) => void }
   /** The color of the bars it has played: the main button's, or a profile row's accent (#448). */
   playedClassName?: string
+  /** The color of the bars it hasn't: fainter on a profile row, under its notes (#459). */
+  barClassName?: string
   /**
    * As SoundCloud draws a track (#451): the bars rise from a line 70% of the way down, with a faint
    * reflection under it, instead of standing on the middle.
@@ -143,7 +147,7 @@ export function ReplayWaveform({
   }, [from, position])
 
   const at = scrubAt ?? (from === null ? null : now)
-  const x = at === null ? null : (at - view.startSeconds) / span
+  const x = at === null ? null : timelineAt(at, view)
   const timeAt = (clientX: number) => {
     const rect = box.current?.getBoundingClientRect()
     if (!rect || rect.width === 0) return view.startSeconds
@@ -207,11 +211,7 @@ export function ReplayWaveform({
             className={cn(
               'min-h-[2px] min-w-0 flex-1',
               shape,
-              played
-                ? playedClassName
-                : dimmed
-                  ? 'bg-muted-foreground/30'
-                  : 'bg-muted-foreground/60'
+              played ? playedClassName : dimmed ? 'bg-muted-foreground/30' : barClassName
             )}
             style={{ height: `${Math.max(level, 0.05) * 100}%` }}
           />

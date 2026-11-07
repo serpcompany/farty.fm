@@ -14,8 +14,10 @@ import { fixtureRecordingId } from './fixture-library'
 import type { Performance } from './performance'
 import { arrangementOf, autoMapRecordings, engineSong } from './pitch-coverage'
 import type { Recording } from './recordings'
+import { padRoll, rollOfScore, rowNotes, savedToot, tootScore } from './toot'
 import { makePadToot, makeToot, TootError } from './toot-renderer'
 import { decodeWav, encodeWav } from './wav'
+import { timelineAt } from './waveform'
 
 // Song Creator's render on the Fixture Library as the app stores it: each fixture as a 16-bit
 // WAV, analyzed as a new Recording is. Through the render worker, a Toot is the engine's render
@@ -245,5 +247,78 @@ describe('makePadToot', () => {
     expect(error).toBeInstanceOf(TootError)
     expect(error.reason).toBe('couldNotMake')
     expect(error.cause.message).toBe('Rendering failed')
+  })
+})
+
+// A Toot's row on its owner's profile page draws its notes over its waveform (#459), which spans
+// its whole audio (`part`), and its playhead at the audio clock's place in that audio. Each note's
+// left edge must be where the playhead is when its fart's attack is heard: what the row's data
+// says (`rowNotes`, from the notes the Toot saved) against where the render put the note.
+describe("A Toot's notes on its profile row (#459)", () => {
+  /** The loudest sample in the 50 ms from `at`. */
+  const peakFrom = (samples: Float32Array, at: number) =>
+    Math.max(...samples.subarray(at, at + 2205).map(Math.abs))
+
+  it.each(
+    songs
+      .filter(s => songIds.includes(s.id) && goldenArrangement('full', s.id).unlocked)
+      .slice(0, 4)
+      .map(s => [s.id, s])
+  )('puts each note of %s where the playhead is as it is heard', async (_, song) => {
+    let rendered: RenderedSong | undefined
+    const draft = await makeToot(song, recordings, loadAudio, async (...args) => {
+      rendered = await renderInWorker(...args)
+      return rendered
+    })
+    if (!rendered) throw new Error('No render')
+    // As the server makes its row's data from the saved Toot.
+    const toot = savedToot(draft, 0)
+    const score = tootScore(toot)
+    if (!score || !toot.arrangement) throw new Error('No score')
+    const part = { startSeconds: 0, endSeconds: toot.seconds }
+    const played = Object.keys(toot.arrangement.recordingForPitch).map(Number)
+    const notes = rowNotes(rollOfScore(score), played)
+
+    expect(notes).toHaveLength(rendered.notes.length)
+    const { samples, sampleRate } = rendered
+    for (const [i, heard] of rendered.notes.entries()) {
+      // Where the row draws the note, and where its playhead is as the attack plays.
+      const x = timelineAt(notes[i].start, part)
+      const playhead = timelineAt(heard.startSample / sampleRate, part)
+      // Within one sample of the Toot's audio: well under a pixel on any screen.
+      expect(Math.abs(x - playhead) * samples.length, `${song.id} note ${i}`).toBeLessThan(1)
+      // And the note's fart is heard there.
+      expect(peakFrom(samples, heard.startSample), `${song.id} note ${i}`).toBeGreaterThan(0.02)
+    }
+  })
+
+  it('puts each tap of a Sound Pad Toot where the playhead is as it is heard', async () => {
+    const performance: Performance = {
+      recordings: [recordings[0].id, recordings[1].id],
+      taps: [
+        [0, 0],
+        [0.25, 1],
+        [0.6, 0],
+        [1.37, 1]
+      ]
+    }
+    let rendered: RenderedPerformance | undefined
+    const draft = await makePadToot(performance, recordings, loadAudio, async (...args) => {
+      rendered = await renderPerformanceInWorker(...args)
+      return rendered
+    })
+    if (!rendered) throw new Error('No render')
+    const part = { startSeconds: 0, endSeconds: draft.seconds }
+    // How long each tap draws doesn't move where it starts.
+    const notes = rowNotes(padRoll(performance, [0.25, 0.25], draft.seconds), [0, 1])
+
+    expect(notes.map(note => note.color)).toEqual([0, 1, 0, 1])
+    const { samples, sampleRate, onsets } = rendered
+    for (const [i, onset] of onsets.entries()) {
+      const x = timelineAt(notes[i].start, part)
+      const playhead = timelineAt(onset / sampleRate, part)
+      expect(Math.abs(x - playhead) * samples.length, `tap ${i}`).toBeLessThan(1)
+      expect(peakFrom(samples, onset), `tap ${i}`).toBeGreaterThan(0.02)
+    }
   })
 })

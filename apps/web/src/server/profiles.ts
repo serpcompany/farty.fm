@@ -2,7 +2,7 @@ import type { Database } from '@/db/database'
 import type { Kind } from '@/db/library'
 import { addProfileReport, type ProfileShareRow, profileShares, profileUser } from '@/db/profiles'
 import { sharedToot } from '@/db/sharing'
-import { noteName } from '@/lib/pitch'
+import { nearestNote, noteName } from '@/lib/pitch'
 import { recordingName, songPitch, type Trim } from '@/lib/recordings'
 import { servedOrigin } from '@/lib/site'
 import { formattedTootLength, type TootRoll } from '@/lib/toot'
@@ -60,6 +60,12 @@ export type ProfileItem = {
    */
   levels: number[]
   /**
+   * A Recording's note, as a whole MIDI note number, which its row draws as a line across its
+   * waveform (#459): the note `detail` names, no finer, or null for a Noise-like one placed by no
+   * ear. Null for a Toot, whose notes its row fetches with its bars (`row/`).
+   */
+  pitch: number | null
+  /**
    * How many farts it plays, which its row counts (#457): a Toot's "Recordings used" rows, a
    * deleted Recording's too, or a Recording's 1.
    */
@@ -112,12 +118,15 @@ function itemText(row: ProfileShareRow): { name: string; detail: string | null }
 }
 
 /** What a share's row plays and draws. */
-function itemSound(row: ProfileShareRow): Pick<ProfileItem, 'length' | 'part' | 'levels'> {
+function itemSound(
+  row: ProfileShareRow
+): Pick<ProfileItem, 'length' | 'part' | 'levels' | 'pitch'> {
   if (row.kind === 'toots') {
     return {
       length: formattedTootLength(row.toot.seconds),
       part: { startSeconds: 0, endSeconds: row.toot.seconds },
-      levels: []
+      levels: [],
+      pitch: null
     }
   }
   const recording = toRecording(row.recording)
@@ -127,9 +136,13 @@ function itemSound(row: ProfileShareRow): Pick<ProfileItem, 'length' | 'part' | 
   return {
     length,
     part,
-    levels: partBars(recording.waveform, recording.seconds, inTake)
+    levels: partBars(recording.waveform, recording.seconds, inTake),
+    pitch: rowPitch(songPitch(recording))
   }
 }
+
+/** A Recording's pitch as its row draws it: the nearest note, the one its pill names, no finer. */
+const rowPitch = (pitch: number | null) => (pitch === null ? null : nearestNote(pitch))
 
 /** A share's farts, as its row's dots and count (#457). */
 function itemFarts(row: ProfileShareRow): Pick<ProfileItem, 'farts' | 'fartColors'> {

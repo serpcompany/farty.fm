@@ -2,25 +2,43 @@
 
 import { Play, Square } from 'lucide-react'
 import Link from 'next/link'
-import { type MouseEvent, type RefObject, useCallback, useEffect, useRef, useState } from 'react'
+import {
+  type CSSProperties,
+  type MouseEvent,
+  type RefObject,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 import { Badge } from '@/components/ui/badge'
 import { play, playbackPosition, stopPlayback } from '@/lib/audio/player'
+import type { SongSummary } from '@/lib/catalog/song'
 import { formattedFartSeconds } from '@/lib/pitch-coverage'
 import type { Trim } from '@/lib/recordings'
-import { formattedTootDate, formattedTootLength } from '@/lib/toot'
+import {
+  formattedTootDate,
+  formattedTootLength,
+  type RollSong,
+  type RowNote,
+  rowNotes
+} from '@/lib/toot'
 import { useInBrowser } from '@/lib/use-in-browser'
 import { cn } from '@/lib/utils'
-import { finerBars } from '@/lib/waveform'
-import { pitchColor, useWidth } from './note-view'
-import { usePlayingSeconds } from './profile-hero'
+import { finerBars, timelineAt } from '@/lib/waveform'
+import { Layout, pitchColor } from './note-view'
+import { usePlayingSeconds, useRollSong } from './profile-hero'
 import { ReplayWaveform } from './waveform'
 
 // A profile page's list of what its user shares (#448, #451), each row laid out as SoundCloud's
 // track row without its artwork: Play at the left, the Handle over the name, as SoundCloud's
 // uploader, and under it a dot for each fart in its color, with how many (#457); the day and a
 // pill at the right, then a waveform drawn as SoundCloud's, which shows how far it has played, its
-// length and, while it plays, where it is, and plays from a tap. Each plays only that share's own
-// audio. Under it, Copy link.
+// length and, while it plays, where it is, and plays from a tap. Over the waveform, a Toot's notes
+// or a Recording's one note, on the waveform's own timeline (#459). Each plays only that share's
+// own audio. Under it, Copy link.
 
 /** A Recording or Toot its user shares, as their page lists it. Never where it was made. */
 export type ProfileShare = {
@@ -38,6 +56,11 @@ export type ProfileShare = {
   part: Trim
   /** A Recording's loudness bars, of its fart. Empty for a Toot, whose row fetches them. */
   levels: number[]
+  /**
+   * A Recording's note, as a MIDI note number, drawn as a line across its waveform (#459): null
+   * when it has none, and for a Toot, whose row fetches its notes with its bars.
+   */
+  pitch: number | null
   /** How many farts it plays: a Recording 1, a Toot its "Recordings used" rows. */
   farts: number
   /**
@@ -113,8 +136,16 @@ const LOADING_BARS = Array<number>(60).fill(0.05)
  */
 const BAR_PIXELS = 4
 
-/** What a shared Toot's row draws, from its `row/`: its loudness bars. */
-export type TootRowArt = { levels: number[] }
+/**
+ * What a shared Toot's row draws, from its `row/` (`ProfileTootRow`): its loudness bars, and its
+ * notes as heard (#459), or for a Toot saved before #254 its Song in the catalog to fetch them
+ * from, with the pitches a fart plays.
+ */
+export type TootRowArt = {
+  levels: number[]
+  notes: RowNote[] | null
+  catalog: { song: SongSummary; played: number[] } | null
+}
 
 /** Each shared Toot's, fetched once a page load. */
 const tootRows = new Map<string, Promise<TootRowArt>>()
@@ -122,12 +153,34 @@ const tootRows = new Map<string, Promise<TootRowArt>>()
 const isLevels = (value: unknown): value is number[] =>
   Array.isArray(value) && value.every(level => typeof level === 'number')
 
-const isTootRowArt = (value: unknown): value is TootRowArt =>
-  typeof value === 'object' && value !== null && isLevels((value as { levels?: unknown }).levels)
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null
+
+const isRowNote = (value: unknown): value is RowNote =>
+  isRecord(value) &&
+  ['start', 'length', 'pitch', 'color'].every(field => typeof value[field] === 'number')
+
+const isCatalog = (value: unknown): value is TootRowArt['catalog'] & object =>
+  isRecord(value) &&
+  isRecord(value.song) &&
+  typeof value.song.id === 'string' &&
+  typeof value.song.notesPath === 'string' &&
+  isLevels(value.played)
+
+/** A `row/`'s answer as its row draws it, or null when it isn't one: with no notes it can't read. */
+function tootRowArt(value: unknown): TootRowArt | null {
+  if (!isRecord(value) || !isLevels(value.levels)) return null
+  const { levels, notes, catalog } = value
+  return {
+    levels,
+    notes: Array.isArray(notes) && notes.every(isRowNote) ? notes : null,
+    catalog: isCatalog(catalog) ? catalog : null
+  }
+}
 
 /**
- * A shared Toot's bars from its `row/`, once `wanted`; null until then, or when they can't be
- * had. The page never reads its Toots' audio for them (ProfileItem's `levels`).
+ * A shared Toot's bars and notes from its `row/`, once `wanted`; null until then, or when they
+ * can't be had. The page never reads its Toots' audio for them (ProfileItem's `levels`).
  */
 export function useTootRow(path: string, wanted: boolean): TootRowArt | null {
   const [loaded, setLoaded] = useState<{ path: string; art: TootRowArt } | null>(null)
@@ -137,8 +190,9 @@ export function useTootRow(path: string, wanted: boolean): TootRowArt | null {
     if (!loading) {
       const started = fetch(`${path}row/`)
         .then(response => (response.ok ? response.json() : null))
-        .then(art => {
-          if (!isTootRowArt(art)) throw new Error('no row')
+        .then(answer => {
+          const art = tootRowArt(answer)
+          if (!art) throw new Error('no row')
           return art
         })
       tootRows.set(path, started)
@@ -158,6 +212,44 @@ export function useTootRow(path: string, wanted: boolean): TootRowArt | null {
     }
   }, [path, wanted])
   return loaded?.path === path ? loaded.art : null
+}
+
+/**
+ * A Toot row's notes to draw (#459): the ones its `row/` sent, or for a Toot saved before #254,
+ * its Song's notes as they are now, fetched as its page fetches them (`useRollSong`) and placed by
+ * the same rule (`rowNotes`). Null while they load, or with none: its Song isn't in Farty any more.
+ */
+function useRowNotes(art: TootRowArt | null): RowNote[] | null {
+  const catalog = art?.catalog ?? null
+  const roll = useMemo(
+    () => (catalog ? { song: null, catalogSong: catalog.song, played: catalog.played } : null),
+    [catalog]
+  )
+  const song = useRollSong(roll)
+  return useMemo(() => {
+    if (art?.notes) return art.notes
+    return song && catalog ? rowNotes(song, catalog.played) : null
+  }, [art, song, catalog])
+}
+
+/** The element's size in pixels, kept current as it resizes. */
+function useSize(element: RefObject<HTMLElement | null>): { width: number; height: number } {
+  const [size, setSize] = useState({ width: 0, height: 0 })
+  // Before the first paint, so the bars and notes never show squeezed at the left.
+  useLayoutEffect(() => {
+    const target = element.current
+    if (!target) return
+    const measure = () => {
+      const width = target.clientWidth
+      const height = target.clientHeight
+      setSize(last => (last.width === width && last.height === height ? last : { width, height }))
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [element])
+  return size
 }
 
 /** Whether the element has come near the screen yet, so a long list loads its rows' bars as read. */
@@ -235,6 +327,142 @@ function FartDots({ farts, colors }: { farts: number; colors: number[] }) {
 }
 
 /**
+ * A note's or the line's colors over the waveform (#459, the owner's "A1 + sound"): its fart's,
+ * `--c`, or ahead of the playhead `--dim`, a solid pale tint of it so the bars don't show through,
+ * and a thin edge in the page's color, so it reads over grey bars and played ones alike. `--dim`
+ * is set on the element that sets `--c`: a custom property's `var()` resolves where it's declared.
+ */
+const NOTE_DIM =
+  '[--dim:color-mix(in_srgb,var(--c)_42%,var(--background))] dark:[--dim:color-mix(in_srgb,var(--c)_55%,var(--background))]'
+const NOTE_EDGE = 'shadow-[0_0_0_1.5px_var(--background)]'
+
+/** Where a note is as its row plays: heard (or stopped), playing now, or not reached yet. */
+type NoteState = 'heard' | 'now' | 'ahead'
+
+function noteState(note: RowNote, at: number | null): NoteState {
+  if (at === null) return 'heard'
+  if (note.start > at) return 'ahead'
+  return at < note.start + note.length ? 'now' : 'heard'
+}
+
+const NOTE_STATE: Record<NoteState, string> = {
+  heard: cn('bg-(--c)', NOTE_EDGE),
+  ahead: cn('bg-(--dim)', NOTE_EDGE),
+  // A ring in its own color, over the notes beside it.
+  now: 'z-[1] bg-(--c) shadow-[0_0_0_1.5px_var(--background),0_0_0_3.5px_var(--c)]'
+}
+
+/**
+ * A Toot's notes as a roll of seconds, a beat to each, so the Toot page's `Layout` places them
+ * on its row's timeline: pitch up, the lowest and highest the row draws one note from its edges.
+ */
+function secondsRoll(notes: readonly RowNote[], part: Trim): RollSong {
+  return {
+    bpm: 60,
+    length_beats: part.endSeconds - part.startSeconds,
+    notes: notes.map(note => ({
+      start: note.start - part.startSeconds,
+      dur: note.length,
+      pitch: note.pitch
+    })),
+    pitches: [...new Set(notes.map(note => note.pitch))].sort((a, b) => a - b)
+  }
+}
+
+/**
+ * A Toot's notes over its waveform, the full height of it, each where it's heard (#459): its
+ * left edge where the playhead is as it plays, both from `timelineAt`, and sized and colored as on
+ * the Toot's own page (`Layout`, `pitchColor`). While it plays, the notes the playhead has passed
+ * are in full color, the one playing has a ring, and the ones ahead are dimmed; stopped, all are
+ * in full color. Only a picture: taps go through to the waveform.
+ */
+function RowNotes({
+  notes,
+  part,
+  size,
+  at
+}: {
+  notes: RowNote[]
+  part: Trim
+  size: { width: number; height: number }
+  at: number | null
+}) {
+  const { layout, placed } = useMemo(() => {
+    const roll = secondsRoll(notes, part)
+    return { layout: new Layout(roll, size.width, size.height), placed: roll.notes }
+  }, [notes, part, size.width, size.height])
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0 z-[2]"
+      data-testid="profile-shared-notes"
+    >
+      {notes.map((note, index) => {
+        const { y, width, height } = layout.rect(placed[index])
+        const state = noteState(note, at)
+        return (
+          <span
+            // A Toot's notes are fixed, and two can start together.
+            // biome-ignore lint/suspicious/noArrayIndexKey: a Toot's notes never reorder
+            key={index}
+            className={cn('absolute rounded-full', NOTE_DIM, NOTE_STATE[state])}
+            style={
+              {
+                '--c': pitchColor(note.color),
+                left: `${(timelineAt(note.start, part) * 100).toFixed(3)}%`,
+                top: `${y.toFixed(2)}px`,
+                width: `${width.toFixed(2)}px`,
+                height: `${height.toFixed(2)}px`
+              } as CSSProperties
+            }
+            data-state={state}
+            data-testid="profile-shared-note"
+          />
+        )
+      })}
+    </div>
+  )
+}
+
+/**
+ * A Recording's one note as a line across its waveform (#459), in its fart's color as its dot:
+ * higher for a higher note, from C2 at the bottom to C4 at the top, or across the middle for a
+ * Noise-like one. While it plays, it fills in up to the playhead, and is dimmed ahead of it.
+ */
+function RecordingLine({
+  pitch,
+  part,
+  at
+}: {
+  pitch: number | null
+  part: Trim
+  at: number | null
+}) {
+  const high = pitch === null ? 0.5 : Math.min(1, Math.max(0, (pitch - 36) / 24))
+  const filled = at === null ? 100 : Math.min(1, Math.max(0, timelineAt(at, part))) * 100
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        'absolute inset-x-0 z-[2] h-1.5 rounded-full top-[calc((100%_-_6px)_*_var(--k))] md:h-2 md:top-[calc((100%_-_8px)_*_var(--k))]',
+        'bg-[linear-gradient(90deg,var(--c)_var(--at),var(--dim)_var(--at))]',
+        'pointer-events-none',
+        NOTE_DIM,
+        NOTE_EDGE
+      )}
+      style={
+        {
+          '--c': pitchColor(0),
+          '--k': (1 - high).toFixed(3),
+          '--at': `${filled.toFixed(3)}%`
+        } as CSSProperties
+      }
+      data-testid="profile-shared-line"
+    />
+  )
+}
+
+/**
  * A label on the waveform's line, dark, as SoundCloud's: its length at the right and, while it
  * plays, where it is at the left.
  */
@@ -266,10 +494,11 @@ function ShareRow({
   const seen = useSeen(row)
   const fetched = useTootRow(share.path, isToot && seen)
   const levels = isToot ? (fetched?.levels ?? null) : share.levels
-  const width = useWidth(wave)
+  const notes = useRowNotes(isToot ? fetched : null)
+  const size = useSize(wave)
   const drawn = finerBars(
     levels && levels.length > 0 ? levels : LOADING_BARS,
-    Math.floor(width / BAR_PIXELS)
+    Math.floor(size.width / BAR_PIXELS)
   )
   const playing = player.playing?.path === share.path ? player.playing.part : null
   const at = usePlayingSeconds(playing !== null)
@@ -352,9 +581,19 @@ function ShareRow({
             if (part.endSeconds - seconds >= 0.02) player.playFrom(share, seconds, 'row')
           }}
           playedClassName="bg-brand-strong dark:bg-brand"
+          // Fainter than a waveform alone, so the notes over it read first (#459).
+          barClassName="bg-muted-foreground/38 dark:bg-muted-foreground/32"
           reflected
           className="h-16 md:h-[88px]"
         />
+        {isToot ? (
+          notes &&
+          notes.length > 0 &&
+          size.width > 0 &&
+          size.height > 0 && <RowNotes notes={notes} part={part} size={size} at={at} />
+        ) : (
+          <RecordingLine pitch={share.pitch} part={part} at={at} />
+        )}
         {at !== null && (
           <span className={cn(onWaveform, 'left-0')} data-testid="profile-shared-time">
             {clock(at)}

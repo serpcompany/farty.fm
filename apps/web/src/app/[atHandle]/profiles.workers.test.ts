@@ -145,6 +145,8 @@ describe('A profile page', () => {
     expect(Object.keys(newest).sort()).toEqual(ITEM_KEYS)
     expect(newest.kind).toBe('recordings')
     expect(newest.detail).toBe('E3')
+    // The note its row draws as a line across its waveform (#459): the one `detail` names.
+    expect(newest.pitch).toBe(52)
     expect(newest.path).toBe('/@alice/r/recording-3/')
     expect(newest.sharedAt).toBe(Date.UTC(2026, 10, 1, 9, 2))
   })
@@ -169,6 +171,7 @@ describe('A profile page', () => {
     'name',
     'part',
     'path',
+    'pitch',
     'sharedAt'
   ]
 
@@ -220,6 +223,8 @@ describe('A profile page', () => {
       expect(item.path).toMatch(new RegExp(`^/@alice/${segment}/[a-z0-9-]+/$`))
       // A Toot's row has a Recording's fields and no more: never its Arrangement or Performance.
       expect(Object.keys(item).sort()).toEqual(ITEM_KEYS)
+      // Its notes come with its bars (`row/`): only a Recording's one note comes with the page.
+      expect(item.pitch).toBe(item.kind === 'toots' ? null : 52)
     }
 
     // Nothing private: no Toot's or Recording's own id, no Recording a Toot plays, and not the

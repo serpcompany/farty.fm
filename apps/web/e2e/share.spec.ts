@@ -64,7 +64,15 @@ function evidenceFor(testInfo: TestInfo) {
     await wideShot(on, `${name}-computer`, 1280, 800)
     await wideShot(on, `${name}-375`, 375, 812)
   }
-  return { out, shot, computerShot }
+  /** At a small phone's 375 px, then in dark mode too when `dark`. */
+  const phoneShot = async (on: Page, name: string, { dark = false } = {}) => {
+    await wideShot(on, `${name}-375`, 375, 812)
+    if (!out || !dark) return
+    await on.emulateMedia({ colorScheme: 'dark' })
+    await wideShot(on, `${name}-375-dark`, 375, 812)
+    await on.emulateMedia({ colorScheme: 'light' })
+  }
+  return { out, shot, computerShot, phoneShot }
 }
 
 /** How far the page scrolls sideways at a 375 px phone's width, then back to `on`'s own size. */
@@ -446,7 +454,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     'The Fixture Library is only in the Staging build (pnpm build:staging)'
   )
   test.setTimeout(300_000)
-  const { out, shot, computerShot } = evidenceFor(testInfo)
+  const { out, shot, computerShot, phoneShot } = evidenceFor(testInfo)
   const handle = `e2e_${randomInt(1e9)}`
   await fakeShareSheet(context)
   await context.addInitScript(skipWelcome)
@@ -708,6 +716,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
           fart => getComputedStyle(fart.querySelector('span[aria-hidden]') ?? fart).backgroundColor
         )
       )
+    await phoneShot(tootPage, 'toot-page')
     await tootPage.close()
     expect(used.length).toBeGreaterThan(0)
     const dots = await rows
@@ -720,8 +729,20 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(rows.getByTestId('profile-shared-length')).toHaveText(/^\d+:\d\d$/)
     expect((await drawn).status()).toBe(200)
     await expect(rows.getByTestId('profile-shared-art')).toHaveCount(0)
+    // Over its waveform, its notes (#459), each in the color its page gives the fart that plays
+    // it, and every fart's color among them. Stopped, all in full color.
+    const notes = rows.getByTestId('profile-shared-note')
+    await expect(notes.first()).toBeVisible()
+    const noteColors = await notes.evaluateAll(each =>
+      each.map(note => getComputedStyle(note).backgroundColor)
+    )
+    expect(new Set(noteColors)).toEqual(new Set(used))
+    await expect(
+      rows.locator('[data-testid="profile-shared-note"]:not([data-state="heard"])')
+    ).toHaveCount(0)
     await shot(other, 'toot-profile')
     await computerShot(other, 'toot-profile')
+    await phoneShot(other, 'toot-profile-notes', { dark: true })
     await expectComputerRows(other)
     expect(await sidewaysAt375(other)).toBe(0)
 
@@ -734,6 +755,13 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(rows.getByTestId('profile-shared-dot')).toHaveCount(1)
     await expect(rows.getByTestId('profile-shared-fart-count')).toHaveText('1 fart')
     await expect(rows).not.toContainText('Testville')
+    // Its one note as a line across its waveform (#459), in its dot's color.
+    const dot = await rows
+      .getByTestId('profile-shared-dot')
+      .evaluate(each => getComputedStyle(each).backgroundColor)
+    const line = rows.getByTestId('profile-shared-line')
+    await expect(line).toBeVisible()
+    expect(await line.evaluate(each => getComputedStyle(each).backgroundImage)).toContain(dot)
     // Its length is its fart's, the figure its own page prints, not the take's with its silence.
     const rowLength = await rows.getByTestId('profile-shared-length').textContent()
     expect(rowLength).toMatch(/^\d+\.\d s$/)
@@ -804,7 +832,39 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     // Its waveform fills pink as it plays.
     const rowFirst = await rowPlayed.count()
     await expect.poll(() => rowPlayed.count()).toBeGreaterThan(rowFirst)
+    // Its notes play along (#459): the ones it has passed in full color, the ones ahead dimmed.
+    const states = () =>
+      rows
+        .getByTestId('profile-shared-note')
+        .evaluateAll(each => each.map(note => (note as HTMLElement).dataset.state))
+    // A few seconds in, so its picture shows both.
+    await expect
+      .poll(
+        async () => {
+          const now = await states()
+          return now.filter(state => state === 'heard').length >= 8 && now.includes('ahead')
+        },
+        { timeout: 15_000 }
+      )
+      .toBe(true)
+    // Dimmed is a solid tint of its color, not see-through.
+    const tints = await rows
+      .getByTestId('profile-shared-note')
+      .evaluateAll(each =>
+        each.map(note => [
+          (note as HTMLElement).dataset.state,
+          getComputedStyle(note).backgroundColor
+        ])
+      )
+    const ahead = tints.filter(([state]) => state === 'ahead').map(([, fill]) => fill)
+    const heardFills = tints.filter(([state]) => state === 'heard').map(([, fill]) => fill)
+    expect(ahead.length).toBeGreaterThan(0)
+    for (const fill of ahead) {
+      expect(fill).not.toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
+      expect(heardFills).not.toContain(fill)
+    }
     await shot(other, 'toot-profile-playing')
+    await phoneShot(other, 'toot-profile-playing')
   })
 
   await test.step("the owner stops sharing from the Toot's screen, and the link is gone", async () => {

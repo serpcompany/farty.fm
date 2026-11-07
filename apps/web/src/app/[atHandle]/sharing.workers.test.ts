@@ -7,6 +7,7 @@ import * as sharesRoute from '@/app/api/share/route'
 import * as shareTootRoute from '@/app/api/share/toots/[id]/route'
 import type { Kind } from '@/db/library'
 import { handles, rateLimit, recordings, shareReports, shares, toots, user } from '@/db/schema'
+import { songIndex } from '@/lib/catalog/song-index.generated'
 import { NOT_SAID } from '@/lib/fart-place'
 import { noteName } from '@/lib/pitch'
 import { formattedFartLength } from '@/lib/pitch-coverage'
@@ -15,6 +16,7 @@ import { findProfile } from '@/server/profiles'
 import {
   findSharedRecording,
   findSharedToot,
+  type ProfileTootRow,
   partFrames,
   SHARED_TOOT_BARS,
   sharedAudioCacheKey,
@@ -1110,11 +1112,18 @@ describe('Sharing a saved Toot', () => {
     const served = await share.row(url)
     expect(served.status).toBe(200)
     expect(served.headers.get('cache-control')).toBe('private, no-cache')
-    // Only its bars: its row has no picture, so no roll (#451), and nothing of its farts, so
-    // never where one was made.
-    expect(await served.json()).toEqual({
-      levels: [...Array(30).fill(1), ...Array(30).fill(0.05)]
+    // Its bars, and its notes (#459): saved before #254, it keeps none of its own, so its Song in
+    // the catalog for the row to fetch them, and the pitch its one fart plays. Nothing of its farts,
+    // so never where one was made.
+    const row = (await served.json()) as ProfileTootRow
+    expect(Object.keys(row).sort()).toEqual(['catalog', 'levels', 'notes'])
+    expect(row.levels).toEqual([...Array(30).fill(1), ...Array(30).fill(0.05)])
+    expect(row.notes).toBeNull()
+    expect(row.catalog).toEqual({
+      song: songIndex.find(song => song.id === 'twinkle'),
+      played: [60]
     })
+    expect(JSON.stringify(row)).not.toContain(tootRecording)
 
     expect((await share.stop(T2, dora, 'toots')).status).toBe(204)
     await expectRowGone(url)
@@ -1286,6 +1295,29 @@ describe('Where a shared fart was made (#444)', () => {
     expect(await viewOf(recording)).toMatchObject(SAID)
     const { rows } = await partsOf(toot)
     expect(rows[0].fart).toMatchObject(SAID)
+  })
+
+  it("never says at a shared Toot's profile row where its fart was made, nor names it (#459)", async () => {
+    const alice = await fromAustin()
+    expect((await api.placeAndTrim(R1, { name: 'Big one' }, alice)).status).toBe(200)
+    const score = {
+      bpm: 60,
+      bar_lines: [0],
+      length_beats: 1,
+      notes: [{ start: 0, dur: 1, pitch: 60 }]
+    }
+    const arrangement = { transposition: 0, recordingForPitch: { 60: R1 } }
+    await saveToot(T1, alice, tootWav(), tootMetadata(T1, { arrangement, score }))
+    const url = await urlOf(await share.put(T1, alice, 'toots'))
+    const { rows } = await partsOf(url)
+    expect(rows[0].fart).toMatchObject({ ...SAID, name: 'Big one' })
+
+    const row = (await (await share.row(url)).json()) as ProfileTootRow
+    expect(row.notes).toEqual([{ start: 0, length: 1, pitch: 60, color: 0 }])
+    const sent = JSON.stringify(row)
+    for (const secret of ['Austin', 'Texas', 'America/Chicago', 'Big one', R1, T1]) {
+      expect(sent).not.toContain(secret)
+    }
   })
 
   it('never changes it by uploading again or editing', async () => {
@@ -1708,6 +1740,70 @@ describe("What a shared Toot shows of what it's made of (#443)", () => {
     const after = await partsOf(url)
     expect(after.song?.notes[1]).toEqual({ start: 0.25, dur: 0.25, pitch: 1 })
     expect(after.rows[1].fart).toBeNull()
+  })
+
+  /** What its row on its owner's profile page gets (`row/`, #459). */
+  const rowOf = async (url: string) => (await (await share.row(url)).json()) as ProfileTootRow
+
+  it('sends its profile row only its notes as heard: when, how long, the pitch and color (#459)', async () => {
+    // At 120 bpm a beat is half a second. No fart plays 62: it was left out (#360), so it isn't
+    // heard, and the row leaves it out.
+    const notes = [
+      { start: 0, dur: 1, pitch: 64 },
+      { start: 1, dur: 0.5, pitch: 62 },
+      { start: 1.5, dur: 2.5, pitch: 60 }
+    ]
+    const score = { bpm: 120, bar_lines: [0], length_beats: 4, notes }
+    const { url } = await songToot({ score })
+    const row = await rowOf(url)
+    expect(row.catalog).toBeNull()
+    // Each colored by its place among the Song's pitches, as its page's "Recordings used".
+    expect(row.notes).toEqual([
+      { start: 0, length: 0.5, pitch: 64, color: 2 },
+      { start: 0.75, length: 1.25, pitch: 60, color: 0 }
+    ])
+    const { rows } = await partsOf(url)
+    expect(rows.map(({ pitch, colorIndex }) => [pitch, colorIndex])).toEqual([
+      [60, 0],
+      [64, 2]
+    ])
+    // Only those four fields: never a fart's name, its place in the Toot or a Recording's id.
+    for (const note of row.notes ?? []) {
+      expect(Object.keys(note).sort()).toEqual(['color', 'length', 'pitch', 'start'])
+    }
+    const sent = JSON.stringify(row)
+    for (const secret of [R1, R2, T1, 'Recording 1', 'Recording 2', 'place']) {
+      expect(sent).not.toContain(secret)
+    }
+  })
+
+  it("sends a Sound Pad Toot's profile row its taps by lane, each as long as its fart (#459)", async () => {
+    const alice = await withFarts('alice')
+    const performance = {
+      recordings: [R1, R2],
+      taps: [
+        [0, 0],
+        [0.25, 1],
+        [0.5, 0]
+      ]
+    }
+    await saveToot(T1, alice, tootWav(), padTootMetadata(T1, { performance, seconds: 1 }))
+    const url = await urlOf(await share.put(T1, alice, 'toots'))
+    const row = await rowOf(url)
+    expect(row.catalog).toBeNull()
+    expect(row.notes).toEqual([
+      { start: 0, length: 0.25, pitch: 0, color: 0 },
+      { start: 0.25, length: 0.09 - 0.01, pitch: 1, color: 1 },
+      { start: 0.5, length: 0.25, pitch: 0, color: 0 }
+    ])
+    expect(JSON.stringify(row)).not.toContain(R1)
+  })
+
+  it('sends its profile row no notes when its Song is gone and it saved none (#459)', async () => {
+    const { url } = await songToot({ songId: 'no-such-song' })
+    const row = await rowOf(url)
+    expect(row.notes).toBeNull()
+    expect(row.catalog).toBeNull()
   })
 })
 

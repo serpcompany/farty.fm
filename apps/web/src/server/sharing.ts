@@ -23,6 +23,7 @@ import {
   tootPlaysTakenDown,
   tootRecordingIds
 } from '@/db/sharing'
+import type { SongSummary } from '@/lib/catalog/song'
 import { songIndex } from '@/lib/catalog/song-index.generated'
 import { NOT_SAID, recordedInOf } from '@/lib/fart-place'
 import { handleProblem, normalizeHandle, profilePath, suggestHandle } from '@/lib/handle'
@@ -33,7 +34,10 @@ import { servedOrigin } from '@/lib/site'
 import { slugify } from '@/lib/slug'
 import {
   PAD_TOOT_TITLE,
+  padRoll,
+  type RowNote,
   rollOfScore,
+  rowNotes,
   type SharedFart,
   type SharedFartRow,
   type SharedTootParts,
@@ -452,17 +456,7 @@ export async function sharedTootParts(
       return part ? part.endSeconds - part.startSeconds : UNKNOWN_TAP_SECONDS
     })
     return {
-      song: {
-        // A beat is a second, so each tap's beat is when it was played.
-        bpm: 60,
-        length_beats: toot.seconds,
-        notes: taps.map(([at, lane]) => ({
-          start: at,
-          dur: Math.max(0, Math.min(tapSeconds[lane], toot.seconds - at)),
-          pitch: lane
-        })),
-        pitches: farts.map((_, lane) => lane)
-      },
+      song: padRoll({ recordings: farts, taps }, tapSeconds, toot.seconds),
       catalogSong: null,
       transposition: 0,
       lanes: true,
@@ -771,14 +765,31 @@ export async function sharedTootLevels(
   return levels
 }
 
-/** A shared Toot's row on its owner's profile page (#448, #451): its waveform's bars. */
-export type ProfileTootRow = { levels: number[] }
+/**
+ * A shared Toot's row on its owner's profile page (#448, #451, #459): its waveform's bars, and its
+ * notes over them. Only what the notes need: never a fart's name, where it was made or a
+ * Recording's id.
+ */
+export type ProfileTootRow = {
+  levels: number[]
+  /**
+   * Its notes as heard, in seconds of its audio (`rowNotes`). Null for a Toot saved before #254,
+   * which keeps no notes of its own (`catalog`), and one whose Song isn't in Farty any more.
+   */
+  notes: RowNote[] | null
+  /**
+   * For a Toot saved before #254: its Song in the catalog, whose notes the row fetches and draws
+   * as `rowNotes` does, and the pitches a fart plays. Null otherwise.
+   */
+  catalog: { song: SongSummary; played: number[] } | null
+}
 
 /**
  * `GET /@<handle>/t/<id>/row/`: what a shared Toot's row on its owner's profile page draws (#448),
- * for anyone with the link: its loudness bars (`sharedTootLevels`). Each row fetches its own once
- * it's on screen, so the page never reads every Toot's WAV. The share is checked in D1 first, as
- * its audio's is, and nothing between keeps it, so a link taken down is down at once.
+ * for anyone with the link: its loudness bars (`sharedTootLevels`) and its notes (#459), from its
+ * roll (`sharedTootRoll`). Each row fetches its own once it's on screen, so the page never reads
+ * every Toot's WAV. The share is checked in D1 first, as its audio's is, and nothing between
+ * keeps it, so a link taken down is down at once.
  */
 export async function sharedTootRow(
   { db, media }: Stores,
@@ -788,8 +799,15 @@ export async function sharedTootRow(
 ): Promise<Response> {
   const shared = await findSharedToot(db, handle, link)
   if (!shared) return apiError(404, 'not_found')
-  const levels = await sharedTootLevels(media, sharedTootKey(shared), servedOrigin(request))
-  const drawn: ProfileTootRow = { levels }
+  const [levels, roll] = await Promise.all([
+    sharedTootLevels(media, sharedTootKey(shared), servedOrigin(request)),
+    sharedTootRoll(db, shared)
+  ])
+  const drawn: ProfileTootRow = {
+    levels,
+    notes: roll.song ? rowNotes(roll.song, roll.played) : null,
+    catalog: roll.catalogSong ? { song: roll.catalogSong, played: roll.played } : null
+  }
   return Response.json(drawn, { headers: { 'Cache-Control': 'private, no-cache' } })
 }
 
