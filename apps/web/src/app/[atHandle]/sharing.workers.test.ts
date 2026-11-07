@@ -9,6 +9,7 @@ import type { Kind } from '@/db/library'
 import { handles, rateLimit, recordings, shareReports, shares, toots, user } from '@/db/schema'
 import { NOT_SAID } from '@/lib/fart-place'
 import { noteName } from '@/lib/pitch'
+import { formattedFartLength } from '@/lib/pitch-coverage'
 import { encodeWav } from '@/lib/wav'
 import { findProfile } from '@/server/profiles'
 import {
@@ -523,6 +524,30 @@ describe('Sharing a Recording', () => {
       expect(allOut.row).toMatchObject({
         length: allOut.page?.length,
         part: { startSeconds: 0, endSeconds: 0.5 }
+      })
+    })
+
+    it("prints its Trim's fart length before analysis, not the whole take's as its Recordings tab does (#450)", async () => {
+      // Not yet analyzed, with handles 0.25 s to 0.75 s and a fart 0.375 s to 0.625 s between them.
+      const alice = await uploadedSharer('alice', {
+        analysis: { state: 'notAnalyzed' },
+        trim: {
+          startSeconds: 0.25,
+          endSeconds: 0.75,
+          fart: { startSeconds: 0.375, endSeconds: 0.625 }
+        }
+      })
+      const { handle, id } = linkParts(alice.url)
+      const shared = await findSharedRecording(testDb(), handle, id)
+      if (!shared) throw new Error('Not shared')
+      // Its Recordings tab counts the whole take until analysis finds the fart.
+      expect(formattedFartLength(shared.recording)).toBe('1.0 s')
+      // Its page and row print the fart its row plays, from its Trim.
+      const { row, page } = await rowAndPage('alice', alice.url)
+      expect(page?.length).toBe('0.2 s')
+      expect(row).toMatchObject({
+        length: page?.length,
+        part: { startSeconds: 0.125, endSeconds: 0.375 }
       })
     })
 

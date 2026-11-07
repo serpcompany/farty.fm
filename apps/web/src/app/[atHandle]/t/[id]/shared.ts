@@ -28,8 +28,6 @@ export type SharedTootView = {
   /** "0:18", as its row shows it. */
   length: string
   seconds: number
-  /** The loudness bars of its saved audio, each 0…1, which its link image draws. */
-  levels: number[]
 }
 
 /** The share behind a link, or null: once per request, whatever asks. */
@@ -44,11 +42,9 @@ const sharedTootOf = cache((handle: string, id: string) =>
  */
 export const sharedTootView = cache(
   async (handle: string, id: string): Promise<SharedTootView | null> => {
-    const { media } = requestStores()
     const shared = await sharedTootOf(handle, id)
     if (!shared) return null
     const song = tootSongTitle(shared.songId)
-    const origin = (await pageOrigin()) ?? 'http://localhost'
     return {
       handle: shared.handle,
       slug: shared.slug,
@@ -56,11 +52,22 @@ export const sharedTootView = cache(
       song,
       isSong: shared.songId !== null,
       length: formattedTootLength(shared.seconds),
-      seconds: shared.seconds,
-      levels: await sharedTootLevels(media, sharedTootKey(shared), origin)
+      seconds: shared.seconds
     }
   }
 )
+
+/**
+ * The loudness bars of a shared Toot's saved audio, each 0…1, or null when the link doesn't work.
+ * Only its link image draws them: its page shows its roll instead (#451), so it doesn't wait on
+ * reading them.
+ */
+export async function sharedTootLevelsView(handle: string, id: string): Promise<number[] | null> {
+  const shared = await sharedTootOf(handle, id)
+  if (!shared) return null
+  const origin = (await pageOrigin()) ?? 'http://localhost'
+  return sharedTootLevels(requestStores().media, sharedTootKey(shared), origin)
+}
 
 /** What the shared Toot's page shows of what it's made of, or null when the link doesn't work. */
 export async function sharedTootPartsView(

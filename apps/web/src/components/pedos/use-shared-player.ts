@@ -4,7 +4,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { play, type Segment, stopPlayback } from '@/lib/audio/player'
 import type { Trim } from '@/lib/recordings'
 
-/** What's playing on a shared page: the item's own audio, whole or one note, or one of its farts. */
+/**
+ * What's playing on a shared page: the item's own audio, whole or one note, or one of its
+ * farts.
+ */
 type Sound = { of: 'item'; segment: Trim; note: number | null } | { of: 'fart'; place: number }
 
 /**

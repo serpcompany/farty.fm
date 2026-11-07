@@ -99,7 +99,10 @@ export type ProfilePlayer = ReturnType<typeof useProfilePlayer>
 /** As many bars as a shared Toot's are drawn in, flat, while its own load. */
 const LOADING_BARS = Array<number>(60).fill(0.05)
 
-/** One bar to this many pixels of a row's waveform, however wide the row: SoundCloud's thin bars. */
+/**
+ * One bar to this many pixels of a row's waveform, however wide the row: SoundCloud's thin
+ * bars.
+ */
 const BAR_PIXELS = 4
 
 /** What a shared Toot's row draws, from its `row/`: its loudness bars. */

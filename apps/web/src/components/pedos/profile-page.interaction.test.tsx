@@ -367,7 +367,8 @@ describe('A row (#346, #448)', () => {
     await render({ items: [{ ...toot, path: '/@alice/t/vvvvvvvvvvvv/' }] })
     await settle()
     expect(fetched).toContain('/@alice/t/vvvvvvvvvvvv/row/')
-    // Its 4 bars, drawn one to each 4 px of its 60 px waveform: 15, from the quietest to the loudest.
+    // Its 4 bars, drawn one to each 4 px of its 60 px waveform: 15, from the quietest to the
+    // loudest.
     const bars = [
       ...(rows()[0].querySelector('[data-testid="replay-waveform"] span')?.children ?? [])
     ].map(bar => Number.parseFloat((bar as HTMLElement).style.height))

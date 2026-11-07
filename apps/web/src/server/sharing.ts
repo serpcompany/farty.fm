@@ -746,8 +746,8 @@ export type ProfileTootRow = { levels: number[] }
 /**
  * `GET /@<handle>/t/<id>/row/`: what a shared Toot's row on its owner's profile page draws (#448),
  * for anyone with the link: its loudness bars (`sharedTootLevels`). Each row fetches its own once
- * it's on screen, so the page never reads every Toot's WAV. The share is checked in D1 first, as its audio's is, and nothing between
- * keeps it, so a link taken down is down at once.
+ * it's on screen, so the page never reads every Toot's WAV. The share is checked in D1 first, as
+ * its audio's is, and nothing between keeps it, so a link taken down is down at once.
  */
 export async function sharedTootRow(
   { db, media }: Stores,

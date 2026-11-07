@@ -17,13 +17,14 @@ import { TootPlay } from './toot-play'
 import { useSharedPlayer } from './use-shared-player'
 
 const tryAgain = 'Check your connection and try again.'
+const plural = (count: number, one: string) => `${count} ${one}${count === 1 ? '' : 's'}`
 
 /**
  * A shared Toot as the screen it was made on (#443, #451), with Song Creator's own parts: Play,
  * with "Ready" or "Playing", then its note roll, with a playhead while it plays, then "Recordings
  * used", each fart playing on its own. A note tapped plays from the Toot's own audio, as on a
- * Toot's screen. A Sound Pad Toot's roll is its taps, one lane per fart. `base` is the page's own
- * path, which its audio is under.
+ * Toot's screen. A Sound Pad Toot's roll is its taps, one lane per fart, and its line counts them
+ * as the Sound Pad's own screen does. `base` is the page's own path, which its audio is under.
  */
 export function SharedTootParts({
   handle,
@@ -73,7 +74,11 @@ export function SharedTootParts({
         label={`${isPlaying ? 'Stop' : 'Play'} ${title}`}
         onPress={() => (isPlaying ? player.stop() : player.playFrom(0))}
         state={isPlaying ? 'Playing' : player.unplayable === 'item' ? "Couldn't play" : 'Ready'}
-        line={`${length} · ${rows.length} of @${handle}'s Recordings${lanes ? '' : ', one per note'}`}
+        line={
+          lanes
+            ? `${length} · ${plural(song?.notes.length ?? 0, 'tap')} of @${handle}'s ${plural(rows.length, 'Recording')}`
+            : `${length} · ${rows.length} of @${handle}'s Recordings, one per note`
+        }
         testId="shared-toot"
       >
         {player.unplayable === 'item' && (
