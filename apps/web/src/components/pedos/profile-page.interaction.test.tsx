@@ -1,6 +1,8 @@
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { SongSummary } from '@/lib/catalog/song'
+import { pitchColor } from './note-view'
 import type { HeroRoll } from './profile-hero'
 import type { ProfileShare } from './profile-share-row'
 
@@ -56,6 +58,7 @@ const toot: ProfileShare = {
   length: '0:18',
   part: { startSeconds: 0, endSeconds: 18 },
   levels: [],
+  pitch: null,
   farts: 3,
   fartColors: [0, 2, 1]
 }
@@ -69,6 +72,7 @@ const recording: ProfileShare = {
   length: '1.1 s',
   part: { startSeconds: 0, endSeconds: 1.1 },
   levels: [0.2, 1, 0.5],
+  pitch: 52,
   farts: 1,
   fartColors: [0]
 }
@@ -90,11 +94,38 @@ const hero: HeroRoll = {
   played: [60]
 }
 
+/** A catalog Song, as a Toot saved before #254 names it, and the notes its `notesPath` serves. */
+const TWINKLE: SongSummary = {
+  id: 'twinkle',
+  title: 'Twinkle, Twinkle, Little Star',
+  source: 'Public domain score',
+  kind: 'Kids',
+  fame: 1,
+  views: 1,
+  lengthBeats: 5,
+  bpm: 120,
+  pitches: [60, 62, 67],
+  durations: [[1], [1], [2]],
+  notesPath: '/songs/twinkle.0123.json'
+}
+const TWINKLE_NOTES = {
+  bar_lines: [0],
+  length_beats: 5,
+  notes: [
+    { start: 0, dur: 1, pitch: 60 },
+    { start: 2, dur: 2, pitch: 67 },
+    { start: 4, dur: 1, pitch: 62 }
+  ]
+}
+
 /**
- * The routes: the friend state, each Toot's bars (`toot`'s, `hero`'s), and any audio.
- * Each fetch is kept in `fetched`.
+ * The routes: the friend state, each Toot's bars (`toot`'s, `hero`'s), as `row/` sends them, and
+ * any audio. Each fetch is kept in `fetched`.
  */
-function server(friend: Response | 'offline' = Response.json({ state: 'none' })) {
+function server(
+  friend: Response | 'offline' = Response.json({ state: 'none' }),
+  row: unknown = { levels: [0.1, 0.9, 0.4, 0.7] }
+) {
   const fetched: string[] = []
   const answers = [friend]
   vi.spyOn(globalThis, 'fetch').mockImplementation(async input => {
@@ -105,7 +136,8 @@ function server(friend: Response | 'offline' = Response.json({ state: 'none' }))
       if (next === 'offline') throw new TypeError('Failed to fetch')
       return next
     }
-    if (url.endsWith('/row/')) return Response.json({ levels: [0.1, 0.9, 0.4, 0.7] })
+    if (url.endsWith('/row/')) return Response.json(row)
+    if (url === TWINKLE.notesPath) return Response.json(TWINKLE_NOTES)
     return new Response(new ArrayBuffer(8))
   })
   return fetched
@@ -631,5 +663,210 @@ describe('A row (#346, #448)', () => {
     expect(rows()[0].querySelector('[role="alert"]')?.textContent).toBe(
       "Couldn't play it. Check your connection and try again."
     )
+  })
+})
+
+describe('A row’s notes over its waveform (#459)', () => {
+  /** Every row comes on screen at once. */
+  const onScreen = () =>
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(private readonly callback: IntersectionObserverCallback) {}
+        observe() {
+          this.callback(
+            [{ isIntersecting: true } as IntersectionObserverEntry],
+            this as unknown as IntersectionObserver
+          )
+        }
+        unobserve() {}
+        disconnect() {}
+      }
+    )
+  const frame = () =>
+    act(async () => {
+      await new Promise(resolve => requestAnimationFrame(() => resolve(null)))
+    })
+  const drawnNotes = () => [
+    ...rows()[0].querySelectorAll<HTMLElement>('[data-testid="profile-shared-note"]')
+  ]
+  const states = () => drawnNotes().map(note => note.dataset.state)
+  const playhead = () => rows()[0].querySelector<HTMLElement>('[data-testid="playhead"]')
+  /** As `row/` sends them for an 18 s Toot: three notes, each with its fart's color. */
+  const notes = [
+    { start: 0, length: 1, pitch: 60, color: 0 },
+    { start: 6, length: 3, pitch: 64, color: 2 },
+    { start: 12, length: 6, pitch: 62, color: 1 }
+  ]
+
+  it('a Toot’s: each note where it’s heard, in its fart’s color, the full height, all in full color while stopped', async () => {
+    // A phone's row: 180 pixels across, 64 high.
+    laidOut(180, 64)
+    onScreen()
+    server(undefined, { levels: [0.1, 0.9, 0.4, 0.7], notes, catalog: null })
+    // A path of its own, since each Toot's row is fetched once a page load.
+    await render({ items: [{ ...toot, path: '/@alice/t/nnnnnnnnnnnn/' }] })
+    await settle()
+
+    // On the waveform's timeline: 0 s, 6 s and 12 s of 18.
+    expect(drawnNotes().map(note => note.style.left)).toEqual(['0.000%', '33.333%', '66.667%'])
+    expect(drawnNotes().map(note => note.style.getPropertyValue('--c'))).toEqual(
+      [0, 2, 1].map(pitchColor)
+    )
+    expect(states()).toEqual(['heard', 'heard', 'heard'])
+    // Higher notes higher, from the top of the waveform to its foot, as the Toot's page lays
+    // them out: 59 to 65 in 64 px, 10 px a note.
+    expect(drawnNotes().map(note => note.style.top)).toEqual(['45px', '9px', '27px'])
+    expect(drawnNotes().map(note => note.style.height)).toEqual(['10px', '10px', '10px'])
+    // A second of 18 in 180 px, a 2 px gap after the second, the last to the end.
+    expect(drawnNotes().map(note => note.style.width)).toEqual(['10px', '28px', '58px'])
+
+    // Only a picture: a screen reader skips it. That a tap goes through it to the waveform, the
+    // e2e checks where the browser lays it out (share.spec.ts).
+    const layer = rows()[0].querySelector('[data-testid="profile-shared-notes"]')
+    expect(layer?.getAttribute('aria-hidden')).toBe('true')
+    // Nothing of a fart but its color, and no text.
+    expect(rows()[0].textContent).toBe('@aliceTwinkle for MumTodaySound Pad3 farts0:18Copy link')
+  })
+
+  it('while it plays: the playhead reaches each note as it’s heard, the one playing ringed, the ones ahead dimmed', async () => {
+    laidOut(180, 64)
+    onScreen()
+    server(undefined, { levels: [0.1, 0.9, 0.4, 0.7], notes, catalog: null })
+    await render({ items: [{ ...toot, path: '/@alice/t/ppppppppppppp/' }] })
+    await settle()
+
+    heard.position = 7
+    await act(async () => rows()[0].querySelector('button')?.click())
+    await frame()
+    // The ring's and the tint's colors, the e2e checks as the browser computes them.
+    expect(states()).toEqual(['heard', 'now', 'ahead'])
+    // A frame later, still in the second note.
+    heard.position = 7.5
+    await frame()
+    expect(states()).toEqual(['heard', 'now', 'ahead'])
+    // The bars it has played fill in under the notes, as before.
+    const bars = [
+      ...(rows()[0].querySelector('[data-testid="replay-waveform"] span')?.children ?? [])
+    ]
+    expect(bars.some(bar => bar.className.includes('bg-brand-strong'))).toBe(true)
+
+    // At 12 s the playhead is at the third note's left edge, which is when it's heard.
+    heard.position = 12
+    await frame()
+    expect(playhead()?.style.left).toBe(drawnNotes()[2].style.left)
+    expect(states()).toEqual(['heard', 'heard', 'now'])
+
+    // The waveform still plays from a spot under its notes: the arrow keys, a twelfth on.
+    const waveform = rows()[0].querySelector<HTMLElement>('[data-testid="replay-waveform"]')
+    await act(async () =>
+      waveform?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+    )
+    expect(heard.plays.at(-1)?.segment).toEqual({ start: 13.5, end: 18 })
+
+    // Stopped, every note is in full color again.
+    await act(async () => rows()[0].querySelector('button')?.click())
+    expect(states()).toEqual(['heard', 'heard', 'heard'])
+  })
+
+  it('a Toot saved before #254: its Song’s notes from the catalog, without the ones left out', async () => {
+    laidOut(180, 64)
+    onScreen()
+    const fetched = server(undefined, {
+      levels: [0.1, 0.9, 0.4, 0.7],
+      notes: null,
+      catalog: { song: TWINKLE, played: [60, 67] }
+    })
+    await render({ items: [{ ...toot, path: '/@alice/t/cccccccccccc/' }] })
+    await settle()
+    await settle()
+    expect(fetched).toContain(TWINKLE.notesPath)
+    // 120 bpm: beat 2 is 1 s in. The note at 62 has no fart, so it isn't heard, or drawn.
+    expect(drawnNotes().map(note => note.style.left)).toEqual(['0.000%', '5.556%'])
+    expect(drawnNotes().map(note => note.style.getPropertyValue('--c'))).toEqual(
+      [0, 2].map(pitchColor)
+    )
+  })
+
+  it('never draws past its waveform: a short last tap ends at its edge, and notes after its audio’s end aren’t drawn', async () => {
+    laidOut(180, 64)
+    onScreen()
+    // A Sound Pad Toot's last tap, a tenth of a second before its 18 s end: 1 px of 180, so it'd
+    // be drawn 10 px wide, as tall as it is, and stick out.
+    server(undefined, {
+      levels: [0.1, 0.9, 0.4, 0.7],
+      notes: [
+        { start: 0, length: 1, pitch: 60, color: 0 },
+        { start: 17.9, length: 0.1, pitch: 62, color: 1 }
+      ],
+      catalog: null
+    })
+    await render({ items: [{ ...toot, path: '/@alice/t/eeeeeeeeeeee/' }] })
+    await settle()
+    expect(drawnNotes().map(note => note.style.left)).toEqual(['0.000%', '99.444%'])
+    expect(drawnNotes().map(note => note.style.width)).toEqual(['10px', '1px'])
+    const right = (note: HTMLElement) =>
+      (Number.parseFloat(note.style.left) / 100) * 180 + Number.parseFloat(note.style.width)
+    for (const note of drawnNotes()) expect(right(note)).toBeLessThanOrEqual(180 + 1e-6)
+  })
+
+  it('a Toot saved before #254 whose Song has grown longer than its audio: only what fits', async () => {
+    laidOut(180, 64)
+    onScreen()
+    // Its audio is 1.5 s; its Song now runs 2.5 s at 120 bpm: notes at 0 s, 1 s and 2 s.
+    server(undefined, {
+      levels: [0.1, 0.9, 0.4, 0.7],
+      notes: null,
+      catalog: { song: TWINKLE, played: [60, 62, 67] }
+    })
+    const short = {
+      ...toot,
+      path: '/@alice/t/llllllllllll/',
+      length: '0:01',
+      part: { startSeconds: 0, endSeconds: 1.5 }
+    }
+    await render({ items: [short] })
+    await settle()
+    await settle()
+    // The note at 2 s starts after the audio ends, so it isn't drawn; the one at 1 s, a second
+    // long, stops at the edge, 60 px from its left at 120 px.
+    expect(drawnNotes().map(note => note.style.left)).toEqual(['0.000%', '66.667%'])
+    expect(drawnNotes().map(note => note.style.width)).toEqual(['60px', '60px'])
+  })
+
+  it('a Toot with no notes to draw: only its waveform', async () => {
+    laidOut(180, 64)
+    onScreen()
+    server(undefined, { levels: [0.1, 0.9, 0.4, 0.7], notes: null, catalog: null })
+    await render({ items: [{ ...toot, path: '/@alice/t/gggggggggggg/' }] })
+    await settle()
+    expect(rows()[0].querySelector('[data-testid="replay-waveform"]')).not.toBeNull()
+    expect(rows()[0].querySelector('[data-testid="profile-shared-notes"]')).toBeNull()
+  })
+
+  it('a Recording’s: its one note as a line across, in its dot’s color, filling in as it plays', async () => {
+    laidOut(180, 64)
+    server()
+    await render({ items: [recording] })
+    await act(async () => (tab('Recordings') as HTMLElement).click())
+    const line = () => rows()[0].querySelector<HTMLElement>('[data-testid="profile-shared-line"]')
+    expect(line()?.getAttribute('aria-hidden')).toBe('true')
+    expect(line()?.style.getPropertyValue('--c')).toBe(pitchColor(0))
+    // E3 is two thirds of the way up from C2 to C4, so a third of the way down.
+    expect(line()?.style.getPropertyValue('--k')).toBe('0.333')
+    expect(line()?.style.getPropertyValue('--at')).toBe('100.000%')
+    expect(line()?.className.split(' ')).toEqual(
+      expect.arrayContaining(['pointer-events-none', 'inset-x-0', 'rounded-full'])
+    )
+
+    heard.position = 0.55
+    await act(async () => rows()[0].querySelector('button')?.click())
+    await frame()
+    expect(line()?.style.getPropertyValue('--at')).toBe('50.000%')
+    expect(playhead()?.style.left).toBe('50.000%')
+
+    // A Noise-like Recording, placed by no ear: across the middle.
+    await render({ items: [{ ...recording, detail: null, pitch: null }] })
+    expect(line()?.style.getPropertyValue('--k')).toBe('0.500')
   })
 })

@@ -102,6 +102,58 @@ export const rollOfScore = ({ bpm, length_beats, notes }: TootScore): RollSong =
   pitches: pitchesOf(notes)
 })
 
+/**
+ * A Sound Pad Toot's taps as a roll (#278, #448): a beat is a second, so each tap's beat is when
+ * it was played, where its render starts its fart (`renderPerformance`). A lane for each fart,
+ * and each tap as long as its fart plays (`tapSeconds`, by lane), cut at the Toot's end.
+ */
+export function padRoll(
+  { recordings, taps }: Pick<Performance, 'recordings' | 'taps'>,
+  tapSeconds: readonly number[],
+  seconds: number
+): RollSong {
+  return {
+    bpm: 60,
+    length_beats: seconds,
+    notes: taps.map(([at, lane]) => ({
+      start: at,
+      dur: Math.max(0, Math.min(tapSeconds[lane], seconds - at)),
+      pitch: lane
+    })),
+    pitches: recordings.map((_, lane) => lane)
+  }
+}
+
+/**
+ * A note as a Toot's row on its owner's profile page draws it over its waveform (#459): only when
+ * it's heard and for how long, in seconds of the Toot's audio, its pitch (a Sound Pad Toot's
+ * lane) and its color. Nothing of which fart plays it.
+ */
+export type RowNote = {
+  start: number
+  length: number
+  pitch: number
+  /** Its color (`pitchColor`): its place among the roll's pitches, as `tootFartRows` colors it. */
+  color: number
+}
+
+/**
+ * `song`'s notes that a fart plays (`played`), as a Toot's row draws them (#459): each where its
+ * render puts its beat (`noteSeconds`), so it sits on the row's waveform where it's heard and the
+ * playhead reaches it as it plays. A note left out of the Toot (#360) isn't heard, so the row
+ * leaves it out.
+ */
+export function rowNotes(song: RollSong, played: readonly number[]): RowNote[] {
+  const heard = new Set(played)
+  return song.notes
+    .filter(note => heard.has(note.pitch))
+    .map(note => ({
+      ...noteSeconds(song, note),
+      pitch: note.pitch,
+      color: Math.max(0, song.pitches.indexOf(note.pitch))
+    }))
+}
+
 /** Room for longer Songs than the catalog's longest, of 64 notes and 26 bars over 64 beats. */
 const MAX_SCORE_NOTES = 500
 const MAX_SCORE_BEATS = 10_000

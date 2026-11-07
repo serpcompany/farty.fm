@@ -35,6 +35,8 @@ declare global {
     __shared: ShareData[]
     /** Each sound the page starts: its length and loudest sample. */
     __sounds: { duration: number; peak: number }[]
+    /** Where in its audio each of `__sounds` starts, in seconds. */
+    __soundsFrom: number[]
   }
 }
 
@@ -64,7 +66,15 @@ function evidenceFor(testInfo: TestInfo) {
     await wideShot(on, `${name}-computer`, 1280, 800)
     await wideShot(on, `${name}-375`, 375, 812)
   }
-  return { out, shot, computerShot }
+  /** At a small phone's 375 px, then in dark mode too when `dark`. */
+  const phoneShot = async (on: Page, name: string, { dark = false } = {}) => {
+    await wideShot(on, `${name}-375`, 375, 812)
+    if (!out || !dark) return
+    await on.emulateMedia({ colorScheme: 'dark' })
+    await wideShot(on, `${name}-375-dark`, 375, 812)
+    await on.emulateMedia({ colorScheme: 'light' })
+  }
+  return { out, shot, computerShot, phoneShot }
 }
 
 /** How far the page scrolls sideways at a 375 px phone's width, then back to `on`'s own size. */
@@ -148,16 +158,18 @@ async function fakeShareSheet(context: BrowserContext) {
   })
 }
 
-/** Counts each sound the page starts, with its length and loudest sample. */
+/** Counts each sound the page starts, with its length, loudest sample and where it starts. */
 async function listenToSounds(context: BrowserContext) {
   await context.addInitScript(() => {
     window.__sounds = []
+    window.__soundsFrom = []
     const start = AudioBufferSourceNode.prototype.start
     AudioBufferSourceNode.prototype.start = function (this: AudioBufferSourceNode, ...args) {
       let peak = 0
       for (const sample of this.buffer?.getChannelData(0) ?? [])
         peak = Math.max(peak, Math.abs(sample))
       window.__sounds.push({ duration: this.buffer?.duration ?? 0, peak })
+      window.__soundsFrom.push(typeof args[1] === 'number' ? args[1] : 0)
       return start.apply(this, args)
     }
   })
@@ -446,7 +458,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     'The Fixture Library is only in the Staging build (pnpm build:staging)'
   )
   test.setTimeout(300_000)
-  const { out, shot, computerShot } = evidenceFor(testInfo)
+  const { out, shot, computerShot, phoneShot } = evidenceFor(testInfo)
   const handle = `e2e_${randomInt(1e9)}`
   await fakeShareSheet(context)
   await context.addInitScript(skipWelcome)
@@ -708,6 +720,7 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
           fart => getComputedStyle(fart.querySelector('span[aria-hidden]') ?? fart).backgroundColor
         )
       )
+    await phoneShot(tootPage, 'toot-page')
     await tootPage.close()
     expect(used.length).toBeGreaterThan(0)
     const dots = await rows
@@ -720,8 +733,20 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(rows.getByTestId('profile-shared-length')).toHaveText(/^\d+:\d\d$/)
     expect((await drawn).status()).toBe(200)
     await expect(rows.getByTestId('profile-shared-art')).toHaveCount(0)
+    // Over its waveform, its notes (#459), each in the color its page gives the fart that plays
+    // it, and every fart's color among them. Stopped, all in full color.
+    const notes = rows.getByTestId('profile-shared-note')
+    await expect(notes.first()).toBeVisible()
+    const noteColors = await notes.evaluateAll(each =>
+      each.map(note => getComputedStyle(note).backgroundColor)
+    )
+    expect(new Set(noteColors)).toEqual(new Set(used))
+    await expect(
+      rows.locator('[data-testid="profile-shared-note"]:not([data-state="heard"])')
+    ).toHaveCount(0)
     await shot(other, 'toot-profile')
     await computerShot(other, 'toot-profile')
+    await phoneShot(other, 'toot-profile-notes', { dark: true })
     await expectComputerRows(other)
     expect(await sidewaysAt375(other)).toBe(0)
 
@@ -734,6 +759,13 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(rows.getByTestId('profile-shared-dot')).toHaveCount(1)
     await expect(rows.getByTestId('profile-shared-fart-count')).toHaveText('1 fart')
     await expect(rows).not.toContainText('Testville')
+    // Its one note as a line across its waveform (#459), in its dot's color.
+    const dot = await rows
+      .getByTestId('profile-shared-dot')
+      .evaluate(each => getComputedStyle(each).backgroundColor)
+    const line = rows.getByTestId('profile-shared-line')
+    await expect(line).toBeVisible()
+    expect(await line.evaluate(each => getComputedStyle(each).backgroundImage)).toContain(dot)
     // Its length is its fart's, the figure its own page prints, not the take's with its silence.
     const rowLength = await rows.getByTestId('profile-shared-length').textContent()
     expect(rowLength).toMatch(/^\d+\.\d s$/)
@@ -804,7 +836,104 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     // Its waveform fills pink as it plays.
     const rowFirst = await rowPlayed.count()
     await expect.poll(() => rowPlayed.count()).toBeGreaterThan(rowFirst)
+    // Its notes play along (#459): the ones it has passed in full color, the ones ahead dimmed.
+    const states = () =>
+      rows
+        .getByTestId('profile-shared-note')
+        .evaluateAll(each => each.map(note => (note as HTMLElement).dataset.state))
+    // A few seconds in, so its picture shows both.
+    await expect
+      .poll(
+        async () => {
+          const now = await states()
+          return now.filter(state => state === 'heard').length >= 8 && now.includes('ahead')
+        },
+        { timeout: 15_000 }
+      )
+      .toBe(true)
+    // Dimmed is a solid tint of its color, not see-through.
+    const tints = await rows
+      .getByTestId('profile-shared-note')
+      .evaluateAll(each =>
+        each.map(note => [
+          (note as HTMLElement).dataset.state,
+          getComputedStyle(note).backgroundColor
+        ])
+      )
+    const ahead = tints.filter(([state]) => state === 'ahead').map(([, fill]) => fill)
+    const heardFills = tints.filter(([state]) => state === 'heard').map(([, fill]) => fill)
+    expect(ahead.length).toBeGreaterThan(0)
+    for (const fill of ahead) {
+      expect(fill).not.toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
+      expect(heardFills).not.toContain(fill)
+    }
+    // The note playing now has a ring in its own color, as the browser draws it.
+    const ringed = rows.locator('[data-testid="profile-shared-note"][data-state="now"]')
+    await expect.poll(() => ringed.count(), { timeout: 15_000 }).toBeGreaterThan(0)
+    const ring = await ringed.first().evaluate(note => {
+      const style = getComputedStyle(note)
+      return {
+        c: style.getPropertyValue('--c'),
+        boxShadow: style.boxShadow,
+        backgroundColor: style.backgroundColor
+      }
+    })
+    // Its own color, `--c` (a hex), as the browser writes a color.
+    const hex = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(ring.c.trim())
+    expect(hex).not.toBeNull()
+    const own = `rgb(${(hex ?? [])
+      .slice(1)
+      .map(part => Number.parseInt(part, 16))
+      .join(', ')})`
+    expect(ring.backgroundColor).toBe(own)
+    // Outside the thin edge in the page's color, a 3.5 px ring in its own.
+    expect(ring.boxShadow).toContain(`${own} 0px 0px 0px 3.5px`)
     await shot(other, 'toot-profile-playing')
+    await phoneShot(other, 'toot-profile-playing')
+
+    // A tap on a note goes through it to the waveform, and plays from there (#459).
+    const wave = rows.getByTestId('replay-waveform')
+    const allNotes = rows.getByTestId('profile-shared-note')
+    // One in the middle, wherever the playhead is now.
+    const target = allNotes.nth(Math.floor((await allNotes.count()) / 2))
+    const box = await target.boundingBox()
+    const waveBox = await wave.boundingBox()
+    if (!box || !waveBox) throw new Error('no note or waveform to tap')
+    const x = box.x + box.width / 2
+    const y = box.y + box.height / 2
+    // What the browser finds at the note's centre is the waveform, or something in it.
+    const hit = await other.evaluate(
+      ([px, py]) =>
+        document.elementFromPoint(px, py)?.closest('[data-testid="replay-waveform"]') !== null,
+      [x, y]
+    )
+    expect(hit).toBe(true)
+    const played = (await sounds()).length
+    const length = (await sounds())[1].duration
+    // Where on the timeline the tap is, in seconds of the Toot's audio.
+    const tapped = ((x - waveBox.x) / waveBox.width) * length
+    const noteStart = ((box.x - waveBox.x) / waveBox.width) * length
+    const noteEnd = ((box.x + box.width - waveBox.x) / waveBox.width) * length
+    await other.mouse.click(x, y)
+    await expect.poll(async () => (await sounds()).length).toBe(played + 1)
+    const from = (await other.evaluate(() => window.__soundsFrom))[played]
+    // Within a couple of pixels of the tap, and inside the note tapped.
+    expect(Math.abs(from - tapped)).toBeLessThan(0.15)
+    expect(from).toBeGreaterThanOrEqual(noteStart - 0.05)
+    expect(from).toBeLessThanOrEqual(noteEnd + 0.05)
+    // And the row says it's there: its time, m:ss, from that note on.
+    const shownAt = async () => {
+      const shown = (await rows.getByTestId('profile-shared-time').textContent()) ?? ''
+      const [minutes, seconds] = shown.split(':').map(Number)
+      return minutes * 60 + seconds
+    }
+    await expect
+      .poll(async () => {
+        const shown = await shownAt()
+        return shown >= Math.floor(from) && shown <= Math.floor(from) + 1
+      })
+      .toBe(true)
+    await rows.getByRole('button', { name: `Stop ${title}` }).click()
   })
 
   await test.step("the owner stops sharing from the Toot's screen, and the link is gone", async () => {

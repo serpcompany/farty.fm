@@ -1,3 +1,14 @@
+import type { Trim } from '@/lib/recordings'
+
+/**
+ * Where `seconds` of the audio falls across `view`, a stretch of it drawn as a waveform: 0 at its
+ * start, 1 at its end. A replay's playhead is drawn here (`ReplayWaveform`), and a profile row's
+ * notes over its waveform (#459), so a note's left edge is where the playhead is as it's heard.
+ */
+export function timelineAt(seconds: number, view: Trim): number {
+  return (seconds - view.startSeconds) / Math.max(1e-6, view.endSeconds - view.startSeconds)
+}
+
 /**
  * Peak loudness of `count` equal slices of the audio, scaled so the loudest is 1, as the iPhone
  * app's `Waveform.levels`. Flat bars when there's too little audio or it's silent. `samples` may be
