@@ -37,7 +37,7 @@ export type SharedFart = {
   name: string
   /** "1.1 s": its fart's length, as its row shows it. */
   length: string
-  /** The loudness bars of the fart, each 0…1. */
+  /** The fart's loudness bars, each 0…1: 16, as Song Creator draws a fart, however short. */
   levels: number[]
   /** When it was recorded, in ms. */
   recordedAt: number

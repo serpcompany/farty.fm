@@ -10,13 +10,14 @@ import type { Trim } from '@/lib/recordings'
 import { formattedTootDate, formattedTootLength, type TootRoll } from '@/lib/toot'
 import { useInBrowser } from '@/lib/use-in-browser'
 import { cn } from '@/lib/utils'
+import { finerBars } from '@/lib/waveform'
 import { useWidth } from './note-view'
 import { RollArt, usePlayingSeconds, useRollSong } from './profile-hero'
 import { ReplayWaveform } from './waveform'
 
 // A profile page's list of what its user shares (#448, #451), each row laid out as SoundCloud's
-// track row: a square picture (a Recording's note, a Toot's note roll), Play, a grey line over the
-// name, the day and a pill at the top right, then a waveform across the row drawn as SoundCloud's,
+// track row: a square picture (a Recording's note, a Toot's note roll), Play, the Handle over the
+// name, as SoundCloud's uploader, the day and a pill at the top right, then a waveform across the row drawn as SoundCloud's,
 // which shows how far it has played, its length and, while it plays, where it is, and plays from a
 // tap. Each plays only that share's own audio. Under it, Copy link.
 
@@ -36,8 +37,6 @@ export type ProfileShare = {
   part: Trim
   /** A Recording's loudness bars, of its fart. Empty for a Toot, whose row fetches them. */
   levels: number[]
-  /** The farts a Toot plays, by name. */
-  farts: string[]
 }
 
 /** Where a play began: the banner's Play, or a row. Each says when its own play fails. */
@@ -102,21 +101,6 @@ const LOADING_BARS = Array<number>(60).fill(0.05)
 
 /** One bar to this many pixels of a row's waveform, however wide the row: SoundCloud's thin bars. */
 const BAR_PIXELS = 4
-
-/**
- * `levels` as `count` thinner bars, each the level where it falls between the two it lies
- * between: the same shape, so a computer's wide row doesn't draw a few fat bars. Never fewer.
- */
-export function finerBars(levels: number[], count: number): number[] {
-  if (levels.length < 2 || count <= levels.length) return levels
-  const last = levels.length - 1
-  return Array.from({ length: count }, (_, i) => {
-    const at = Math.min(Math.max(((i + 0.5) * levels.length) / count - 0.5, 0), last)
-    const below = Math.floor(at)
-    const above = Math.min(below + 1, last)
-    return levels[below] + (levels[above] - levels[below]) * (at - below)
-  })
-}
 
 /** What a shared Toot's row draws, from its `row/`: its loudness bars and its note roll. */
 export type TootRowArt = { levels: number[]; roll: TootRoll }
@@ -223,7 +207,7 @@ const onWaveform =
 
 /**
  * A share's row, as SoundCloud's track row: its square picture at the left; Play, and over its
- * name (a link to its own page) the farts a Toot plays, or the Handle; at the top right, the day
+ * name (a link to its own page) the Handle, as SoundCloud's uploader; at the top right, the day
  * it was shared and a Recording's note (a Toot's Song, when that isn't its name) as a pill; then
  * its waveform across the row, as SoundCloud draws one, with its length at the right; then Copy
  * link.
@@ -254,8 +238,6 @@ function ShareRow({
   const PlayIcon = playing ? Square : Play
   // Only in the browser, so it's the viewer's own day.
   const date = inBrowser ? formattedTootDate(share.sharedAt) : null
-  const byline =
-    isToot && share.farts.length > 0 ? `Farts: ${share.farts.join(', ')}` : `@${handle}`
   const { part } = share
   // From the fart's start, and never past its end, so it reads the length at its end.
   const clock = (seconds: number) => {
@@ -285,7 +267,7 @@ function ShareRow({
         </button>
         <div className="grid min-w-0 flex-1 gap-0.5">
           <p className="truncate text-sm text-muted-foreground" data-testid="profile-shared-byline">
-            {byline}
+            @{handle}
           </p>
           <Link
             href={share.path}

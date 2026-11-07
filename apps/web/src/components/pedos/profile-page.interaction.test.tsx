@@ -55,8 +55,7 @@ const toot: ProfileShare = {
   sharedAt: now,
   length: '0:18',
   part: { startSeconds: 0, endSeconds: 18 },
-  levels: [],
-  farts: ['Recording 1', 'Recording 2']
+  levels: []
 }
 
 const recording: ProfileShare = {
@@ -67,8 +66,7 @@ const recording: ProfileShare = {
   sharedAt: now,
   length: '1.1 s',
   part: { startSeconds: 0, endSeconds: 1.1 },
-  levels: [0.2, 1, 0.5],
-  farts: []
+  levels: [0.2, 1, 0.5]
 }
 
 /** The roll of `toot`: three notes, of which the fart at 62 was left out. */
@@ -299,7 +297,7 @@ describe('The tabs (#448)', () => {
 })
 
 describe('A row (#346, #448)', () => {
-  it('a Toot’s: its farts over its name, its day and Song, its length, its own page and its own audio, from a spot too', async () => {
+  it('a Toot’s: the Handle over its name, as SoundCloud’s uploader, its day and Song, its length, its own page and its own audio, from a spot too', async () => {
     const fetched = server()
     await render({ items: [toot, recording], hero })
     const [row] = rows()
@@ -307,7 +305,7 @@ describe('A row (#346, #448)', () => {
     // Its own shared page, with its whole roll and each fart (#445). Next's Link drops the
     // trailing slash here, outside a build with `trailingSlash`.
     expect(row.querySelector('a')?.getAttribute('href')).toBe('/@alice/t/tttttttttttt')
-    expect(rowText('profile-shared-byline')).toEqual(['Farts: Recording 1, Recording 2'])
+    expect(rowText('profile-shared-byline')).toEqual(['@alice'])
     expect(rowText('profile-shared-date')).toEqual(['Today'])
     expect(rowText('profile-shared-tag')).toEqual(['Sound Pad'])
     expect(rowText('profile-shared-length')).toEqual(['0:18'])
@@ -491,11 +489,6 @@ describe('A row (#346, #448)', () => {
     expect(heights.map(height => Math.round(height * 10) / 10)).toEqual([
       20, 40, 80, 87.5, 62.5, 50
     ])
-
-    const { finerBars } = await import('./profile-share-row')
-    expect(finerBars([0, 1], 4)).toEqual([0, 0.25, 0.75, 1])
-    // Never fewer bars than it has.
-    expect(finerBars([0.2, 1, 0.5], 2)).toEqual([0.2, 1, 0.5])
   })
 
   it('never says where a fart was made: only the day, as the shared page says it with a town', async () => {
@@ -505,7 +498,7 @@ describe('A row (#346, #448)', () => {
     await act(async () => (tab('Recordings') as HTMLElement).click())
     shown.push(...rows().map(row => row.textContent))
     expect(shown).toEqual([
-      'Farts: Recording 1, Recording 2Twinkle for MumTodaySound Pad0:18Copy link',
+      '@aliceTwinkle for MumTodaySound Pad0:18Copy link',
       // Its picture's note first.
       'E3@aliceRecording 1TodayE31.1 sCopy link'
     ])

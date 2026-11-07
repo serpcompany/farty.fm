@@ -690,9 +690,9 @@ test('a signed-in user shares a saved Toot, someone signed out plays it, and Sto
     await expect(rows).toHaveCount(1)
     await expect(rows.getByTestId('profile-shared-link')).toHaveAttribute('href', link)
     await expect(rows.getByTestId('profile-shared-link')).toHaveText(title)
-    // Laid out as SoundCloud's track row: the farts it plays over its name, the day at the
-    // right, its length on its waveform, and its note roll as its picture.
-    await expect(rows.getByTestId('profile-shared-byline')).toHaveText(/^Farts: Recording \d+/)
+    // Laid out as SoundCloud's track row: the Handle over its name, as its uploader, the day at
+    // the right, its length on its waveform, and its note roll as its picture.
+    await expect(rows.getByTestId('profile-shared-byline')).toHaveText(`@${handle}`)
     await expect(rows.getByTestId('profile-shared-date')).toHaveText('Today')
     await expect(rows.getByTestId('profile-shared-length')).toHaveText(/^\d+:\d\d$/)
     expect((await drawn).status()).toBe(200)

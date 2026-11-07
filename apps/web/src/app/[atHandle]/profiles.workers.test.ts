@@ -157,17 +157,7 @@ describe('A profile page', () => {
   })
 
   /** Each item's fields, which are all the page gets. */
-  const ITEM_KEYS = [
-    'detail',
-    'farts',
-    'kind',
-    'length',
-    'levels',
-    'name',
-    'part',
-    'path',
-    'sharedAt'
-  ]
+  const ITEM_KEYS = ['detail', 'kind', 'length', 'levels', 'name', 'part', 'path', 'sharedAt']
 
   it('leaves out what was stopped, taken down or deleted, and what others share', async () => {
     const alice = await sharer('alice', [R1, R2, R3])
@@ -350,14 +340,13 @@ describe('A profile page', () => {
     expect(await names('alice')).toEqual(['Song with R2'])
   })
 
-  it('gives each row its length and bars, and a Toot’s the farts it plays (#448)', async () => {
+  it('gives each row its length and bars (#448)', async () => {
     // R1 at 9:00, R2 at 9:01.
     const alice = await sharer('alice', [R1, R2])
     const arrangement = { transposition: 0, recordingForPitch: { 52: R1, 55: R2 } }
     await savedToot(alice, tootMetadata(T1, { title: 'Song', arrangement, seconds: 18.4 }), {
       minute: 3
     })
-    // R3 was never uploaded, so the row names only R2.
     const performance = {
       recordings: [R2, R3],
       taps: [
@@ -374,27 +363,19 @@ describe('A profile page', () => {
     expect(await row('Song')).toMatchObject({
       length: '0:18',
       part: { startSeconds: 0, endSeconds: 18.4 },
-      levels: [],
-      farts: ['Recording 1', 'Recording 2']
+      levels: []
     })
     expect(await row('Pad')).toMatchObject({
       length: '1:01',
-      part: { startSeconds: 0, endSeconds: 61 },
-      farts: ['Recording 2']
+      part: { startSeconds: 0, endSeconds: 61 }
     })
     // A Recording's length is its fart's, as its own page prints it, and its row plays and draws
     // only that fart, 0.01 s to 0.09 s of the 0.1 s take its link serves.
     expect(await row('Recording 1')).toMatchObject({
       length: '0.0 s',
       part: { startSeconds: 0.01, endSeconds: 0.09 },
-      levels: [0, 0.5, 1],
-      farts: []
+      levels: [0, 0.5, 1]
     })
-
-    // A deleted Recording is no longer named.
-    expect((await api.delete('recordings', R2, alice)).status).toBe(204)
-    expect((await row('Song'))?.farts).toEqual(['Recording 1'])
-    expect((await row('Pad'))?.farts).toEqual([])
   })
 
   it('puts the newest Toot’s roll in its banner, with only the pitches its farts play (#448)', async () => {

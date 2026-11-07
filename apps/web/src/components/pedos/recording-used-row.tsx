@@ -22,7 +22,7 @@ export function RecordingsUsed({ children, footer }: { children: ReactNode; foot
 
 /**
  * A Recording the Toot uses: the color of its notes, play, its name, its waveform and its fart's
- * length, `when` it was recorded on a shared page, "Your pick" when the user swapped it in (#360),
+ * length, `when` it was recorded on a shared page (one line, cut short), "Your pick" when the user swapped it in (#360),
  * and the note it plays in the Song. As the iPhone app's `RecordingRow` in Song Creator, which
  * shows the whole take's length.
  */
@@ -99,7 +99,9 @@ export function RecordingUsedRowView({
             />
             <span className="text-sm text-muted-foreground">{length}</span>
           </span>
-          {when && <span className="text-sm text-muted-foreground tabular-nums">{when}</span>}
+          {when && (
+            <span className="truncate text-xs text-muted-foreground tabular-nums">{when}</span>
+          )}
           {isYourPick && <span className="text-sm font-semibold text-brand-strong">Your pick</span>}
         </span>
       </button>

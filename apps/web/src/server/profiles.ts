@@ -1,7 +1,7 @@
 import type { Database } from '@/db/database'
 import type { Kind } from '@/db/library'
 import { addProfileReport, type ProfileShareRow, profileShares, profileUser } from '@/db/profiles'
-import { liveRecordingsOf, sharedToot, tootRecordingIds } from '@/db/sharing'
+import { sharedToot } from '@/db/sharing'
 import { noteName } from '@/lib/pitch'
 import { recordingName, songPitch, type Trim } from '@/lib/recordings'
 import { servedOrigin } from '@/lib/site'
@@ -58,8 +58,6 @@ export type ProfileItem = {
    * never reads every Toot's audio.
    */
   levels: number[]
-  /** The names of the farts a Toot plays, as its page lists them, leaving out any deleted. */
-  farts: string[]
 }
 
 /**
@@ -97,17 +95,13 @@ function itemText(row: ProfileShareRow): { name: string; detail: string | null }
   return { name: recordingName(recording), detail: pitch === null ? null : noteName(pitch) }
 }
 
-/** What a share's row plays and draws, and the farts a Toot's row names, from `fartNames`. */
-function itemSound(
-  row: ProfileShareRow,
-  fartNames: Map<string, string>
-): Pick<ProfileItem, 'length' | 'part' | 'levels' | 'farts'> {
+/** What a share's row plays and draws. */
+function itemSound(row: ProfileShareRow): Pick<ProfileItem, 'length' | 'part' | 'levels'> {
   if (row.kind === 'toots') {
     return {
       length: formattedTootLength(row.toot.seconds),
       part: { startSeconds: 0, endSeconds: row.toot.seconds },
-      levels: [],
-      farts: tootRecordingIds(row.toot).flatMap(id => fartNames.get(id) ?? [])
+      levels: []
     }
   }
   const recording = toRecording(row.recording)
@@ -117,21 +111,8 @@ function itemSound(
   return {
     length,
     part,
-    levels: partBars(recording.waveform, recording.seconds, inTake),
-    farts: []
+    levels: partBars(recording.waveform, recording.seconds, inTake)
   }
-}
-
-/** The names of the Recordings `rows`' Toots play that aren't deleted, by id, in one lookup. */
-async function tootFartNames(
-  db: Database,
-  userId: string,
-  rows: ProfileShareRow[]
-): Promise<Map<string, string>> {
-  const ids = new Set(rows.flatMap(row => (row.kind === 'toots' ? tootRecordingIds(row.toot) : [])))
-  if (ids.size === 0) return new Map()
-  const found = await liveRecordingsOf(db, userId, [...ids])
-  return new Map(found.map(row => [row.id, recordingName(toRecording(row))]))
 }
 
 /** The banner's roll: the Toot's at `slug`, as its own page finds and draws it. */
@@ -156,7 +137,6 @@ export async function findProfile(db: Database, handle: string): Promise<Profile
     await giveSlugs(db, owner.userId)
     rows = await profileShares(db, owner.userId)
   }
-  const fartNames = await tootFartNames(db, owner.userId, rows)
   const newest = rows.find(row => row.kind === 'toots')
   return {
     handle: owner.handle,
@@ -165,7 +145,7 @@ export async function findProfile(db: Database, handle: string): Promise<Profile
       path: sharePath(row.kind, owner.handle, row.slug ?? row.shareId),
       ...itemText(row),
       sharedAt: row.sharedAt.getTime(),
-      ...itemSound(row, fartNames)
+      ...itemSound(row)
     })),
     hero: newest ? await heroOf(db, owner.handle, newest.slug ?? newest.shareId) : null
   }

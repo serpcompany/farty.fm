@@ -132,7 +132,10 @@ export function SharedTootParts({
             )
           }
           const isFartPlaying = fartPlaying && sound.place === fart.place && tapped === pitch
-          const when = inBrowser ? recordedWhenAndWhere(fart.recordedAt, fart) : null
+          // The day and town on one line, as short as Song Creator's rows allow (#451).
+          const when = inBrowser
+            ? recordedWhenAndWhere(fart.recordedAt, fart, { time: false })
+            : null
           return (
             <RecordingUsedRowView
               key={pitch}

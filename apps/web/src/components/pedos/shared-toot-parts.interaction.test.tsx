@@ -49,7 +49,8 @@ const fart = (place: number, name: string): SharedFartRow['fart'] => ({
   name,
   length: '0:01',
   levels: [0.2, 0.8],
-  recordedAt: Date.UTC(2026, 10, 6, 15, 12),
+  // 9:12 PM on Nov 6 in Chicago, where it was made: already the 7th in UTC.
+  recordedAt: Date.UTC(2026, 10, 7, 3, 12),
   playable: true,
   recordedIn: 'Austin, Texas',
   timeZone: 'America/Chicago'
@@ -172,11 +173,19 @@ describe("A shared Toot's farts", () => {
     expect(fartRows()[0].querySelector('button')).toBeNull()
   })
 
-  it('says where each fart was made, in the time there', async () => {
+  it('says the day and where each fart was made, the day there, on one line (#451)', async () => {
     await render()
-    expect(fartRows()[0].textContent).toContain('Austin, Texas')
-    // 15:12 UTC, in Chicago that November.
-    expect(fartRows()[0].textContent).toMatch(/\b0?9:12/)
+    const day = new Date(Date.UTC(2026, 10, 7, 3, 12)).toLocaleDateString(undefined, {
+      dateStyle: 'medium',
+      timeZone: 'America/Chicago'
+    })
+    expect(day).toContain('6')
+    const when = [...fartRows()[0].querySelectorAll('span')].find(
+      span => span.childElementCount === 0 && span.textContent?.includes('Austin')
+    )
+    expect(when?.textContent).toBe(`${day} · Austin, Texas`)
+    // No time, and cut short rather than wrapping at a phone's width.
+    expect(when?.classList.contains('truncate')).toBe(true)
   })
 
   it('says nothing of where for a fart with no place', async () => {

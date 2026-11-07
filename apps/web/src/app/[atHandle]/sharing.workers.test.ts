@@ -1506,7 +1506,12 @@ describe("What a shared Toot shows of what it's made of (#443)", () => {
     expect(await framesOf(await share.fart(url, 0))).toEqual(range(2000, 4000))
 
     const [row] = (await partsOf(url)).rows
-    expect(row.fart).toMatchObject({ length: '0.2 s', levels: [0.2], playable: true })
+    // Its one stored bar drawn as Song Creator draws a fart, in 16 thin bars (#451).
+    expect(row.fart).toMatchObject({
+      length: '0.2 s',
+      levels: Array(16).fill(0.2),
+      playable: true
+    })
   })
 
   it("has nothing to play of a fart analysis hasn't found, with no Trim", async () => {
@@ -1563,7 +1568,7 @@ describe("What a shared Toot shows of what it's made of (#443)", () => {
     expect(parts.rows.map(row => row.fart?.place)).toEqual([0, 1])
     expect(parts.rows.map(row => row.fart?.name)).toEqual(['Recording 1', 'Recording 2'])
     expect(parts.rows[0].fart?.recordedAt).toBe(Date.UTC(2026, 9, 21))
-    expect(parts.rows[0].fart?.levels.length).toBeLessThanOrEqual(16)
+    expect(parts.rows.map(row => row.fart?.levels.length)).toEqual([16, 16])
 
     const data = JSON.stringify(parts)
     for (const secret of [R1, R2, T1]) expect(data).not.toContain(secret)

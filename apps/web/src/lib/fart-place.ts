@@ -67,13 +67,17 @@ export function recordedInOf(place: RecordedPlace | null): RecordedIn {
 
 /**
  * "Nov 6, 2026, 3:12 PM · Austin, Texas": when a Recording was made, in the time where it was made,
- * or in the viewer's own time when the page says nothing of where.
+ * or in the viewer's own time when the page says nothing of where. Without `time`, only the day,
+ * "Nov 6, 2026 · Austin, Texas", for a row with room for one short line (#451).
  */
 export function recordedWhenAndWhere(
   recordedAt: number,
-  { recordedIn, timeZone }: RecordedIn
+  { recordedIn, timeZone }: RecordedIn,
+  { time = true }: { time?: boolean } = {}
 ): string {
-  const style = { dateStyle: 'medium', timeStyle: 'short' } as const
+  const style = time
+    ? ({ dateStyle: 'medium', timeStyle: 'short' } as const)
+    : ({ dateStyle: 'medium' } as const)
   const at = new Date(recordedAt)
   let when: string
   try {

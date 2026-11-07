@@ -40,7 +40,7 @@ import {
   tootRollOf
 } from '@/lib/toot'
 import { wavHeader } from '@/lib/wav'
-import { waveformLevels } from '@/lib/waveform'
+import { finerBars, waveformLevels } from '@/lib/waveform'
 
 import { consumeSlots, reporterLimitKey, requestClient, type SlotRule } from './auth-config'
 import { type Stores, toRecording, wrongLibrary } from './library'
@@ -387,7 +387,10 @@ export function partBars(waveform: number[], seconds: number, part: Trim): numbe
   return bars.length > 0 ? bars : waveform
 }
 
-/** How many loudness bars a fart's row draws, as Song Creator's do. */
+/**
+ * How many loudness bars a fart's row draws, as Song Creator's do, however short the fart: a few
+ * stored bars across its 72 px would draw as round blobs (#451).
+ */
 const FART_ROW_BARS = 16
 
 /** `levels` in at most `count` bars, each the loudest it covers. */
@@ -430,7 +433,10 @@ export async function sharedTootParts(
       name: recordingName(recording),
       length: part ? formattedFartSeconds(part.endSeconds - part.startSeconds) : '',
       levels: part
-        ? fewerBars(partBars(recording.waveform, recording.seconds, part), FART_ROW_BARS)
+        ? finerBars(
+            fewerBars(partBars(recording.waveform, recording.seconds, part), FART_ROW_BARS),
+            FART_ROW_BARS
+          )
         : [],
       recordedAt: recording.createdAt,
       playable: part !== null
